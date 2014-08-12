@@ -43,6 +43,12 @@
     <Filter Include="Sources\FakeNetwork">
       <UniqueIdentifier>{edf9bc04-ccfc-4bd8-b464-e0e412d65800}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Consensus">
+      <UniqueIdentifier>{8a677c09-ae67-4a28-877b-bb9c2d65c532}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\TBB">
+      <UniqueIdentifier>{c1babbf9-ebb8-485a-bdba-ce608263b1c9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TNET_UI\Sources\BaseNetwork.cpp">
@@ -284,10 +290,183 @@
     <ClInclude Include="..\TNET_UI\Sources\Signal.h">
       <Filter>Sources\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\aggregator.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\aligned_space.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\atomic.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\blocked_range.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\blocked_range2d.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\blocked_range3d.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\cache_aligned_allocator.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\combinable.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\concurrent_hash_map.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\concurrent_lru_cache.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\concurrent_priority_queue.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\concurrent_queue.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\concurrent_unordered_map.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\concurrent_unordered_set.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\concurrent_vector.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\critical_section.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\enumerable_thread_specific.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\flow_graph.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\memory_pool.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\mutex.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\null_mutex.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\null_rw_mutex.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\parallel_do.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\parallel_for.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\parallel_for_each.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\parallel_invoke.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\parallel_reduce.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\parallel_scan.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\parallel_sort.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\parallel_while.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\partitioner.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\pipeline.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\queuing_mutex.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\queuing_rw_mutex.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\reader_writer_lock.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\recursive_mutex.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\runtime_loader.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\scalable_allocator.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\spin_mutex.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\spin_rw_mutex.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\task.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\task_arena.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\task_group.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\task_scheduler_init.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\task_scheduler_observer.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbb.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbb_allocator.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbb_config.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbb_exception.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbb_machine.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbb_profiling.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbb_stddef.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbb_thread.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbbmalloc_proxy.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tick_count.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MainForm.resx">
       <Filter>Resource Files</Filter>
     </EmbeddedResource>
+    <EmbeddedResource Include="NetworkVisualizer.resx">
+      <Filter>Resource Files</Filter>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\TNET_UI\Sources\TBB\tbb\index.html">
+      <Filter>Sources\TBB</Filter>
+    </None>
   </ItemGroup>
 </Project>

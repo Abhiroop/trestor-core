@@ -4,6 +4,8 @@
 
 #include "NetworkVisualizer.h"
 
+//#include "concurrent_hash_map.h"
+
 #include "Utils.h"
 #include "HashTree.h"
 #include "AccountInfo.h"
@@ -13,6 +15,15 @@
 #include "../TNET_UI/Sources/Timer.h"
 #include <hash_map>
 
+#include "tbb/concurrent_hash_map.h"
+
+extern tbb::concurrent_hash_map<int, int> h;
+
+void TBB_TEST()
+{
+	h.insert(7, 9);
+	h.insert(7, 10);	
+}
 
 /*timer::Timer t;
 
@@ -515,7 +526,7 @@ namespace TNETVALIDATORCLR {
 		tabPage_Visualizer->Invalidate();
 	}
 
-			
+	
 
 	private: System::Void timerTestsToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 
@@ -530,7 +541,7 @@ namespace TNETVALIDATORCLR {
 
 	private: System::Void timer_UI_Tick(System::Object^  sender, System::EventArgs^  e) {
 
-		PrintMessage("" + Value);
+		//PrintMessage("" + Value);
 	}
     
 	};
