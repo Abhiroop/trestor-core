@@ -1,0 +1,287 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{d50e2194-bb3d-4a27-aee4-3303ed85d229}</ProjectGuid>
+    <RootNamespace>TNET_UI</RootNamespace>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
+    <AppContainerApplication>true</AppContainerApplication>
+    <ApplicationType>Windows Store</ApplicationType>
+    <ApplicationTypeRevision>8.1</ApplicationTypeRevision>
+    <ProjectName>TNET VALIDATOR</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <PackageCertificateKeyFile>TNET_UI_TemporaryKey.pfx</PackageCertificateKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ExecutablePath>\Sources;\Sources\ed25519;Sources\SQLiteCpp;$(ExecutablePath)</ExecutablePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ExecutablePath>\Sources;\Sources\ed25519;Sources\SQLiteCpp;$(ExecutablePath)</ExecutablePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>4453;28204</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>4453;28204</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>4453;28204</DisableSpecificWarnings>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>4453;28204</DisableSpecificWarnings>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile />
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>.\Sources\SQLiteCpp\sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>4453;28204</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>4453;28204</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Common\NavigationHelper.h" />
+    <ClInclude Include="Common\RelayCommand.h" />
+    <ClInclude Include="Common\SuspensionManager.h" />
+    <ClInclude Include="App.xaml.h">
+      <DependentUpon>App.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="ItemsPage.xaml.h">
+      <DependentUpon>ItemsPage.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="SimulationPage.xaml.h">
+      <DependentUpon>SimulationPage.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="Sources\AccountInfo.h" />
+    <ClInclude Include="Sources\Base64.h" />
+    <ClInclude Include="Sources\BaseNetwork.h" />
+    <ClInclude Include="Sources\CandidateSet.h" />
+    <ClInclude Include="Sources\Constants.h" />
+    <ClInclude Include="Sources\CreditDebitData.h" />
+    <ClInclude Include="Sources\ed25519\ed25519.h" />
+    <ClInclude Include="Sources\ed25519\fe.h" />
+    <ClInclude Include="Sources\ed25519\fixedint_.h" />
+    <ClInclude Include="Sources\ed25519\ge.h" />
+    <ClInclude Include="Sources\ed25519\precomp_data.h" />
+    <ClInclude Include="Sources\ed25519\sc.h" />
+    <ClInclude Include="Sources\ed25519\sha512.h" />
+    <ClInclude Include="Sources\Hash.h" />
+    <ClInclude Include="Sources\HashTree.h" />
+    <ClInclude Include="Sources\Ledger.h" />
+    <ClInclude Include="Sources\LedgerFileHandler.h" />
+    <ClInclude Include="Sources\OnionConnectionEstablish.h" />
+    <ClInclude Include="Sources\OnionNodeList.h" />
+    <ClInclude Include="Sources\OnionPack.h" />
+    <ClInclude Include="Sources\PrivateKeyManage.h" />
+    <ClInclude Include="Sources\Structs.h" />
+    <ClInclude Include="Sources\TransactionContent.h" />
+    <ClInclude Include="Sources\TransactionSink.h" />
+    <ClInclude Include="Sources\TreeLeafNode.h" />
+    <ClInclude Include="Sources\TreeNodeX.h" />
+    <ClInclude Include="Sources\UserDataHandler.h" />
+    <ClInclude Include="Sources\UserDataMapHandler.h" />
+    <ClInclude Include="Sources\Utils.h" />
+    <ClInclude Include="SplitPage.xaml.h">
+      <DependentUpon>SplitPage.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="DataModel\SampleDataSource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Page Include="ItemsPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SimulationPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SplitPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
+    <None Include="Common\ReadMe.txt" />
+    <None Include="TNET_UI_TemporaryKey.pfx" />
+    <Text Include="DataModel\SampleData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\Logo.scale-100.png" />
+    <Image Include="Assets\SmallLogo.scale-100.png" />
+    <Image Include="Assets\StoreLogo.scale-100.png" />
+    <Image Include="Assets\SplashScreen.scale-100.png" />
+    <Image Include="Assets\LightGray.png" />
+    <Image Include="Assets\MediumGray.png" />
+    <Image Include="Assets\DarkGray.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="App.xaml.cpp">
+      <DependentUpon>App.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="Common\NavigationHelper.cpp" />
+    <ClCompile Include="Common\RelayCommand.cpp" />
+    <ClCompile Include="Common\SuspensionManager.cpp" />
+    <ClCompile Include="ItemsPage.xaml.cpp">
+      <DependentUpon>ItemsPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="SimulationPage.xaml.cpp">
+      <DependentUpon>SimulationPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="Sources\AccountInfo.cpp" />
+    <ClCompile Include="Sources\Base64.cpp" />
+    <ClCompile Include="Sources\BaseNetwork.cpp" />
+    <ClCompile Include="Sources\CandidateSet.cpp" />
+    <ClCompile Include="Sources\Constants.cpp" />
+    <ClCompile Include="Sources\CreditDebitData.cpp" />
+    <ClCompile Include="Sources\CyptoTest.cpp" />
+    <ClCompile Include="Sources\ECTest.cpp" />
+    <ClCompile Include="Sources\ed25519\add_scalar.cpp" />
+    <ClCompile Include="Sources\ed25519\fe.cpp" />
+    <ClCompile Include="Sources\ed25519\ge.cpp" />
+    <ClCompile Include="Sources\ed25519\keypair.cpp" />
+    <ClCompile Include="Sources\ed25519\key_exchange.cpp" />
+    <ClCompile Include="Sources\ed25519\sc.cpp" />
+    <ClCompile Include="Sources\ed25519\seed.cpp" />
+    <ClCompile Include="Sources\ed25519\sha512.cpp" />
+    <ClCompile Include="Sources\ed25519\sign.cpp" />
+    <ClCompile Include="Sources\ed25519\test_ec.cpp" />
+    <ClCompile Include="Sources\ed25519\verify.cpp" />
+    <ClCompile Include="Sources\Hash.cpp" />
+    <ClCompile Include="Sources\Ledger.cpp" />
+    <ClCompile Include="Sources\LedgerFileHandler.cpp" />
+    <ClCompile Include="Sources\main1.cpp" />
+    <ClCompile Include="Sources\main1_.cpp" />
+    <ClCompile Include="Sources\OnionConnectionEstablish.cpp" />
+    <ClCompile Include="Sources\OnionNodeList.cpp" />
+    <ClCompile Include="Sources\OnionPack.cpp" />
+    <ClCompile Include="Sources\PrivateKeyManage.cpp" />
+    <ClCompile Include="Sources\SQLiteTest.cpp" />
+    <ClCompile Include="Sources\TransactionContent.cpp" />
+    <ClCompile Include="Sources\TransactionSink.cpp" />
+    <ClCompile Include="Sources\TreeNodeX.cpp" />
+    <ClCompile Include="Sources\UserDataHandler.cpp" />
+    <ClCompile Include="Sources\UserDataMapHandler.cpp" />
+    <ClCompile Include="Sources\Utils.cpp" />
+    <ClCompile Include="SplitPage.xaml.cpp">
+      <DependentUpon>SplitPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="DataModel\SampleDataSource.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

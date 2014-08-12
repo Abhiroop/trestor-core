@@ -1,0 +1,293 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Sources">
+      <UniqueIdentifier>{bd1708a4-eee5-49f7-8daf-2d7992d0927d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\ed25519">
+      <UniqueIdentifier>{b2f25913-1157-4a18-be93-7daef50a5e6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\HashTree">
+      <UniqueIdentifier>{9932b0f5-f6b2-4914-b354-536d2dfbd39c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Utils">
+      <UniqueIdentifier>{ffc53bb3-363e-4d58-b74f-409ef8ba49c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Core">
+      <UniqueIdentifier>{1b8c9c17-6ccc-46f1-baca-d10eb13c9b3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Routing">
+      <UniqueIdentifier>{855a07b1-ea5e-4e12-80c6-d0b838de4ae6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Transactions">
+      <UniqueIdentifier>{3576ead9-c003-4030-8f59-4e21a489029d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Ledger">
+      <UniqueIdentifier>{9496c862-f88c-403a-9405-50cbda799af7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Node">
+      <UniqueIdentifier>{3facd9f6-4336-4089-b756-a1e6f64ab210}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\FakeNetwork">
+      <UniqueIdentifier>{edf9bc04-ccfc-4bd8-b464-e0e412d65800}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\TNET_UI\Sources\BaseNetwork.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\CandidateSet.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\CyptoTest.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ECTest.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\main1.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\main1_.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\PrivateKeyManage.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\SQLiteTest.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\UserDataHandler.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\UserDataMapHandler.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\add_scalar.cpp">
+      <Filter>Sources\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\fe.cpp">
+      <Filter>Sources\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\ge.cpp">
+      <Filter>Sources\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\keypair.cpp">
+      <Filter>Sources\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\key_exchange.cpp">
+      <Filter>Sources\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\sc.cpp">
+      <Filter>Sources\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\seed.cpp">
+      <Filter>Sources\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\sha512.cpp">
+      <Filter>Sources\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\sign.cpp">
+      <Filter>Sources\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\test_ec.cpp">
+      <Filter>Sources\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\verify.cpp">
+      <Filter>Sources\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Base64.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Hash.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Utils.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\OnionConnectionEstablish.cpp">
+      <Filter>Sources\Routing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\OnionNodeList.cpp">
+      <Filter>Sources\Routing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\OnionPack.cpp">
+      <Filter>Sources\Routing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\CreditDebitData.cpp">
+      <Filter>Sources\Transactions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TransactionContent.cpp">
+      <Filter>Sources\Transactions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TransactionSink.cpp">
+      <Filter>Sources\Transactions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Ledger.cpp">
+      <Filter>Sources\Ledger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LedgerFileHandler.cpp">
+      <Filter>Sources\Ledger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\AccountInfo.cpp">
+      <Filter>Sources\Ledger</Filter>
+    </ClCompile>
+    <ClCompile Include="Program.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MainForm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TreeNodeX.cpp">
+      <Filter>Sources\HashTree</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkVisualizer.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\NodeController.cpp">
+      <Filter>Sources\Node</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Point2.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\FakeNetwork.cpp">
+      <Filter>Sources\FakeNetwork</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Constants.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\FakeSocket.cpp">
+      <Filter>Sources\FakeNetwork</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Timer.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\CandidateSet.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\PrivateKeyManage.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Structs.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\UserDataHandler.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\UserDataMapHandler.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\ed25519.h">
+      <Filter>Sources\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\fe.h">
+      <Filter>Sources\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\fixedint_.h">
+      <Filter>Sources\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\ge.h">
+      <Filter>Sources\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\precomp_data.h">
+      <Filter>Sources\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\sc.h">
+      <Filter>Sources\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\sha512.h">
+      <Filter>Sources\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\HashTree.h">
+      <Filter>Sources\HashTree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Base64.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Hash.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Utils.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\OnionConnectionEstablish.h">
+      <Filter>Sources\Routing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\OnionNodeList.h">
+      <Filter>Sources\Routing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\OnionPack.h">
+      <Filter>Sources\Routing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\CreditDebitData.h">
+      <Filter>Sources\Transactions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TransactionContent.h">
+      <Filter>Sources\Transactions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TransactionSink.h">
+      <Filter>Sources\Transactions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Ledger.h">
+      <Filter>Sources\Ledger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LedgerFileHandler.h">
+      <Filter>Sources\Ledger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\AccountInfo.h">
+      <Filter>Sources\Ledger</Filter>
+    </ClInclude>
+    <ClInclude Include="MainForm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TreeNodeX.h">
+      <Filter>Sources\HashTree</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkVisualizer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\NodeController.h">
+      <Filter>Sources\Node</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Point2.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\FakeNetwork.h">
+      <Filter>Sources\FakeNetwork</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Constants.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\FakeSocket.h">
+      <Filter>Sources\FakeNetwork</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Timer.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Signal.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="MainForm.resx">
+      <Filter>Resource Files</Filter>
+    </EmbeddedResource>
+  </ItemGroup>
+</Project>
