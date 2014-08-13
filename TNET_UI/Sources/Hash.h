@@ -7,6 +7,8 @@
 #include <map>
 #include <array>
 
+
+
 using namespace std;
 
 typedef vector<unsigned char> HashData;
@@ -16,11 +18,14 @@ class Hash : public HashData
 
 private: 
 
+	
+
 	//size_t local_Hash = 0;
 
 	//size_t hash_initial() const;
 
 public:
+
 
 	static const size_t bucket_size = 5;
 	static const size_t min_buckets = 8;

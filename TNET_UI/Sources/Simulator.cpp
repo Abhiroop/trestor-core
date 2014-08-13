@@ -7,7 +7,13 @@
 #include "Constants.h"
 #include "Timer.h"
 
-hash_map<Hash, Node> sim_nodes;
+#include <functional>
+#include <memory>
+
+using namespace std;
+using namespace std::placeholders;
+
+hash_map<Hash, shared_ptr<Node>> sim_nodes;
 vector<Point2> sim_XY;
 hash_map<Hash, NodeData> sim_nData;
 
@@ -15,6 +21,7 @@ void Simulator::Timestep()
 {
 	if (SimulationStarted)
 	{
+		//hash<Hash> h;
 
 	}
 }
@@ -61,24 +68,38 @@ void Simulator::StartSimulation()
 
 	GlobalNodes.clear();
 
-	Ledger lgr;
+	//Ledger lgr;
 
-	vector<Hash> nodeHashes;
+	shared_ptr<Ledger> lgr(new Ledger());
+
+	vector<Hash*> nodeHashes;
 
 	for (int i = 0; i < 8; i++)
 	{
-		Node n = Node("NO_NAME", 4, lgr, 100 * i, 100);
-		AccountInfo si = AccountInfo(n.PublicKey, 500, "NO_NAME", 0);
-		nodeHashes.push_back(n.PublicKey);
-		lgr.AddUserToLedger(si);
-		sim_nodes[n.PublicKey] = n;
+		string CN = "NO_NAME_" + to_string(i) + "_";
 
-		GlobalNodes[n.PublicKey] = n;
+		//Node n3 = Node(CN, 4, lgr, 100 * i, 100);
+
+		shared_ptr<Node> n(new Node(CN, 4, lgr, 100 * i, 100));
+		
+		//Node *n = dynamic_cast<Node*> (&n3);
+
+		//Nodes.push_back(*n);
+
+		Hash* pk = &n->PublicKey;
+
+		//shared_ptr<Hash> pk = n->PublicKey;
+
+		AccountInfo si = AccountInfo(*pk, 500, CN, 0);
+		nodeHashes.push_back(pk);
+		lgr->AddUserToLedger(si);
+		sim_nodes[*pk] = n;
+
+		GlobalNodes[*pk] = n.get();
 
 		//function<void(NetworkPacket)> f = std::bind1st(std::mem_fun(&Node::ReceivedData), &n);
-		function<void(NetworkPacket)> f = std::bind(&Node::Receive, &n, std::placeholders::_1);
-
-		network.AttachReceiver(n.PublicKey, f);
+	
+		//network.AttachReceiver(pk, bind(&Node::Receive, *n, _1));
 	}
 
 	int LinksPerNode = 3;
@@ -89,9 +110,9 @@ void Simulator::StartSimulation()
 
 		for (int k = 0; k < (int)perm.size(); k++)
 		{
-			Hash h = nodeHashes[perm[k]];
-			Node n = sim_nodes[h];
-			sim_nodes[nodeHashes[i]].Connections[h] = n;
+			Hash* h = nodeHashes[perm[k]];
+			shared_ptr<Node> n = sim_nodes[*h];
+			sim_nodes[*nodeHashes[i]]->Connections[*h] = n;
 		}
 	}
 
@@ -107,4 +128,10 @@ void CALLBACK TimerProcS(void* lpParametar, BOOLEAN TimerOrWaitFired)
 {
 	Simulator* obj = (Simulator*)lpParametar;
 	obj->Timestep();
+
+	for (hash_map<Hash, Node*>::iterator links = GlobalNodes.begin(); links != GlobalNodes.end(); ++links)
+	{
+		links->second->UpdateEvent();
+	}
+
 }

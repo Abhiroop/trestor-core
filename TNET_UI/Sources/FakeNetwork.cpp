@@ -49,7 +49,7 @@ void FakeNetwork::TimerCallback()
 	if (QueuedPackets.unsafe_size() > 0)
 	{
 		NetworkPacketQueueEntry PQE;
-		bool OK = QueuedPackets.try_pop(PQE);
+		bool OK;
 		do 
 		{			
 			OK = QueuedPackets.try_pop(PQE);			

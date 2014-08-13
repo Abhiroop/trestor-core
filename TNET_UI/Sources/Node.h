@@ -6,6 +6,10 @@
 #include "Ledger.h"
 #include "ed25519/ed25519.h"
 #include <hash_map>
+#include <functional>
+#include <Windows.h>
+//#include "Timer.h"
+#include <memory>
 
 typedef struct CandidateStatus
 {
@@ -29,13 +33,19 @@ public: Hash Source;
 		}
 } TransactionContentPack;
 
+
+
 class Node
 {
 public:
-	hash_map<Hash, Node> Connections;
+	hash_map<Hash, shared_ptr<Node>> Connections;
 
-	hash_map<Hash, Node> TrustedNodes;
+	hash_map<Hash, shared_ptr<Node>> TrustedNodes;
 
+	HANDLE hTimerQueue = nullptr;
+	//function<void()> f;
+	//TimerX::Timer Tmr;
+	HANDLE hTimer = NULL;
 	/// <summary>
 	/// Outer Dict is TransactionID, inner is Voter node.
 	/// </summary>
@@ -50,7 +60,7 @@ public:
 
 	AccountInfo AI;
 
-	Ledger ledger;
+	shared_ptr<Ledger> ledger;
 
 	Ledger getLocalLedger();
 
@@ -59,7 +69,11 @@ public:
 
 	Hash PublicKey;
 
-	Node(string Name, int _ConnectionLimit, Ledger & _ledger, long Money, int TimerRate);
+	string Name;
+
+	int64_t LocalMoney;
+
+	Node(string _Name, int _ConnectionLimit, shared_ptr<Ledger> ledger, long Money, int TimerRate);
 
 	void CreateArbitraryTransactionAndSendToTrustedNodes();
 
@@ -76,6 +90,8 @@ public:
 	void SendCandidates(Hash source, vector<TransactionContent> Transactions);
 
 	void Receive(NetworkPacket Packet);
+
+	void UpdateEvent();
 
 };
 

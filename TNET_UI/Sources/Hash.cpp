@@ -11,6 +11,10 @@
 #include "Hash.h"
 #include "Utils.h"
 
+#include <mutex>
+
+static std::mutex HMTX;
+
 Hash::Hash()
 {
 }
@@ -77,16 +81,29 @@ ostream& operator<<(ostream &os, Hash &mc)
 
 string Hash::ToString() const
 {
+	//bool Have_Lock = HMTX.try_lock();
+
+	//if (Have_Lock)
+	//{
 	uint8_t hexs[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 	int length = (int)(*this).size();
 
-	vector<char> finalStr = vector<char>();
-	finalStr.reserve(length << 1);
-	for (int i = 0; i < length; i++)
+	if (length > 0)
 	{
-		finalStr.push_back((char)hexs[(((*this)[i]) >> 4) & 0xF]);
-		finalStr.push_back((char)hexs[(*this)[i] & 0xF]);
+		vector<char> finalStr = vector<char>();
+		finalStr.reserve(length << 1);
+		for (int i = 0; i < length; i++)
+		{
+			finalStr.push_back((char)hexs[(((*this)[i]) >> 4) & 0xF]);
+			finalStr.push_back((char)hexs[(*this)[i] & 0xF]);
+		}
+
+		return string(finalStr.begin(), finalStr.end());
 	}
-	return string(finalStr.begin(), finalStr.end());
+
+	//HMTX.unlock();
+	//}
+
+	return "NULLDATA";
 }
 

@@ -1,13 +1,21 @@
 
-
+#include <Windows.h>
 
 #include "Node.h"
+#include "Constants.h"
+//#include "Timer.h"
+#include <functional>
 
+#include <mutex>
+#include <memory>
 
-Ledger Node::getLocalLedger()
+//std::mutex MTX;
+
+/*Ledger Node::getLocalLedger()
 {
 	return ledger;
 }
+*/
 
 Node::Node()
 {
@@ -15,9 +23,19 @@ Node::Node()
 }
 
 
+void Node::UpdateEvent()
+{
+	//MTX.lock();
+	//MessageQueue.push(" Is Awake");
+	LocalMoney ++;
+	//MTX.unlock();
+}
+
 //Timer Tmr;
 
-Node::Node(string Name, int _ConnectionLimit, Ledger & _ledger, long Money, int TimerRate)
+void CALLBACK TimerProcND(void* lpParametar, BOOLEAN TimerOrWaitFired);
+
+Node::Node(string _Name, int _ConnectionLimit, shared_ptr<Ledger> _ledger, long Money, int TimerRate)
 {
 	ConnectionLimit = ConnectionLimit;
 	byte Seed[32];
@@ -32,11 +50,47 @@ Node::Node(string Name, int _ConnectionLimit, Ledger & _ledger, long Money, int 
 
 	ledger = _ledger;
 
-	AI = AccountInfo(PublicKey, Money, Name, 0);
+	Name = _Name;
 
-	ledger.AddUserToLedger(AI);
+	AI = AccountInfo(PublicKey, Money, _Name, 0);
 
+	ledger->AddUserToLedger(AI);
+
+	LocalMoney = 0;
+
+	//function<void()> f = bind(&Node::UpdateEvent, *this);
 	
+	//Tmr = TimerX::Timer(hTimerQueue, 0, Constants::SIM_REFRESH_MS, f);
+	/*
+	// Create the timer queue.
+	hTimerQueue = CreateTimerQueue();
+	if (NULL == hTimerQueue)
+	{
+
+	}
+
+	if (!CreateTimerQueueTimer(&hTimer, hTimerQueue, (WAITORTIMERCALLBACK)TimerProcND, this, Constants::SIM_REFRESH_MS, Constants::SIM_REFRESH_MS, 0))
+	{
+		//printf("CreateTimerQueueTimer failed (%d)\n", GetLastError());
+		//return 3;
+	}*/
+		
+	//typedef void (Node::*)(void)function_t;
+
+	/*string type = f.target_type().name();
+
+	auto fptr = f.target<void (Node::*)()>();
+	if (fptr != nullptr)
+	{
+		auto fX = *fptr;
+		
+		MessageQueue.push("Good MSG");
+
+		//fX();
+		//function_t* ptr_fun = *ptr_ptr_fun;
+		//ptr_fun();
+		//TimerX::Timer Tmr = TimerX::Timer(0, Constants::SIM_REFRESH_MS, **ptr_fun);
+	}*/
 
 	//Tmr = new Timer();
 	//Tmr.Elapsed += Tmr_Elapsed;
@@ -44,6 +98,14 @@ Node::Node(string Name, int _ConnectionLimit, Ledger & _ledger, long Money, int 
 	//Tmr.Interval = TimerRate;
 	//Tmr.Start();
 }
+
+
+/*
+void CALLBACK TimerProcND(void* lpParametar, BOOLEAN TimerOrWaitFired)
+{
+	Node* obj = (Node*)lpParametar;
+	obj->UpdateEvent();
+}*/
 
 /*void Tmr_Elapsed(object sender, ElapsedEventArgs e)
 {
@@ -90,7 +152,7 @@ void Node::InitializeValuesFromGlobalLedger()
 int64_t Node::Money()
 {
 	AccountInfo ai;
-	bool got = ledger.GetAccount(PublicKey, ai);
+	bool got = ledger->GetAccount(PublicKey, ai);
 
 	if (got)
 		return ai.Money;
@@ -130,5 +192,9 @@ void Node::SendCandidates(Hash source, vector<TransactionContent> Transactions)
 
 void Node::Receive(NetworkPacket Packet)
 {
+	string _SZ = ", " + Packet.Data.size() + (string)" Bytes";
+	string _OTH_MSG = " Received Packet :" + Packet.Type + (string)", From:" + Packet.PublicKey_Src.ToString() + _SZ;
+	string MSG = (string)"[" + PublicKey.ToString() + "] : " + _OTH_MSG;
 
+	MessageQueue.push(MSG);
 }

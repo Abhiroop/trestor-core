@@ -25,7 +25,7 @@ public: Point2 Center;
 		}
 } NodeData;
 
-extern hash_map<Hash, Node> sim_nodes;
+extern hash_map<Hash, shared_ptr<Node>> sim_nodes;
 extern vector<Point2> sim_XY;
 extern hash_map<Hash, NodeData> sim_nData;
 
@@ -42,6 +42,8 @@ class Simulator
 public:
 
 	FakeNetwork network;
+
+	//vector<Node> Nodes;
 
 	void StartSimulation();
 	void StopSimulation();

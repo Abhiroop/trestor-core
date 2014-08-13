@@ -2,6 +2,7 @@
 #include <algorithm>
 
 
+
 // @Author : Arpan Jati
 // @Date: 12th Aug 2014
 
@@ -9,28 +10,43 @@
 
 #ifdef TIMER_H//__cplusplus_cli
 
+
+
 namespace TimerX
 {
-	Timer::Timer(int _DueTime, int _Period, void(*_Callback)())
+	Timer::Timer()
+	{
+	}
+
+	Timer::Timer(HANDLE & hTimerQueue, int _DueTime, int _Period, function<void()> Callback)
 	{
 		// Create the timer queue.
 		hTimerQueue = CreateTimerQueue();
 		if (NULL == hTimerQueue)
 		{
-			//	printf("CreateTimerQueue failed (%d)\n", GetLastError());
-			//	//return 2;
+	
 		}
 
 		DueTime = _DueTime;
 		Period = _Period;
+		_Callback = Callback;
 		
-		//CallBack = _Callback;
-		// Set a timer to call the timer routine in 10 seconds.
-		if (!CreateTimerQueueTimer(&hTimer, hTimerQueue, (WAITORTIMERCALLBACK)_Callback, NULL, DueTime, Period, 0))
+		if (!CreateTimerQueueTimer(&hTimer, hTimerQueue, (WAITORTIMERCALLBACK)TimerProcTMR, this, DueTime, Period, 0))
 		{
-			printf("CreateTimerQueueTimer failed (%d)\n", GetLastError());
+			//printf("CreateTimerQueueTimer failed (%d)\n", GetLastError());
 			//return 3;
 		}
+	}
+
+	void Timer::DoCall()
+	{
+		_Callback();
+	}
+
+	void CALLBACK TimerProcTMR(void* lpParametar, BOOLEAN TimerOrWaitFired)
+	{
+		Timer* obj = (Timer*)lpParametar;
+		obj->DoCall();
 	}
 
 	/*

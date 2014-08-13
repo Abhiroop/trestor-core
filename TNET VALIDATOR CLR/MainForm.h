@@ -504,7 +504,19 @@ namespace TNETVALIDATORCLR {
 
 	private: System::Void timer_UI_Tick(System::Object^  sender, System::EventArgs^  e) {
 
-		//PrintMessage("" + Value);
+		if (MessageQueue.unsafe_size() > 0)
+		{
+			string Message;
+			bool OK;
+			do
+			{
+				OK = MessageQueue.try_pop(Message);				
+				if (OK)
+				{
+					PrintMessage(Message);					
+				}
+			} while (OK);
+		}
 	}
     
 	};

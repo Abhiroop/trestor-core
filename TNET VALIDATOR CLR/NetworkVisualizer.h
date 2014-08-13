@@ -128,10 +128,10 @@ namespace TNETVALIDATORCLR {
 		g->Clear(Color::GhostWhite);
 
 		int i = 0;
-		for (hash_map<Hash, Node>::iterator _ts = sim_nodes.begin(); _ts != sim_nodes.end(); ++_ts)
+		for (hash_map<Hash, shared_ptr<Node>>::iterator _ts = sim_nodes.begin(); _ts != sim_nodes.end(); ++_ts)
 		{
-			Node *ND;
-			ND = &_ts->second;
+			shared_ptr<Node> ND;
+			ND = _ts->second;
 			if (sim_nData.count(ND->PublicKey) == 0)
 			{
 				NodeData d;
@@ -143,23 +143,23 @@ namespace TNETVALIDATORCLR {
 			}
 		}
 
-		for (hash_map<Hash, Node>::iterator _ts = sim_nodes.begin(); _ts != sim_nodes.end(); ++_ts)
+		for (hash_map<Hash, shared_ptr<Node>>::iterator _ts = sim_nodes.begin(); _ts != sim_nodes.end(); ++_ts)
 		{
-			Node* ND;
-			ND = &_ts->second;
+			shared_ptr<Node> ND;
+			ND = _ts->second;
 			NodeData* nd = &sim_nData[_ts->first];
 
-			for (hash_map<Hash, Node>::iterator links = ND->Connections.begin(); links != ND->Connections.end(); ++links)
+			for (hash_map<Hash, shared_ptr<Node>>::iterator links = ND->Connections.begin(); links != ND->Connections.end(); ++links)
 			{
-				Node* Link;
-				Link = &links->second;
+				shared_ptr<Node> Link;
+				Link = links->second;
 				NodeData* LinkData = &sim_nData[Link->PublicKey];
 
 				g->DrawLine(gcnew Pen(Color::LightGray, 0.5F), Point(LinkData->Center.X, LinkData->Center.Y), Point(nd->Center.X, nd->Center.Y));
 			}
 		}
 
-		for (hash_map<Hash, Node>::iterator _ts = sim_nodes.begin(); _ts != sim_nodes.end(); ++_ts)
+		for (hash_map<Hash, shared_ptr<Node>>::iterator _ts = sim_nodes.begin(); _ts != sim_nodes.end(); ++_ts)
 		{
 			NodeData* nd = &sim_nData[_ts->first];
 			std::string ss = _ts->first.ToString();
@@ -168,12 +168,12 @@ namespace TNETVALIDATORCLR {
 
 			String ^sss = "ID:" +
 				StringUtils::stops(ss)->Substring(0, 8) +
-				" Money:" +
-				(int)_ts->second.Money();
+				" Money:" + (int) _ts->second->LocalMoney;
+				//(int)_ts->second.Money();
 
 			g->DrawString(sss, gcnew System::Drawing::Font("Consolas", 8, FontStyle::Regular), Brushes::DarkMagenta, Point(nd->Center.X, nd->Center.Y+15));
-			g->DrawString("Candidates:" + _ts->second.ledger.getCandidates().size() + " Out TX:" + _ts->second.OutTransactionCount +
-				" In TX:" + _ts->second.InCandidatesCount, gcnew System::Drawing::Font("Consolas", 8, FontStyle::Regular), Brushes::DarkGreen, Point(nd->Center.X, nd->Center.Y + 30));
+			g->DrawString("Candidates:" + _ts->second->ledger->getCandidates().size() + " Out TX:" + _ts->second->OutTransactionCount +
+				" In TX:" + _ts->second->InCandidatesCount, gcnew System::Drawing::Font("Consolas", 8, FontStyle::Regular), Brushes::DarkGreen, Point(nd->Center.X, nd->Center.Y + 30));
 
 		}
 	}

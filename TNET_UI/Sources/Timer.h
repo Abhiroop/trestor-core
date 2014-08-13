@@ -5,18 +5,24 @@
 
 #include <windows.h>
 
+#include <functional>
+
+using namespace std;
+
 // @Author : Arpan Jati
 // @Date: 12th Aug 2014
 
 namespace TimerX
 {
-
 	/*HANDLE gDoneEvent;
 
 	HANDLE hTimer = NULL;
 	HANDLE hTimerQueue = NULL;
 	int arg = 123;*/
 
+	//typedef void(*TimerCallback)();
+
+	void CALLBACK TimerProcTMR(void* lpParametar, BOOLEAN TimerOrWaitFired);
 
 	class Timer
 	{
@@ -26,26 +32,19 @@ namespace TimerX
 		HANDLE hTimerQueue = NULL;
 
 		int DueTime;
-		int Period;
+		int Period;	
 
-		//static void(*CallBack)();// = NULL;
+		function<void()> _Callback;
 
 	public:
-
-		/*VOID CALLBACK TimerRoutine(PVOID lpParam, BOOLEAN TimerOrWaitFired)
-		{
-			CallBack();
-		}
-		*/
-
-		Timer(int _DueTime, int _Period, void(*_Callback)());
-
-		//void Tick(void(*_Callback)());
-
+		
+		Timer();
+		Timer(HANDLE & hTimerQueue, int _DueTime, int _Period, function<void()>);
+		void DoCall();
 	};
 
-	/*
 
+	/*
 
 	VOID CALLBACK TimerRoutine(PVOID lpParam, BOOLEAN TimerOrWaitFired)
 	{
