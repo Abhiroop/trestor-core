@@ -164,16 +164,17 @@ namespace TNETVALIDATORCLR {
 			NodeData* nd = &sim_nData[_ts->first];
 			std::string ss = _ts->first.ToString();
 
+			shared_ptr<Node> ndd = _ts->second;
+
 			g->FillEllipse(Brushes::LightBlue, System::Drawing::Rectangle(nd->Center.X - 10, nd->Center.Y - 10, 20, 20));
 
 			String ^sss = "ID:" +
 				StringUtils::stops(ss)->Substring(0, 8) +
-				" Money:" + (int) _ts->second->LocalMoney;
-				//(int)_ts->second.Money();
+				" Money:" + (int)(ndd->LocalMoney + ndd->Money());
 
 			g->DrawString(sss, gcnew System::Drawing::Font("Consolas", 8, FontStyle::Regular), Brushes::DarkMagenta, Point(nd->Center.X, nd->Center.Y+15));
-			g->DrawString("Candidates:" + _ts->second->ledger->getCandidates().size() + " Out TX:" + _ts->second->OutTransactionCount +
-				" In TX:" + _ts->second->InCandidatesCount, gcnew System::Drawing::Font("Consolas", 8, FontStyle::Regular), Brushes::DarkGreen, Point(nd->Center.X, nd->Center.Y + 30));
+			g->DrawString("Candidates:" + ndd->ledger->getCandidates().size() + " Out TX:" + ndd->OutTransactionCount +
+				" In TX:" + ndd->InTransactionCount, gcnew System::Drawing::Font("Consolas", 8, FontStyle::Regular), Brushes::DarkGreen, Point(nd->Center.X, nd->Center.Y + 30));
 
 		}
 	}

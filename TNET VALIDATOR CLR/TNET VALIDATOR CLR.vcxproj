@@ -182,6 +182,7 @@
     <ClInclude Include="..\TNET_UI\Sources\Base64.h" />
     <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h" />
     <ClInclude Include="..\TNET_UI\Sources\CandidateSet.h" />
+    <ClInclude Include="..\TNET_UI\Sources\Consensus.h" />
     <ClInclude Include="..\TNET_UI\Sources\Constants.h" />
     <ClInclude Include="..\TNET_UI\Sources\CreditDebitData.h" />
     <ClInclude Include="..\TNET_UI\Sources\ed25519\ed25519.h" />
@@ -263,6 +264,7 @@
     <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tick_count.h" />
     <ClInclude Include="..\TNET_UI\Sources\Timer.h" />
     <ClInclude Include="..\TNET_UI\Sources\TransactionContent.h" />
+    <ClInclude Include="..\TNET_UI\Sources\TransactionSetType.h" />
     <ClInclude Include="..\TNET_UI\Sources\TransactionSink.h" />
     <ClInclude Include="..\TNET_UI\Sources\TreeNodeX.h" />
     <ClInclude Include="..\TNET_UI\Sources\UserDataHandler.h" />

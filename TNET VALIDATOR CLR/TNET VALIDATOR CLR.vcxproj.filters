@@ -464,6 +464,12 @@
     <ClInclude Include="..\TNET_UI\Sources\Node.h">
       <Filter>Sources\Node</Filter>
     </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Consensus.h">
+      <Filter>Sources\Consensus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TransactionSetType.h">
+      <Filter>Sources\Consensus</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MainForm.resx">

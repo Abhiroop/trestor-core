@@ -13,7 +13,9 @@
 #include <stack>
 #include <queue>
 #include <array>
+#include<set>
 #include <list>
+#include<memory>
 #include <stdint.h>
 #include "Point2.h"
 
@@ -39,10 +41,11 @@ uint64_t getCurrentUTFtime();
 /// <returns></returns>
 vector<int> GenerateNonRepeatingDistribution(int maxNumber, int Count, int self);
 
-enum PacketTypes {	HELLO = 0x00, DISCONNECT = 0x01, KEEPALIVE = 0x02, 
-					KEY_EXCHANGE_1 = 0x10, KEY_EXCHANGE_2 = 0x11, KEY_EXCHANGE_DONE=0x12,
-					TRANS_REQUEST = 0x20, TRANS_FORWARDING = 0x21,
-					CONS_STATE = 0x30, CONS_CURRENT_SET = 0x31, CONS_REQUEST_TX = 0x32, CONS_RESP_TX = 0x33
+enum PacketTypes {
+	PT_HELLO = 0x00, PT_DISCONNECT = 0x01, PT_KEEPALIVE = 0x02,
+	PT_KEY_EXCHANGE_1 = 0x10, PT_KEY_EXCHANGE_2 = 0x11, PT_KEY_EXCHANGE_DONE = 0x12,
+	PT_TRANS_REQUEST = 0x20, PT_TRANS_FORWARDING = 0x21,
+	PT_CONS_STATE = 0x30, PT_CONS_CURRENT_SET = 0x31, PT_CONS_REQUEST_TX = 0x32, PT_CONS_RESP_TX = 0x33
 };
 
 struct NetworkPacket

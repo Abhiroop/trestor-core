@@ -517,6 +517,15 @@ namespace TNETVALIDATORCLR {
 				}
 			} while (OK);
 		}
+
+		nv->Invalidate();
+		
+		/*if (sim.Refreshed)
+		{
+			sim.Refreshed = false;
+			nv->Invalidate();
+		}*/
+
 	}
     
 	};

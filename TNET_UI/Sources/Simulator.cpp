@@ -22,6 +22,8 @@ void Simulator::Timestep()
 	if (SimulationStarted)
 	{
 		//hash<Hash> h;
+		//Refreshed = true;
+
 
 	}
 }
@@ -99,7 +101,7 @@ void Simulator::StartSimulation()
 
 		//function<void(NetworkPacket)> f = std::bind1st(std::mem_fun(&Node::ReceivedData), &n);
 	
-		//network.AttachReceiver(pk, bind(&Node::Receive, *n, _1));
+		network.AttachReceiver(*pk, bind(&Node::Receive, *n, _1));
 	}
 
 	int LinksPerNode = 3;
@@ -128,10 +130,10 @@ void CALLBACK TimerProcS(void* lpParametar, BOOLEAN TimerOrWaitFired)
 {
 	Simulator* obj = (Simulator*)lpParametar;
 	obj->Timestep();
-
+	/*
 	for (hash_map<Hash, Node*>::iterator links = GlobalNodes.begin(); links != GlobalNodes.end(); ++links)
 	{
 		links->second->UpdateEvent();
-	}
+	}*/
 
 }

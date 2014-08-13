@@ -26,8 +26,10 @@ Node::Node()
 void Node::UpdateEvent()
 {
 	//MTX.lock();
-	//MessageQueue.push(" Is Awake");
+	//MessageQueue.push(this->PublicKey.ToString() + " Is Awake");
 	LocalMoney ++;
+
+	CreateArbitraryTransactionAndSendToTrustedNodes();
 	//MTX.unlock();
 }
 
@@ -61,7 +63,7 @@ Node::Node(string _Name, int _ConnectionLimit, shared_ptr<Ledger> _ledger, long 
 	//function<void()> f = bind(&Node::UpdateEvent, *this);
 	
 	//Tmr = TimerX::Timer(hTimerQueue, 0, Constants::SIM_REFRESH_MS, f);
-	/*
+	
 	// Create the timer queue.
 	hTimerQueue = CreateTimerQueue();
 	if (NULL == hTimerQueue)
@@ -73,11 +75,13 @@ Node::Node(string _Name, int _ConnectionLimit, shared_ptr<Ledger> _ledger, long 
 	{
 		//printf("CreateTimerQueueTimer failed (%d)\n", GetLastError());
 		//return 3;
-	}*/
+	}
 		
+	/*
+
 	//typedef void (Node::*)(void)function_t;
 
-	/*string type = f.target_type().name();
+	string type = f.target_type().name();
 
 	auto fptr = f.target<void (Node::*)()>();
 	if (fptr != nullptr)
@@ -91,21 +95,16 @@ Node::Node(string _Name, int _ConnectionLimit, shared_ptr<Ledger> _ledger, long 
 		//ptr_fun();
 		//TimerX::Timer Tmr = TimerX::Timer(0, Constants::SIM_REFRESH_MS, **ptr_fun);
 	}*/
-
-	//Tmr = new Timer();
-	//Tmr.Elapsed += Tmr_Elapsed;
-	//Tmr.Enabled = true;
-	//Tmr.Interval = TimerRate;
-	//Tmr.Start();
+	
 }
 
 
-/*
+
 void CALLBACK TimerProcND(void* lpParametar, BOOLEAN TimerOrWaitFired)
 {
 	Node* obj = (Node*)lpParametar;
 	obj->UpdateEvent();
-}*/
+}
 
 /*void Tmr_Elapsed(object sender, ElapsedEventArgs e)
 {
@@ -128,19 +127,35 @@ while (PendingIncomingTransactions.Count > 0)
 void Node::CreateArbitraryTransactionAndSendToTrustedNodes()
 {
 	vector<TransactionSink> tsks;
-	/*
-	Node destNode = Constants.GlobalNodeList[Constants.random.Next(0, Constants.GlobalNodeList.Count)];
+	
+	//GlobalNodes.
+
+	for (hash_map<Hash, Node*>::iterator _ts = GlobalNodes.begin(); _ts != GlobalNodes.end(); ++_ts)
+	{
+		Node * dest = _ts->second;
+
+		int Amount = this->Money() / 8;
+
+		TransactionSink tsk = TransactionSink(dest->PublicKey, Amount);
+		tsks.push_back(tsk);
+
+		TransactionContent tco = TransactionContent(this->PublicKey, 0, tsks, Hash() );
+		_ts->second->SendTransaction(this->PublicKey, tco);
+	}
+	
+
+	/*Node destNode = Constants.GlobalNodeList[Constants.random.Next(0, Constants.GlobalNodeList.Count)];
 
 	if (destNode.PublicKey != PublicKey)
 	{
-	int Amount = Constants.random.Next(0, (int)(Money / 2));
+		int Amount = Constants.random.Next(0, (int)(Money / 2));
 
-	TransactionSink tsk = new TransactionSink(destNode.PublicKey, Amount);
-	tsks.Add(tsk);
+		TransactionSink tsk = new TransactionSink(destNode.PublicKey, Amount);
+		tsks.Add(tsk);
 
-	TransactionContent tco = new TransactionContent(PublicKey, 0, tsks.ToArray(), new byte[0]);
+		TransactionContent tco = new TransactionContent(PublicKey, 0, tsks.ToArray(), new byte[0]);
 
-	OutTransactionCount++;
+		OutTransactionCount++;
 	}*/
 }
 
@@ -197,4 +212,14 @@ void Node::Receive(NetworkPacket Packet)
 	string MSG = (string)"[" + PublicKey.ToString() + "] : " + _OTH_MSG;
 
 	MessageQueue.push(MSG);
+	
+	switch (Packet.Type)
+	{
+	case PT_HELLO:
+
+		break;
+
+
+	}
+
 }

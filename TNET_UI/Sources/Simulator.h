@@ -43,6 +43,8 @@ public:
 
 	FakeNetwork network;
 
+	bool Refreshed = false;
+
 	//vector<Node> Nodes;
 
 	void StartSimulation();
