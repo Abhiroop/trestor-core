@@ -1,5 +1,7 @@
+///
 // @Author : Arpan Jati
 // @Date: 12th Aug 2014
+//
 
 #include "Simulator.h"
 
@@ -8,7 +10,6 @@
 hash_map<Hash, Node> sim_nodes;
 vector<Point2> sim_XY;
 hash_map<Hash, NodeData> sim_nData;
-
 
 void Simulator::StartSimulation()
 {
@@ -29,6 +30,11 @@ void Simulator::StartSimulation()
 		sim_nodes[n.PublicKey] = n;
 
 		GlobalNodes[n.PublicKey] = n;
+
+		//function<void(NetworkPacket)> f = std::bind1st(std::mem_fun(&Node::ReceivedData), &n);
+		function<void(NetworkPacket)> f = std::bind(&Node::Receive, &n, std::placeholders::_1);
+
+		network.AttachReceiver(n.PublicKey, f);
 	}
 
 	int LinksPerNode = 3;
@@ -44,4 +50,6 @@ void Simulator::StartSimulation()
 			sim_nodes[nodeHashes[i]].Connections[h] = n;
 		}
 	}
+
+
 }

@@ -39,6 +39,25 @@ uint64_t getCurrentUTFtime();
 /// <returns></returns>
 vector<int> GenerateNonRepeatingDistribution(int maxNumber, int Count, int self);
 
+enum PacketTypes {	HELLO = 0x00, DISCONNECT = 0x01, KEEPALIVE = 0x02, 
+					KEY_EXCHANGE_1 = 0x10, KEY_EXCHANGE_2 = 0x11, KEY_EXCHANGE_DONE=0x12,
+					TRANS_REQUEST = 0x20, TRANS_FORWARDING = 0x21,
+					CONS_STATE = 0x30, CONS_CURRENT_SET = 0x31, CONS_REQUEST_TX = 0x32, CONS_RESP_TX = 0x33
+};
+
+struct NetworkPacket
+{
+	Hash PublicKey_Src;
+	byte Type;
+	vector<byte> Data;
+};
+
+struct NetworkPacketQueueEntry
+{
+	Hash PublicKey_Dest;
+	NetworkPacket Packet;
+};
+
 #ifdef __cplusplus_cli
 
 class StringUtils

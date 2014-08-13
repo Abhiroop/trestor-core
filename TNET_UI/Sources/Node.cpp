@@ -127,3 +127,8 @@ void Node::SendCandidates(Hash source, vector<TransactionContent> Transactions)
 	}
 }
 
+
+void Node::Receive(NetworkPacket Packet)
+{
+
+}

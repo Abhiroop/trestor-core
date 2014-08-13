@@ -39,7 +39,7 @@ public:
 
 	void Initialize()
 	{
-		network = FakeNetwork(hTimerQueue);
+		network = FakeNetwork(hTimerQueue, Constants::SIM_REFRESH_MS);
 	}
 
 	Simulator()

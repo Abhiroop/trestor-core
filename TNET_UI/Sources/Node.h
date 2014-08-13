@@ -75,6 +75,8 @@ public:
 
 	void SendCandidates(Hash source, vector<TransactionContent> Transactions);
 
+	void Receive(NetworkPacket Packet);
+
 };
 
 
