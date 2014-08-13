@@ -35,7 +35,7 @@ void Simulator::Initialize(int Resolution_MS)
 
 Simulator::Simulator()
 {
-	Simulator::Simulator(Constants::SIM_REFRESH_MS);
+	Simulator::Simulator(Constants::SIM_REFRESH_MS_SIM);
 }
 
 Simulator::Simulator(int Resolution_MS)
@@ -60,7 +60,7 @@ Simulator::Simulator(int Resolution_MS)
 		GoodInit = false;
 	}
 
-	Initialize(Resolution_MS);
+	Initialize(Constants::SIM_REFRESH_MS);
 }
 
 
@@ -97,7 +97,7 @@ void Simulator::StartSimulation()
 		lgr->AddUserToLedger(si);
 		sim_nodes[*pk] = n;
 
-		GlobalNodes[*pk] = n.get();
+		GlobalNodes[*pk] = n;
 
 		//function<void(NetworkPacket)> f = std::bind1st(std::mem_fun(&Node::ReceivedData), &n);
 	

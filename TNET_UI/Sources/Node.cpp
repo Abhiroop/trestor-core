@@ -130,11 +130,11 @@ void Node::CreateArbitraryTransactionAndSendToTrustedNodes()
 	
 	//GlobalNodes.
 
-	for (hash_map<Hash, Node*>::iterator _ts = GlobalNodes.begin(); _ts != GlobalNodes.end(); ++_ts)
+	for (hash_map<Hash, shared_ptr<Node>>::iterator _ts = GlobalNodes.begin(); _ts != GlobalNodes.end(); ++_ts)
 	{
-		Node * dest = _ts->second;
+		shared_ptr<Node> dest = _ts->second;
 
-		int Amount = this->Money() / 8;
+		int64_t Amount = this->Money() / 8;
 
 		TransactionSink tsk = TransactionSink(dest->PublicKey, Amount);
 		tsks.push_back(tsk);

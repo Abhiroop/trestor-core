@@ -17,7 +17,8 @@ class Constants
 {
 public :
 
-	static const int SIM_REFRESH_MS = 1000;
+	static const int SIM_REFRESH_MS = 50;
+	static const int SIM_REFRESH_MS_SIM = 50;
 
 	
 
@@ -29,7 +30,7 @@ static const char* dbFile = "test.db";
 
 static const char* Const_LedgerFileName = "Ledger.txt";
 
-extern hash_map<Hash, Node*> GlobalNodes;
+extern hash_map<Hash, shared_ptr<Node>> GlobalNodes;
 
 
 #endif

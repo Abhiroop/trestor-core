@@ -9,6 +9,7 @@
 #include <functional>
 #include <Windows.h>
 //#include "Timer.h"
+#include "tbb/concurrent_queue.h"
 #include <memory>
 
 typedef struct CandidateStatus
@@ -26,11 +27,18 @@ typedef struct TransactionContentPack
 {
 public: Hash Source;
 		TransactionContent Transacation;
+
 		TransactionContentPack(Hash _Source, TransactionContent _Transacation)
 		{
 			Source = _Source;
 			Transacation = _Transacation;
 		}
+
+		TransactionContentPack()
+		{
+			
+		}
+
 } TransactionContentPack;
 
 
@@ -83,7 +91,7 @@ public:
 
 	stack<TransactionContentPack> PendingIncomingCandidates;
 
-	stack<TransactionContentPack> PendingIncomingTransactions;
+	tbb::concurrent_queue<TransactionContentPack> PendingIncomingTransactions;
 
 	void SendTransaction(Hash source, TransactionContent Transaction);
 
