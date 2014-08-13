@@ -3,7 +3,7 @@
 #define FAKE_NETWORK_H
 
 #include "Utils.h"
-#include "NodeController.h"
+#include "Node.h"
 
 #include "Timer.h"
 
@@ -30,7 +30,6 @@ struct NetworkPacket
 
 void CALLBACK TimerProc(void* lpParametar, BOOLEAN TimerOrWaitFired);
 
-
 class FakeNetwork
 {
 	typedef void(*NetworkCallback)(NetworkPacket Packet);
@@ -45,32 +44,37 @@ class FakeNetwork
 	}
 
 	HANDLE hTimer = NULL;
-	HANDLE hTimerQueue = NULL;
 
 public:
+
+	bool GoodInit = true;
 
 	FakeNetwork()
 	{
 
-		// Create the timer queue.
-		hTimerQueue = CreateTimerQueue();
+	}
+
+	FakeNetwork(HANDLE & hTimerQueue)
+	{
+		// Create a new Timer Queue If not there already
 		if (NULL == hTimerQueue)
 		{
-			//	printf("CreateTimerQueue failed (%d)\n", GetLastError());
-			//	//return 2;
+			hTimerQueue = CreateTimerQueue();
+		}
+		
+		// Fail if Init fails
+		if (NULL == hTimerQueue)
+		{
+			GoodInit = false;
 		}
 
 		int DueTime = 0;
-		int Period = 100; //100ms
+		int Period = 100;
 
-		//CallBack = _Callback;
-		// Set a timer to call the timer routine in 10 seconds.
 		if (!CreateTimerQueueTimer(&hTimer, hTimerQueue, (WAITORTIMERCALLBACK)TimerProc, this, DueTime, Period, 0))
 		{
-			printf("CreateTimerQueueTimer failed (%d)\n", GetLastError());
-			//return 3;
+			GoodInit = false;
 		}
-
 	}
 
 	void TimerCallback()
@@ -91,10 +95,6 @@ public:
 	
 };
 
-void CALLBACK TimerProc(void* lpParametar, BOOLEAN TimerOrWaitFired)
-{
-	FakeNetwork* obj = (FakeNetwork*)lpParametar;
-	obj->TimerCallback();
-}
+
 
 #endif

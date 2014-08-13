@@ -8,8 +8,3 @@
 *
 */
 
-#include "NetworkVisualizer.h"
-
-hash_map<Hash, Node> sim_nodes;
-vector<Point2> XY;
-hash_map<Hash, NodeData> nData;

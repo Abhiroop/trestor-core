@@ -11,18 +11,20 @@
 #include "AccountInfo.h"
 #include "CandidateSet.h"
 #include "Ledger.h"
-#include "../TNET_UI/Sources/Constants.h"
-#include "../TNET_UI/Sources/Timer.h"
+#include "Constants.h"
+#include "Timer.h"
 #include <hash_map>
 
-#include "tbb/concurrent_hash_map.h"
+#include "Simulator.h"
 
-extern tbb::concurrent_hash_map<int, int> h;
+//#include "tbb/concurrent_hash_map.h"
 
-void TBB_TEST()
+//extern tbb::concurrent_hash_map<int, int> h;
+
+static void TBB_TEST()
 {
-	h.insert(7, 9);
-	h.insert(7, 10);	
+	//h.insert(7, 9);
+	//h.insert(7, 10);	
 }
 
 /*timer::Timer t;
@@ -40,6 +42,8 @@ t.subscribe(TimerX);
 //extern TimerX::Timer tmr;// = TimerX::Timer(1000, 1000);
 
 extern int Value;
+
+extern Simulator sim;
 
 
 //void Callback();
@@ -467,49 +471,10 @@ namespace TNETVALIDATORCLR {
 		PrintMessage("BlackLists          : " + st.BlackLists);
 
 	}
+
 	private: System::Void simulateVisualToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 
-		sim_nodes.clear();
-
-		/*vector<int> v = GenerateNonRepeatingDistribution(100, 100, 0);
-		StringBuilder^ sb = gcnew StringBuilder();
-		for (int i = 0; i < 100; i++)
-		{
-		sb->Append(i + ":" + v[i] + "   ");
-		}
-		PrintMessage(sb->ToString());*/
-
-		GlobalNodes.clear();
-
-		Ledger lgr;
-
-		vector<Hash> nodeHashes;
-
-		for (int i = 0; i < 8; i++)
-		{
-			Node n = Node("NO_NAME", 4, lgr, 100 * i, 100);
-			AccountInfo si = AccountInfo(n.PublicKey, 500, "NO_NAME", 0);
-			nodeHashes.push_back(n.PublicKey);
-			lgr.AddUserToLedger(si);
-			sim_nodes[n.PublicKey] = n;
-
-			GlobalNodes[n.PublicKey] = n;
-		}
-
-		int LinksPerNode = 3;
-
-		for (int i = 0; i < 8; i++)
-		{
-			vector<int> perm = GenerateNonRepeatingDistribution((int)nodeHashes.size(), LinksPerNode, i);
-
-			for (int k = 0; k < (int)perm.size(); k++)
-			{
-				Hash h = nodeHashes[perm[k]];
-				Node n = sim_nodes[h];
-				sim_nodes[nodeHashes[i]].Connections[h] = n;
-			}
-		}
-
+		sim.StartSimulation();
 		//networkVisualizer1.nodes = nodes;
 		nv->Invalidate();
 
@@ -524,9 +489,7 @@ namespace TNETVALIDATORCLR {
 
 		tabPage_Visualizer->Controls->Add(nv);
 		tabPage_Visualizer->Invalidate();
-	}
-
-	
+	}	
 
 	private: System::Void timerTestsToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 

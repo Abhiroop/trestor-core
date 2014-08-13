@@ -4,13 +4,13 @@
 #include <hash_map>
 #include <vector>
 #include "Utils.h"
-#include "NodeController.h"
+#include "Node.h"
 
 //#include "SQLiteCpp\CppSQLite3.h"
 
 //extern CppSQLite3DB global_db;
 
-static const char* dbFile = "D:\\work\\Trestor Foundation\\Trestor Crypto\\TrestorCrypto\\TrestorCrypto\\test.db";
+static const char* dbFile = "test.db";
 
 static const char* Const_LedgerFileName = "Ledger.txt";
 

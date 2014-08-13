@@ -12,25 +12,11 @@
 
 #include "Utils.h"
 #include "Point2.h"
-#include "NodeController.h"
+#include "Node.h"
 #include "Constants.h"
 #include <hash_map>
 
-extern hash_map<Hash, Node> sim_nodes;
-extern vector<Point2> XY;
-
-typedef struct NodeData
-{
-public: Point2 Corner;
-public: Point2 Center;
-
-		NodeData()
-		{
-
-		}
-} NodeData;
-
-extern hash_map<Hash, NodeData> nData;
+#include "Simulator.h"
 
 using namespace System;
 using namespace System::ComponentModel;
@@ -58,11 +44,10 @@ namespace TNETVALIDATORCLR {
 
 			this->UpdateStyles();
 
-			XY.push_back(Point2((int)(this->Width * (1.0 / 2.0)), (int)(this->Height * (1.0 / 2.0))));
-			XY.push_back(Point2((int)(this->Width * (1.0 / 3.0)), (int)(this->Height * (1.0 / 3.0))));
-			XY.push_back(Point2((int)(this->Width * (2.0 / 3.0)), (int)(this->Height * (2.0 / 3.0))));
-
-
+			//sim_XY.push_back(Point2((int)(this->Width * (1.0 / 2.0)), (int)(this->Height * (1.0 / 2.0))));
+			//sim_XY.push_back(Point2((int)(this->Width * (1.0 / 3.0)), (int)(this->Height * (1.0 / 3.0))));
+			//sim_XY.push_back(Point2((int)(this->Width * (2.0 / 3.0)), (int)(this->Height * (2.0 / 3.0))));
+			
 			InitializeComponent();
 			//
 			//TODO: Add the constructor code here
@@ -108,6 +93,7 @@ namespace TNETVALIDATORCLR {
 
 		}
 #pragma endregion
+
 	private: System::Void NetworkVisualizer_Load(System::Object^  sender, System::EventArgs^  e) {
 
 
@@ -115,20 +101,20 @@ namespace TNETVALIDATORCLR {
 
 	private: System::Void NetworkVisualizer_Resize(System::Object^  sender, System::EventArgs^  e) {
 
-		XY.clear();
-		nData.clear();
+		sim_XY.clear();
+		sim_nData.clear();
 		
-		XY.push_back(Point2((int)(this->Width * (2.0 / 5.0)), (int)(this->Height * (1.0 / 5.0))));
-		XY.push_back(Point2((int)(this->Width * (3.0 / 5.0)), (int)(this->Height * (1.0 / 5.0))));
+		sim_XY.push_back(Point2((int)(this->Width * (2.0 / 5.0)), (int)(this->Height * (1.0 / 5.0))));
+		sim_XY.push_back(Point2((int)(this->Width * (3.0 / 5.0)), (int)(this->Height * (1.0 / 5.0))));
 
-		XY.push_back(Point2((int)(this->Width * (1.0 / 5.0)), (int)(this->Height * (2.0 / 5.0))));
-		XY.push_back(Point2((int)(this->Width * (4.0 / 5.0)), (int)(this->Height * (2.0 / 5.0))));
+		sim_XY.push_back(Point2((int)(this->Width * (1.0 / 5.0)), (int)(this->Height * (2.0 / 5.0))));
+		sim_XY.push_back(Point2((int)(this->Width * (4.0 / 5.0)), (int)(this->Height * (2.0 / 5.0))));
 
-		XY.push_back(Point2((int)(this->Width * (1.0 / 5.0)), (int)(this->Height * (3.0 / 5.0))));
-		XY.push_back(Point2((int)(this->Width * (4.0 / 5.0)), (int)(this->Height * (3.0 / 5.0))));
+		sim_XY.push_back(Point2((int)(this->Width * (1.0 / 5.0)), (int)(this->Height * (3.0 / 5.0))));
+		sim_XY.push_back(Point2((int)(this->Width * (4.0 / 5.0)), (int)(this->Height * (3.0 / 5.0))));
 
-		XY.push_back(Point2((int)(this->Width * (2.0 / 5.0)), (int)(this->Height * (4.0 / 5.0))));
-		XY.push_back(Point2((int)(this->Width * (3.0 / 5.0)), (int)(this->Height * (4.0 / 5.0))));
+		sim_XY.push_back(Point2((int)(this->Width * (2.0 / 5.0)), (int)(this->Height * (4.0 / 5.0))));
+		sim_XY.push_back(Point2((int)(this->Width * (3.0 / 5.0)), (int)(this->Height * (4.0 / 5.0))));
 
 	}
 
@@ -146,13 +132,13 @@ namespace TNETVALIDATORCLR {
 		{
 			Node *ND;
 			ND = &_ts->second;
-			if (nData.count(ND->PublicKey) == 0)
+			if (sim_nData.count(ND->PublicKey) == 0)
 			{
 				NodeData d;
-				Point2 s = Point2(XY[i].X - 10, XY[i].Y - 10);
+				Point2 s = Point2(sim_XY[i].X - 10, sim_XY[i].Y - 10);
 				d.Center = s;
-				d.Corner = XY[i];
-				nData[ND->PublicKey] = d;
+				d.Corner = sim_XY[i];
+				sim_nData[ND->PublicKey] = d;
 				i++;
 			}
 		}
@@ -161,13 +147,13 @@ namespace TNETVALIDATORCLR {
 		{
 			Node* ND;
 			ND = &_ts->second;
-			NodeData* nd = &nData[_ts->first];
+			NodeData* nd = &sim_nData[_ts->first];
 
 			for (hash_map<Hash, Node>::iterator links = ND->Connections.begin(); links != ND->Connections.end(); ++links)
 			{
 				Node* Link;
 				Link = &links->second;
-				NodeData* LinkData = &nData[Link->PublicKey];
+				NodeData* LinkData = &sim_nData[Link->PublicKey];
 
 				g->DrawLine(gcnew Pen(Color::LightGray, 0.5F), Point(LinkData->Center.X, LinkData->Center.Y), Point(nd->Center.X, nd->Center.Y));
 			}
@@ -175,7 +161,7 @@ namespace TNETVALIDATORCLR {
 
 		for (hash_map<Hash, Node>::iterator _ts = sim_nodes.begin(); _ts != sim_nodes.end(); ++_ts)
 		{
-			NodeData* nd = &nData[_ts->first];
+			NodeData* nd = &sim_nData[_ts->first];
 			std::string ss = _ts->first.ToString();
 
 			g->FillEllipse(Brushes::LightBlue, System::Drawing::Rectangle(nd->Center.X - 10, nd->Center.Y - 10, 20, 20));

@@ -49,6 +49,9 @@
     <Filter Include="Sources\TBB">
       <UniqueIdentifier>{c1babbf9-ebb8-485a-bdba-ce608263b1c9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Simulator">
+      <UniqueIdentifier>{41843b58-516d-4eea-a94f-55625eefbaf1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TNET_UI\Sources\BaseNetwork.cpp">
@@ -162,9 +165,6 @@
     <ClCompile Include="NetworkVisualizer.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\TNET_UI\Sources\NodeController.cpp">
-      <Filter>Sources\Node</Filter>
-    </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\Point2.cpp">
       <Filter>Sources\Utils</Filter>
     </ClCompile>
@@ -179,6 +179,12 @@
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\Timer.cpp">
       <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Simulator.cpp">
+      <Filter>Sources\Simulator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Node.cpp">
+      <Filter>Sources\Node</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -268,9 +274,6 @@
     </ClInclude>
     <ClInclude Include="NetworkVisualizer.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TNET_UI\Sources\NodeController.h">
-      <Filter>Sources\Node</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\Point2.h">
       <Filter>Sources\Utils</Filter>
@@ -454,6 +457,12 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tick_count.h">
       <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Simulator.h">
+      <Filter>Sources\Simulator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Node.h">
+      <Filter>Sources\Node</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

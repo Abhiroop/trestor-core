@@ -57,7 +57,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>NotSet</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>main</EntryPointSymbol>
       <AdditionalDependencies>tbb_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -101,12 +101,13 @@
     <ClCompile Include="..\TNET_UI\Sources\LedgerFileHandler.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\main1.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\main1_.cpp" />
-    <ClCompile Include="..\TNET_UI\Sources\NodeController.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\Node.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\OnionConnectionEstablish.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\OnionNodeList.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\OnionPack.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\Point2.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\PrivateKeyManage.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\Simulator.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\SQLiteTest.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\Timer.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\TransactionContent.cpp" />
@@ -139,13 +140,14 @@
     <ClInclude Include="..\TNET_UI\Sources\HashTree.h" />
     <ClInclude Include="..\TNET_UI\Sources\Ledger.h" />
     <ClInclude Include="..\TNET_UI\Sources\LedgerFileHandler.h" />
-    <ClInclude Include="..\TNET_UI\Sources\NodeController.h" />
+    <ClInclude Include="..\TNET_UI\Sources\Node.h" />
     <ClInclude Include="..\TNET_UI\Sources\OnionConnectionEstablish.h" />
     <ClInclude Include="..\TNET_UI\Sources\OnionNodeList.h" />
     <ClInclude Include="..\TNET_UI\Sources\OnionPack.h" />
     <ClInclude Include="..\TNET_UI\Sources\Point2.h" />
     <ClInclude Include="..\TNET_UI\Sources\PrivateKeyManage.h" />
     <ClInclude Include="..\TNET_UI\Sources\Signal.h" />
+    <ClInclude Include="..\TNET_UI\Sources\Simulator.h" />
     <ClInclude Include="..\TNET_UI\Sources\Structs.h" />
     <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\aggregator.h" />
     <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\aligned_space.h" />

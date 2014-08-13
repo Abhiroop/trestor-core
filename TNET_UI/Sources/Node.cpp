@@ -1,7 +1,7 @@
 
 
 
-#include "NodeController.h"
+#include "Node.h"
 
 
 Ledger Node::getLocalLedger()
