@@ -10,13 +10,13 @@
 #include "Utils.h"
 #include "Node.h"
 
-#include "Timer.h"
+//#include "Timer.h"
 
 #include <functional>
 
 void CALLBACK TimerProc(void* lpParametar, BOOLEAN TimerOrWaitFired);
 
-typedef void(*NetworkCallback)(NetworkPacket Packet);
+//typedef void(*NetworkCallback)(NetworkPacket Packet);
 
 class FakeNetwork
 {

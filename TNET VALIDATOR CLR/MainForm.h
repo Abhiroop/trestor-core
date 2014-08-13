@@ -12,7 +12,7 @@
 #include "CandidateSet.h"
 #include "Ledger.h"
 #include "Constants.h"
-#include "Timer.h"
+//#include "Timer.h"
 #include <hash_map>
 
 #include "Simulator.h"

@@ -29,29 +29,33 @@ extern hash_map<Hash, Node> sim_nodes;
 extern vector<Point2> sim_XY;
 extern hash_map<Hash, NodeData> sim_nData;
 
+void CALLBACK TimerProcS(void* lpParametar, BOOLEAN TimerOrWaitFired);
+
 class Simulator
 {
 	HANDLE hTimerQueue = NULL;
+
+	HANDLE hTimer = NULL;
+
+
 
 public:
 
 	FakeNetwork network;
 
-	void Initialize()
-	{
-		network = FakeNetwork(hTimerQueue, Constants::SIM_REFRESH_MS);
-	}
-
-	Simulator()
-	{
-		Initialize();
-	}
-	
 	void StartSimulation();
+	void StopSimulation();
+	void Timestep();
 
-	
+	void Initialize(int Resolution_MS);
 
+	Simulator(int Resolution_MS);
 
+	Simulator();
+
+	bool GoodInit = false;
+
+	bool SimulationStarted = false;
 
 };
 

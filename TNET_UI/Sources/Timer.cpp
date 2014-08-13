@@ -7,7 +7,7 @@
 
 #include "Timer.h"
 
-#ifdef __cplusplus_cli
+#ifdef TIMER_H//__cplusplus_cli
 
 namespace TimerX
 {

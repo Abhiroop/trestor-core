@@ -1,7 +1,7 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#ifdef __cplusplus_cli
+#ifdef  TIMER_H//__cplusplus_cli
 
 #include <windows.h>
 

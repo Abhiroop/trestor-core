@@ -4,12 +4,56 @@
 //
 
 #include "Simulator.h"
-
-//#include "NetworkVisualizer.h"
+#include "Constants.h"
+#include "Timer.h"
 
 hash_map<Hash, Node> sim_nodes;
 vector<Point2> sim_XY;
 hash_map<Hash, NodeData> sim_nData;
+
+void Simulator::Timestep()
+{
+	if (SimulationStarted)
+	{
+
+	}
+}
+
+void Simulator::Initialize(int Resolution_MS)
+{
+	network = FakeNetwork(hTimerQueue, Resolution_MS);
+}
+
+Simulator::Simulator()
+{
+	Simulator::Simulator(Constants::SIM_REFRESH_MS);
+}
+
+Simulator::Simulator(int Resolution_MS)
+{
+	// Create a new Timer Queue If not there already
+	if (NULL == hTimerQueue)
+	{
+		hTimerQueue = CreateTimerQueue();
+	}
+
+	// Fail if Init fails
+	if (NULL == hTimerQueue)
+	{
+		GoodInit = false;
+	}
+
+	int DueTime = 0;
+	int Period = Resolution_MS;
+
+	if (!CreateTimerQueueTimer(&hTimer, hTimerQueue, (WAITORTIMERCALLBACK)TimerProcS, this, DueTime, Period, 0))
+	{
+		GoodInit = false;
+	}
+
+	Initialize(Resolution_MS);
+}
+
 
 void Simulator::StartSimulation()
 {
@@ -51,5 +95,16 @@ void Simulator::StartSimulation()
 		}
 	}
 
+	SimulationStarted = true;
+}
 
+void Simulator::StopSimulation()
+{
+	SimulationStarted = false;
+}
+
+void CALLBACK TimerProcS(void* lpParametar, BOOLEAN TimerOrWaitFired)
+{
+	Simulator* obj = (Simulator*)lpParametar;
+	obj->Timestep();
 }
