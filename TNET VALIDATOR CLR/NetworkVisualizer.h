@@ -128,7 +128,7 @@ namespace TNETVALIDATORCLR {
 		g->Clear(Color::GhostWhite);
 
 		int i = 0;
-		for (hash_map<Hash, shared_ptr<Node>>::iterator _ts = sim_nodes.begin(); _ts != sim_nodes.end(); ++_ts)
+		for (hash_map<Hash, shared_ptr<Node>>::iterator _ts = GlobalNodes.begin(); _ts != GlobalNodes.end(); ++_ts)
 		{
 			shared_ptr<Node> ND;
 			ND = _ts->second;
@@ -143,7 +143,7 @@ namespace TNETVALIDATORCLR {
 			}
 		}
 
-		for (hash_map<Hash, shared_ptr<Node>>::iterator _ts = sim_nodes.begin(); _ts != sim_nodes.end(); ++_ts)
+		for (hash_map<Hash, shared_ptr<Node>>::iterator _ts = GlobalNodes.begin(); _ts != GlobalNodes.end(); ++_ts)
 		{
 			shared_ptr<Node> ND;
 			ND = _ts->second;
@@ -159,7 +159,7 @@ namespace TNETVALIDATORCLR {
 			}
 		}
 
-		for (hash_map<Hash, shared_ptr<Node>>::iterator _ts = sim_nodes.begin(); _ts != sim_nodes.end(); ++_ts)
+		for (hash_map<Hash, shared_ptr<Node>>::iterator _ts = GlobalNodes.begin(); _ts != GlobalNodes.end(); ++_ts)
 		{
 			NodeData* nd = &sim_nData[_ts->first];
 			std::string ss = _ts->first.ToString();

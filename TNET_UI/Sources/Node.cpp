@@ -141,6 +141,8 @@ void Node::CreateArbitraryTransactionAndSendToTrustedNodes()
 
 		TransactionContent tco = TransactionContent(this->PublicKey, 0, tsks, Hash() );
 		_ts->second->SendTransaction(this->PublicKey, tco);
+
+		OutTransactionCount++;
 	}
 	
 

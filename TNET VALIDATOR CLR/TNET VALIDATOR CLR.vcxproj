@@ -172,6 +172,7 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ProtocolPackager.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\Simulator.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -236,6 +237,7 @@
     <ClInclude Include="..\TNET_UI\Sources\OnionPack.h" />
     <ClInclude Include="..\TNET_UI\Sources\Point2.h" />
     <ClInclude Include="..\TNET_UI\Sources\PrivateKeyManage.h" />
+    <ClInclude Include="..\TNET_UI\Sources\ProtocolPackager.h" />
     <ClInclude Include="..\TNET_UI\Sources\Signal.h" />
     <ClInclude Include="..\TNET_UI\Sources\Simulator.h" />
     <ClInclude Include="..\TNET_UI\Sources\Structs.h" />

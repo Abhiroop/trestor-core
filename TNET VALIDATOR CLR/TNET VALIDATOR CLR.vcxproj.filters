@@ -52,6 +52,9 @@
     <Filter Include="Sources\Simulator">
       <UniqueIdentifier>{41843b58-516d-4eea-a94f-55625eefbaf1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Protocol">
+      <UniqueIdentifier>{9d417022-9045-4aa2-bb5d-35dca7fdfd81}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TNET_UI\Sources\BaseNetwork.cpp">
@@ -185,6 +188,9 @@
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\Node.cpp">
       <Filter>Sources\Node</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ProtocolPackager.cpp">
+      <Filter>Sources\Protocol</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -469,6 +475,9 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\TransactionSetType.h">
       <Filter>Sources\Consensus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ProtocolPackager.h">
+      <Filter>Sources\Protocol</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

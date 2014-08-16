@@ -196,13 +196,13 @@ namespace TNETVALIDATORCLR {
 			this->richTextBox_Log->ForeColor = System::Drawing::Color::LawnGreen;
 			this->richTextBox_Log->Location = System::Drawing::Point(0, 0);
 			this->richTextBox_Log->Name = L"richTextBox_Log";
-			this->richTextBox_Log->Size = System::Drawing::Size(1012, 407);
+			this->richTextBox_Log->Size = System::Drawing::Size(1085, 444);
 			this->richTextBox_Log->TabIndex = 0;
 			this->richTextBox_Log->Text = L"";
 			// 
 			// textBox_Nodes
 			// 
-			this->textBox_Nodes->Location = System::Drawing::Point(316, 3);
+			this->textBox_Nodes->Location = System::Drawing::Point(339, 3);
 			this->textBox_Nodes->Name = L"textBox_Nodes";
 			this->textBox_Nodes->Size = System::Drawing::Size(100, 20);
 			this->textBox_Nodes->TabIndex = 0;
@@ -222,7 +222,7 @@ namespace TNETVALIDATORCLR {
 			this->tableLayoutPanel1->RowCount = 2;
 			this->tableLayoutPanel1->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 50.13193F)));
 			this->tableLayoutPanel1->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 49.86807F)));
-			this->tableLayoutPanel1->Size = System::Drawing::Size(1012, 53);
+			this->tableLayoutPanel1->Size = System::Drawing::Size(1085, 57);
 			this->tableLayoutPanel1->TabIndex = 0;
 			// 
 			// splitContainer1
@@ -239,8 +239,8 @@ namespace TNETVALIDATORCLR {
 			// splitContainer1.Panel2
 			// 
 			this->splitContainer1->Panel2->Controls->Add(this->richTextBox_Log);
-			this->splitContainer1->Size = System::Drawing::Size(1012, 464);
-			this->splitContainer1->SplitterDistance = 53;
+			this->splitContainer1->Size = System::Drawing::Size(1085, 505);
+			this->splitContainer1->SplitterDistance = 57;
 			this->splitContainer1->TabIndex = 1;
 			// 
 			// tabPage1
@@ -249,7 +249,7 @@ namespace TNETVALIDATORCLR {
 			this->tabPage1->Location = System::Drawing::Point(4, 22);
 			this->tabPage1->Name = L"tabPage1";
 			this->tabPage1->Padding = System::Windows::Forms::Padding(3);
-			this->tabPage1->Size = System::Drawing::Size(1018, 470);
+			this->tabPage1->Size = System::Drawing::Size(1091, 511);
 			this->tabPage1->TabIndex = 0;
 			this->tabPage1->Text = L"Simulate";
 			this->tabPage1->UseVisualStyleBackColor = true;
@@ -263,7 +263,7 @@ namespace TNETVALIDATORCLR {
 			this->tabControl1->Location = System::Drawing::Point(0, 24);
 			this->tabControl1->Name = L"tabControl1";
 			this->tabControl1->SelectedIndex = 0;
-			this->tabControl1->Size = System::Drawing::Size(1026, 496);
+			this->tabControl1->Size = System::Drawing::Size(1099, 537);
 			this->tabControl1->TabIndex = 5;
 			// 
 			// tabPage_Visualizer
@@ -285,9 +285,9 @@ namespace TNETVALIDATORCLR {
 			// statusStrip1
 			// 
 			this->statusStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->StatusLabel });
-			this->statusStrip1->Location = System::Drawing::Point(0, 520);
+			this->statusStrip1->Location = System::Drawing::Point(0, 561);
 			this->statusStrip1->Name = L"statusStrip1";
-			this->statusStrip1->Size = System::Drawing::Size(1026, 22);
+			this->statusStrip1->Size = System::Drawing::Size(1099, 22);
 			this->statusStrip1->TabIndex = 4;
 			this->statusStrip1->Text = L"statusStrip1";
 			// 
@@ -347,7 +347,7 @@ namespace TNETVALIDATORCLR {
 			// refreshToolStripMenuItem
 			// 
 			this->refreshToolStripMenuItem->Name = L"refreshToolStripMenuItem";
-			this->refreshToolStripMenuItem->Size = System::Drawing::Size(152, 22);
+			this->refreshToolStripMenuItem->Size = System::Drawing::Size(113, 22);
 			this->refreshToolStripMenuItem->Text = L"Refresh";
 			this->refreshToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::refreshToolStripMenuItem_Click);
 			// 
@@ -365,7 +365,7 @@ namespace TNETVALIDATORCLR {
 			});
 			this->menuStrip1->Location = System::Drawing::Point(0, 0);
 			this->menuStrip1->Name = L"menuStrip1";
-			this->menuStrip1->Size = System::Drawing::Size(1026, 24);
+			this->menuStrip1->Size = System::Drawing::Size(1099, 24);
 			this->menuStrip1->TabIndex = 3;
 			this->menuStrip1->Text = L"menuStrip1";
 			// 
@@ -378,7 +378,7 @@ namespace TNETVALIDATORCLR {
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(1026, 542);
+			this->ClientSize = System::Drawing::Size(1099, 583);
 			this->Controls->Add(this->tabControl1);
 			this->Controls->Add(this->statusStrip1);
 			this->Controls->Add(this->menuStrip1);

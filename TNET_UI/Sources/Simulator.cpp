@@ -13,7 +13,7 @@
 using namespace std;
 using namespace std::placeholders;
 
-hash_map<Hash, shared_ptr<Node>> sim_nodes;
+//hash_map<Hash, shared_ptr<Node>> sim_nodes;
 vector<Point2> sim_XY;
 hash_map<Hash, NodeData> sim_nData;
 
@@ -66,7 +66,7 @@ Simulator::Simulator(int Resolution_MS)
 
 void Simulator::StartSimulation()
 {
-	sim_nodes.clear();
+	//sim_nodes.clear();
 
 	GlobalNodes.clear();
 
@@ -82,39 +82,48 @@ void Simulator::StartSimulation()
 
 		//Node n3 = Node(CN, 4, lgr, 100 * i, 100);
 
-		shared_ptr<Node> n(new Node(CN, 4, lgr, 100 * i, 100));
+		shared_ptr<Node> NewNode(new Node(CN, 4, lgr, 100 * i, 100));
 		
 		//Node *n = dynamic_cast<Node*> (&n3);
-
 		//Nodes.push_back(*n);
 
-		Hash* pk = &n->PublicKey;
+		Hash* pk = &NewNode->PublicKey;
 
 		//shared_ptr<Hash> pk = n->PublicKey;
 
 		AccountInfo si = AccountInfo(*pk, 500, CN, 0);
 		nodeHashes.push_back(pk);
 		lgr->AddUserToLedger(si);
-		sim_nodes[*pk] = n;
+		//sim_nodes[*pk] = NewNode;
 
-		GlobalNodes[*pk] = n;
+		GlobalNodes[*pk] = NewNode;
 
 		//function<void(NetworkPacket)> f = std::bind1st(std::mem_fun(&Node::ReceivedData), &n);
 	
-		network.AttachReceiver(*pk, bind(&Node::Receive, *n, _1));
+		network.AttachReceiver(*pk, bind(&Node::Receive, *NewNode, _1));
 	}
 
+	
 	int LinksPerNode = 3;
 
 	for (int i = 0; i < 8; i++)
 	{
-		vector<int> perm = GenerateNonRepeatingDistribution((int)nodeHashes.size(), LinksPerNode, i);
+		vector<int> perm_Conn = GenerateNonRepeatingDistribution((int)nodeHashes.size(), LinksPerNode, i);
 
-		for (int k = 0; k < (int)perm.size(); k++)
+		for (int k = 0; k < (int)perm_Conn.size(); k++)
 		{
-			Hash* h = nodeHashes[perm[k]];
-			shared_ptr<Node> n = sim_nodes[*h];
-			sim_nodes[*nodeHashes[i]]->Connections[*h] = n;
+			Hash* h = nodeHashes[perm_Conn[k]];
+			shared_ptr<Node> n = GlobalNodes[*h];
+			GlobalNodes[*nodeHashes[i]]->Connections[*h] = n;
+		}
+
+		vector<int> perm_Trusted= GenerateNonRepeatingDistribution((int)nodeHashes.size(), LinksPerNode, i);
+
+		for (int k = 0; k < (int)perm_Trusted.size(); k++)
+		{
+			Hash* h = nodeHashes[perm_Trusted[k]];
+			shared_ptr<Node> n = GlobalNodes[*h];
+			GlobalNodes[*nodeHashes[i]]->TrustedNodes[*h] = n;
 		}
 	}
 
@@ -130,10 +139,4 @@ void CALLBACK TimerProcS(void* lpParametar, BOOLEAN TimerOrWaitFired)
 {
 	Simulator* obj = (Simulator*)lpParametar;
 	obj->Timestep();
-	/*
-	for (hash_map<Hash, Node*>::iterator links = GlobalNodes.begin(); links != GlobalNodes.end(); ++links)
-	{
-		links->second->UpdateEvent();
-	}*/
-
 }
