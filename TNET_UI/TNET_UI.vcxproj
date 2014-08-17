@@ -96,7 +96,8 @@
     <PackageCertificateKeyFile>TNET_UI_TemporaryKey.pfx</PackageCertificateKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ExecutablePath>\Sources;\Sources\ed25519;Sources\SQLiteCpp;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+    <IncludePath>\Sources;\Sources\ed25519;G:\TRESTOR_PROJECT\TNetUI\TNET_UI\Sources\TBB;Sources\SQLiteCpp;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ExecutablePath>\Sources;\Sources\ed25519;Sources\SQLiteCpp;$(ExecutablePath)</ExecutablePath>
@@ -119,10 +120,14 @@
       <DisableSpecificWarnings>4453;28204</DisableSpecificWarnings>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <SDLCheck>true</SDLCheck>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -165,6 +170,7 @@
     <ClInclude Include="Sources\Base64.h" />
     <ClInclude Include="Sources\BaseNetwork.h" />
     <ClInclude Include="Sources\CandidateSet.h" />
+    <ClInclude Include="Sources\Consensus.h" />
     <ClInclude Include="Sources\Constants.h" />
     <ClInclude Include="Sources\CreditDebitData.h" />
     <ClInclude Include="Sources\ed25519\ed25519.h" />
@@ -174,16 +180,25 @@
     <ClInclude Include="Sources\ed25519\precomp_data.h" />
     <ClInclude Include="Sources\ed25519\sc.h" />
     <ClInclude Include="Sources\ed25519\sha512.h" />
+    <ClInclude Include="Sources\FakeNetwork.h" />
+    <ClInclude Include="Sources\FakeSocket.h" />
     <ClInclude Include="Sources\Hash.h" />
     <ClInclude Include="Sources\HashTree.h" />
     <ClInclude Include="Sources\Ledger.h" />
     <ClInclude Include="Sources\LedgerFileHandler.h" />
+    <ClInclude Include="Sources\Node.h" />
     <ClInclude Include="Sources\OnionConnectionEstablish.h" />
     <ClInclude Include="Sources\OnionNodeList.h" />
     <ClInclude Include="Sources\OnionPack.h" />
+    <ClInclude Include="Sources\Point2.h" />
     <ClInclude Include="Sources\PrivateKeyManage.h" />
+    <ClInclude Include="Sources\ProtocolPackager.h" />
+    <ClInclude Include="Sources\Signal.h" />
+    <ClInclude Include="Sources\Simulator.h" />
     <ClInclude Include="Sources\Structs.h" />
+    <ClInclude Include="Sources\Timer.h" />
     <ClInclude Include="Sources\TransactionContent.h" />
+    <ClInclude Include="Sources\TransactionSetType.h" />
     <ClInclude Include="Sources\TransactionSink.h" />
     <ClInclude Include="Sources\TreeLeafNode.h" />
     <ClInclude Include="Sources\TreeNodeX.h" />
@@ -260,16 +275,23 @@
     <ClCompile Include="Sources\ed25519\sign.cpp" />
     <ClCompile Include="Sources\ed25519\test_ec.cpp" />
     <ClCompile Include="Sources\ed25519\verify.cpp" />
+    <ClCompile Include="Sources\FakeNetwork.cpp" />
+    <ClCompile Include="Sources\FakeSocket.cpp" />
     <ClCompile Include="Sources\Hash.cpp" />
     <ClCompile Include="Sources\Ledger.cpp" />
     <ClCompile Include="Sources\LedgerFileHandler.cpp" />
     <ClCompile Include="Sources\main1.cpp" />
     <ClCompile Include="Sources\main1_.cpp" />
+    <ClCompile Include="Sources\Node.cpp" />
     <ClCompile Include="Sources\OnionConnectionEstablish.cpp" />
     <ClCompile Include="Sources\OnionNodeList.cpp" />
     <ClCompile Include="Sources\OnionPack.cpp" />
+    <ClCompile Include="Sources\Point2.cpp" />
     <ClCompile Include="Sources\PrivateKeyManage.cpp" />
+    <ClCompile Include="Sources\ProtocolPackager.cpp" />
+    <ClCompile Include="Sources\Simulator.cpp" />
     <ClCompile Include="Sources\SQLiteTest.cpp" />
+    <ClCompile Include="Sources\Timer.cpp" />
     <ClCompile Include="Sources\TransactionContent.cpp" />
     <ClCompile Include="Sources\TransactionSink.cpp" />
     <ClCompile Include="Sources\TreeNodeX.cpp" />

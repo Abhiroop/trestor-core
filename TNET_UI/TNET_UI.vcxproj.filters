@@ -86,6 +86,9 @@
     <Filter Include="Sources\Ledger">
       <UniqueIdentifier>{523dd558-9d2d-49f3-b36b-86548e5c8991}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Sources">
+      <UniqueIdentifier>{db812193-65ff-442f-bb95-1951019c5fa4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
@@ -200,6 +203,13 @@
     <ClCompile Include="Sources\Constants.cpp">
       <Filter>Sources\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\FakeNetwork.cpp" />
+    <ClCompile Include="Sources\FakeSocket.cpp" />
+    <ClCompile Include="Sources\Node.cpp" />
+    <ClCompile Include="Sources\Point2.cpp" />
+    <ClCompile Include="Sources\ProtocolPackager.cpp" />
+    <ClCompile Include="Sources\Simulator.cpp" />
+    <ClCompile Include="Sources\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -294,6 +304,16 @@
     <ClInclude Include="Sources\Constants.h">
       <Filter>Sources\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Consensus.h" />
+    <ClInclude Include="Sources\FakeNetwork.h" />
+    <ClInclude Include="Sources\FakeSocket.h" />
+    <ClInclude Include="Sources\Node.h" />
+    <ClInclude Include="Sources\Point2.h" />
+    <ClInclude Include="Sources\ProtocolPackager.h" />
+    <ClInclude Include="Sources\Signal.h" />
+    <ClInclude Include="Sources\Simulator.h" />
+    <ClInclude Include="Sources\Timer.h" />
+    <ClInclude Include="Sources\TransactionSetType.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

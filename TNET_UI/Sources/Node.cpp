@@ -3,6 +3,7 @@
 
 #include "Node.h"
 #include "Constants.h"
+#include "ProtocolPackager.h"
 //#include "Timer.h"
 #include <functional>
 

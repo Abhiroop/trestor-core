@@ -20,6 +20,10 @@ public :
 	static const int SIM_REFRESH_MS = 50;
 	static const int SIM_REFRESH_MS_SIM = 50;
 
+	static const int KEYLEN_PUBLIC = 32;
+	static const int KEYLEN_PRIVATE = 32;
+	static const int KEYLEN_SIGNATURE = 64;
+
 	
 
 

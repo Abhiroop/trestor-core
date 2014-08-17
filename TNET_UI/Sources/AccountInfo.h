@@ -19,9 +19,9 @@ public:
 	int64_t Money;
 	string Name;
 	int64_t LastTransactionTime;
-	
-		AccountInfo();
-		AccountInfo(Hash _AccountID, int64_t _Money, string Name, int64_t LastTransactionTime);
+
+	AccountInfo();
+	AccountInfo(Hash _AccountID, int64_t _Money, string Name, int64_t LastTransactionTime);
 	Hash GetHash();
 	Hash GetID();
 };

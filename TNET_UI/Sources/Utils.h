@@ -13,17 +13,17 @@
 #include <stack>
 #include <queue>
 #include <array>
-#include<set>
+#include <set>
 #include <list>
-#include<memory>
+#include <memory>
 #include <stdint.h>
 #include "Point2.h"
 
 #include "Hash.h"
 
-using namespace std;
+#include "Types.h"
 
-typedef unsigned char byte;
+using namespace std;
 
 byte GetNibble_(Hash val, int NibbleIndex);
 

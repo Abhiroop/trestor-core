@@ -63,6 +63,9 @@
       <EntryPointSymbol>main</EntryPointSymbol>
       <AdditionalDependencies>tbb_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -98,6 +101,7 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Conversions.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\CreditDebitData.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -173,6 +177,7 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\ProtocolPackager.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\SerializableBase.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\Simulator.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -217,6 +222,7 @@
     <ClInclude Include="..\TNET_UI\Sources\CandidateSet.h" />
     <ClInclude Include="..\TNET_UI\Sources\Consensus.h" />
     <ClInclude Include="..\TNET_UI\Sources\Constants.h" />
+    <ClInclude Include="..\TNET_UI\Sources\Conversions.h" />
     <ClInclude Include="..\TNET_UI\Sources\CreditDebitData.h" />
     <ClInclude Include="..\TNET_UI\Sources\ed25519\ed25519.h" />
     <ClInclude Include="..\TNET_UI\Sources\ed25519\fe.h" />
@@ -238,6 +244,7 @@
     <ClInclude Include="..\TNET_UI\Sources\Point2.h" />
     <ClInclude Include="..\TNET_UI\Sources\PrivateKeyManage.h" />
     <ClInclude Include="..\TNET_UI\Sources\ProtocolPackager.h" />
+    <ClInclude Include="..\TNET_UI\Sources\SerializableBase.h" />
     <ClInclude Include="..\TNET_UI\Sources\Signal.h" />
     <ClInclude Include="..\TNET_UI\Sources\Simulator.h" />
     <ClInclude Include="..\TNET_UI\Sources\Structs.h" />
@@ -301,6 +308,7 @@
     <ClInclude Include="..\TNET_UI\Sources\TransactionSetType.h" />
     <ClInclude Include="..\TNET_UI\Sources\TransactionSink.h" />
     <ClInclude Include="..\TNET_UI\Sources\TreeNodeX.h" />
+    <ClInclude Include="..\TNET_UI\Sources\Types.h" />
     <ClInclude Include="..\TNET_UI\Sources\UserDataHandler.h" />
     <ClInclude Include="..\TNET_UI\Sources\UserDataMapHandler.h" />
     <ClInclude Include="..\TNET_UI\Sources\Utils.h" />

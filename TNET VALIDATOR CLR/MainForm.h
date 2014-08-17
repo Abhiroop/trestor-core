@@ -16,6 +16,7 @@
 #include <hash_map>
 
 #include "Simulator.h"
+#include "ProtocolPackager.h"
 
 //#include "tbb/concurrent_hash_map.h"
 
@@ -492,6 +493,24 @@ namespace TNETVALIDATORCLR {
 	}	
 
 	private: System::Void timerTestsToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
+
+		vector<byte> Data;
+		Data.push_back('H');
+		Data.push_back('E');
+		Data.push_back('L');
+		Data.push_back('L');
+		Data.push_back('O');	
+
+		//unique_ptr<ProtocolDataType> DATA = ProtocolPackager::Pack(Data, 0);
+
+		unique_ptr<ProtocolDataType> DATA2 = ProtocolPackager::Pack((string)"hcbducbsiu cidcsi iisu br b", 87);
+
+		byte NAME=87;
+		string DATA;
+
+		bool PASS = ProtocolPackager::UnpackString(*DATA2, NAME, DATA);
+
+		PrintMessage(DATA);
 
 	
 	}

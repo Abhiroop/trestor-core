@@ -9,66 +9,78 @@
 
 struct ProtocolDataType
 {
-	byte Type;
+	// Any Identifier based on protocol
+	byte NameType;
+	// It can be INT, FLOAT, LONG, BYTE[], 
+	byte DataType;
 	vector<byte> Data;
 };
 
+enum ProtocolData { PD_BYTE_VECTOR, PD_BYTE, PD_INT16, PD_INT32, PD_INT64, PD_FLOAT, PD_DOUBLE, PD_BOOL, PD_STRING };
 
 class ProtocolPackager
 {
 
 private:
 
-	vector<unsigned char> IntToBytes(int paramInt)
-	{
-		vector<unsigned char> arrayOfByte(3);
-		arrayOfByte[0] = (paramInt >> (0));
-		arrayOfByte[1] = (paramInt >> (8));
-		arrayOfByte[2] = (paramInt >> (16));
-		return arrayOfByte;
-	}
+	static vector<unsigned char> IntToBytes(int paramInt);
 
-	int BytesToInt(vector<unsigned char> paramInt)
-	{
-		int val = 0;
-		val |= paramInt[0];
-		val |= paramInt[8] << 8;
-		val |= paramInt[16] << 16;
-		return val;
-	}
+	static int BytesToInt(vector<unsigned char> paramInt);
 
-	vector<byte> PackSingle(ProtocolDataType data)
-	{
-		vector<byte> pack(4);
-		vector<byte> SZ = IntToBytes(data.Data.size());
-		pack[0] = data.Type;
-		pack[1] = SZ[0];
-		pack[2] = SZ[1];
-		pack[3] = SZ[2];
-		pack.insert(pack.end(), data.Data.begin(), data.Data.end());
-		return pack;
-	}
+	static vector<byte> PackSingle(ProtocolDataType data);
 
+	static unique_ptr<ProtocolDataType> ProtocolPackager::GenericPack(byte DataType, byte nameType);
 
 public:
-
+	// Packaging Format : Supports 16 MB Data per pack.
+	//    Index :      {0}      {123}        {4 ..... }
 	// PACK FORMAT : [ TYPE[1] : LENGTH[3] : DATA[LENGTH] ]
 
-	vector<byte> Pack(vector<ProtocolDataType> packets)
-	{
-		vector<byte> pack;
-		for (vector<ProtocolDataType>::iterator packet = packets.begin(); packet != packets.end(); ++packet)
-		{
-			vector<byte> F = PackSingle(*packet);
-			pack.insert(pack.end(), F.begin(), F.end());
-		}
-		return pack;
-	}
+	/////////////////////////////////////  PACKERS  /////////////////////////////////////
 
-	vector<ProtocolDataType> UnPack(vector<byte> packedData)
-	{
+	static vector<byte> PackRaw(vector<ProtocolDataType> packets);
 
-	}
+	static vector<ProtocolDataType> UnPackRaw(vector<byte> packedData);
+
+	static unique_ptr<ProtocolDataType> Pack(vector<byte> input, byte nameType);
+
+	static unique_ptr<ProtocolDataType> Pack(byte byteValue, byte nameType);
+
+	static unique_ptr<ProtocolDataType> Pack(int16_t shortValue, byte nameType);
+
+	static unique_ptr<ProtocolDataType> Pack(int32_t intValue, byte nameType);
+
+	static unique_ptr<ProtocolDataType> Pack(int64_t longValue, byte nameType);
+
+	static unique_ptr<ProtocolDataType> Pack(float floatValue, byte nameType);
+
+	static unique_ptr<ProtocolDataType> Pack(double doubleValue, byte nameType);
+
+	static unique_ptr<ProtocolDataType> Pack(bool boolValue, byte nameType);
+
+	static unique_ptr<ProtocolDataType> Pack(string stringValue, byte nameType);
+
+	/////////////////////////////////////  UNPACKERS  /////////////////////////////////////
+
+	static bool UnpackByteVector(ProtocolDataType packedData, byte nameType, vector<byte> & Data);
+
+	static bool UnpackByteVector_s(ProtocolDataType packedData, byte nameType, int Size, vector<byte> & Data);
+
+	static bool UnpackByte(ProtocolDataType packedData, byte nameType, byte & Data);
+
+	static bool UnpackInt16(ProtocolDataType packedData, byte nameType, int16_t &  Data);
+
+	static bool UnpackInt32(ProtocolDataType packedData, byte nameType, int32_t &  Data);
+
+	static bool UnpackInt64(ProtocolDataType packedData, byte nameType, int64_t &  Data);
+
+	static bool UnpackFloat(ProtocolDataType packedData, byte nameType, float & Data);
+
+	static bool UnpackDouble(ProtocolDataType packedData, byte nameType, double &  Data);
+
+	static bool UnpackBool(ProtocolDataType packedData, byte nameType, bool & Data);
+
+	static bool UnpackString(ProtocolDataType packedData, byte nameType, string &  Data);
 
 };
 

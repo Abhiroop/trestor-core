@@ -9,8 +9,9 @@
 #include <list>
 #include "ed25519\ed25519.h"
 #include "ed25519\sha512.h"
+#include "SerializableBase.h"
 
-class TransactionContent : LeafDataType
+class TransactionContent : LeafDataType, public SerializableBase
 {
 
 private:
@@ -43,6 +44,10 @@ public:
 	Hash GetID();
 
 	Hash GetTransactionDataAndSignature();
+
+	vector<byte> Serialize() override;
+	void Deserialize(vector<byte> Data) override;
+	
 
 };
 

@@ -109,3 +109,22 @@ Hash TransactionContent::GetTransactionDataAndSignature()
 	_data.insert(_data.end(), Signature.begin(), Signature.end());
 	return _data;
 }
+
+
+
+///////////////////////////////////////////////////////////
+
+
+
+void TransactionContent::Deserialize(vector<byte> Data)
+{
+
+}
+
+vector<byte> TransactionContent::Serialize()
+{
+	vector<byte> SDATA;
+
+
+	return SDATA;
+}

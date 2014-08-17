@@ -45,7 +45,7 @@ vector<int> GenerateNonRepeatingDistribution(int maxNumber, int Count, int self)
 
 	std::default_random_engine generator;
 	generator.seed(rand());
-	std::uniform_int_distribution<int> distribution(0, maxNumber-1);
+	std::uniform_int_distribution<int> distribution(0, maxNumber - 1);
 	vector<byte> data;
 
 	hash_set<int> ints;
