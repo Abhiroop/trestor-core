@@ -22,6 +22,7 @@ public:
 	TransactionSetType(Hash publicKey, vector<TransactionIDInfo> tranIDinfo);
 
 	Hash GetID();
+	Hash GetHash();
 };
 
 

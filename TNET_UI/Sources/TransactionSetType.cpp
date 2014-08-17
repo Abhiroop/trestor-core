@@ -15,3 +15,8 @@ Hash TransactionSetType::GetID()
 {
 	return PublicKey;
 }
+
+Hash TransactionSetType::GetHash()
+{
+	return PublicKey;
+}

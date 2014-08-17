@@ -74,7 +74,7 @@ public:
 	//template<class LeafDataType>
 	int64_t TotalNodes();
 	int64_t TotalLeaves();
-
+	
 	TreeNodeX* Root;
 
 	HashTree();

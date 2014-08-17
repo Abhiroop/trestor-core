@@ -5,18 +5,24 @@
 #include <vector>
 #include "Utils.h"
 #include "Node.h"
+#include "TransactionSetType.h"
+#include "AccountInfo.h"
 
 #include "tbb/concurrent_queue.h"
-
+#include "tbb/concurrent_hash_map.h"
 //#include "SQLiteCpp\CppSQLite3.h"
 //extern CppSQLite3DB global_db;
 
 extern tbb::concurrent_queue<string> MessageQueue;
 
+extern concurrent_hash_map<Hash, AccountInfo> GLOBAL_LEDGER_MAP;
+
 class Constants
 {
 public :
 
+	
+	static const uint64_t FIN_MIN_BALANCE = 1500;
 	static const int VALIDATOR_COUNT = 5;
 	static const int SIM_REFRESH_MS = 50;
 	static const int SIM_REFRESH_MS_SIM = 50;
