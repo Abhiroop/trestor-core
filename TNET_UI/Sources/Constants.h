@@ -17,6 +17,7 @@ class Constants
 {
 public :
 
+	static const int VALIDATOR_COUNT = 5;
 	static const int SIM_REFRESH_MS = 50;
 	static const int SIM_REFRESH_MS_SIM = 50;
 

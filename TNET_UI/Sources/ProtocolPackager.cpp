@@ -159,7 +159,7 @@ unique_ptr<ProtocolDataType> ProtocolPackager::Pack(double doubleValue, byte nam
 
 unique_ptr<ProtocolDataType> ProtocolPackager::Pack(bool boolValue, byte nameType)
 {
-	unique_ptr<ProtocolDataType> PDType = GenericPack(PD_BYTE_VECTOR, nameType);
+	unique_ptr<ProtocolDataType> PDType = GenericPack(PD_BOOL, nameType);
 	vector<byte> F(1);
 	F[0] = boolValue ? 1 : 0;
 	PDType->Data = F;

@@ -94,11 +94,16 @@ public:
 
 	int64_t TraverseNodesAndSave(fstream& Ledger);
 
+	vector<shared_ptr<LeafDataType>> TraverseNodesAndReturnLeaf();
+
 	void TraverseLevelOrder(TreeNodeX* Root, int64_t & FoundNodes);
 
 	void TraverseTree(TreeNodeX* Root, int64_t & FoundNodes, int _depth);
 
 	void TraverseTreeAndSave(fstream& Ledger, TreeNodeX* Root, int64_t & FoundNodes, int _depth);
+
+	void TraverseTreeAndReturn(vector<shared_ptr<LeafDataType>> & tempLeaves, TreeNodeX* Root, int64_t & FoundNodes, int _depth);
+
 
 	/// <summary>
 	/// Gets the element at the position specified by the ID.
@@ -377,6 +382,20 @@ int64_t HashTree<T>::TraverseNodesAndSave(fstream& Ledger)
 
 
 template<typename T>
+vector<shared_ptr<LeafDataType>> HashTree<T>::TraverseNodesAndReturnLeaf()
+{
+	vector<shared_ptr<LeafDataType>> tempLeaves;
+	int64_t nodes = 0;
+	int depth = 0;
+		
+	TraverseTreeAndReturn(tempLeaves, Root, nodes, depth);
+
+	//TraverseLevelOrder(Root, ref nodes);
+	return tempLeaves;
+}
+
+
+template<typename T>
 void HashTree<T>::TraverseTree(TreeNodeX* Root, int64_t & FoundNodes, int _depth)
 {
 	int depth = _depth + 1;
@@ -438,6 +457,33 @@ void HashTree<T>::TraverseTreeAndSave(fstream& Ledger, TreeNodeX* Root, int64_t 
 
 				Ledger << convertVector(ai.AccountID) << " " << ai.Money << " " << ai.Name << " " << ai.LastTransactionTime << "\n";
 
+				FoundNodes++;
+			}
+		}
+	}
+}
+
+
+template<typename T>
+void HashTree<T>::TraverseTreeAndReturn(vector<shared_ptr<LeafDataType>> & tempLeaves, TreeNodeX* Root, int64_t & FoundNodes, int _depth)
+{
+	int depth = _depth + 1;
+
+	for (int i = 0; i < 16; i++)
+	{
+		if (Root->Children[i] != nullptr)
+		{
+			if (!Root->Children[i]->IsLeaf)
+			{
+				TraverseTreeAndReturn(tempLeaves, Root->Children[i], FoundNodes, depth);
+			}
+			if (Root->Children[i]->IsLeaf)
+			{
+				TreeLeafNode<T>* Leaf = (TreeLeafNode<T>*)Root->Children[i];
+				LeafDataType ld = Leaf->Value;
+
+				shared_ptr<LeafDataType> data(&ld);
+				tempLeaves.push_back(data);
 				FoundNodes++;
 			}
 		}

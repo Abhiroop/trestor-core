@@ -6,6 +6,9 @@
 #include "TransactionContent.h"
 #include "Ledger.h"
 #include "Utils.h"
+#include "ProtocolPackager.h"
+#include "HashTree.h"
+#include "TransactionIDInfo.h"
 
 class Consensus
 {
@@ -16,12 +19,15 @@ private:
 	
 	vector<Hash> ValidatorPublickey;
 	shared_ptr<Ledger> Ledger;
+	HashTree<TransactionSetType> TranasctionSetTree;
 
 public:
-	
+	vector<Hash> publishableID;
+
 	void InsertValidatedTransactions(vector<TransactionContent> Transactions);
-	void PublishIDsToVallidators();
-	
+	void PublishIDsToVallidatorsForVote();
+	void PublishIDsToVallidatorsInitial();
+
 	vector<Hash> GetTransactionIDsInSet();
 	vector<TransactionContent> GetTransactionsForID(vector<Hash> ID, Hash ValidatorPublickey);
 	
