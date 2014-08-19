@@ -1,0 +1,32 @@
+﻿<Page x:Class="TNetWallet.LoginPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d"
+	Title="LoginPage" Height="600" Width="400">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="20*"/>
+            <ColumnDefinition Width="10*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="49*"/>
+            <RowDefinition Height="56*"/>
+            <RowDefinition Height="177*"/>
+            <RowDefinition Height="26*"/>
+            <RowDefinition Height="41*"/>
+            <RowDefinition Height="86*"/>
+            <RowDefinition Height="18*"/>
+            <RowDefinition Height="147*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Create New Account" VerticalAlignment="Top" FontSize="18" Height="28" Grid.Column="1" Margin="10,21,9,0" FontWeight="Bold" />
+        <Button Grid.ColumnSpan="3" Content="Login" Margin="72,25,72,0" Grid.Row="5" Style="{DynamicResource TrestorButtonStyle}" Foreground="#FFFDFDFD" Background="#00000000" Height="38" VerticalAlignment="Top"/>
+        <Line></Line>
+        <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="So, let's create your account, takes a few seconds." VerticalAlignment="Top" FontSize="14" Height="28"  Grid.Row="1" Grid.ColumnSpan="3" />
+
+    </Grid>
+</Page>

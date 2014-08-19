@@ -1,0 +1,53 @@
+﻿<Page x:Class="TNetWallet.HomeScreen"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d"
+	Title="HomeScreen" Height="600" Width="400">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="20*"/>
+            <ColumnDefinition Width="10*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="65*"/>
+            <RowDefinition Height="216*"/>
+            <RowDefinition Height="27*"/>
+            <RowDefinition Height="41*"/>
+            <RowDefinition Height="86*"/>
+            <RowDefinition Height="18*"/>
+            <RowDefinition Height="147*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock HorizontalAlignment="Center"  Grid.Row="3" TextWrapping="Wrap" Text="Hi, Welcome to Trestor Network 2" VerticalAlignment="Top" FontSize="20" Grid.ColumnSpan="3" Height="27" Margin="58,0" Width="284"/>
+        <Button x:Name="button_CreateAccount" Grid.ColumnSpan="3" Content="Create New Account" Margin="72,25,72,0" Grid.Row="4" Style="{DynamicResource TrestorButtonStyle}" Foreground="#FFFDFDFD" Background="#00000000" Height="38" VerticalAlignment="Top" Click="button_CreateAccount_Click"/>
+        <Button x:Name="button_Login" Content="Login" HorizontalAlignment="Left" Height="38" Margin="0,20,0,0" Grid.Row="6" Style="{DynamicResource TrestorButtonStyle}" VerticalAlignment="Top" Width="200" Foreground="#FFFDFDFD" Background="#00000000" Grid.Column="1" Click="button_Login_Click"/>
+        <TextBlock Grid.Column="1" HorizontalAlignment="Center"  Grid.Row="5" TextWrapping="Wrap" Text="OR" VerticalAlignment="Top" Margin="92,0,88,0" Foreground="#FF999999" Height="16" Width="20"/>
+        <Line></Line>
+        <Border BorderBrush="#FF999999" BorderThickness="1" Grid.ColumnSpan="2" Grid.Column="1" HorizontalAlignment="Left" Height="1" Margin="118,7,0,0" Grid.Row="5" VerticalAlignment="Top" Width="101" Background="#FF999999" RenderTransformOrigin="0.5,0.5">
+            <Border.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleY="-1"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Border.RenderTransform>
+        </Border>
+        <Border BorderBrush="#FF999999" BorderThickness="1" Grid.ColumnSpan="2" HorizontalAlignment="Left" Height="1" Margin="81,8,0,0" Grid.Row="5" VerticalAlignment="Top" Width="101" Background="#FF999999" RenderTransformOrigin="0.5,0.5">
+            <Border.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleY="-1"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Border.RenderTransform>
+        </Border>
+        <Image HorizontalAlignment="Left" Height="216" Grid.Row="1" VerticalAlignment="Top" Width="200" Grid.Column="1" Source="pack://siteoforigin:,,,/Resources/Logo.jpg"/>
+
+    </Grid>
+</Page>

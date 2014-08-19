@@ -1,0 +1,34 @@
+﻿<Page x:Class="TNetWallet.RegisterPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d"
+	Title="RegisterPage" Height="600" Width="400">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="20*"/>
+            <ColumnDefinition Width="10*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80*"/>
+            <RowDefinition Height="18*"/>
+            <RowDefinition Height="355*"/>
+            <RowDefinition Height="147*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Create New Account" VerticalAlignment="Top" FontSize="18" Height="28" Grid.Column="1" Margin="14,21,13,0" FontWeight="Bold" Width="173" />
+        <Button Grid.ColumnSpan="3" Content="Create Account" Margin="72,295,72,0" Grid.Row="2" Style="{DynamicResource TrestorButtonStyle}" Foreground="#FFFDFDFD" Background="#00000000" Height="38" VerticalAlignment="Top"/>
+        <Line Margin="0,0,0,31"></Line>
+        <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="So, let's create your account, takes a few seconds." VerticalAlignment="Top" FontSize="14" Height="28" Grid.ColumnSpan="3" Margin="47,49,47,0" Width="306" />
+        <TextBlock Text="CHOOSE A TRESTOR ID" HorizontalAlignment="Left" Margin="47,45,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Grid.ColumnSpan="3" Width="281" Foreground="{DynamicResource TrestorGray}"/>
+        <TextBox Grid.ColumnSpan="3" HorizontalAlignment="Left" Height="34" Margin="47,66,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="298" Style="{DynamicResource TrestorSingle_TextBoxStyle}" FontSize="14"/>
+        <TextBlock Text="CHOOSE PASSWORD" HorizontalAlignment="Left" Margin="47,116,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Grid.ColumnSpan="3" Width="281" Foreground="{DynamicResource TrestorGray}"/>
+        <TextBox Grid.ColumnSpan="3" HorizontalAlignment="Left" Height="34" Margin="47,137,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="298" Style="{DynamicResource TrestorSingle_TextBoxStyle}" FontSize="14"/>
+        <TextBlock Text="RETYPE PASSWORD" HorizontalAlignment="Left" Margin="47,195,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Grid.ColumnSpan="3" Width="281" Foreground="{DynamicResource TrestorGray}"/>
+        <TextBox Grid.ColumnSpan="3" HorizontalAlignment="Left" Height="34" Margin="47,216,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="298" Style="{DynamicResource TrestorSingle_TextBoxStyle}" FontSize="14"/>
+
+    </Grid>
+</Page>
