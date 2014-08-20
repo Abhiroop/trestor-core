@@ -7,7 +7,7 @@
             <RowDefinition Height="5*"/>
             <RowDefinition Height="74*"/>
         </Grid.RowDefinitions>
-        <Rectangle Fill="#FF59AE46" HorizontalAlignment="Stretch" Height="40" Stroke="Black" VerticalAlignment="Top"  StrokeThickness="0"/>
+        <Rectangle Fill="#FF59AE46" HorizontalAlignment="Stretch" Height="40" Stroke="Black" VerticalAlignment="Top"  StrokeThickness="0" MouseDown="Rectangle_MouseDown"/>
         <Frame Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="mainFrame" NavigationUIVisibility="Hidden" ></Frame>
         <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Text="Trestor Wallet" FontSize="16" Foreground="White"/>
         <Button Name="button_Exit" Click="button_Exit_Click" Content="X" HorizontalAlignment="Left" Height="25" Margin="447,7,0,0" VerticalAlignment="Top" Width="21" Background="#00DDDDDD" BorderBrush="#00707070" FontWeight="Bold" FontSize="16" Foreground="White"/>
