@@ -24,5 +24,13 @@ namespace TNetWallet
         {
             InitializeComponent();
         }
+        
+        void PassHandler()
+        {
+            Color cc = textBox_Password.PasswordQuality;
+
+            passQualityEllipse.Fill = new SolidColorBrush(cc);
+
+        }
     }
 }

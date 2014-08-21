@@ -108,6 +108,6 @@
         </Grid.RowDefinitions>
         <TextBlock Name="textBlock_Title" Text="TITLE BAR" Margin="5,0" FontSize="12" Foreground="{DynamicResource TextBox.Static.Border}" FontWeight="Bold"/>
         <TextBox Grid.Row="1"  Name="textBox_Content" Margin="5" Style="{DynamicResource TextBoxStyle_TitleStyle}" GotFocus="textBox_Content_GotFocus" LostFocus="textBox_Content_LostFocus" />
-        <PasswordBox Name="passwordBox_Content" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5" Grid.Row="1"  Style="{DynamicResource PasswordBoxStyle}" GotFocus="textBox_Content_GotFocus" LostFocus="textBox_Content_LostFocus" />
+        <PasswordBox Name="passwordBox_Content" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="5" Grid.Row="1"  Style="{DynamicResource PasswordBoxStyle}" GotFocus="textBox_Content_GotFocus" LostFocus="textBox_Content_LostFocus" KeyUp="passwordBox_Content_KeyUp" />
     </Grid>
 </UserControl>

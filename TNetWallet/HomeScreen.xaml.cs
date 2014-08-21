@@ -32,7 +32,7 @@ namespace TNetWallet
 
         private void button_Login_Click(object sender, RoutedEventArgs e)
         {
-
+            NavigationService.Navigate(new LoginPage());
         }
     }
 }

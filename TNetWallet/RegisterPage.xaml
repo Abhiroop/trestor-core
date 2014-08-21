@@ -31,7 +31,7 @@
                 </Border>
             </local:TitledTextBox.ToolTip>
         </local:TitledTextBox>
-        <local:TitledTextBox x:Name="textBox_Password" ToolTipService.Placement="Bottom" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="47,96,0,0" Grid.Row="1" VerticalAlignment="Top" Width="298" TitleText="CHOOSE A PASSWORD"  IsPasswordBox="True">
+        <local:TitledTextBox x:Name="textBox_Password" PassTextChanged="PassHandler"  ToolTipService.Placement="Bottom" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="47,96,0,0" Grid.Row="1" VerticalAlignment="Top" Width="298" TitleText="CHOOSE A PASSWORD"  IsPasswordBox="True">
             <local:TitledTextBox.ToolTip>
                 <Border  Margin="-6" Padding="5" Background="{DynamicResource ToolTipBackgroundBrush}">
                     <TextBlock Foreground="White">Choose a strong password. This password will be used to secure your private keys.</TextBlock>
@@ -39,6 +39,7 @@
             </local:TitledTextBox.ToolTip>
         </local:TitledTextBox>
         <local:TitledTextBox x:Name="textBox_RepeatPassword" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="47,179,0,0" Grid.Row="1" VerticalAlignment="Top" Width="298" TitleText="RETYPE PASSWORD" IsPasswordBox="True"/>
+        <Ellipse Name="passQualityEllipse" Grid.Column="2" HorizontalAlignment="Left" Height="22" Margin="59,125,0,0" Grid.Row="1" VerticalAlignment="Top" Width="22"/>
 
     </Grid>
 </Page>
