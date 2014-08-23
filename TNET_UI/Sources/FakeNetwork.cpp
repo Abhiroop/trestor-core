@@ -13,8 +13,6 @@ concurrent_queue<NetworkPacketQueueEntry> QueuedPackets;
 
 concurrent_hash_map<Hash, function<void(NetworkPacket)>> Attachments;
 
-concurrent_hash_map<Hash, function<void(NetworkPacket)>>::accessor Hash_NetworkCallback_acc;
-
 FakeNetwork::FakeNetwork()
 {
 
@@ -40,7 +38,7 @@ FakeNetwork::FakeNetwork(HANDLE & hTimerQueue, int Resolution_MS)
 	if (!CreateTimerQueueTimer(&hTimer, hTimerQueue, (WAITORTIMERCALLBACK)TimerProc, this, DueTime, Period, 0))
 	{
 		GoodInit = false;
-	}	
+	}
 }
 
 // Called every Resolution_MS milliseconds, used to process the pending Queue
@@ -50,9 +48,14 @@ void FakeNetwork::TimerCallback()
 	{
 		NetworkPacketQueueEntry PQE;
 		bool OK;
-		do 
-		{			
-			OK = QueuedPackets.try_pop(PQE);			
+		do
+		{
+			OK = QueuedPackets.try_pop(PQE);
+
+			if (!OK) break;
+
+			concurrent_hash_map<Hash, function<void(NetworkPacket)>>::accessor Hash_NetworkCallback_acc;
+
 			bool found = Attachments.find(Hash_NetworkCallback_acc, PQE.PublicKey_Dest);
 			if (found)
 			{
