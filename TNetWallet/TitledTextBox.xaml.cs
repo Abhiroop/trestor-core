@@ -170,7 +170,7 @@ namespace TNetWallet
                 passQuality = Colors.Orange;
             }
 
-            if (pass.Length >= 8 && getSpChar(pass) >= 2 && getNum(pass) > 1)
+            if (pass.Length >= 8 && getSpChar(pass) >= 1 && getNum(pass) > 1)
             {
                 passQuality = Colors.Green;
             }
