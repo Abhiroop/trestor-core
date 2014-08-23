@@ -49,36 +49,79 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 	//if there is no receiver than make a new receiver account
 	if (!receiverExists)
 	{
-		CppSQLite3Statement stmt = global_db.compileStatement("insert into Ledger values(@u1,@u2,@u3,@u4,@u5,@u6);");
-		stmt.bind("@u1", receiverPublicKey.c_str());
-		stmt.bind("@u4", transactionAmount);
-		
-		//bt default user is unbblocked
-		stmt.bind("@u5", 0);
-		//get the current system time here
-		stmt.bind("@u6", receiverPublicKey.c_str());
+		int64_t senderNewBalance = sender_balance - transactionAmount;
+
+		CppSQLite3Statement stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1 where PublicKey = @u2");
+		stmt.bind("@u1", senderNewBalance);
+		stmt.bind("@u2", senderPublickey.c_str());
 		int n_rows = stmt.execDML();
-		stmt.reset();
-		return 1;
+
+		if (n_rows == 1)
+		{
+			stmt.reset();
+			stmt = global_db.compileStatement("insert into Ledger values(@u1,@u2,@u3,@u4,@u5,@u6);");
+			stmt.bind("@u1", receiverPublicKey.c_str());
+			stmt.bind("@u4", transactionAmount);
+
+			//bt default user is unbblocked
+			stmt.bind("@u5", 0);
+			//get the current system time here
+			stmt.bind("@u6", receiverPublicKey.c_str());
+			int upate_rows = stmt.execDML();
+			return 1;
+		}
+
+		else
+		{
+			senderNewBalance += transactionAmount;
+			stmt.reset();
+			stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1 where PublicKey = @u2");
+			stmt.bind("@u1", senderNewBalance);
+			stmt.bind("@u2", senderPublickey.c_str());
+			int n_rows = stmt.execDML();
+			return 0;
+		}
+		
+		return 0;
+		
 	}
+
+
 	//update new account balances of sender and receiver
 	else
 	{
-		int64_t senderNewBalance = sender_balance + transactionAmount;
-		int64_t receiverNewBalance = receiver_balance - transactionAmount;
+		int64_t senderNewBalance = sender_balance - transactionAmount;
+		int64_t receiverNewBalance = receiver_balance + transactionAmount;
 
 		//update sender
 		CppSQLite3Statement stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1 where PublicKey = @u2");
 		stmt.bind("@u1", senderNewBalance);
 		stmt.bind("@u2", senderPublickey.c_str());
-		stmt.reset();
+		int ex_row = stmt.execDML();
+
 
 		//update receiver
-		stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1 where PublicKey = @u2");
-		stmt.bind("@u1", receiverNewBalance);
-		stmt.bind("@u2", receiverPublicKey.c_str());
-		stmt.reset();
-		return 1;
+
+		if (ex_row == 1)
+		{
+			stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1 where PublicKey = @u2");
+			stmt.bind("@u1", receiverNewBalance);
+			stmt.bind("@u2", receiverPublicKey.c_str());
+			stmt.execDML();
+			stmt.reset();
+			return 1;
+		}
+		else
+		{
+			senderNewBalance += transactionAmount;
+			stmt.reset();
+			stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1 where PublicKey = @u2");
+			stmt.bind("@u1", senderNewBalance);
+			stmt.bind("@u2", senderPublickey.c_str());
+			return 0;
+		}
+		return 0;
+		
 	}
 
 }
