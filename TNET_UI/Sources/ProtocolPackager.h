@@ -64,7 +64,7 @@ public:
 
 	static bool UnpackByteVector(ProtocolDataType packedData, byte nameType, vector<byte> & Data);
 
-	static bool UnpackByteVector_s(ProtocolDataType packedData, byte nameType, int Size, vector<byte> & Data);
+	static bool UnpackByteVector_s(ProtocolDataType packedData, byte nameType, int ExpectedSize, vector<byte> & Data);
 
 	static bool UnpackByte(ProtocolDataType packedData, byte nameType, byte & Data);
 

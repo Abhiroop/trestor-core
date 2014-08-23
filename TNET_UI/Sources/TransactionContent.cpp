@@ -1,5 +1,7 @@
 
 #include "TransactionContent.h"
+#include "ProtocolPackager.h"
+#include "Constants.h"
 
 TransactionContent::TransactionContent(Hash _PublicKey_Source, int64_t _Timestamp, vector<TransactionSink> _Destinations, Hash _Signature)
 {
@@ -13,27 +15,30 @@ TransactionContent::TransactionContent(Hash _PublicKey_Source, int64_t _Timestam
 
 TransactionContent::TransactionContent()
 {
-
+	PublicKey_Source = Hash();
+	Timestamp = 0;
+	Destinations = vector<TransactionSink>();
+	Signature = Hash();
 }
 /*
 Hash TransactionContent::getPublicKey_Source()
 {
-	return PublicKey_Source;
+return PublicKey_Source;
 }
 
 int64_t TransactionContent::getTimestamp()
 {
-	return Timestamp;
+return Timestamp;
 }
 
 vector<TransactionSink> TransactionContent::getDestinations()
 {
-	return Destinations;
+return Destinations;
 }
 
 Hash TransactionContent::getSignature()
 {
-	return Signature;
+return Signature;
 }*/
 
 #define U64TO8_LITTLE(p, v) (((int64_t*)(p))[0] = v)
@@ -115,16 +120,76 @@ Hash TransactionContent::GetTransactionDataAndSignature()
 ///////////////////////////////////////////////////////////
 
 
-
-void TransactionContent::Deserialize(vector<byte> Data)
-{
-
-}
+/*
+Hash PublicKey_Source;
+int64_t Timestamp;
+vector<TransactionSink> Destinations;
+Hash Signature;
+*/
 
 vector<byte> TransactionContent::Serialize()
 {
-	vector<byte> SDATA;
+	vector<ProtocolDataType> PDTs;
+	PDTs.push_back(*ProtocolPackager::Pack(PublicKey_Source, 0));
+	PDTs.push_back(*ProtocolPackager::Pack(Timestamp, 1));
 
+	for (vector<TransactionSink>::iterator it = Destinations.begin(); it != Destinations.end(); ++it)
+	{
+		PDTs.push_back(*ProtocolPackager::Pack((*it).Serialize(), 2));
+	}
 
-	return SDATA;
+	PDTs.push_back(*ProtocolPackager::Pack(Signature, 3));
+
+	return ProtocolPackager::PackRaw(PDTs);
 }
+
+/////////////////////////
+
+
+void TransactionContent::Deserialize(vector<byte> Data)
+{
+	TransactionContent();
+
+	vector<ProtocolDataType> PDTs = ProtocolPackager::UnPackRaw(Data);
+	int cnt = 0;
+
+	while (cnt < (int)PDTs.size())
+	{
+		ProtocolDataType* PDT = &PDTs[cnt++];
+
+
+
+		switch (PDT->NameType)
+		{
+		case 0:
+			ProtocolPackager::UnpackByteVector_s(*PDT, 0, Constants::KEYLEN_PUBLIC, PublicKey_Source);
+			break;
+
+		case 1:
+			ProtocolPackager::UnpackInt64(*PDT, 1, Timestamp);
+			break;
+
+		case 2:
+
+		{
+			vector<byte> tempVector;
+			ProtocolPackager::UnpackByteVector(*PDT, 2, tempVector);
+			if (tempVector.size() > 0)
+			{
+				TransactionSink tsk;
+				tsk.Deserialize(tempVector);
+				Destinations.push_back(tsk);
+			}
+		}
+
+			break;
+
+		case 3:
+			ProtocolPackager::UnpackByteVector_s(*PDT, 3, Constants::KEYLEN_SIGNATURE, Signature);
+			break;
+		}
+	}
+
+}
+
+

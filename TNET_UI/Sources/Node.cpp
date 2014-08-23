@@ -23,6 +23,10 @@ Node::Node()
 
 }
 
+Node::Node(FakeNetwork _network)
+{
+	network = _network;
+}
 
 void Node::UpdateEvent()
 {
@@ -38,8 +42,10 @@ void Node::UpdateEvent()
 
 void CALLBACK TimerProcND(void* lpParametar, BOOLEAN TimerOrWaitFired);
 
-Node::Node(string _Name, int _ConnectionLimit, shared_ptr<Ledger> _ledger, long Money, int TimerRate)
+Node::Node(FakeNetwork _network, string _Name, int _ConnectionLimit, shared_ptr<Ledger> _ledger, long Money, int TimerRate)
 {
+	network = _network;
+
 	ConnectionLimit = ConnectionLimit;
 	byte Seed[32];
 
@@ -131,7 +137,7 @@ void Node::CreateArbitraryTransactionAndSendToTrustedNodes()
 	
 	//GlobalNodes.
 
-	for (hash_map<Hash, shared_ptr<Node>>::iterator _ts = GlobalNodes.begin(); _ts != GlobalNodes.end(); ++_ts)
+	for (concurrent_hash_map<Hash, shared_ptr<Node>>::iterator _ts = GlobalNodes.begin(); _ts != GlobalNodes.end(); ++_ts)
 	{
 		shared_ptr<Node> dest = _ts->second;
 
@@ -141,7 +147,12 @@ void Node::CreateArbitraryTransactionAndSendToTrustedNodes()
 		tsks.push_back(tsk);
 
 		TransactionContent tco = TransactionContent(this->PublicKey, 0, tsks, Hash() );
-		_ts->second->SendTransaction(this->PublicKey, tco);
+		
+		vector<byte> data = tco.Serialize();
+		
+		network.SendPacket(NetworkPacketQueueEntry(_ts->second->PublicKey, NetworkPacket(this->PublicKey, TPT_TRANS_REQUEST, data)));
+
+		//_ts->second->SendTransaction(this->PublicKey, tco);
 
 		OutTransactionCount++;
 	}
@@ -178,7 +189,7 @@ int64_t Node::Money()
 }
 
 
-/// <summary>
+/*/// <summary>
 /// [TO BE CALLED BY OTHER NODES] Sends transactions to destination, only valid ones will be processed.
 /// </summary>
 /// <param name="source"></param>
@@ -188,6 +199,7 @@ void Node::SendTransaction(Hash source, TransactionContent Transaction)
 	PendingIncomingTransactions.push(TransactionContentPack(source, Transaction));
 	InTransactionCount++;
 }
+*/
 
 /// <summary>
 /// [TO BE CALLED BY OTHER NODES] Sends candidates to destination [ONLY AFTER > 50% voting], only valid ones will be processed.
@@ -210,15 +222,23 @@ void Node::SendCandidates(Hash source, vector<TransactionContent> Transactions)
 
 void Node::Receive(NetworkPacket Packet)
 {
-	string _SZ = ", " + Packet.Data.size() + (string)" Bytes";
-	string _OTH_MSG = " Received Packet :" + Packet.Type + (string)", From:" + Packet.PublicKey_Src.ToString() + _SZ;
+	/*string _SZ = ", " + to_string( Packet.Data.size()) + (string)" Bytes";
+	string _OTH_MSG = " Received Packet :" + to_string(Packet.Type) + (string)", From:" + Packet.PublicKey_Src.ToString() + _SZ;
 	string MSG = (string)"[" + PublicKey.ToString() + "] : " + _OTH_MSG;
 
-	MessageQueue.push(MSG);
+	MessageQueue.push(MSG);*/
 	
 	switch (Packet.Type)
 	{
-	case PT_HELLO:
+	case TPT_TRANS_REQUEST:
+
+		TransactionContent tc;
+		tc.Deserialize(Packet.Data);
+
+		PendingIncomingTransactions.push(TransactionContentPack(Packet.PublicKey_Src, tc));
+		InTransactionCount++;
+
+		MessageQueue.push(to_string(InTransactionCount));
 
 		break;
 

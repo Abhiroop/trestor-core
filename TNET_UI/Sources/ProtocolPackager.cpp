@@ -185,9 +185,9 @@ bool ProtocolPackager::UnpackByteVector(ProtocolDataType packedData, byte nameTy
 	else return false;
 }
 
-bool ProtocolPackager::UnpackByteVector_s(ProtocolDataType packedData, byte nameType, int Size, vector<byte> & Data)
+bool ProtocolPackager::UnpackByteVector_s(ProtocolDataType packedData, byte nameType, int ExpectedSize, vector<byte> & Data)
 {
-	if (packedData.Data.size() == Size && (nameType == packedData.NameType) && (packedData.DataType == PD_BYTE_VECTOR))
+	if (packedData.Data.size() == ExpectedSize && (nameType == packedData.NameType) && (packedData.DataType == PD_BYTE_VECTOR))
 	{
 		Data = packedData.Data;
 		return true;

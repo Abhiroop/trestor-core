@@ -128,7 +128,7 @@ namespace TNETVALIDATORCLR {
 		g->Clear(Color::GhostWhite);
 
 		int i = 0;
-		for (hash_map<Hash, shared_ptr<Node>>::iterator _ts = GlobalNodes.begin(); _ts != GlobalNodes.end(); ++_ts)
+		for (concurrent_hash_map<Hash, shared_ptr<Node>>::iterator _ts = GlobalNodes.begin(); _ts != GlobalNodes.end(); ++_ts)
 		{
 			shared_ptr<Node> ND;
 			ND = _ts->second;
@@ -143,7 +143,9 @@ namespace TNETVALIDATORCLR {
 			}
 		}
 
-		for (hash_map<Hash, shared_ptr<Node>>::iterator _ts = GlobalNodes.begin(); _ts != GlobalNodes.end(); ++_ts)
+
+		// Draw Connections
+		for (concurrent_hash_map<Hash, shared_ptr<Node>>::iterator _ts = GlobalNodes.begin(); _ts != GlobalNodes.end(); ++_ts)
 		{
 			shared_ptr<Node> ND;
 			ND = _ts->second;
@@ -155,11 +157,29 @@ namespace TNETVALIDATORCLR {
 				Link = links->second;
 				NodeData* LinkData = &sim_nData[Link->PublicKey];
 
-				g->DrawLine(gcnew Pen(Color::LightGray, 0.5F), Point(LinkData->Center.X, LinkData->Center.Y), Point(nd->Center.X, nd->Center.Y));
+				g->DrawLine(gcnew Pen(Color::LightPink, 0.5F), Point(LinkData->Center.X, LinkData->Center.Y), Point(nd->Center.X, nd->Center.Y));
 			}
 		}
 
-		for (hash_map<Hash, shared_ptr<Node>>::iterator _ts = GlobalNodes.begin(); _ts != GlobalNodes.end(); ++_ts)
+
+		// Draw Trusted
+		for (concurrent_hash_map<Hash, shared_ptr<Node>>::iterator _ts = GlobalNodes.begin(); _ts != GlobalNodes.end(); ++_ts)
+		{
+			shared_ptr<Node> ND;
+			ND = _ts->second;
+			NodeData* nd = &sim_nData[_ts->first];
+
+			for (hash_map<Hash, shared_ptr<Node>>::iterator trusted = ND->TrustedNodes.begin(); trusted != ND->TrustedNodes.end(); ++trusted)
+			{
+				shared_ptr<Node> Trusted;
+				Trusted = trusted->second;
+				NodeData* TrustedLinkData = &sim_nData[Trusted->PublicKey];
+
+				g->DrawLine(gcnew Pen(Color::LightBlue, 0.5F), Point(TrustedLinkData->Center.X, TrustedLinkData->Center.Y+1), Point(nd->Center.X, nd->Center.Y+1));
+			}
+		}
+
+		for (concurrent_hash_map<Hash, shared_ptr<Node>>::iterator _ts = GlobalNodes.begin(); _ts != GlobalNodes.end(); ++_ts)
 		{
 			NodeData* nd = &sim_nData[_ts->first];
 			std::string ss = _ts->first.ToString();
@@ -173,8 +193,9 @@ namespace TNETVALIDATORCLR {
 				" Money:" + (int)(ndd->LocalMoney + ndd->Money());
 
 			g->DrawString(sss, gcnew System::Drawing::Font("Consolas", 8, FontStyle::Regular), Brushes::DarkMagenta, Point(nd->Center.X, nd->Center.Y+15));
-			g->DrawString("Candidates:" + ndd->ledger->getCandidates().size() + " Out TX:" + ndd->OutTransactionCount +
-				" In TX:" + ndd->InTransactionCount, gcnew System::Drawing::Font("Consolas", 8, FontStyle::Regular), Brushes::DarkGreen, Point(nd->Center.X, nd->Center.Y + 30));
+			g->DrawString("InCD:" + ndd->ledger->getCandidates().size() + " OutTX:" + ndd->OutTransactionCount +
+				" InTX:" + ndd->InTransactionCount +
+				" InPendingTX:" + ndd->PendingIncomingTransactions.unsafe_size(), gcnew System::Drawing::Font("Consolas", 8, FontStyle::Regular), Brushes::DarkGreen, Point(nd->Center.X, nd->Center.Y + 30));
 
 		}
 	}

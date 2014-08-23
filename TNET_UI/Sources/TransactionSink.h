@@ -11,6 +11,7 @@ public:
 	Hash PublicKey_Sink;
 	int64_t Amount;
 	TransactionSink(Hash _PublicKey_Sink, int64_t _Amount);
+	TransactionSink();
 
 	vector<byte> Serialize() override;
 	void Deserialize(vector<byte> Data) override;

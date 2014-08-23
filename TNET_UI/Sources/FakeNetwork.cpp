@@ -10,7 +10,7 @@
 using namespace tbb;
 
 concurrent_queue<NetworkPacketQueueEntry> QueuedPackets;
-concurrent_hash_map<Hash, Node> NetworkedNodes;
+
 concurrent_hash_map<Hash, function<void(NetworkPacket)>> Attachments;
 
 concurrent_hash_map<Hash, function<void(NetworkPacket)>>::accessor Hash_NetworkCallback_acc;

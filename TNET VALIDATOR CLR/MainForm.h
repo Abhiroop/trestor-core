@@ -17,6 +17,7 @@
 
 #include "Simulator.h"
 #include "ProtocolPackager.h"
+#include "TransactionSink.h"
 
 //#include "tbb/concurrent_hash_map.h"
 
@@ -111,7 +112,7 @@ namespace TNETVALIDATORCLR {
 	private: System::Windows::Forms::ToolStripMenuItem^  fILEToolStripMenuItem;
 	private: System::Windows::Forms::MenuStrip^  menuStrip1;
 	private: System::Windows::Forms::ToolStripMenuItem^  timerTestsToolStripMenuItem;
-	private: System::Windows::Forms::ToolStripMenuItem^  refreshToolStripMenuItem;
+
 	private: System::Windows::Forms::Timer^  timer_UI;
 	private: System::ComponentModel::IContainer^  components;
 
@@ -148,7 +149,6 @@ namespace TNETVALIDATORCLR {
 			this->simulateToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->cONTROLToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->timerTestsToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			this->refreshToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->fILEToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->menuStrip1 = (gcnew System::Windows::Forms::MenuStrip());
 			this->timer_UI = (gcnew System::Windows::Forms::Timer(this->components));
@@ -182,7 +182,7 @@ namespace TNETVALIDATORCLR {
 			this->tabPage2->Location = System::Drawing::Point(4, 22);
 			this->tabPage2->Name = L"tabPage2";
 			this->tabPage2->Padding = System::Windows::Forms::Padding(3);
-			this->tabPage2->Size = System::Drawing::Size(1018, 470);
+			this->tabPage2->Size = System::Drawing::Size(1091, 511);
 			this->tabPage2->TabIndex = 1;
 			this->tabPage2->Text = L"Settings";
 			this->tabPage2->UseVisualStyleBackColor = true;
@@ -272,7 +272,7 @@ namespace TNETVALIDATORCLR {
 			this->tabPage_Visualizer->Location = System::Drawing::Point(4, 22);
 			this->tabPage_Visualizer->Name = L"tabPage_Visualizer";
 			this->tabPage_Visualizer->Padding = System::Windows::Forms::Padding(3);
-			this->tabPage_Visualizer->Size = System::Drawing::Size(1018, 470);
+			this->tabPage_Visualizer->Size = System::Drawing::Size(1091, 511);
 			this->tabPage_Visualizer->TabIndex = 2;
 			this->tabPage_Visualizer->Text = L"Visualizer";
 			this->tabPage_Visualizer->UseVisualStyleBackColor = true;
@@ -301,6 +301,7 @@ namespace TNETVALIDATORCLR {
 			// simulateTreeToolStripMenuItem
 			// 
 			this->simulateTreeToolStripMenuItem->Name = L"simulateTreeToolStripMenuItem";
+			this->simulateTreeToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::F4));
 			this->simulateTreeToolStripMenuItem->Size = System::Drawing::Size(200, 22);
 			this->simulateTreeToolStripMenuItem->Text = L"Simulate Tree";
 			// 
@@ -339,18 +340,12 @@ namespace TNETVALIDATORCLR {
 			// 
 			// timerTestsToolStripMenuItem
 			// 
-			this->timerTestsToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->refreshToolStripMenuItem });
 			this->timerTestsToolStripMenuItem->Name = L"timerTestsToolStripMenuItem";
-			this->timerTestsToolStripMenuItem->Size = System::Drawing::Size(200, 22);
+			this->timerTestsToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>(((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::Shift)
+				| System::Windows::Forms::Keys::F5));
+			this->timerTestsToolStripMenuItem->Size = System::Drawing::Size(213, 22);
 			this->timerTestsToolStripMenuItem->Text = L"Timer Tests";
 			this->timerTestsToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::timerTestsToolStripMenuItem_Click);
-			// 
-			// refreshToolStripMenuItem
-			// 
-			this->refreshToolStripMenuItem->Name = L"refreshToolStripMenuItem";
-			this->refreshToolStripMenuItem->Size = System::Drawing::Size(113, 22);
-			this->refreshToolStripMenuItem->Text = L"Refresh";
-			this->refreshToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::refreshToolStripMenuItem_Click);
 			// 
 			// fILEToolStripMenuItem
 			// 
@@ -510,16 +505,25 @@ namespace TNETVALIDATORCLR {
 
 		bool PASS = ProtocolPackager::UnpackString(*DATA2, NAME, DATA);
 
-		PrintMessage(DATA);
+		byte data[32] = { 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7 };
 
+		Hash h(data, data+32);
+
+		TransactionSink tsk = TransactionSink(h, 1234567);
+
+		Hash serialized = tsk.Serialize();
+
+		TransactionSink tskDs;
+		tskDs.Deserialize(serialized);
+
+
+
+		PrintMessage(tskDs.PublicKey_Sink.ToString());
+		PrintMessage("AMT:" + tskDs.Amount);
 	
 	}
 
-	private: System::Void refreshToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 
-		//InitTimer();
-		//PrintMessage("" + Value);
-	}
 
 	private: System::Void timer_UI_Tick(System::Object^  sender, System::EventArgs^  e) {
 

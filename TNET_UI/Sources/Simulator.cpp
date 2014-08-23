@@ -10,12 +10,15 @@
 #include <functional>
 #include <memory>
 
+#include "tbb/concurrent_hash_map.h"
+
 using namespace std;
 using namespace std::placeholders;
 
 //hash_map<Hash, shared_ptr<Node>> sim_nodes;
 vector<Point2> sim_XY;
 hash_map<Hash, NodeData> sim_nData;
+//tbb::concurrent_hash_map<Hash, Node> NetworkedNodes;
 
 void Simulator::Timestep()
 {
@@ -23,6 +26,8 @@ void Simulator::Timestep()
 	{
 		//hash<Hash> h;
 		//Refreshed = true;
+
+		
 
 
 	}
@@ -82,7 +87,7 @@ void Simulator::StartSimulation()
 
 		//Node n3 = Node(CN, 4, lgr, 100 * i, 100);
 
-		shared_ptr<Node> NewNode(new Node(CN, 4, lgr, 100 * i, 100));
+		shared_ptr<Node> NewNode(new Node(network, CN, 4, lgr, 100 * i, 100));
 		
 		//Node *n = dynamic_cast<Node*> (&n3);
 		//Nodes.push_back(*n);
@@ -96,7 +101,9 @@ void Simulator::StartSimulation()
 		lgr->AddUserToLedger(si);
 		//sim_nodes[*pk] = NewNode;
 
-		GlobalNodes[*pk] = NewNode;
+		GlobalNodes.insert(make_pair(*pk, NewNode));
+
+		//GlobalNodes.
 
 		//function<void(NetworkPacket)> f = std::bind1st(std::mem_fun(&Node::ReceivedData), &n);
 	
@@ -110,11 +117,24 @@ void Simulator::StartSimulation()
 	{
 		vector<int> perm_Conn = GenerateNonRepeatingDistribution((int)nodeHashes.size(), LinksPerNode, i);
 
+		concurrent_hash_map<Hash, shared_ptr<Node>>::accessor Map_Acc;
+		concurrent_hash_map<Hash, shared_ptr<Node>>::accessor Map_Acc_2;
+
 		for (int k = 0; k < (int)perm_Conn.size(); k++)
 		{
 			Hash* h = nodeHashes[perm_Conn[k]];
-			shared_ptr<Node> n = GlobalNodes[*h];
-			GlobalNodes[*nodeHashes[i]]->Connections[*h] = n;
+			//shared_ptr<Node> n = GlobalNodes[*h];
+			//GlobalNodes[*nodeHashes[i]]->Connections[*h] = n;
+
+			if (GlobalNodes.find(Map_Acc, *h))
+			{
+				shared_ptr<Node> n = Map_Acc->second;
+				if (GlobalNodes.find(Map_Acc_2, *nodeHashes[i]))
+				{
+					Map_Acc_2->second->Connections[*h] = n;
+				}
+				
+			}
 		}
 
 		vector<int> perm_Trusted= GenerateNonRepeatingDistribution((int)nodeHashes.size(), LinksPerNode, i);
@@ -122,9 +142,26 @@ void Simulator::StartSimulation()
 		for (int k = 0; k < (int)perm_Trusted.size(); k++)
 		{
 			Hash* h = nodeHashes[perm_Trusted[k]];
+			//shared_ptr<Node> n = GlobalNodes[*h];
+			//GlobalNodes[*nodeHashes[i]]->Connections[*h] = n;
+
+			if (GlobalNodes.find(Map_Acc, *h))
+			{
+				shared_ptr<Node> n = Map_Acc->second;
+				if (GlobalNodes.find(Map_Acc_2, *nodeHashes[i]))
+				{
+					Map_Acc_2->second->TrustedNodes[*h] = n;
+				}
+
+			}
+		}
+
+		/*for (int k = 0; k < (int)perm_Trusted.size(); k++)
+		{
+			Hash* h = nodeHashes[perm_Trusted[k]];
 			shared_ptr<Node> n = GlobalNodes[*h];
 			GlobalNodes[*nodeHashes[i]]->TrustedNodes[*h] = n;
-		}
+		}*/
 	}
 
 	SimulationStarted = true;

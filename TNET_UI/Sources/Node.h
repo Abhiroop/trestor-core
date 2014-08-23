@@ -9,9 +9,8 @@
 #include <functional>
 #include <memory>
 #include <Windows.h>
-//#include "Timer.h"
 #include "tbb/concurrent_queue.h"
-
+#include "FakeNetwork.h"
 
 using namespace tbb;
 
@@ -48,6 +47,7 @@ public: Hash Source;
 
 class Node
 {
+	FakeNetwork network;
 
 	HANDLE hTimerQueue = nullptr;
 	//function<void()> f;
@@ -66,10 +66,12 @@ public:
 
 	int ConnectionLimit = 0;
 	int OutTransactionCount = 0;
-	int InCandidatesCount = 0;;
+	int InCandidatesCount = 0;
 	int InTransactionCount = 0;
 
 	Node();
+
+	Node(FakeNetwork _network);
 
 	AccountInfo AI;
 
@@ -86,7 +88,7 @@ public:
 
 	int64_t LocalMoney;
 
-	Node(string _Name, int _ConnectionLimit, shared_ptr<Ledger> ledger, long Money, int TimerRate);
+	Node(FakeNetwork _network, string _Name, int _ConnectionLimit, shared_ptr<Ledger> ledger, long Money, int TimerRate);
 
 	void CreateArbitraryTransactionAndSendToTrustedNodes();
 
@@ -98,7 +100,7 @@ public:
 
 	tbb::concurrent_queue<TransactionContentPack> PendingIncomingTransactions;
 
-	void SendTransaction(Hash source, TransactionContent Transaction);
+	//void SendTransaction(Hash source, TransactionContent Transaction);
 
 	void SendCandidates(Hash source, vector<TransactionContent> Transactions);
 

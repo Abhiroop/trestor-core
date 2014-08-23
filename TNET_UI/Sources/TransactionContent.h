@@ -46,8 +46,7 @@ public:
 	Hash GetTransactionDataAndSignature();
 
 	vector<byte> Serialize() override;
-	void Deserialize(vector<byte> Data) override;
-	
+	void Deserialize(vector<byte> Data) override;	
 
 };
 

@@ -42,23 +42,33 @@ uint64_t getCurrentUTFtime();
 vector<int> GenerateNonRepeatingDistribution(int maxNumber, int Count, int self);
 
 enum PacketTypes {
-	PT_HELLO = 0x00, PT_DISCONNECT = 0x01, PT_KEEPALIVE = 0x02,
-	PT_KEY_EXCHANGE_1 = 0x10, PT_KEY_EXCHANGE_2 = 0x11, PT_KEY_EXCHANGE_DONE = 0x12,
-	PT_TRANS_REQUEST = 0x20, PT_TRANS_FORWARDING = 0x21,
-	PT_CONS_STATE = 0x30, PT_CONS_CURRENT_SET = 0x31, PT_CONS_REQUEST_TX = 0x32, PT_CONS_RESP_TX = 0x33
+	TPT_HELLO = 0x00, TPT_DISCONNECT = 0x01, TPT_KEEPALIVE = 0x02,
+	TPT_KEY_EXCHANGE_1 = 0x10, TPT_KEY_EXCHANGE_2 = 0x11, TPT_KEY_EXCHANGE_DONE = 0x12,
+		
+	// TPT_TRANS_REQUEST : DATA [TransactionContent] or a single TransactionContent request.
+	TPT_TRANS_REQUEST = 0x20,
+	
+	TPT_TRANS_FORWARDING = 0x21,
+	TPT_CONS_STATE = 0x30, TPT_CONS_CURRENT_SET = 0x31, TPT_CONS_REQUEST_TX = 0x32, TPT_CONS_RESP_TX = 0x33
 };
+
 
 struct NetworkPacket
 {
 	Hash PublicKey_Src;
 	byte Type;
 	vector<byte> Data;
+	NetworkPacket(Hash publicKey_Src, byte type, vector<byte> data) : PublicKey_Src(publicKey_Src), Type(type), Data(data) { }
+	NetworkPacket() {}
 };
 
 struct NetworkPacketQueueEntry
 {
 	Hash PublicKey_Dest;
 	NetworkPacket Packet;
+	NetworkPacketQueueEntry(Hash publicKey_Dest, NetworkPacket packet) : PublicKey_Dest(publicKey_Dest), Packet(packet) { }
+	NetworkPacketQueueEntry() {}
+	
 };
 
 #ifdef __cplusplus_cli
