@@ -19,6 +19,9 @@
     <Filter Include="Source Files\SqlLiteCpp">
       <UniqueIdentifier>{6cca4cd9-bd3d-4c6e-bedd-79c92207fdf6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Network">
+      <UniqueIdentifier>{67c8298f-0db3-48f9-a0bd-e033e29c6d43}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -39,7 +42,13 @@
     <ClInclude Include="..\TNET_UI\Sources\SQLiteCpp\sqlite3.h">
       <Filter>Source Files\SqlLiteCpp</Filter>
     </ClInclude>
-    <ClInclude Include="Constants.h">
+    <ClInclude Include="Network.h">
+      <Filter>Source Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="TCPClientData.h">
+      <Filter>Source Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Constants2.h">
       <Filter>Source Files\Ledger</Filter>
     </ClInclude>
   </ItemGroup>
@@ -64,7 +73,13 @@
     <ClCompile Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.cpp">
       <Filter>Source Files\SqlLiteCpp</Filter>
     </ClCompile>
-    <ClCompile Include="Constants.cpp">
+    <ClCompile Include="Network.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="TCPClientData.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Constants2.cpp">
       <Filter>Source Files\Ledger</Filter>
     </ClCompile>
   </ItemGroup>

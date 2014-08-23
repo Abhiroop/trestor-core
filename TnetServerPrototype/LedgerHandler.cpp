@@ -1,7 +1,5 @@
 
-
 #include "LedgerHandler.h"
-#include "Constants.h"
 
 int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey, int64_t transactionAmount)
 {
@@ -22,6 +20,8 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 
 		if (sender_balance < transactionAmount)
 			throw exception("Unsufficient Sender Balance", 1);
+
+		q.nextRow();
 	}
 	if (!senderExists)
 	{
@@ -44,6 +44,8 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 		receiver_balance = atoll(baltemp.c_str());
 
 		receiverExists = 1;
+
+		q.nextRow();
 	}
 
 	//if there is no receiver than make a new receiver account

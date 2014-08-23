@@ -23,7 +23,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Log in to your Account" VerticalAlignment="Top" FontSize="18" Height="28" Grid.Column="1" Margin="0,21,96,0" FontWeight="Bold" Width="204" Grid.ColumnSpan="2" />
-        <Button Grid.ColumnSpan="3" Content="Login" Margin="78,196,66,0" Grid.Row="2" Style="{DynamicResource TrestorButtonStyle}" Foreground="#FFFDFDFD" Background="#00000000" Height="38" VerticalAlignment="Top"/>
+        <Button Grid.ColumnSpan="3" Name="Button_Login"  Content="Login" Margin="78,196,66,0" Grid.Row="2" Style="{DynamicResource TrestorButtonStyle}" Foreground="#FFFDFDFD" Background="#00000000" Height="38" VerticalAlignment="Top" Click="Button_Login_Click"/>
         <Line/>
 
         <local:TitledTextBox Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="78,10,0,0" Grid.Row="2" VerticalAlignment="Top" Height="62" Width="256"  TitleText="TRESTOR ID"/>
