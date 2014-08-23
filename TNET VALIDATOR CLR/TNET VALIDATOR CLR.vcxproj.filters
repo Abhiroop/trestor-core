@@ -55,6 +55,9 @@
     <Filter Include="Sources\Protocol">
       <UniqueIdentifier>{9d417022-9045-4aa2-bb5d-35dca7fdfd81}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\SQLLiteCpp">
+      <UniqueIdentifier>{6f09fe2c-6b1d-44bd-84b7-dfc8111dca7c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TNET_UI\Sources\BaseNetwork.cpp">
@@ -209,6 +212,9 @@
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\VoteType.cpp">
       <Filter>Sources\Consensus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.cpp">
+      <Filter>Sources\SQLLiteCpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -511,6 +517,12 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\VoteType.h">
       <Filter>Sources\Consensus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.h">
+      <Filter>Sources\SQLLiteCpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\SQLiteCpp\sqlite3.h">
+      <Filter>Sources\SQLLiteCpp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

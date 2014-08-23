@@ -183,6 +183,7 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\SQLiteTest.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -251,6 +252,8 @@
     <ClInclude Include="..\TNET_UI\Sources\SerializableBase.h" />
     <ClInclude Include="..\TNET_UI\Sources\Signal.h" />
     <ClInclude Include="..\TNET_UI\Sources\Simulator.h" />
+    <ClInclude Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.h" />
+    <ClInclude Include="..\TNET_UI\Sources\SQLiteCpp\sqlite3.h" />
     <ClInclude Include="..\TNET_UI\Sources\Structs.h" />
     <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\aggregator.h" />
     <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\aligned_space.h" />
