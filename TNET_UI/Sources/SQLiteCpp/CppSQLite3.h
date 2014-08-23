@@ -251,6 +251,7 @@ public:
     void bind(int nParam, const char* szValue);
     void bind(int nParam, const int nValue);
     void bind(int nParam, const double dwValue);
+	void bind(int nParam, const sqlite_int64 dwValue);
     void bind(int nParam, const unsigned char* blobValue, int nLen);
     void bindNull(int nParam);
 
@@ -258,6 +259,7 @@ public:
     void bind(const char* szParam, const char* szValue);
     void bind(const char* szParam, const int nValue);
     void bind(const char* szParam, const double dwValue);
+	void bind(const char* szParam, const sqlite_int64 dwValue);
     void bind(const char* szParam, const unsigned char* blobValue, int nLen);
     void bindNull(const char* szParam);
 
