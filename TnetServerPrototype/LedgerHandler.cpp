@@ -6,9 +6,7 @@
 
 std::mutex mtx;
 
-
-
-int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey, int64_t transactionAmount, function<void(string)> transactionEvent)
+int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey, int64_t transactionAmount, string sender, function<void(string, string)> transactionEvent)
 {
 	const __int64 current_time = time(0);
 
@@ -36,14 +34,14 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 		senderExists = 1;
 
 		if (sender_balance < transactionAmount)
-			transactionEvent("Unsufficient Sender Balance");
+			transactionEvent(sender, "Unsufficient Sender Balance");
 
 		q.nextRow();
 	}
 	if (!senderExists)
 	{
 		mtx.unlock();
-		transactionEvent("Sender Missing");
+		transactionEvent(sender, "Sender Missing");
 		return -1;
 	}
 
@@ -112,7 +110,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 
 			mtx.unlock();
 
-			transactionEvent("Transaction success");
+			transactionEvent(sender, "Transaction success");
 
 			return 1;
 		}
@@ -142,7 +140,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			stmt.execDML();
 			mtx.unlock();
 
-			transactionEvent("Transaction failure");
+			transactionEvent(sender, "Transaction failure");
 
 			return 0;
 		}
@@ -195,7 +193,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 
 			mtx.unlock();
 
-			transactionEvent("Transaction success");
+			transactionEvent(sender, "Transaction success");
 
 			return 1;
 		}
@@ -228,25 +226,25 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 
 			mtx.unlock();
 
-			transactionEvent("Transaction failure");
+			transactionEvent(sender, "Transaction failure");
 
 			return 0;
 		}
 		mtx.unlock();
 
-		transactionEvent("Transaction failure");
+		transactionEvent(sender, "Transaction failure");
 
 		return 0;
 		
 	}
 	mtx.unlock();
-	transactionEvent("Transaction failure");
+	transactionEvent(sender, "Transaction failure");
 
 	return 0;
 }
 
 
-BalanceType LedgerHandler::getBalance(string PublicKey, const __int64 queryTime, function<void(string)> transactionEvent)
+BalanceType LedgerHandler::getBalance(string PublicKey, const __int64 queryTime, string sender, function<void(string, string)> transactionEvent)
 {
 	//make a balance type and modify it
 
@@ -330,7 +328,7 @@ BalanceType LedgerHandler::getBalance(string PublicKey, const __int64 queryTime,
 
 		return balance_type;
 	}
-	transactionEvent("No such Sender exists");
+	transactionEvent(sender, "No such Sender exists");
 
 
 	return balance_type;

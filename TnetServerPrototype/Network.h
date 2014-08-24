@@ -1,7 +1,7 @@
 #ifndef Network_H
 #define Network_H
 
-using namespace System;
+
 using namespace System::Threading;
 using namespace System::Net::Sockets;
 using namespace System::Net;

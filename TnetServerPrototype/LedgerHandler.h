@@ -16,8 +16,8 @@ class LedgerHandler
 	
 public:
 
-	int transaction(string senderName, string receiverName, int64_t transactionAmount, function<void(string)> transactionEvent);
-	BalanceType getBalance(string UserName, const __int64 time, function<void(string)> transactionEvent);
+	int transaction(string senderName, string receiverName, int64_t transactionAmount, string sender, function<void(string, string)> transactionEvent);
+	BalanceType getBalance(string UserName, const __int64 time, string sender, function<void(string, string)> transactionEvent);
 
 };
 #endif

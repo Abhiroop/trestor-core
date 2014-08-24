@@ -25,6 +25,5 @@ int main(array<System::String ^> ^args)
 		Thread::Sleep(100);
 	}
 
-
     return 0;
 }
