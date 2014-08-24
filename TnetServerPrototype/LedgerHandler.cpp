@@ -1,6 +1,7 @@
 
 #include "LedgerHandler.h"
-#include "GetBalanceType.h"
+#include "BalanceType.h"
+#include "Base64_2.h"
 #include <mutex>
 
 std::mutex mtx;
@@ -13,10 +14,17 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 
 	//check sender
 	mtx.lock();
+	/*
 	string qry = "select Balance from Ledger where PublicKey = '";
 	qry.append(senderPublickey);
 	qry.append("';");
 	CppSQLite3Query q = global_db.execQuery(qry.c_str());
+	*/
+
+	CppSQLite3Statement stmt =global_db.compileStatement("select Balance from Ledger where PublicKey = @u1");
+	stmt.bind("@u1", senderPublickey.c_str());
+	CppSQLite3Query q = stmt.execQuery();
+
 
 	int64_t sender_balance = 0;
 	bool senderExists = 0;
@@ -41,10 +49,18 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 
 
 	//check receiver
+	/*
 	qry = "select Balance from Ledger where PublicKey = '";
 	qry.append(receiverPublicKey);
 	qry.append("';");
     q = global_db.execQuery(qry.c_str());
+	*/
+
+	stmt.reset();
+
+    stmt = global_db.compileStatement("select Balance from Ledger where PublicKey = @u1");
+	stmt.bind("@u1", receiverPublicKey.c_str());
+	q = stmt.execQuery();
 
 	int64_t receiver_balance = 0;
 	bool receiverExists = 0;
@@ -230,16 +246,22 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 }
 
 
-GetBalanceType LedgerHandler::getBalance(string PublicKey, const __int64 queryTime, function<void(string)> transactionEvent)
+BalanceType LedgerHandler::getBalance(string PublicKey, const __int64 queryTime, function<void(string)> transactionEvent)
 {
 	//make a balance type and modify it
 
-	GetBalanceType balance_type;
-
+	BalanceType balance_type;
+	
+	/*
 	string qry = "select Balance from Ledger where PublicKey = '";
 	qry.append(PublicKey);
 	qry.append("';");
 	CppSQLite3Query q = global_db.execQuery(qry.c_str());
+	*/
+
+	CppSQLite3Statement stmt = global_db.compileStatement("select Balance from Ledger where PublicKey = @u1");
+	stmt.bind("@u1", PublicKey.c_str());
+	CppSQLite3Query q = stmt.execQuery();
 
 	//int row_counter = 0;
 	while (!q.eof())
@@ -250,19 +272,62 @@ GetBalanceType LedgerHandler::getBalance(string PublicKey, const __int64 queryTi
 		balance_type.setBalance(balance);
 
 		//retrive history
-		CppSQLite3Statement stmt = global_db.compileStatement("select * from TransactionHistory where ( ((Sender = @u1) OR (Receiver = @u1)) AND (Time > @u2))");
+		CppSQLite3Statement stmt = 
+			global_db.compileStatement("select * from TransactionHistory where ( ((Sender = @u1) OR (Receiver = @u1)) AND (Time > @u2))");
+
 		stmt.bind("@u1", PublicKey.c_str());
 		stmt.bind("@u2", queryTime);
 
 		CppSQLite3Query q = stmt.execQuery();
 
+		vector<string> transactionHistory;
 		while (!q.eof())
 		{
+			string tran;
+
+			/*
+			get string from database
+			convert them to base64 format
+			then append them, individual rows will be separated by :
+			put them in a string vector
+			*/
 			string ID = q.fieldValue(0);
-			//string sender = 
+			string ID_64 = base64_encode_2(ID.c_str(), ID.length());
+			
+			tran = tran.append(ID_64);
+
+			string Sender = q.fieldValue(1);
+			string Sender_64 = base64_encode_2(Sender.c_str(), Sender.length());
+			
+			tran = tran.append(":").append(Sender_64);
+
+			string Receiver = q.fieldValue(2);
+			string Receiver_64 = base64_encode_2(Receiver.c_str(), Receiver.length());
+
+			tran = tran.append(":").append(Receiver_64);
+
+			string Amount = q.fieldValue(3);
+			string Amount_64 = base64_encode_2(Amount.c_str(), Amount.length());
+
+			tran = tran.append(":").append(Amount_64);
+
+			string Time = q.fieldValue(4);
+			string Time_64 = base64_encode_2(Time.c_str(), Time.length());
+
+			tran = tran.append(":").append(Time_64);
+
+			string IsSuccess = q.fieldValue(5);
+			string IsSuccess_64 = base64_encode_2(IsSuccess.c_str(), IsSuccess.length());
+
+			tran = tran.append(":").append(IsSuccess_64);
+
+			transactionHistory.push_back(tran);
 
 			q.nextRow();
 		}
+		//vector set
+		balance_type.setTransactionHistory(transactionHistory);
+
 		return balance_type;
 	}
 	transactionEvent("No such Sender exists");

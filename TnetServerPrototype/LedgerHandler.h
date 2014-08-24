@@ -7,7 +7,7 @@
 #include <time.h>
 #include "Constants2.h"
 #include <functional>
-#include "GetBalanceType.h"
+#include "BalanceType.h"
 
 using namespace std;
 
@@ -17,8 +17,7 @@ class LedgerHandler
 public:
 
 	int transaction(string senderName, string receiverName, int64_t transactionAmount, function<void(string)> transactionEvent);
-	GetBalanceType getBalance(string UserName, const __int64 time, function<void(string)> transactionEvent);
-
+	BalanceType getBalance(string UserName, const __int64 time, function<void(string)> transactionEvent);
 
 };
 #endif

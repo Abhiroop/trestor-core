@@ -7,9 +7,10 @@
 
 using namespace std;
 
-class GetBalanceType
+class BalanceType
 {
 	int64_t balance;
+	//roe in base 64 format separated by pipes
 	vector<string> transactionHistory;
 
 public:
