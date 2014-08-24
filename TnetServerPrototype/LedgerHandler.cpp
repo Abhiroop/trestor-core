@@ -4,6 +4,7 @@
 int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey, int64_t transactionAmount)
 {
 	//check sender
+	mtx.lock();
 	string qry = "select Balance from Ledger where PublicKey = '";
 	qry.append(senderPublickey);
 	qry.append("';");
@@ -25,6 +26,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 	}
 	if (!senderExists)
 	{
+		mtx.unlock();
 		throw exception("Sender Missing", 1);
 		return -1;
 	}
@@ -70,6 +72,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			//get the current system time here
 			stmt.bind("@u6", receiverPublicKey.c_str());
 			int upate_rows = stmt.execDML();
+			mtx.unlock();
 			return 1;
 		}
 
@@ -81,9 +84,10 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			stmt.bind("@u1", senderNewBalance);
 			stmt.bind("@u2", senderPublickey.c_str());
 			int n_rows = stmt.execDML();
+			mtx.unlock();
 			return 0;
 		}
-		
+		mtx.unlock();
 		return 0;
 		
 	}
@@ -111,6 +115,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			stmt.bind("@u2", receiverPublicKey.c_str());
 			stmt.execDML();
 			stmt.reset();
+			mtx.unlock();
 			return 1;
 		}
 		else
@@ -120,12 +125,15 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1 where PublicKey = @u2");
 			stmt.bind("@u1", senderNewBalance);
 			stmt.bind("@u2", senderPublickey.c_str());
+			mtx.unlock();
 			return 0;
 		}
+		mtx.unlock();
 		return 0;
 		
 	}
-
+	mtx.unlock();
+	return 0;
 }
 
 
@@ -146,6 +154,7 @@ int64_t LedgerHandler::getBalance(string PublicKey)
 	}
 	//if (row_counter == 0)
 	throw exception("No such user exists", 1);
+
 
 	return -1;
 }
