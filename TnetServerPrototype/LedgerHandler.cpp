@@ -1,14 +1,17 @@
 
 #include "LedgerHandler.h"
+#include <mutex>
+
+std::mutex mtx;
+
+void LedgerHandler::attachHandler(function<void(string)> _transactionEvent)
+{
+	transactionEvent = _transactionEvent;
+}
 
 int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey, int64_t transactionAmount)
 {
-	time_t rawtime;
-	struct tm * timeinfo;
-
-	time(&rawtime);
-	timeinfo = localtime(&rawtime);
-	string current_time = asctime(timeinfo);
+	const __int64 current_time = time(0);
 
 	//check sender
 	mtx.lock();
@@ -27,14 +30,14 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 		senderExists = 1;
 
 		if (sender_balance < transactionAmount)
-			throw exception("Unsufficient Sender Balance", 1);
+			transactionEvent("Unsufficient Sender Balance");
 
 		q.nextRow();
 	}
 	if (!senderExists)
 	{
 		mtx.unlock();
-		throw exception("Sender Missing", 1);
+		transactionEvent("Sender Missing");
 		return -1;
 	}
 
@@ -77,7 +80,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			//bt default user is unbblocked
 			stmt.bind("@u5", 0);
 			//get the current system time here
-			stmt.bind("@u6", current_time.c_str());
+			stmt.bind("@u6", current_time);
 			int upate_rows = stmt.execDML();
 			
 			//update transaction history
@@ -87,10 +90,16 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			stmt.bind("@u2", senderPublickey.c_str());
 			stmt.bind("@u3", receiverPublicKey.c_str());
 			stmt.bind("@u4", transactionAmount);	
-			stmt.bind("@u5", current_time.c_str());
+			stmt.bind("@u5", current_time);
 			//successful transaction
 			stmt.bind("@u6", 1);
+			//execute
+			stmt.execDML();
+
 			mtx.unlock();
+
+			transactionEvent("Transaction success");
+
 			return 1;
 		}
 
@@ -101,7 +110,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1 where PublicKey = @u2");
 			stmt.bind("@u1", senderNewBalance);
 			stmt.bind("@u2", senderPublickey.c_str());
-			stmt.bind("@u6", current_time.c_str());
+			stmt.bind("@u6", current_time);
 
 			int n_rows = stmt.execDML();
 			
@@ -112,11 +121,15 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			stmt.bind("@u2", senderPublickey.c_str());
 			stmt.bind("@u3", receiverPublicKey.c_str());
 			stmt.bind("@u4", transactionAmount);
-			stmt.bind("@u5", current_time.c_str());
+			stmt.bind("@u5", current_time);
 			//unsuccessful transaction
 			stmt.bind("@u6", 0);
-			
+			//execute
+			stmt.execDML();
 			mtx.unlock();
+
+			transactionEvent("Transaction failure");
+
 			return 0;
 		}
 		mtx.unlock();
@@ -135,7 +148,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 		CppSQLite3Statement stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1, LastTransaction = @u6 where PublicKey = @u2");
 		stmt.bind("@u1", senderNewBalance);
 		stmt.bind("@u2", senderPublickey.c_str());
-		stmt.bind("@u6", current_time.c_str());
+		stmt.bind("@u6", current_time);
 
 		int ex_row = stmt.execDML();
 
@@ -148,7 +161,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			
 			stmt.bind("@u1", receiverNewBalance);
 			stmt.bind("@u2", receiverPublicKey.c_str());
-			stmt.bind("@u6", current_time.c_str());
+			stmt.bind("@u6", current_time);
 
 			stmt.execDML();
 
@@ -159,11 +172,17 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			stmt.bind("@u2", senderPublickey.c_str());
 			stmt.bind("@u3", receiverPublicKey.c_str());
 			stmt.bind("@u4", transactionAmount);
-			stmt.bind("@u5", current_time.c_str());
+			stmt.bind("@u5", current_time);
 			//successful transaction
 			stmt.bind("@u6", 1);
 
+			//execute
+			stmt.execDML();
+
 			mtx.unlock();
+
+			transactionEvent("Transaction success");
+
 			return 1;
 		}
 		else
@@ -175,7 +194,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			
 			stmt.bind("@u1", senderNewBalance);
 			stmt.bind("@u2", senderPublickey.c_str()); 
-			stmt.bind("@u6", current_time.c_str());
+			stmt.bind("@u6", current_time);
 
 			stmt.execDML();
 
@@ -186,17 +205,29 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			stmt.bind("@u2", senderPublickey.c_str());
 			stmt.bind("@u3", receiverPublicKey.c_str());
 			stmt.bind("@u4", transactionAmount);
-			stmt.bind("@u5", current_time.c_str());
+			stmt.bind("@u5", current_time);
 			//unsuccessful transaction
 			stmt.bind("@u6", 0);
+
+			//execute
+			stmt.execDML();
+
 			mtx.unlock();
+
+			transactionEvent("Transaction failure");
+
 			return 0;
 		}
 		mtx.unlock();
+
+		transactionEvent("Transaction failure");
+
 		return 0;
 		
 	}
 	mtx.unlock();
+	transactionEvent("Transaction failure");
+
 	return 0;
 }
 
@@ -217,7 +248,7 @@ int64_t LedgerHandler::getBalance(string PublicKey)
 		return balance;
 	}
 	//if (row_counter == 0)
-	throw exception("No such user exists", 1);
+	transactionEvent("No such Sender exists");
 
 
 	return -1;

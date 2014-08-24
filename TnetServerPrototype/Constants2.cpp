@@ -2,4 +2,3 @@
 
 CppSQLite3DB global_db;
 
-std::mutex mtx;

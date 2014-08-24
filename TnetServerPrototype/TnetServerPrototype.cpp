@@ -8,14 +8,16 @@
 
 using namespace System;
 
+shared_ptr<LedgerHandler> lH(new LedgerHandler);
+
+
 int main(array<System::String ^> ^args)
 {
-
 	global_db.open("D:\\work\\Trestor Foundation\\TNetUI\\TnetServerPrototype\\db\\ledger.dat");
 
-    Console::WriteLine(L"Starting Server");
+    Console::WriteLine(L"Server Started ....");
 
-	NetworkClient^ nc = gcnew NetworkClient();
+	NetworkClient^ nc = gcnew NetworkClient(lH);
 
 	while (true)
 	{

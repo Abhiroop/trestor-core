@@ -105,7 +105,9 @@
     <ClCompile Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.cpp" />
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="Constants2.cpp" />
-    <ClCompile Include="LedgerHandler.cpp" />
+    <ClCompile Include="LedgerHandler.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
