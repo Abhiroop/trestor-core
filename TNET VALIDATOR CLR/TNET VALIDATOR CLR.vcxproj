@@ -89,6 +89,7 @@
     <ClCompile Include="..\TNET_UI\Sources\Base64.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Base64_2.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\BaseNetwork.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -223,6 +224,7 @@
   <ItemGroup>
     <ClInclude Include="..\TNET_UI\Sources\AccountInfo.h" />
     <ClInclude Include="..\TNET_UI\Sources\Base64.h" />
+    <ClInclude Include="..\TNET_UI\Sources\Base64_2.h" />
     <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h" />
     <ClInclude Include="..\TNET_UI\Sources\CandidateSet.h" />
     <ClInclude Include="..\TNET_UI\Sources\Consensus.h" />
