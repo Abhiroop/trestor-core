@@ -69,7 +69,7 @@ void NetworkClient::HandleClient(System::Object^ _TCD)
 					int64_t PAISA = Int64::Parse(parts2[2]);
 
 
-					lH2->transaction(SENDER_PK, RECEIVER_PK, PAISA);
+					//lH2->transaction(SENDER_PK, RECEIVER_PK, PAISA, );
 
 				}
 			}

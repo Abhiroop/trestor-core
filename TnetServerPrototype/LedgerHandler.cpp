@@ -1,15 +1,13 @@
 
 #include "LedgerHandler.h"
+#include "GetBalanceType.h"
 #include <mutex>
 
 std::mutex mtx;
 
-void LedgerHandler::attachHandler(function<void(string)> _transactionEvent)
-{
-	transactionEvent = _transactionEvent;
-}
 
-int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey, int64_t transactionAmount)
+
+int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey, int64_t transactionAmount, function<void(string)> transactionEvent)
 {
 	const __int64 current_time = time(0);
 
@@ -232,8 +230,12 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 }
 
 
-int64_t LedgerHandler::getBalance(string PublicKey, const __int64 time)
+GetBalanceType LedgerHandler::getBalance(string PublicKey, const __int64 queryTime, function<void(string)> transactionEvent)
 {
+	//make a balance type and modify it
+
+	GetBalanceType balance_type;
+
 	string qry = "select Balance from Ledger where PublicKey = '";
 	qry.append(PublicKey);
 	qry.append("';");
@@ -245,11 +247,26 @@ int64_t LedgerHandler::getBalance(string PublicKey, const __int64 time)
 		string baltemp = q.fieldValue(0);
 		int64_t balance = atoll(baltemp.c_str());
 
-		return balance;
+		balance_type.setBalance(balance);
+
+		//retrive history
+		CppSQLite3Statement stmt = global_db.compileStatement("select * from TransactionHistory where ( ((Sender = @u1) OR (Receiver = @u1)) AND (Time > @u2))");
+		stmt.bind("@u1", PublicKey.c_str());
+		stmt.bind("@u2", queryTime);
+
+		CppSQLite3Query q = stmt.execQuery();
+
+		while (!q.eof())
+		{
+			string ID = q.fieldValue(0);
+			//string sender = 
+
+			q.nextRow();
+		}
+		return balance_type;
 	}
-	//if (row_counter == 0)
 	transactionEvent("No such Sender exists");
 
 
-	return -1;
+	return balance_type;
 }

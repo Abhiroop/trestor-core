@@ -13,16 +13,10 @@ class GetBalanceType
 	vector<string> transactionHistory;
 
 public:
-
-	void setBalance(int64_t _balance)
-	{
-		balance = _balance;
-	}
-
-	void setTransactionHistory(vector<string> _transactionHistory)
-	{
-		transactionHistory = _transactionHistory;
-	}
+	void setBalance(int64_t _balance);
+	void setTransactionHistory(vector<string> _transactionHistory);
+	int64_t getBalance();
+	vector<string> getTransactionHistory();
 
 };
 #endif
