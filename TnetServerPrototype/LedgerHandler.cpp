@@ -3,6 +3,13 @@
 
 int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey, int64_t transactionAmount)
 {
+	time_t rawtime;
+	struct tm * timeinfo;
+
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+	string current_time = asctime(timeinfo);
+
 	//check sender
 	mtx.lock();
 	string qry = "select Balance from Ledger where PublicKey = '";
@@ -70,8 +77,19 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			//bt default user is unbblocked
 			stmt.bind("@u5", 0);
 			//get the current system time here
-			stmt.bind("@u6", receiverPublicKey.c_str());
+			stmt.bind("@u6", current_time.c_str());
 			int upate_rows = stmt.execDML();
+			
+			//update transaction history
+			stmt.reset();
+			
+			stmt = global_db.compileStatement("insert into TransactionHistory values(@u1,@u2,@u3,@u4,@u5,@u6);");
+			stmt.bind("@u2", senderPublickey.c_str());
+			stmt.bind("@u3", receiverPublicKey.c_str());
+			stmt.bind("@u4", transactionAmount);	
+			stmt.bind("@u5", current_time.c_str());
+			//successful transaction
+			stmt.bind("@u6", 1);
 			mtx.unlock();
 			return 1;
 		}
@@ -83,7 +101,21 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1 where PublicKey = @u2");
 			stmt.bind("@u1", senderNewBalance);
 			stmt.bind("@u2", senderPublickey.c_str());
+			stmt.bind("@u6", current_time.c_str());
+
 			int n_rows = stmt.execDML();
+			
+			//update transaction history
+			stmt.reset();
+
+			stmt = global_db.compileStatement("insert into TransactionHistory values(@u1,@u2,@u3,@u4,@u5,@u6);");
+			stmt.bind("@u2", senderPublickey.c_str());
+			stmt.bind("@u3", receiverPublicKey.c_str());
+			stmt.bind("@u4", transactionAmount);
+			stmt.bind("@u5", current_time.c_str());
+			//unsuccessful transaction
+			stmt.bind("@u6", 0);
+			
 			mtx.unlock();
 			return 0;
 		}
@@ -100,9 +132,11 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 		int64_t receiverNewBalance = receiver_balance + transactionAmount;
 
 		//update sender
-		CppSQLite3Statement stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1 where PublicKey = @u2");
+		CppSQLite3Statement stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1, LastTransaction = @u6 where PublicKey = @u2");
 		stmt.bind("@u1", senderNewBalance);
 		stmt.bind("@u2", senderPublickey.c_str());
+		stmt.bind("@u6", current_time.c_str());
+
 		int ex_row = stmt.execDML();
 
 
@@ -110,11 +144,25 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 
 		if (ex_row == 1)
 		{
-			stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1 where PublicKey = @u2");
+			stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1, LastTransaction = @u6 where PublicKey = @u2");
+			
 			stmt.bind("@u1", receiverNewBalance);
 			stmt.bind("@u2", receiverPublicKey.c_str());
+			stmt.bind("@u6", current_time.c_str());
+
 			stmt.execDML();
+
+			//update transaction history
 			stmt.reset();
+
+			stmt = global_db.compileStatement("insert into TransactionHistory values(@u1,@u2,@u3,@u4,@u5,@u6);");
+			stmt.bind("@u2", senderPublickey.c_str());
+			stmt.bind("@u3", receiverPublicKey.c_str());
+			stmt.bind("@u4", transactionAmount);
+			stmt.bind("@u5", current_time.c_str());
+			//successful transaction
+			stmt.bind("@u6", 1);
+
 			mtx.unlock();
 			return 1;
 		}
@@ -122,9 +170,25 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 		{
 			senderNewBalance += transactionAmount;
 			stmt.reset();
-			stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1 where PublicKey = @u2");
+			
+			stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1, LastTransaction = @u6 where PublicKey = @u2");
+			
 			stmt.bind("@u1", senderNewBalance);
+			stmt.bind("@u2", senderPublickey.c_str()); 
+			stmt.bind("@u6", current_time.c_str());
+
+			stmt.execDML();
+
+			//update transaction history
+			stmt.reset();
+
+			stmt = global_db.compileStatement("insert into TransactionHistory values(@u1,@u2,@u3,@u4,@u5,@u6);");
 			stmt.bind("@u2", senderPublickey.c_str());
+			stmt.bind("@u3", receiverPublicKey.c_str());
+			stmt.bind("@u4", transactionAmount);
+			stmt.bind("@u5", current_time.c_str());
+			//unsuccessful transaction
+			stmt.bind("@u6", 0);
 			mtx.unlock();
 			return 0;
 		}
