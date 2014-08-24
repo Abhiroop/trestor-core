@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
+
+
 namespace TNetWallet
 {
     /// <summary>
@@ -13,5 +15,8 @@ namespace TNetWallet
     /// </summary>
     public partial class App : Application
     {
+        
+        
+
     }
 }
