@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TNetWallet.WalletOperations;
 
 namespace TNetWallet
 {
@@ -23,6 +24,10 @@ namespace TNetWallet
         public HomeScreen()
         {
             InitializeComponent();
+
+            TransactionHistory th = new TransactionHistory();
+            th.pushTransactionHistoryToLocalDB("");
+            System.Console.WriteLine(th.getLatestTransactionTime());
         }
 
         private void button_CreateAccount_Click(object sender, RoutedEventArgs e)
