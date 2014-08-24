@@ -3,6 +3,7 @@
 #include "BalanceType.h"
 #include "Base64_2.h"
 #include <mutex>
+#include <thread>
 
 std::mutex mtx;
 
@@ -10,8 +11,11 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 {
 	const __int64 current_time = time(0);
 
-	//check sender
-	mtx.lock();
+	while (mtx.try_lock())
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+	}
+	
 	/*
 	string qry = "select Balance from Ledger where PublicKey = '";
 	qry.append(senderPublickey);
@@ -34,10 +38,16 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 		senderExists = 1;
 
 		if (sender_balance < transactionAmount)
+		{
+			mtx.unlock();
 			transactionEvent(sender, "Unsufficient Sender Balance");
+			return -1;
+		}
+			
 
 		q.nextRow();
 	}
+
 	if (!senderExists)
 	{
 		mtx.unlock();

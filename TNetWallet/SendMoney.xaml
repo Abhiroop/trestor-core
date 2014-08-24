@@ -19,7 +19,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="18" Height="28" Grid.Column="1" Margin="43,21,48,0" FontWeight="Bold" Width="109" Text="Send Trests" />
-        <Button Grid.ColumnSpan="3" Content="Back" Margin="72,454,72,0" Grid.Row="1" Style="{DynamicResource TrestorButtonStyle}" Foreground="#FFFDFDFD" Background="#00000000" Height="38" VerticalAlignment="Top"/>
+        <Button Grid.ColumnSpan="3" Content="Back" Margin="72,376,72,0" Grid.Row="1" Style="{DynamicResource TrestorButtonStyle}" Foreground="#FFFDFDFD" Background="#00000000" Height="38" VerticalAlignment="Top"/>
         <Line Margin="0,0,0,49"/>
         <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Enter transaction details " VerticalAlignment="Top" FontSize="14" Height="28" Margin="23,49,22,0" Width="155" Grid.Column="1" />
 
@@ -31,7 +31,7 @@
             </local:TitledTextBox.ToolTip>
         </local:TitledTextBox>
         <Ellipse Name="passQualityEllipse" Grid.Column="2" HorizontalAlignment="Left" Height="22" Margin="59,125,0,0" Grid.Row="1" VerticalAlignment="Top" Width="22"/>
-        <local:TitledTextBox x:Name="textBox_UserName_Copy" ToolTipService.Placement="Bottom" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="72,95,0,0" Grid.Row="1" VerticalAlignment="Top" Width="256" TitleText="AMOUNT IN TRESTS">
+        <local:TitledTextBox x:Name="textBox_Money" ToolTipService.Placement="Bottom" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="72,95,0,0" Grid.Row="1" VerticalAlignment="Top" Width="256" TitleText="AMOUNT IN TRESTS" Text="10">
             <local:TitledTextBox.ToolTip>
                 <Border  Margin="-6" Padding="5" Background="#FF747474">
                     <TextBlock Foreground="White" Text="A unique id, will be used to transfer trests. It is preferable to have an anonymous ID."/>
@@ -39,13 +39,6 @@
             </local:TitledTextBox.ToolTip>
         </local:TitledTextBox>
         <Button x:Name="button_Send" Grid.ColumnSpan="3" Content="Next" Margin="72,181,72,0" Grid.Row="1" Style="{DynamicResource TrestorButtonStyle}" Foreground="#FFFDFDFD" Background="#00000000" Height="38" VerticalAlignment="Top" Click="button_Send_Click" />
-        <RichTextBox x:Name="rtb_Status" Grid.ColumnSpan="3" HorizontalAlignment="Left" Height="139" Margin="40,271,0,0" Grid.Row="1" VerticalAlignment="Top" Width="316">
-            <FlowDocument>
-                <Paragraph>
-                    <Run Text=""/>
-                </Paragraph>
-            </FlowDocument>
-        </RichTextBox>
-
+        <TextBlock Name="textBlock_Status" RenderTransformOrigin="1.525,3.788" Margin="72,290,72,165" Grid.Row="1" Grid.ColumnSpan="3" FontSize="20"/>
     </Grid>
 </Page>

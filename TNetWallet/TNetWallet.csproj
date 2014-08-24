@@ -121,8 +121,6 @@
     <Compile Include="Chaos.NaCl\Internal\Salsa\SalsaCore.cs" />
     <Compile Include="Chaos.NaCl\Internal\Sha512Internal.cs" />
     <Compile Include="Chaos.NaCl\MontgomeryCurve25519.cs" />
-    <Compile Include="Chaos.NaCl\OneTimeAuth.cs" />
-    <Compile Include="Chaos.NaCl\Poly1305.cs" />
     <Compile Include="Chaos.NaCl\Sha512.cs" />
     <Compile Include="Chaos.NaCl\XSalsa20Poly1305.cs" />
     <Compile Include="CryptoUtility\PublicKeyManagement.cs" />

@@ -25,9 +25,9 @@ namespace TNetWallet
         {
             InitializeComponent();
 
-            TransactionHistory th = new TransactionHistory();
-            th.pushTransactionHistoryToLocalDB("");
-            System.Console.WriteLine(th.getLatestTransactionTime());
+            //TransactionHistory th = new TransactionHistory();
+            //th.pushTransactionHistoryToLocalDB("");
+           // System.Console.WriteLine(th.getLatestTransactionTime());
         }
 
         private void button_CreateAccount_Click(object sender, RoutedEventArgs e)

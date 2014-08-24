@@ -119,7 +119,6 @@ void NetworkClient::UpdateEvents()
 		thr->Start(TCD);
 	}
 
-
 	MessageData md;
 	while (MessageQueue.try_pop(md))
 	{
@@ -131,7 +130,10 @@ void NetworkClient::UpdateEvents()
 			StreamWriter ^ sw = gcnew StreamWriter(ConnDict[dest]->Tc->GetStream());
 
 			sw->WriteLine("TRANS_RESP|" + Convert::ToBase64String(Encoding::UTF8->GetBytes(msg)));
+			sw->Flush();
 
+
+			Console::WriteLine(dest + ": " + msg);
 		}
 	}
 
