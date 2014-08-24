@@ -43,8 +43,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\work\Trestor Foundation\TNetUI\TNET_UI\Sources;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\work\Trestor Foundation\TNetUI\TNET_UI\Sources\SQLiteCpp;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\TNET_UI\Sources;$(IncludePath)</IncludePath>
+    <LibraryPath>..\TNET_UI\Sources\SQLiteCpp;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -92,6 +92,7 @@
     <ClInclude Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.h" />
     <ClInclude Include="..\TNET_UI\Sources\SQLiteCpp\sqlite3.h" />
     <ClInclude Include="Constants2.h" />
+    <ClInclude Include="GetBalanceType.h" />
     <ClInclude Include="LedgerHandler.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="resource.h" />
@@ -105,6 +106,7 @@
     <ClCompile Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.cpp" />
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="Constants2.cpp" />
+    <ClCompile Include="GetBalanceType.cpp" />
     <ClCompile Include="LedgerHandler.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>

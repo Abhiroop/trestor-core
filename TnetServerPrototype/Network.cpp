@@ -5,16 +5,19 @@
 #include "TCPClientData.h"
 #include "LedgerHandler.h"
 
-shared_ptr<LedgerHandler> lH;
+shared_ptr<LedgerHandler> lH2;
 
 NetworkClient::NetworkClient(shared_ptr<LedgerHandler> _lH)
 {
-	lH = _lH;
+	lH2 = _lH;
 
 	tList->Start();
 }
 
+void NetworkClient::ReplyToClient(string s)
+{
 
+}
 
 void NetworkClient::MarshalString(String ^ s, string& os) {
 	using namespace Runtime::InteropServices;
@@ -66,7 +69,7 @@ void NetworkClient::HandleClient(System::Object^ _TCD)
 					int64_t PAISA = Int64::Parse(parts2[2]);
 
 
-					lH->transaction(SENDER_PK, RECEIVER_PK, PAISA);
+					lH2->transaction(SENDER_PK, RECEIVER_PK, PAISA);
 
 				}
 			}

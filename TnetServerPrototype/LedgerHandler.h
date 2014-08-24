@@ -18,7 +18,7 @@ class LedgerHandler
 public:
 
 	int transaction(string senderName, string receiverName, int64_t transactionAmount);
-	int64_t getBalance(string UserName);
+	int64_t getBalance(string UserName, const __int64 time);
 
 	void attachHandler(function<void(string)> _transactionEvent);
 

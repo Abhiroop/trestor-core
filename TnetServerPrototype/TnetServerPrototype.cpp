@@ -13,7 +13,7 @@ shared_ptr<LedgerHandler> lH(new LedgerHandler);
 
 int main(array<System::String ^> ^args)
 {
-	global_db.open("D:\\work\\Trestor Foundation\\TNetUI\\TnetServerPrototype\\db\\ledger.dat");
+	global_db.open(".\\db\\ledger.dat");
 
     Console::WriteLine(L"Server Started ....");
 

@@ -232,7 +232,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 }
 
 
-int64_t LedgerHandler::getBalance(string PublicKey)
+int64_t LedgerHandler::getBalance(string PublicKey, const __int64 time)
 {
 	string qry = "select Balance from Ledger where PublicKey = '";
 	qry.append(PublicKey);

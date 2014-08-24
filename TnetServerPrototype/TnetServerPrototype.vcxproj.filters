@@ -51,6 +51,9 @@
     <ClInclude Include="Constants2.h">
       <Filter>Source Files\Ledger</Filter>
     </ClInclude>
+    <ClInclude Include="GetBalanceType.h">
+      <Filter>Source Files\Ledger</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc">
@@ -80,6 +83,9 @@
       <Filter>Source Files\Network</Filter>
     </ClCompile>
     <ClCompile Include="Constants2.cpp">
+      <Filter>Source Files\Ledger</Filter>
+    </ClCompile>
+    <ClCompile Include="GetBalanceType.cpp">
       <Filter>Source Files\Ledger</Filter>
     </ClCompile>
   </ItemGroup>
