@@ -56,9 +56,11 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
     q = global_db.execQuery(qry.c_str());
 	*/
 
-	CppSQLite3Statement stmt = global_db.compileStatement("select Balance from Ledger where PublicKey = @u1");
+	stmt.reset();
+
+    stmt = global_db.compileStatement("select Balance from Ledger where PublicKey = @u1");
 	stmt.bind("@u1", receiverPublicKey.c_str());
-	CppSQLite3Query q = stmt.execQuery();
+	q = stmt.execQuery();
 
 	int64_t receiver_balance = 0;
 	bool receiverExists = 0;
