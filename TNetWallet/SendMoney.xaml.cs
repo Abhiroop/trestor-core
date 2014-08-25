@@ -84,7 +84,7 @@ namespace TNetWallet
         {
             try
             {
-                Transactions t = new Transactions(SP_KEY, REC_KEY, long.Parse(textBox_Money.Text));
+                Transactions t = new Transactions(SP_KEY, REC_KEY, long.Parse(textBox_Money.Text), App.PublicKeyManagement);
                 nw.SendPacket("TRAN|" + t.Packet);
             }
             catch { }

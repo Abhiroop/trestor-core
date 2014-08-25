@@ -20,7 +20,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Create New Account" VerticalAlignment="Top" FontSize="18" Height="28" Grid.Column="1" Margin="14,21,13,0" FontWeight="Bold" Width="173" />
-        <Button Grid.ColumnSpan="3" Content="Create Account" Margin="72,295,72,0" Grid.Row="1" Style="{DynamicResource TrestorButtonStyle}" Foreground="#FFFDFDFD" Background="#00000000" Height="38" VerticalAlignment="Top"/>
+        <Button Grid.ColumnSpan="3" Content="Create Account" Margin="72,295,72,0" Grid.Row="1" Style="{DynamicResource TrestorButtonStyle}" Foreground="#FFFDFDFD" Background="#00000000" Height="38" VerticalAlignment="Top" Click="Button_Click"/>
         <Line Margin="0,0,0,49"/>
         <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="So, let's create your account, takes a few seconds." VerticalAlignment="Top" FontSize="14" Height="28" Grid.ColumnSpan="3" Margin="47,49,47,0" Width="306" />
 

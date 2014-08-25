@@ -27,7 +27,18 @@ namespace TNetWallet
 
         private void Button_Login_Click(object sender, RoutedEventArgs e)
         {
-            NavigationService.Navigate(App.SendMoney);
+            string userName = text_username.Text;
+            string passWord = text_password.Text;
+
+            int succ = App.PublicKeyManagement.userLogin(userName, passWord);
+
+            if (succ == 1)
+                NavigationService.Navigate(App.SendMoney);
+
+            else
+            {
+                text_username.Text = "";
+            }
         }
     }
 }

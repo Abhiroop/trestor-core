@@ -32,5 +32,18 @@ namespace TNetWallet
             passQualityEllipse.Fill = new SolidColorBrush(cc);
 
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            string userName = textBox_UserName.Text;
+            string passWord = textBox_Password.Text;
+
+            int succ = App.PublicKeyManagement.newUserRegistration(userName, passWord);
+
+            if(succ == 1)
+            {
+                NavigationService.Navigate(App.LoginPage);
+            }
+        }
     }
 }

@@ -31,6 +31,7 @@ namespace TNetWallet.WalletOperations
             {
                 outMaxTime = sqlite_datareader[0].ToString();
             }
+            sqlite_datareader.Close();
             sqlite_conn.Close();
 
             return outMaxTime;

@@ -11,10 +11,10 @@ using System.Data.SQLite;
 
 namespace TNetWallet.CryptoUtility
 {
-    class PublicKeyManagement
+    public class PublicKeyManagement
     {
         byte[] publicKey;
-        byte[] privateKey;
+        private byte[] privateKey;
         byte[] randomSeed = new byte[32];
         byte[] randomSalt = new byte[8];
         byte[] encryptedRandomSeed;
@@ -22,6 +22,14 @@ namespace TNetWallet.CryptoUtility
 
         static Encoding enc = Encoding.GetEncoding("ISO8859-1");
 
+        public byte[] PrivateKey
+        {
+            get 
+            {
+                return privateKey;
+            }
+            
+        }
         /// <summary>
         /// If there is already a user it will return zero
         /// if it is successful then this function wul retun 1
@@ -38,7 +46,7 @@ namespace TNetWallet.CryptoUtility
             sqlite_conn.Open();
             sqlite_cmd = sqlite_conn.CreateCommand();
 
-            sqlite_cmd.CommandText = "SELECT * FROM AppUsertable where Username = @u1";
+            sqlite_cmd.CommandText = "SELECT * FROM AppUserTable where Username = @u1";
             sqlite_cmd.Parameters.Add(new SQLiteParameter("@u1", username));
 
             sqlite_datareader = sqlite_cmd.ExecuteReader();
@@ -50,6 +58,8 @@ namespace TNetWallet.CryptoUtility
             {
                 return 0;
             }
+
+            sqlite_datareader.Close();
           
 
             (new RNGCryptoServiceProvider()).GetBytes(randomSeed);
@@ -59,8 +69,8 @@ namespace TNetWallet.CryptoUtility
 
             byte[] hashedPassword = (new SHA512Managed()).ComputeHash(enc.GetBytes(password).Concat(randomSalt).ToArray());
 
-            this.encryptedRandomSeed = EncryptAES(randomSeed, hashedPassword);
-            this.encryptedRandomSalt = EncryptAES(randomSalt, hashedPassword);
+            this.encryptedRandomSeed = EncryptAES(randomSeed, hashedPassword.Take(32).ToArray());
+            this.encryptedRandomSalt = EncryptAES(randomSalt, hashedPassword.Take(32).ToArray());
 
             /*
             FileStream fst = new FileStream(username+".key", FileMode.OpenOrCreate);
@@ -76,7 +86,7 @@ namespace TNetWallet.CryptoUtility
             try
             {
                 sqlite_cmd.CommandText =
-                    "INSERT INTO AppUsertable (UserName, RandomSalt, EncryptedRandomSeed, EncryptedRandomSalt) VALUES (@u1, @u2, @u3, @u4);";
+                    "INSERT INTO AppUserTable (UserName, RandomSalt, EncryptedRandomSeed, EncryptedRandomSalt) VALUES (@u1, @u2, @u3, @u4);";
                 sqlite_cmd.Parameters.Add(new SQLiteParameter("@u1", username));
                 sqlite_cmd.Parameters.Add(new SQLiteParameter("@u2", enc.GetString(randomSalt)));
                 sqlite_cmd.Parameters.Add(new SQLiteParameter("@u3", enc.GetString(encryptedRandomSeed)));
@@ -84,7 +94,7 @@ namespace TNetWallet.CryptoUtility
                 sqlite_cmd.ExecuteNonQuery();
             }
 
-            catch
+            catch(Exception e)
             {
                 return 0;
             }
@@ -108,7 +118,7 @@ namespace TNetWallet.CryptoUtility
             sqlite_conn.Open();
             sqlite_cmd = sqlite_conn.CreateCommand();
 
-            sqlite_cmd.CommandText = "SELECT * FROM AppUsertable where Username = @u1";
+            sqlite_cmd.CommandText = "SELECT * FROM AppUserTable where Username = @u1";
             sqlite_cmd.Parameters.Add(new SQLiteParameter("@u1", username));
 
             sqlite_datareader = sqlite_cmd.ExecuteReader();
@@ -121,17 +131,28 @@ namespace TNetWallet.CryptoUtility
             while (sqlite_datareader.Read())
             {
                 userExist = true;
-                this.randomSalt = enc.GetBytes(sqlite_datareader[0].ToString());
-                this.encryptedRandomSeed = enc.GetBytes(sqlite_datareader[1].ToString());
-                this.encryptedRandomSalt = enc.GetBytes(sqlite_datareader[2].ToString());
+                this.randomSalt = enc.GetBytes(sqlite_datareader["RandomSalt"].ToString());
+                this.encryptedRandomSeed = enc.GetBytes(sqlite_datareader["EncryptedRandomSeed"].ToString());
+                this.encryptedRandomSalt = enc.GetBytes(sqlite_datareader["EncryptedRandomSalt"].ToString());
             }
+
+            sqlite_datareader.Close();
+
+
             if(!userExist)
                 return 0;
 
             byte[] hashedPassword = (new SHA512Managed()).ComputeHash(enc.GetBytes(password).Concat(randomSalt).ToArray());
 
-            byte[] test_salt = DecryptAES(this.encryptedRandomSalt, hashedPassword);
-
+            byte[] test_salt;
+            try
+            {
+                test_salt = DecryptAES(this.encryptedRandomSalt, hashedPassword.Take(32).ToArray());
+            }
+            catch
+            {
+                return 0;
+            }
             //check if the key is correct or not
             if (test_salt.Length == randomSalt.Length)
             {
@@ -147,8 +168,14 @@ namespace TNetWallet.CryptoUtility
             }
 
             //get random seed
-            this.randomSeed = DecryptAES(this.encryptedRandomSeed, hashedPassword);
-
+            try
+            {
+                this.randomSeed = DecryptAES(this.encryptedRandomSeed, hashedPassword.Take(32).ToArray());
+            }
+            catch
+            {
+                return 0;
+            }
             //make keypair
             Ed25519.KeyPairFromSeed(out publicKey, out privateKey, randomSeed);
 
@@ -173,10 +200,12 @@ namespace TNetWallet.CryptoUtility
             // with the specified key and IV. 
             using (RijndaelManaged rijAlg = new RijndaelManaged())
             {
-                rijAlg.Key = Key;             
+                rijAlg.Key = Key;
+                rijAlg.Mode = CipherMode.CBC;
+                rijAlg.Padding = PaddingMode.PKCS7;
 
                 // Create a decrytor to perform the stream transform.
-                ICryptoTransform encryptor = rijAlg.CreateEncryptor(rijAlg.Key, rijAlg.IV);
+                ICryptoTransform encryptor = rijAlg.CreateEncryptor(rijAlg.Key, new byte[16]);
 
                 // Create the streams used for encryption. 
                 using (MemoryStream msEncrypt = new MemoryStream())
@@ -207,7 +236,6 @@ namespace TNetWallet.CryptoUtility
             if (Key == null || Key.Length <= 0)
                 throw new ArgumentNullException("Key");
        
-
             // Declare the string used to hold 
             // the decrypted text. 
             string plaintext = null;
@@ -217,9 +245,10 @@ namespace TNetWallet.CryptoUtility
             using (RijndaelManaged rijAlg = new RijndaelManaged())
             {
                 rijAlg.Key = Key;
-
+                rijAlg.Mode = CipherMode.CBC;
+                rijAlg.Padding = PaddingMode.PKCS7;
                 // Create a decrytor to perform the stream transform.
-                ICryptoTransform decryptor = rijAlg.CreateDecryptor(rijAlg.Key, rijAlg.IV);
+                ICryptoTransform decryptor = rijAlg.CreateDecryptor(rijAlg.Key, new byte [16]);
 
                 // Create the streams used for decryption. 
                 using (MemoryStream msDecrypt = new MemoryStream(cipherText))

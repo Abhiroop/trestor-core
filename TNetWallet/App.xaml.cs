@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using TNetWallet.CryptoUtility;
 
 
 
@@ -23,6 +24,8 @@ namespace TNetWallet
         public static SendMoney SendMoney = new SendMoney();
 
         // ////////////// .PAGES
+
+        public static PublicKeyManagement PublicKeyManagement = new PublicKeyManagement();
     
         
 
