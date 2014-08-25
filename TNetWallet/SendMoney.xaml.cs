@@ -26,7 +26,7 @@ namespace TNetWallet
         public SendMoney()
         {
             InitializeComponent();
-            nw = new Network("127.0.0.1");
+            nw = new Network("192.168.64.121");
             nw.PacketReceived += nw_PacketReceived;
             nw.ConnectionError += nw_ConnectionError;
         }
