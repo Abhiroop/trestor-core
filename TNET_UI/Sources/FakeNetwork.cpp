@@ -2,6 +2,9 @@
 // @Author : Arpan Jati
 // @Date: 12th Aug 2014
 
+#include <Windows.h>
+#include <Threadpoolapiset.h>
+
 #include "FakeNetwork.h"
 
 #include "tbb/concurrent_queue.h"
@@ -21,24 +24,56 @@ FakeNetwork::FakeNetwork()
 FakeNetwork::FakeNetwork(HANDLE & hTimerQueue, int Resolution_MS)
 {
 	// Create a new Timer Queue If not there already
-	if (NULL == hTimerQueue)
-	{
-		hTimerQueue = CreateTimerQueue();
-	}
+	//if (NULL == hTimerQueue)
+	//{
+	//	hTimerQueue = CreateTimerQueue();
+	//}
 
-	// Fail if Init fails
-	if (NULL == hTimerQueue)
-	{
-		GoodInit = false;
-	}
+	//// Fail if Init fails
+	//if (NULL == hTimerQueue)
+	//{
+	//	GoodInit = false;
+	//}
 
-	int DueTime = 0;
-	int Period = Resolution_MS;
+	//int DueTime = 0;
+	//int Period = Resolution_MS;
 
-	if (!CreateTimerQueueTimer(&hTimer, hTimerQueue, (WAITORTIMERCALLBACK)TimerProc, this, DueTime, Period, 0))
-	{
-		GoodInit = false;
-	}
+	//if (!CreateTimerQueueTimer(&hTimer, hTimerQueue, (WAITORTIMERCALLBACK)TimerProc, this, DueTime, Period, 0))
+	//{
+	//	GoodInit = false;
+	//}
+
+	BOOL bRet = FALSE;
+
+	FILETIME FileDueTime;
+	ULARGE_INTEGER ulDueTime;
+
+	InitializeThreadpoolEnvironment(&CallBackEnvironment);
+
+	pool = CreateThreadpool(NULL);
+
+	if (NULL == pool) { GoodInit = false; }
+
+	SetThreadpoolThreadMaximum(pool, 1);
+	bRet = SetThreadpoolThreadMinimum(pool, 1);
+
+	if (FALSE == bRet) { GoodInit = false; }
+
+	cleanupgroup = CreateThreadpoolCleanupGroup();
+
+	if (NULL == cleanupgroup) { GoodInit = false; }
+
+	SetThreadpoolCallbackPool(&CallBackEnvironment, pool);
+	SetThreadpoolCallbackCleanupGroup(&CallBackEnvironment, cleanupgroup, NULL);
+	timer = CreateThreadpoolTimer(timercallback, this, &CallBackEnvironment);
+
+	if (NULL == timer) { GoodInit = false; }
+
+	ulDueTime.QuadPart = (ULONGLONG)-(1 * 10 * 1000 * 1000);
+	FileDueTime.dwHighDateTime = ulDueTime.HighPart;
+	FileDueTime.dwLowDateTime = ulDueTime.LowPart;
+	SetThreadpoolTimer(timer, &FileDueTime, Resolution_MS, 0);
+
 }
 
 // Called every Resolution_MS milliseconds, used to process the pending Queue
@@ -76,10 +111,28 @@ void FakeNetwork::AttachReceiver(Hash SourcePK, function<void(NetworkPacket)> ca
 	Attachments.insert(std::make_pair(SourcePK, callback));
 }
 
-void CALLBACK TimerProc(void* lpParametar, BOOLEAN TimerOrWaitFired)
+
+VOID
+CALLBACK
+TimerCallbackX(
+PTP_CALLBACK_INSTANCE Instance,
+PVOID                 Parameter,
+PTP_TIMER             Timer
+)
 {
-	FakeNetwork* obj = (FakeNetwork*)lpParametar;
+	// Instance, Parameter, and Timer not used in this example.
+	UNREFERENCED_PARAMETER(Instance);
+	UNREFERENCED_PARAMETER(Timer);
+
+	FakeNetwork* obj = (FakeNetwork*)Parameter;
 	obj->TimerCallback();
 }
+
+//
+//void CALLBACK TimerProc(void* lpParametar, BOOLEAN TimerOrWaitFired)
+//{
+//	FakeNetwork* obj = (FakeNetwork*)lpParametar;
+//	obj->TimerCallback();
+//}
 
 
