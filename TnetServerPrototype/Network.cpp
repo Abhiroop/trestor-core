@@ -250,7 +250,7 @@ void NetworkClient::InternalUpdate()
 			StreamWriter ^ sw = gcnew StreamWriter(ConnDict[dest]->Tc->GetStream());
 
 			sw->WriteLine(type + "|" + Convert::ToBase64String(Encoding::UTF8->GetBytes(msg)));
-			sw->Flush();
+			sw->FlushAsync();
 
 			Console::WriteLine(DateTime::Now.ToShortTimeString() + " | " + dest + ": " + type + " : " + msg);
 		}

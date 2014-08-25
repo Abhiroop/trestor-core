@@ -8,7 +8,7 @@
 using namespace Threading;
 
 
-void ThreadProc(Object^ data)
+/*void ThreadProc(Object^ data)
 {
 	//NetworkClient^ nc = gcnew NetworkClient(lH);
 
@@ -21,7 +21,7 @@ void ThreadProc(Object^ data)
 	//	Thread::Sleep(30);
 	//}
 
-}
+}*/
 
 
 namespace TnetServerPrototype {
