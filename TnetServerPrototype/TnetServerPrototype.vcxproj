@@ -99,7 +99,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TNET_UI\Sources\Base64_2.cpp" />
-    <ClCompile Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="Constants2.cpp" />
     <ClCompile Include="BalanceType.cpp" />

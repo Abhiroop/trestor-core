@@ -21,9 +21,42 @@ struct MessageData
 	}
 };
 
+struct TransactionRequest
+{
+	// IP PORT for the client
+	string User;
+
+	// SenderPublic
+	string Sender;
+
+	// Receiver Public
+	string Receiver;
+	// Money / trests
+	int64_t Money;
+
+	// Signature
+	string Signature;
+
+	// Transaction Time
+	int64_t Time;
+
+	TransactionRequest(){};
+
+	TransactionRequest(string user, string sender, string receiver, int64_t money, string signature, int64_t time)
+	{
+		user = user;
+		Sender = Sender;
+		Receiver = receiver;
+		Money = money;
+		Signature = signature;
+		Time = time;
+	}
+};
+
 shared_ptr<LedgerHandler> lH2;
 
 concurrent_queue<MessageData> MessageQueue;
+concurrent_queue<TransactionRequest> TransactionQueue;
 
 void transEvent(string user, string message)
 {
@@ -59,46 +92,59 @@ void NetworkClient::HandleClient(System::Object^ _TCD)
 
 	while (TCD->Tc->Connected)
 	{
-		String^ data = sr->ReadLine();
-
-		if (data == nullptr)
+		try
 		{
-			Console::WriteLine("User Disconnected : " + TCD->Tc->Client->RemoteEndPoint->ToString());
-			break;
-		}
+			String^ data = sr->ReadLine();
 
-		cli::array<String^>^ parts = data->Split('|');
-
-		if (parts->Length == 2)
-		{
-			String^ FLAG = parts[0];
-			String^ DATA = parts[1];
-
-			String^ dd = Encoding::UTF8->GetString(Convert::FromBase64String(DATA));
-
-			if (FLAG == "TRAN")
+			if (data == nullptr)
 			{
-				cli::array<String^>^ parts2 = dd->Split('|');
+				Console::WriteLine("User Disconnected : " + TCD->Tc->Client->RemoteEndPoint->ToString());
+				break;
+			}
 
-				if (parts2->Length == 3)
+			cli::array<String^>^ parts = data->Split('|');
+
+			if (parts->Length == 2)
+			{
+				String^ FLAG = parts[0];
+				String^ DATA = parts[1];
+
+				String^ dd = Encoding::UTF8->GetString(Convert::FromBase64String(DATA));
+
+				if (FLAG == "TRAN")
 				{
-					std::string SENDER_PK;
-					std::string RECEIVER_PK;
-					std::string CONNECTED_USER;
+					cli::array<String^>^ parts2 = dd->Split('|');
 
-					MarshalString(parts2[0], SENDER_PK);
-					MarshalString(parts2[1], RECEIVER_PK);
-					MarshalString(TCD->Tc->Client->RemoteEndPoint->ToString(), CONNECTED_USER);
+					if (parts2->Length == 3)
+					{
+						std::string SENDER_PK;
+						std::string RECEIVER_PK;
+						std::string CONNECTED_USER;
 
-					int64_t PAISA = Int64::Parse(parts2[2]);
+						MarshalString(parts2[0], SENDER_PK);
+						MarshalString(parts2[1], RECEIVER_PK);
+						MarshalString(TCD->Tc->Client->RemoteEndPoint->ToString(), CONNECTED_USER);
 
-					MarshalString(parts2[1], RECEIVER_PK);
+						int64_t MONEY = Int64::Parse(parts2[2]);
 
-					lH2->transaction(SENDER_PK, RECEIVER_PK, PAISA, CONNECTED_USER, transEvent);
+						MarshalString(parts2[1], RECEIVER_PK);
+
+						TransactionRequest tr;
+						tr.Sender = SENDER_PK;
+						tr.Receiver = RECEIVER_PK;
+						tr.Money = MONEY;
+						tr.User = CONNECTED_USER;
+
+						TransactionQueue.push(tr);					
+					}
 				}
 			}
+
+		}		
+		catch (Exception^ ex)
+		{
+			Console::WriteLine("User Disconnected : " + TCD->Tc->Client->RemoteEndPoint->ToString() + " : " + ex->Message);
 		}
-		//Thread::Sleep(100);
 	}
 
 	Console::WriteLine("User Disconnected : " + TCD->Tc->Client->RemoteEndPoint->ToString());
@@ -134,6 +180,18 @@ void NetworkClient::UpdateEvents()
 
 
 			Console::WriteLine(dest + ": " + msg);
+		}
+	}
+
+
+	TransactionRequest tq;
+	while (TransactionQueue.try_pop(tq))
+	{
+		String ^ user = gcnew String(tq.User.c_str());		
+		if (ConnDict->ContainsKey(user))
+		{
+			StreamWriter ^ sw = gcnew StreamWriter(ConnDict[user]->Tc->GetStream());
+			lH2->transaction(tq.Sender, tq.Receiver, tq.Money, tq.User, transEvent);			
 		}
 	}
 

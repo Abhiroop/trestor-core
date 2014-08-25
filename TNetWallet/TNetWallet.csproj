@@ -44,6 +44,7 @@
     <Reference Include="System.Data.SQLite, Version=1.0.93.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86" />
     <Reference Include="System.Data.SQLite.Linq, Version=1.0.93.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -129,7 +130,10 @@
     <Compile Include="SendMoney.xaml.cs">
       <DependentUpon>SendMoney.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TitledTextBox.xaml.cs">
+    <Compile Include="UserControls\MoneyBar.xaml.cs">
+      <DependentUpon>MoneyBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\TitledTextBox.xaml.cs">
       <DependentUpon>TitledTextBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="WalletOperations\Network.cs" />
@@ -173,7 +177,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="TitledTextBox.xaml">
+    <Page Include="UserControls\MoneyBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\TitledTextBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

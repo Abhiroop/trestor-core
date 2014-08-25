@@ -22,7 +22,7 @@ int main(array<System::String ^> ^args)
 	while (true)
 	{
 		nc->UpdateEvents();
-		Thread::Sleep(100);
+		Thread::Sleep(30);
 	}
 
     return 0;

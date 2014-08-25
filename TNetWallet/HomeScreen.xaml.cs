@@ -32,12 +32,12 @@ namespace TNetWallet
 
         private void button_CreateAccount_Click(object sender, RoutedEventArgs e)
         {
-            NavigationService.Navigate(new RegisterPage());
+            NavigationService.Navigate(App.RegisterPage);
         }
 
         private void button_Login_Click(object sender, RoutedEventArgs e)
         {
-            NavigationService.Navigate(new LoginPage());
+            NavigationService.Navigate(App.LoginPage);
         }
     }
 }

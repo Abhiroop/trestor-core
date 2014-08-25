@@ -15,7 +15,15 @@ namespace TNetWallet
     /// </summary>
     public partial class App : Application
     {
-        
+        // ////////////// PAGES
+
+        public static HomeScreen HomeScreen = new HomeScreen();
+        public static LoginPage LoginPage = new LoginPage();
+        public static RegisterPage RegisterPage = new RegisterPage();
+        public static SendMoney SendMoney = new SendMoney();
+
+        // ////////////// .PAGES
+    
         
 
     }

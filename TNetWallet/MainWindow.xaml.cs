@@ -27,7 +27,7 @@ namespace TNetWallet
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            mainFrame.Content = new HomeScreen();
+            mainFrame.Content = App.HomeScreen;
         }
 
         private void button_Exit_Click(object sender, RoutedEventArgs e)
