@@ -8,60 +8,62 @@
 
 #include "Timer.h"
 
+#include <Threadpoolapiset.h>
+
 #ifdef TIMER_H//__cplusplus_cli
 
 
 
-namespace TimerX
-{
-	Timer::Timer()
-	{
-	}
-
-	Timer::Timer(HANDLE & hTimerQueue, int _DueTime, int _Period, function<void()> Callback)
-	{
-		// Create the timer queue.
-		hTimerQueue = CreateTimerQueue();
-		if (NULL == hTimerQueue)
-		{
-	
-		}
-
-		DueTime = _DueTime;
-		Period = _Period;
-		_Callback = Callback;
-		
-		if (!CreateTimerQueueTimer(&hTimer, hTimerQueue, (WAITORTIMERCALLBACK)TimerProcTMR, this, DueTime, Period, 0))
-		{
-			//printf("CreateTimerQueueTimer failed (%d)\n", GetLastError());
-			//return 3;
-		}
-	}
-
-	void Timer::DoCall()
-	{
-		_Callback();
-	}
-
-	void CALLBACK TimerProcTMR(void* lpParametar, BOOLEAN TimerOrWaitFired)
-	{
-		Timer* obj = (Timer*)lpParametar;
-		obj->DoCall();
-	}
-
-	/*
-	void Timer::Tick(void(*_Callback)())
-	{
-		//CallBack = _Callback;
-		// Set a timer to call the timer routine in 10 seconds.
-		if (!CreateTimerQueueTimer(&hTimer, hTimerQueue, (WAITORTIMERCALLBACK)_Callback, NULL, DueTime, Period, 0))
-		{
-			printf("CreateTimerQueueTimer failed (%d)\n", GetLastError());
-			//return 3;
-		}
-	}*/
-
-}
+//namespace TimerX
+//{
+//	Timer::Timer()
+//	{
+//	}
+//
+//	Timer::Timer(HANDLE & hTimerQueue, int _DueTime, int _Period, function<void()> Callback)
+//	{
+//		// Create the timer queue.
+//		hTimerQueue = CreateTimerQueue();
+//		if (NULL == hTimerQueue)
+//		{
+//	
+//		}
+//
+//		DueTime = _DueTime;
+//		Period = _Period;
+//		_Callback = Callback;
+//		
+//		if (!CreateTimerQueueTimer(&hTimer, hTimerQueue, (WAITORTIMERCALLBACK)TimerProcTMR, this, DueTime, Period, 0))
+//		{
+//			//printf("CreateTimerQueueTimer failed (%d)\n", GetLastError());
+//			//return 3;
+//		}
+//	}
+//
+//	void Timer::DoCall()
+//	{
+//		_Callback();
+//	}
+//
+//	void CALLBACK TimerProcTMR(void* lpParametar, BOOLEAN TimerOrWaitFired)
+//	{
+//		Timer* obj = (Timer*)lpParametar;
+//		obj->DoCall();
+//	}
+//
+//	//
+//	//void Timer::Tick(void(*_Callback)())
+//	//{
+//	//	CallBack = _Callback;
+//	//	 Set a timer to call the timer routine in 10 seconds.
+//	//	if (!CreateTimerQueueTimer(&hTimer, hTimerQueue, (WAITORTIMERCALLBACK)_Callback, NULL, DueTime, Period, 0))
+//	//	{
+//	//		printf("CreateTimerQueueTimer failed (%d)\n", GetLastError());
+//	//		return 3;
+//	//	}
+//	//}
+//
+//}
 
 #else
 

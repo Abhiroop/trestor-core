@@ -100,7 +100,8 @@
     <IncludePath>\Sources;\Sources\ed25519;G:\TRESTOR_PROJECT\TNetUI\TNET_UI\Sources\TBB;Sources\SQLiteCpp;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ExecutablePath>\Sources;\Sources\ed25519;Sources\SQLiteCpp;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+    <IncludePath>.\Sources;.\Sources\ed25519;.\Sources\SQLiteCpp;.\Sources\TBB;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
