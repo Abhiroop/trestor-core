@@ -17,6 +17,9 @@ namespace TNetWallet.CryptoUtility
         byte[] privateKey;
         byte[] randomSeed = new byte[32];
         byte[] randomSalt = new byte[8];
+        byte[] encryptedRandomSeed;
+        byte[] encryptedRandomSalt;
+
         static Encoding enc = Encoding.GetEncoding("ISO8859-1");
 
         /// <summary>
@@ -56,8 +59,8 @@ namespace TNetWallet.CryptoUtility
 
             byte[] hashedPassword = (new SHA512Managed()).ComputeHash(enc.GetBytes(password).Concat(randomSalt).ToArray());
 
-            byte[] encryptedRandomSeed = EncryptAES(randomSeed, hashedPassword);
-            byte[] encryptedRandomSalt = EncryptAES(randomSalt, hashedPassword);
+            this.encryptedRandomSeed = EncryptAES(randomSeed, hashedPassword);
+            this.encryptedRandomSalt = EncryptAES(randomSalt, hashedPassword);
 
             /*
             FileStream fst = new FileStream(username+".key", FileMode.OpenOrCreate);
@@ -86,7 +89,6 @@ namespace TNetWallet.CryptoUtility
                 return 0;
             }
 
-
             return 1;
         }
 
@@ -99,8 +101,58 @@ namespace TNetWallet.CryptoUtility
         /// <returns></returns>
         public int userLogin(String username, String password)
         {
+            SQLiteConnection sqlite_conn;
+            SQLiteCommand sqlite_cmd;
+            SQLiteDataReader sqlite_datareader;
+            sqlite_conn = new SQLiteConnection(@"data source=..\..\db\db.dat; Version=3; New=True; Compress=True;");
+            sqlite_conn.Open();
+            sqlite_cmd = sqlite_conn.CreateCommand();
 
-            return 0;
+            sqlite_cmd.CommandText = "SELECT * FROM AppUsertable where Username = @u1";
+            sqlite_cmd.Parameters.Add(new SQLiteParameter("@u1", username));
+
+            sqlite_datareader = sqlite_cmd.ExecuteReader();
+
+            //if there is no user retun 0
+            bool userExist = false;
+
+
+
+            while (sqlite_datareader.Read())
+            {
+                userExist = true;
+                this.randomSalt = enc.GetBytes(sqlite_datareader[0].ToString());
+                this.encryptedRandomSeed = enc.GetBytes(sqlite_datareader[1].ToString());
+                this.encryptedRandomSalt = enc.GetBytes(sqlite_datareader[2].ToString());
+            }
+            if(!userExist)
+                return 0;
+
+            byte[] hashedPassword = (new SHA512Managed()).ComputeHash(enc.GetBytes(password).Concat(randomSalt).ToArray());
+
+            byte[] test_salt = DecryptAES(this.encryptedRandomSalt, hashedPassword);
+
+            //check if the key is correct or not
+            if (test_salt.Length == randomSalt.Length)
+            {
+                for(int i = 0; i<test_salt.Length; i++)
+                {
+                    if(test_salt[i] != randomSalt[i])
+                        return 0;
+                }
+            }
+            else
+            {
+                return 0;
+            }
+
+            //get random seed
+            this.randomSeed = DecryptAES(this.encryptedRandomSeed, hashedPassword);
+
+            //make keypair
+            Ed25519.KeyPairFromSeed(out publicKey, out privateKey, randomSeed);
+
+            return 1;
         }
 
 
