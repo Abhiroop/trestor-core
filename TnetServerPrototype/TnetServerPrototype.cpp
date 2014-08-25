@@ -10,18 +10,19 @@ using namespace System;
 
 shared_ptr<LedgerHandler> lH(new LedgerHandler);
 
-
 int main(array<System::String ^> ^args)
 {
 	global_db.open(".\\db\\ledger.dat");
 
     Console::WriteLine(L"Server Started ....");
-
 	NetworkClient^ nc = gcnew NetworkClient(lH);
 
 	while (true)
 	{
-		nc->UpdateEvents();
+		if (!nc->Updating)
+		{
+			nc->UpdateEvents();
+		}
 		Thread::Sleep(30);
 	}
 

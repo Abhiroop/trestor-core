@@ -91,15 +91,18 @@ namespace TNetWallet
         {
             get
             {
-                return textBox_Content.Text;
+                if (_passBox)
+                    return BAD_ConvertToUnsecureString(passwordBox_Content.SecurePassword);
+                else return textBox_Content.Text;
             }
 
             set
             {
-                textBox_Content.Text = value;
+                if (_passBox)
+                    throw new Exception("Changing Passowrd not allowed.");
+                else
+                    textBox_Content.Text = value;
             }
-
-
         }
 
         public TitledTextBox()

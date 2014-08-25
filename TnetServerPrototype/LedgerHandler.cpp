@@ -5,16 +5,11 @@
 #include <mutex>
 #include <thread>
 
-std::mutex mtx;
 
 int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey, int64_t transactionAmount, string sender, function<void(string, string)> transactionEvent)
 {
 	const __int64 current_time = time(0);
 
-	while (mtx.try_lock())
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
-	}
 	
 	/*
 	string qry = "select Balance from Ledger where PublicKey = '";
@@ -39,7 +34,6 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 
 		if (sender_balance < transactionAmount)
 		{
-			mtx.unlock();
 			transactionEvent(sender, "Unsufficient Sender Balance");
 			return -1;
 		}
@@ -50,7 +44,6 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 
 	if (!senderExists)
 	{
-		mtx.unlock();
 		transactionEvent(sender, "Sender Missing");
 		return -1;
 	}
@@ -118,8 +111,6 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			//execute
 			stmt.execDML();
 
-			mtx.unlock();
-
 			transactionEvent(sender, "Transaction success");
 
 			return 1;
@@ -148,15 +139,13 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			stmt.bind("@u6", 0);
 			//execute
 			stmt.execDML();
-			mtx.unlock();
 
 			transactionEvent(sender, "Transaction failure");
 
 			return 0;
 		}
-		mtx.unlock();
-		return 0;
-		
+
+		return 0;		
 	}
 
 
@@ -173,8 +162,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 		stmt.bind("@u6", current_time);
 
 		int ex_row = stmt.execDML();
-
-
+		
 		//update receiver
 
 		if (ex_row == 1)
@@ -200,8 +188,6 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 
 			//execute
 			stmt.execDML();
-
-			mtx.unlock();
 
 			transactionEvent(sender, "Transaction success");
 
@@ -234,20 +220,17 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			//execute
 			stmt.execDML();
 
-			mtx.unlock();
-
 			transactionEvent(sender, "Transaction failure");
 
 			return 0;
 		}
-		mtx.unlock();
 
 		transactionEvent(sender, "Transaction failure");
 
 		return 0;
 		
 	}
-	mtx.unlock();
+
 	transactionEvent(sender, "Transaction failure");
 
 	return 0;
@@ -299,7 +282,7 @@ BalanceType LedgerHandler::getBalance(string PublicKey, const __int64 queryTime,
 			then append them, individual rows will be separated by :
 			put them in a string vector
 			*/
-			string ID = q.fieldValue(0);
+			string ID = "";// q.fieldValue(0);
 			string ID_64 = base64_encode_2(ID.c_str(), ID.length());
 			
 			tran = tran.append(ID_64);
@@ -338,8 +321,8 @@ BalanceType LedgerHandler::getBalance(string PublicKey, const __int64 queryTime,
 
 		return balance_type;
 	}
-	transactionEvent(sender, "No such Sender exists");
 
+	transactionEvent(sender, "No such Sender exists");
 
 	return balance_type;
 }

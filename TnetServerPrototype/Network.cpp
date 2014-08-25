@@ -11,13 +11,15 @@ struct MessageData
 {
 	string User;
 	string Message;
+	string MessageType;
 
 	MessageData(){};
 
-	MessageData(string user, string message)
+	MessageData(string user, string message, string messageType)
 	{
 		User = user;
 		Message = message;
+		MessageType = messageType;
 	}
 };
 
@@ -53,14 +55,46 @@ struct TransactionRequest
 	}
 };
 
+struct CommandRequest
+{
+	// IP PORT for the client
+	string User;
+
+	// SenderPublic
+	string Sender;
+
+	// Command
+	string Command;
+
+	// Command
+	string Data;
+
+	CommandRequest(){};
+
+	CommandRequest(string user, string sender, string command, string data)
+	{
+		User = user;
+		Sender = Sender;
+		Command = command;
+		Data = data;
+	}
+};
+
+
 shared_ptr<LedgerHandler> lH2;
 
 concurrent_queue<MessageData> MessageQueue;
 concurrent_queue<TransactionRequest> TransactionQueue;
+concurrent_queue<CommandRequest> CommandQueue;
 
 void transEvent(string user, string message)
 {
-	MessageQueue.push(MessageData(user, message));
+	MessageQueue.push(MessageData(user, message, "TRANS_RESP"));
+}
+
+void balanceEvent(string user, string message)
+{
+	MessageQueue.push(MessageData(user, message, "BAL_RESP"));
 }
 
 NetworkClient::NetworkClient(shared_ptr<LedgerHandler> _lH)
@@ -135,12 +169,44 @@ void NetworkClient::HandleClient(System::Object^ _TCD)
 						tr.Money = MONEY;
 						tr.User = CONNECTED_USER;
 
-						TransactionQueue.push(tr);					
+						TransactionQueue.push(tr);
 					}
 				}
 			}
 
-		}		
+			if (parts->Length == 4)
+			{
+				String^ FLAG = parts[0];
+				String^ __PK = parts[1]; // B64
+				String^ __COMM = parts[2]; // B64
+				String^ __DATA = parts[2]; // B64
+
+				String^ _PK = __PK;
+				String^ _COMM = Encoding::UTF8->GetString(Convert::FromBase64String(__COMM));
+				String^ _DATA = Encoding::UTF8->GetString(Convert::FromBase64String(__DATA));
+
+				if (FLAG == "COMMAND")
+				{
+					std::string PK;
+					std::string COMM;
+					std::string DATA;
+					std::string CONNECTED_USER;
+
+					MarshalString(_PK, PK);
+					MarshalString(_COMM, COMM);
+					MarshalString(_DATA, DATA);
+					MarshalString(TCD->Tc->Client->RemoteEndPoint->ToString(), CONNECTED_USER);
+
+					CommandRequest cr;
+					cr.Sender = PK;
+					cr.User = CONNECTED_USER;
+					cr.Command = COMM;
+					cr.Data = DATA;
+
+					CommandQueue.push(cr);
+				}
+			}
+		}
 		catch (Exception^ ex)
 		{
 			Console::WriteLine("User Disconnected : " + TCD->Tc->Client->RemoteEndPoint->ToString() + " : " + ex->Message);
@@ -155,6 +221,8 @@ void NetworkClient::HandleClient(System::Object^ _TCD)
 
 void NetworkClient::UpdateEvents()
 {
+	Updating = true;
+
 	while (tList->Pending())
 	{
 		TcpClient^ TC = tList->AcceptTcpClient();
@@ -170,16 +238,16 @@ void NetworkClient::UpdateEvents()
 	{
 		String ^ dest = gcnew String(md.User.c_str());
 		String ^ msg = gcnew String(md.Message.c_str());
+		String ^ type = gcnew String(md.MessageType.c_str());
 
 		if (ConnDict->ContainsKey(dest))
 		{
 			StreamWriter ^ sw = gcnew StreamWriter(ConnDict[dest]->Tc->GetStream());
 
-			sw->WriteLine("TRANS_RESP|" + Convert::ToBase64String(Encoding::UTF8->GetBytes(msg)));
+			sw->WriteLine(type + "|" + Convert::ToBase64String(Encoding::UTF8->GetBytes(msg)));
 			sw->Flush();
 
-
-			Console::WriteLine(dest + ": " + msg);
+			Console::WriteLine(DateTime::Now.ToShortTimeString() + " | " + dest + ": " + type + " : " + msg);
 		}
 	}
 
@@ -187,15 +255,31 @@ void NetworkClient::UpdateEvents()
 	TransactionRequest tq;
 	while (TransactionQueue.try_pop(tq))
 	{
-		String ^ user = gcnew String(tq.User.c_str());		
+		String ^ user = gcnew String(tq.User.c_str());
 		if (ConnDict->ContainsKey(user))
 		{
 			StreamWriter ^ sw = gcnew StreamWriter(ConnDict[user]->Tc->GetStream());
-			lH2->transaction(tq.Sender, tq.Receiver, tq.Money, tq.User, transEvent);			
+			lH2->transaction(tq.Sender, tq.Receiver, tq.Money, tq.User, transEvent);
 		}
 	}
 
+	CommandRequest cr;
+	while (CommandQueue.try_pop(cr))
+	{
+		String ^ user = gcnew String(cr.User.c_str());
+		if (ConnDict->ContainsKey(user))
+		{
+			StreamWriter ^ sw = gcnew StreamWriter(ConnDict[user]->Tc->GetStream());
+			if (cr.Command == "BAL")
+			{
+				BalanceType bt = lH2->getBalance(cr.Sender, 0, cr.User, balanceEvent);
+				int64_t bal = bt.getBalance();
+				balanceEvent(cr.User, to_string(bal));
+			}
+		}
+	}
 
+	Updating = false;
 }
 
 

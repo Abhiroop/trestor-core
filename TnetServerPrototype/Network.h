@@ -22,6 +22,8 @@ public ref class NetworkClient
 	
 public:
 
+	bool Updating = false;
+
 	NetworkClient(shared_ptr<LedgerHandler> _lH);
 
 	void MarshalString(String ^ s, string& os);
