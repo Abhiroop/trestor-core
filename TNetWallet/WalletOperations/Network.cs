@@ -32,7 +32,13 @@ namespace TNetWallet.WalletOperations
         {
             try
             {
-                tc = new TcpClient(IP, 5050);
+                tc = new TcpClient();
+
+                tc.ReceiveBufferSize = 64;
+                tc.SendBufferSize = 64;
+
+                tc.Connect(IP, 5050);
+
                 //dt = new DispatcherTimer();
                 //dt.Interval = new TimeSpan(0, 0, 0, 0, 100);
                 sr = new StreamReader(tc.GetStream());
@@ -78,9 +84,7 @@ namespace TNetWallet.WalletOperations
 
                         if (PacketReceived != null)
                             PacketReceived(FLAG, DECODED);
-
                     }
-
                 }
                 catch
                 {

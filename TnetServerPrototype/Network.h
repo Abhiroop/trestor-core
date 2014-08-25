@@ -24,7 +24,7 @@ public:
 
 	bool Updating = false;
 
-	NetworkClient(shared_ptr<LedgerHandler> _lH);
+	NetworkClient(/*shared_ptr<LedgerHandler> _lH*/);
 
 	void MarshalString(String ^ s, string& os);
 
@@ -32,7 +32,9 @@ public:
 
 	void ReplyToClient(string s);
 
-	void UpdateEvents();
+	void UpdateEvents(Object^ data);
+
+	void InternalUpdate();
 
 };
 

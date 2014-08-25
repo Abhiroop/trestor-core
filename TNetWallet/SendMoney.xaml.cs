@@ -33,9 +33,14 @@ namespace TNetWallet
 
         void nw_ConnectionError()
         {
-            textBlock_Status.Dispatcher.Invoke(new Action(delegate {
-                textBlock_Status.Text = "Connection ERROR";
-            }));
+            try
+            {
+                textBlock_Status.Dispatcher.Invoke(new Action(delegate
+                {
+                    textBlock_Status.Text = "Connection ERROR";
+                }));
+            }
+            catch { }            
         }
 
         void nw_PacketReceived(string Type, byte[] Data)

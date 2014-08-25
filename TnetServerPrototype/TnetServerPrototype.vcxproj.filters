@@ -60,6 +60,15 @@
     <ClInclude Include="..\TNET_UI\Sources\Base64_2.h">
       <Filter>Source Files\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="MainForm2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Utils.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Base64.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc">
@@ -95,6 +104,18 @@
       <Filter>Source Files\Ledger</Filter>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\Base64_2.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Program.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MainForm2.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Utils.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Base64.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
