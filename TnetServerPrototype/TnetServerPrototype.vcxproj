@@ -48,6 +48,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>..\TNET_UI\Sources;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>..\TNET_UI\Sources\SQLiteCpp;..\TNET_UI\Sources\TBB\lib\ia32\vc12;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -60,35 +62,43 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies />
+      <AdditionalDependencies>sqlite3.lib</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\TNET_UI\Sources\Base64.h" />
     <ClInclude Include="..\TNET_UI\Sources\Base64_2.h" />
     <ClInclude Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.h" />
     <ClInclude Include="..\TNET_UI\Sources\SQLiteCpp\sqlite3.h" />
+    <ClInclude Include="..\TNET_UI\Sources\Utils.h" />
     <ClInclude Include="Constants2.h" />
     <ClInclude Include="BalanceType.h" />
     <ClInclude Include="LedgerHandler.h" />
+    <ClInclude Include="MainForm2.h">
+      <FileType>CppForm</FileType>
+    </ClInclude>
     <ClInclude Include="Network.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -98,17 +108,29 @@
     <ResourceCompile Include="app.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\TNET_UI\Sources\Base64_2.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\Base64.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\Base64_2.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Utils.cpp" />
     <ClCompile Include="AssemblyInfo.cpp" />
-    <ClCompile Include="Constants2.cpp" />
-    <ClCompile Include="BalanceType.cpp" />
+    <ClCompile Include="Constants2.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="BalanceType.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="LedgerHandler.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="MainForm2.cpp" />
     <ClCompile Include="Network.cpp" />
+    <ClCompile Include="Program.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -118,6 +140,11 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="MainForm2.resx">
+      <DependentUpon>MainForm2.h</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

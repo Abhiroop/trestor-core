@@ -81,7 +81,10 @@ struct CommandRequest
 };
 
 
-shared_ptr<LedgerHandler> lH2;
+//shared_ptr<LedgerHandler> lH2;
+
+shared_ptr<LedgerHandler> lH2(new LedgerHandler);
+
 
 concurrent_queue<MessageData> MessageQueue;
 concurrent_queue<TransactionRequest> TransactionQueue;
@@ -97,9 +100,9 @@ void balanceEvent(string user, string message)
 	MessageQueue.push(MessageData(user, message, "BAL_RESP"));
 }
 
-NetworkClient::NetworkClient(shared_ptr<LedgerHandler> _lH)
+NetworkClient::NetworkClient(/*shared_ptr<LedgerHandler> _lH*/)
 {
-	lH2 = _lH;
+	//lH2 = _lH;
 	tList->Start();
 }
 
@@ -217,15 +220,17 @@ void NetworkClient::HandleClient(System::Object^ _TCD)
 }
 
 
-
-
-void NetworkClient::UpdateEvents()
+void NetworkClient::InternalUpdate()
 {
 	Updating = true;
 
 	while (tList->Pending())
 	{
 		TcpClient^ TC = tList->AcceptTcpClient();
+
+		TC->ReceiveBufferSize = 64;
+		TC->SendBufferSize = 64;
+		
 		TCPClientData^ TCD = gcnew TCPClientData(TC);
 		ConnDict->Add(TC->Client->RemoteEndPoint->ToString(), TCD);
 		ParameterizedThreadStart^ pts = gcnew ParameterizedThreadStart(this, &NetworkClient::HandleClient);
@@ -245,7 +250,7 @@ void NetworkClient::UpdateEvents()
 			StreamWriter ^ sw = gcnew StreamWriter(ConnDict[dest]->Tc->GetStream());
 
 			sw->WriteLine(type + "|" + Convert::ToBase64String(Encoding::UTF8->GetBytes(msg)));
-			sw->Flush();
+			sw->FlushAsync();
 
 			Console::WriteLine(DateTime::Now.ToShortTimeString() + " | " + dest + ": " + type + " : " + msg);
 		}
@@ -259,6 +264,9 @@ void NetworkClient::UpdateEvents()
 		if (ConnDict->ContainsKey(user))
 		{
 			StreamWriter ^ sw = gcnew StreamWriter(ConnDict[user]->Tc->GetStream());
+
+			//transEvent(tq.User, "DIE BITCH DIE");
+
 			lH2->transaction(tq.Sender, tq.Receiver, tq.Money, tq.User, transEvent);
 		}
 	}
@@ -273,13 +281,20 @@ void NetworkClient::UpdateEvents()
 			if (cr.Command == "BAL")
 			{
 				BalanceType bt = lH2->getBalance(cr.Sender, 0, cr.User, balanceEvent);
-				int64_t bal = bt.getBalance();
+				int64_t bal =  bt.getBalance();
 				balanceEvent(cr.User, to_string(bal));
 			}
 		}
 	}
 
 	Updating = false;
+}
+
+void NetworkClient::UpdateEvents(Object^ data)
+{
+	
+	if (!Updating) InternalUpdate();
+	
 }
 
 
