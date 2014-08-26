@@ -30,7 +30,10 @@ namespace TNetWallet
             string userName = text_username.Text;
             string passWord = text_password.Text;
 
-            int succ = App.PublicKeyManagement.userLogin(userName, passWord);
+            string message;
+            int succ = App.PublicKeyManagement.userLogin(userName, passWord, out message);
+
+            textbloc_login_status.Text = message;
 
             if (succ == 1)
                 NavigationService.Navigate(App.SendMoney);

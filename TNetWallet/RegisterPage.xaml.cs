@@ -38,7 +38,8 @@ namespace TNetWallet
             string userName = textBox_UserName.Text;
             string passWord = textBox_Password.Text;
 
-            int succ = App.PublicKeyManagement.newUserRegistration(userName, passWord);
+            string message;
+            int succ = App.PublicKeyManagement.newUserRegistration(userName, passWord, out message);
 
             if(succ == 1)
             {
