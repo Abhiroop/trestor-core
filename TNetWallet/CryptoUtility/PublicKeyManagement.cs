@@ -20,7 +20,7 @@ namespace TNetWallet.CryptoUtility
         byte[] encryptedRandomSeed;
         byte[] encryptedRandomSalt;
 
-        static Encoding enc = Encoding.GetEncoding("ISO8859-1");
+        static Encoding enc = Encoding.GetEncoding(28591);
 
         public byte[] PrivateKey
         {
@@ -30,6 +30,38 @@ namespace TNetWallet.CryptoUtility
             }
             
         }
+
+        public byte[] PublicKey
+        {
+            get
+            {
+                return publicKey;
+            }
+
+        }
+
+        public bool UserExistsLocal(string Username)
+        {
+            SQLiteConnection sqlite_conn;
+            SQLiteCommand sqlite_cmd;
+            SQLiteDataReader sqlite_datareader;
+            sqlite_conn = new SQLiteConnection(@"data source=..\..\db\db.dat; Version=3; New=True; Compress=True;");
+            sqlite_conn.Open();
+            sqlite_cmd = sqlite_conn.CreateCommand();
+
+            sqlite_cmd.CommandText = "SELECT * FROM AppUserTable where Username = @u1";
+            sqlite_cmd.Parameters.Add(new SQLiteParameter("@u1", Username));
+
+            sqlite_datareader = sqlite_cmd.ExecuteReader();
+
+            //if there is already user return true
+            while (sqlite_datareader.Read())
+                return true;
+
+            return false;
+        }
+
+
         /// <summary>
         /// If there is already a user it will return zero
         /// if it is successful then this function wul retun 1
@@ -37,8 +69,22 @@ namespace TNetWallet.CryptoUtility
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
+        /// 
         public int newUserRegistration(String username, String password, out string message)
         {
+            if (username.Length == 0)
+            {
+                message = "Username field can not be empty";
+                return 0;
+            }
+
+            if (password.Length == 0)
+            {
+                message = "Password field can not be empty";
+                return 0;
+            }
+
+
             SQLiteConnection sqlite_conn;
             SQLiteCommand sqlite_cmd;
             SQLiteDataReader sqlite_datareader;

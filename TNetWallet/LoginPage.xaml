@@ -29,6 +29,7 @@
         <local:TitledTextBox x:Name="text_username" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="78,10,0,0" Grid.Row="2" VerticalAlignment="Top" Height="62" Width="256"  TitleText="TRESTOR ID"/>
         <local:TitledTextBox x:Name="text_password" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="78,105,0,0" Grid.Row="2" VerticalAlignment="Top" Height="62" Width="256" TitleText="PASSWORD" IsPasswordBox="True"/>
         <TextBlock x:Name="textbloc_login_status" HorizontalAlignment="Left" Margin="78,30,0,0" Grid.Row="3" TextWrapping="Wrap" VerticalAlignment="Top" Width="256" Height="46" Foreground="#FF59AE46" Grid.ColumnSpan="3"/>
+        <TextBlock Grid.Column="1" HorizontalAlignment="Left" Margin="166,77,0,0" Grid.Row="2" TextWrapping="Wrap" Text="@trestor.com" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="97" Height="28" Foreground="#FF59AE46" FontSize="16"/>
 
     </Grid>
 </Page>

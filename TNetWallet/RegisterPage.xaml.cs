@@ -18,8 +18,33 @@ namespace TNetWallet
     /// <summary>
     /// Interaction logic for RegisterPage.xaml
     /// </summary>
+    /// 
+
+   
     public partial class RegisterPage : Page
     {
+        public string message;
+
+        public static bool validusername(string username)
+        {
+            if (username.ToLower().Contains("@trestor.com"))
+                return false;
+
+
+            foreach(char c in username)
+            {
+                if (char.IsLetterOrDigit(c))
+                    continue;
+                else if (c == '.')
+                    continue;
+
+                else
+                    return false;
+            }
+
+            return true;
+        }
+
         public RegisterPage()
         {
             InitializeComponent();
@@ -35,16 +60,74 @@ namespace TNetWallet
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            string userName = textBox_UserName.Text;
+            string userName = textBox_UserName.Text.ToLower().Trim();
             string passWord = textBox_Password.Text;
+            string pass_retype = textBox_RepeatPassword.Text;
+            bool isSame = (passWord == pass_retype);
 
-            string message;
-            int succ = App.PublicKeyManagement.newUserRegistration(userName, passWord, out message);
-
-            if(succ == 1)
+            if (!isSame)
             {
-                NavigationService.Navigate(App.LoginPage);
+                textbox_passcheck.Text = "Passwords are not same";
+                textBox_UserName.Text = "";
             }
+
+            else if(!validusername(userName))
+            {
+                textbox_passcheck.Text = "Use only alphanumeric username, . is allowed";
+                textBox_UserName.Text = "";
+            }
+
+            else if (userName.Length < 4)
+            {
+            }
+
+            else
+            {
+
+                userName += "@trestor.com";
+                int succ = App.PublicKeyManagement.newUserRegistration(userName, passWord, out message);
+
+                textbox_passcheck.Text = message;
+
+                if (succ == 1)
+                {
+                    //send username, address, public key and signature to the server
+                    NavigationService.Navigate(App.RegistrationConfirm);
+                    //NavigationService.Navigate(App.LoginPage);
+                }
+            }
+        }
+
+        private void textBox_UserName_LostFocus(object sender, RoutedEventArgs e)
+        {
+            string UserName = textBox_UserName.Text.ToLower().Trim();
+
+            if(UserName.Length < 4 )
+                username_checker.Text = "Minimum length is 3";
+
+            else if(!validusername(UserName))
+
+                username_checker.Text = "Invalid Username";
+
+
+            else
+            {
+                UserName += "@trestor.com";
+                if(App.PublicKeyManagement.UserExistsLocal(UserName))
+                {
+                    username_checker.Text = "UserName already exists";
+                    textBox_UserName.Text = "";
+                }
+                else
+                {
+                    username_checker.Text = "";
+                    //send to server
+                    
+                }
+            }
+
+
+            
         }
     }
 }

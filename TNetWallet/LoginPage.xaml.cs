@@ -27,7 +27,7 @@ namespace TNetWallet
 
         private void Button_Login_Click(object sender, RoutedEventArgs e)
         {
-            string userName = text_username.Text;
+            string userName = text_username.Text.ToLower().Trim() + "@trestor.com";
             string passWord = text_password.Text;
 
             string message;
