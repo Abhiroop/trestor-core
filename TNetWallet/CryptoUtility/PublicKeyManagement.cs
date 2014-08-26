@@ -37,7 +37,7 @@ namespace TNetWallet.CryptoUtility
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public int newUserRegistration(String username, String password)
+        public int newUserRegistration(String username, String password, out string message)
         {
             SQLiteConnection sqlite_conn;
             SQLiteCommand sqlite_cmd;
@@ -56,6 +56,7 @@ namespace TNetWallet.CryptoUtility
             //TODO
             while (sqlite_datareader.Read())
             {
+                message = "User "+username+" already exists";
                 return 0;
             }
 
@@ -96,9 +97,11 @@ namespace TNetWallet.CryptoUtility
 
             catch(Exception)
             {
+                message = "Database error";
                 return 0;
             }
 
+            message = "User registration successful";
             return 1;
         }
 
@@ -109,8 +112,20 @@ namespace TNetWallet.CryptoUtility
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public int userLogin(String username, String password)
+        public int userLogin(String username, String password, out string message)
         {
+            if(username.Length == 0)
+            {
+                message = "Username field can not be empty";
+                return 0;
+            }
+
+            if (password.Length == 0)
+            {
+                message = "Password field can not be empty";
+                return 0;
+            }
+
             SQLiteConnection sqlite_conn;
             SQLiteCommand sqlite_cmd;
             SQLiteDataReader sqlite_datareader;
@@ -139,8 +154,11 @@ namespace TNetWallet.CryptoUtility
             sqlite_datareader.Close();
 
 
-            if(!userExist)
+            if (!userExist)
+            {
+                message = "User " + username + " not exists in the app database";
                 return 0;
+            }
 
             byte[] hashedPassword = (new SHA512Managed()).ComputeHash(enc.GetBytes(password).Concat(randomSalt).ToArray());
 
@@ -151,6 +169,7 @@ namespace TNetWallet.CryptoUtility
             }
             catch
             {
+                message = "Password error";
                 return 0;
             }
             //check if the key is correct or not
@@ -158,12 +177,16 @@ namespace TNetWallet.CryptoUtility
             {
                 for(int i = 0; i<test_salt.Length; i++)
                 {
-                    if(test_salt[i] != randomSalt[i])
+                    if (test_salt[i] != randomSalt[i])
+                    {
+                        message = "Password error";
                         return 0;
+                    }
                 }
             }
             else
             {
+                message = "Password error";
                 return 0;
             }
 
@@ -174,11 +197,13 @@ namespace TNetWallet.CryptoUtility
             }
             catch
             {
+                message = "Password error";
                 return 0;
             }
             //make keypair
             Ed25519.KeyPairFromSeed(out publicKey, out privateKey, randomSeed);
 
+            message = "Suuccess";
             return 1;
         }
 
