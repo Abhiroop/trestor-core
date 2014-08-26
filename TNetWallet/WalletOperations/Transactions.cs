@@ -14,7 +14,7 @@ namespace TNetWallet.WalletOperations
         byte [] SenderPublicKey;
         byte [] ReceiverPublicKey;
         long Transaction;
-        byte[] signature;
+        //byte[] signature;
 
         private byte[] dataToSend;
         byte[] signedData;
@@ -36,7 +36,7 @@ namespace TNetWallet.WalletOperations
             //make packet here
 
 
-            signedData = Ed25519.Sign(dataToSend, privateKey);
+            //signedData = Ed25519.Sign(dataToSend, privateKey);
 
             //not required
             _pack = MakeTransactionPacket();

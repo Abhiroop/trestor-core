@@ -90,6 +90,9 @@
   <ItemGroup>
     <ClInclude Include="..\TNET_UI\Sources\Base64.h" />
     <ClInclude Include="..\TNET_UI\Sources\Base64_2.h" />
+    <ClInclude Include="..\TNET_UI\Sources\Conversions.h" />
+    <ClInclude Include="..\TNET_UI\Sources\ProtocolPackager.h" />
+    <ClInclude Include="..\TNET_UI\Sources\SerializableBase.h" />
     <ClInclude Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.h" />
     <ClInclude Include="..\TNET_UI\Sources\SQLiteCpp\sqlite3.h" />
     <ClInclude Include="..\TNET_UI\Sources\Utils.h" />
@@ -112,6 +115,9 @@
     <ClCompile Include="..\TNET_UI\Sources\Base64_2.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Conversions.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\ProtocolPackager.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\SerializableBase.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>

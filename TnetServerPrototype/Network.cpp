@@ -1,11 +1,13 @@
-
+#include "Base64_2.h"
 #include "Network.h"
+#include "ProtocolPackager.h"
 
 #include "TCPClientData.h"
 #include "LedgerHandler.h"
 #include "..\TNET_UI\Sources\TBB\tbb\concurrent_queue.h"
 
 using namespace tbb;
+
 
 struct MessageData
 {
@@ -61,17 +63,17 @@ struct CommandRequest
 	string User;
 
 	// SenderPublic
-	string Sender;
+	vector <unsigned char> Sender;
 
 	// Command
 	string Command;
 
 	// Command
-	string Data;
+	vector <unsigned char> Data;
 
 	CommandRequest(){};
 
-	CommandRequest(string user, string sender, string command, string data)
+	CommandRequest(string user, vector <unsigned char> sender, string command, vector <unsigned char> data)
 	{
 		User = user;
 		Sender = Sender;
@@ -111,7 +113,7 @@ void NetworkClient::ReplyToClient(string s)
 
 void NetworkClient::MarshalString(String ^ s, string& os) {
 	using namespace Runtime::InteropServices;
-	const char* chars =	(const char*)(Marshal::StringToHGlobalAnsi(s)).ToPointer();
+	const char* chars = (const char*)(Marshal::StringToHGlobalAnsi(s)).ToPointer();
 	os = chars;
 	Marshal::FreeHGlobal(IntPtr((void*)chars));
 }
@@ -173,36 +175,49 @@ void NetworkClient::HandleClient(System::Object^ _TCD)
 				}
 			}
 
-			if (parts->Length == 4)
+			if (parts->Length == 2)
 			{
 				String^ FLAG = parts[0];
-				String^ __PK = parts[1]; // B64
-				String^ __COMM = parts[2]; // B64
-				String^ __DATA = parts[2]; // B64
-
-				String^ _PK = __PK;
-				String^ _COMM = Encoding::UTF8->GetString(Convert::FromBase64String(__COMM));
-				String^ _DATA = Encoding::UTF8->GetString(Convert::FromBase64String(__DATA));
+				String^ DATA = parts[1];
 
 				if (FLAG == "COMMAND")
 				{
-					std::string PK;
+					cli::array<unsigned char>^ dd = Convert::FromBase64String(DATA);
+
+					std::vector<unsigned char> raw(dd->Length);
+					System::Runtime::InteropServices::Marshal::Copy(dd, 0, IntPtr(&raw[0]), dd->Length);
+
+					vector<ProtocolDataType> datas = ProtocolPackager::UnPackRaw(raw);
+
+					vector <unsigned char> PK;
 					std::string COMM;
-					std::string DATA;
+					vector <unsigned char> DATA;
 					std::string CONNECTED_USER;
 
-					MarshalString(_PK, PK);
-					MarshalString(_COMM, COMM);
-					MarshalString(_DATA, DATA);
-					MarshalString(TCD->Tc->Client->RemoteEndPoint->ToString(), CONNECTED_USER);
+					for each (ProtocolDataType var in datas)
+					{
+						if (var.NameType == 0)					
+							ProtocolPackager::UnpackByteVector(var, 0, PK);							
 
-					CommandRequest cr;
-					cr.Sender = PK;
-					cr.User = CONNECTED_USER;
-					cr.Command = COMM;
-					cr.Data = DATA;
+						if (var.NameType == 1)						
+							ProtocolPackager::UnpackString(var, 1, COMM);						
 
-					CommandQueue.push(cr);
+						if (var.NameType == 2)						
+							ProtocolPackager::UnpackByteVector(var, 2, DATA);	
+					}
+
+					if (PK.size() == 32 && COMM.size() > 2)
+					{
+						MarshalString(TCD->Tc->Client->RemoteEndPoint->ToString(), CONNECTED_USER);
+
+						CommandRequest cr;
+						cr.Sender = PK;
+						cr.User = CONNECTED_USER;
+						cr.Command = COMM;
+						cr.Data = DATA;
+
+						CommandQueue.push(cr);
+					}
 				}
 			}
 		}
@@ -226,7 +241,7 @@ void NetworkClient::InternalUpdate()
 
 		TC->ReceiveBufferSize = 64;
 		TC->SendBufferSize = 64;
-		
+
 		TCPClientData^ TCD = gcnew TCPClientData(TC);
 		ConnDict->Add(TC->Client->RemoteEndPoint->ToString(), TCD);
 		ParameterizedThreadStart^ pts = gcnew ParameterizedThreadStart(this, &NetworkClient::HandleClient);
@@ -276,8 +291,8 @@ void NetworkClient::InternalUpdate()
 			StreamWriter ^ sw = gcnew StreamWriter(ConnDict[user]->Tc->GetStream());
 			if (cr.Command == "BAL")
 			{
-				BalanceType bt = lH2->getBalance(cr.Sender, 0, cr.User, balanceEvent);
-				int64_t bal =  bt.getBalance();
+				BalanceType bt = lH2->getBalance(base64_encode_2((char const*)cr.Sender.data(), cr.Sender.size()), 0, cr.User, balanceEvent);
+				int64_t bal = bt.getBalance();
 				balanceEvent(cr.User, to_string(bal));
 			}
 		}
@@ -288,9 +303,9 @@ void NetworkClient::InternalUpdate()
 
 void NetworkClient::UpdateEvents(Object^ data)
 {
-	
+
 	if (!Updating) InternalUpdate();
-	
+
 }
 
 

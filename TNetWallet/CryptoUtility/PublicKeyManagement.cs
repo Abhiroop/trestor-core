@@ -94,7 +94,7 @@ namespace TNetWallet.CryptoUtility
                 sqlite_cmd.ExecuteNonQuery();
             }
 
-            catch(Exception e)
+            catch(Exception)
             {
                 return 0;
             }

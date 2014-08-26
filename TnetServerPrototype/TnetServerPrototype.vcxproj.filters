@@ -25,6 +25,9 @@
     <Filter Include="Source Files\Utils">
       <UniqueIdentifier>{af185072-9189-45c9-8631-ac2f5da02fae}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Protocol">
+      <UniqueIdentifier>{30f3a4c0-31a8-45ba-a9e6-2f4f9ff6e14c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -67,6 +70,15 @@
       <Filter>Source Files\Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\Base64.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ProtocolPackager.h">
+      <Filter>Source Files\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\SerializableBase.h">
+      <Filter>Source Files\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Conversions.h">
       <Filter>Source Files\Utils</Filter>
     </ClInclude>
   </ItemGroup>
@@ -118,10 +130,24 @@
     <ClCompile Include="..\TNET_UI\Sources\Base64.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ProtocolPackager.cpp">
+      <Filter>Source Files\Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\SerializableBase.cpp">
+      <Filter>Source Files\Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Conversions.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="app.ico">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="MainForm2.resx">
+      <Filter>Resource Files</Filter>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

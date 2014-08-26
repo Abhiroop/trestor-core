@@ -19,6 +19,13 @@ namespace TNetCommon.Protocol
         // It can be INT, FLOAT, LONG, BYTE[], 
         public PDataType DataType;
         public byte[] Data;
+
+        public ProtocolDataType(byte NameType, PDataType DataType, byte[] Data)
+        {
+           this.NameType = NameType;
+           this.DataType = DataType;
+           this.Data = Data;
+        }
     };
    
     public class ProtocolPackager
@@ -50,7 +57,7 @@ namespace TNetCommon.Protocol
 
         // Make Variable Size Encoding Decoding
 
-        static List<byte> PackSingle(ProtocolDataType data)
+        static byte[] PackSingle(ProtocolDataType data)
         {
             List<byte> pack = new List<byte>();
             byte[] SZ = IntToBytes(data.Data.Length);
@@ -60,28 +67,28 @@ namespace TNetCommon.Protocol
             pack.Add(SZ[1]);
             pack.Add(SZ[2]);
             pack.AddRange(data.Data);
-            return pack;
+            return pack.ToArray();
         }
 
-        public static List<byte> PackRaw(List<ProtocolDataType> packets)
+        public static byte[] PackRaw(List<ProtocolDataType> packets)
         {
             List<byte> pack = new List<byte>();
             foreach (ProtocolDataType packet in packets)
             {
-                List<byte> F = PackSingle(packet);
+                byte[] F = PackSingle(packet);
                 pack.AddRange(F);
             }
-            return pack;
+            return pack.ToArray();
         }
 
-        public static List<ProtocolDataType> UnPackRaw(List<byte> packedData)
+        public static List<ProtocolDataType> UnPackRaw(byte[] packedData)
         {
             List<ProtocolDataType> packets = new List<ProtocolDataType>();
 
             int index = 0;
             while (true)
             {
-                if (packedData.Count - index >= 5)
+                if (packedData.Length - index >= 5)
                 {
                     List<byte> L_Bytes = new List<byte>();
                     byte NameType = packedData[index + 0];
@@ -92,7 +99,7 @@ namespace TNetCommon.Protocol
 
                     int Length = BytesToInt(L_Bytes);
 
-                    if (packedData.Count - index - Length >= 5)
+                    if (packedData.Length - index - Length >= 5)
                     {
                         byte[] Data = new byte[Length];
                         for (int i = 0; i < Length; i++)

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Windows.Threading;
 using System.Threading;
+using TNetCommon.Protocol;
 
 namespace TNetWallet.WalletOperations
 {
@@ -116,15 +117,33 @@ namespace TNetWallet.WalletOperations
             }
         }
 
+        /// <summary>
+        /// COMMAND FORMAT: TYPE : {0 BYTE[] PublicKey}, {1 string Command}, {2 byte[] CommandData},  
+        /// </summary>
+        /// <param name="PK"></param>
+        /// <param name="Command"></param>
+        /// <param name="CommandData"></param>
         public void SendCommand(byte[] PK, string Command, string CommandData)
         {
             try
             {
                 NetworkStream w = tc.GetStream();
                 StreamWriter sw = new StreamWriter(w);
-                sw.WriteLine("COMMAND|" + Convert.ToBase64String(PK) + "|" +
+
+                List<ProtocolDataType> packets = new List<ProtocolDataType>();
+
+                packets.Add(ProtocolPackager.Pack(PK,0));
+                packets.Add(ProtocolPackager.Pack(Command, 1));
+                packets.Add(ProtocolPackager.Pack(CommandData, 2));
+
+                byte [] pack = ProtocolPackager.PackRaw(packets);
+
+                sw.WriteLine("COMMAND|" + Convert.ToBase64String(pack));
+
+
+                /*sw.WriteLine("COMMAND|" + Convert.ToBase64String(PK) + "|" +
                     Convert.ToBase64String(Encoding.GetEncoding("ISO8859-1").GetBytes(Command)) + "|" +
-                    Convert.ToBase64String(Encoding.GetEncoding("ISO8859-1").GetBytes(CommandData)));
+                    Convert.ToBase64String(Encoding.GetEncoding("ISO8859-1").GetBytes(CommandData)));*/
 
                 sw.Flush();
             }
