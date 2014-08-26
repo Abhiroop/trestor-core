@@ -97,7 +97,7 @@ namespace TNetWallet.WalletOperations
             }
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Send Packet
         /// </summary>
         /// <param name="Packet"></param>
@@ -115,7 +115,7 @@ namespace TNetWallet.WalletOperations
                 if (ConnectionError != null)
                     ConnectionError();
             }
-        }
+        }*/
 
         /// <summary>
         /// COMMAND FORMAT: TYPE : {0 BYTE[] PublicKey}, {1 string Command}, {2 byte[] CommandData},  
@@ -123,7 +123,7 @@ namespace TNetWallet.WalletOperations
         /// <param name="PK"></param>
         /// <param name="Command"></param>
         /// <param name="CommandData"></param>
-        public void SendCommand(byte[] PK, string Command, string CommandData)
+        public void SendCommand(byte[] PK, string Command, byte [] CommandData)
         {
             try
             {

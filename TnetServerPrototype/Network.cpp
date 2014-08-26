@@ -92,7 +92,7 @@ concurrent_queue<CommandRequest> CommandQueue;
 
 void transEvent(string user, string message)
 {
-	MessageQueue.push(MessageData(user, message, "TRANS_RESP"));
+	MessageQueue.push(MessageData(user, message, "TRX_RESP"));
 }
 
 void balanceEvent(string user, string message)
@@ -137,87 +137,79 @@ void NetworkClient::HandleClient(System::Object^ _TCD)
 				break;
 			}
 
-			cli::array<String^>^ parts = data->Split('|');
+			cli::array<unsigned char>^ TOTDATA = Convert::FromBase64String(data);
 
-			if (parts->Length == 2)
+			//cli::array<String^>^ parts = data->Split('|');
+
+			/*if (parts->Length == 2)
 			{
-				String^ FLAG = parts[0];
-				String^ DATA = parts[1];
+			String^ FLAG = parts[0];
+			String^ DATA = parts[1];
 
-				String^ dd = Encoding::UTF8->GetString(Convert::FromBase64String(DATA));
+			String^ dd = Encoding::UTF8->GetString(Convert::FromBase64String(DATA));
 
-				if (FLAG == "TRAN")
-				{
-					cli::array<String^>^ parts2 = dd->Split('|');
+			if (FLAG == "TRAN")
+			{
+			cli::array<String^>^ parts2 = dd->Split('|');
 
-					if (parts2->Length == 3)
-					{
-						std::string SENDER_PK;
-						std::string RECEIVER_PK;
-						std::string CONNECTED_USER;
+			if (parts2->Length == 3)
+			{
+			std::string SENDER_PK;
+			std::string RECEIVER_PK;
+			std::string CONNECTED_USER;
 
-						MarshalString(parts2[0], SENDER_PK);
-						MarshalString(parts2[1], RECEIVER_PK);
-						MarshalString(TCD->Tc->Client->RemoteEndPoint->ToString(), CONNECTED_USER);
+			MarshalString(parts2[0], SENDER_PK);
+			MarshalString(parts2[1], RECEIVER_PK);
+			MarshalString(TCD->Tc->Client->RemoteEndPoint->ToString(), CONNECTED_USER);
 
-						int64_t MONEY = Int64::Parse(parts2[2]);
-						
-						TransactionRequest tr;
-						tr.Sender = SENDER_PK;
-						tr.Receiver = RECEIVER_PK;
-						tr.Money = MONEY;
-						tr.User = CONNECTED_USER;
+			int64_t MONEY = Int64::Parse(parts2[2]);
 
-						TransactionQueue.push(tr);
-					}
-				}
+			TransactionRequest tr;
+			tr.Sender = SENDER_PK;
+			tr.Receiver = RECEIVER_PK;
+			tr.Money = MONEY;
+			tr.User = CONNECTED_USER;
+
+			TransactionQueue.push(tr);
+			}
+			}
+			}*/
+
+			std::vector<unsigned char> raw(TOTDATA->Length);
+			System::Runtime::InteropServices::Marshal::Copy(TOTDATA, 0, IntPtr(&raw[0]), TOTDATA->Length);
+
+			vector<ProtocolDataType> datas = ProtocolPackager::UnPackRaw(raw);
+
+			vector <unsigned char> PK;
+			std::string COMM;
+			vector <unsigned char> DATA;
+			std::string CONNECTED_USER;
+
+			for each (ProtocolDataType var in datas)
+			{
+				if (var.NameType == 0)
+					ProtocolPackager::UnpackByteVector(var, 0, PK);
+
+				if (var.NameType == 1)
+					ProtocolPackager::UnpackString(var, 1, COMM);
+
+				if (var.NameType == 2)
+					ProtocolPackager::UnpackByteVector(var, 2, DATA);
 			}
 
-			if (parts->Length == 2)
+			if (PK.size() == 32 && COMM.size() > 2)
 			{
-				String^ FLAG = parts[0];
-				String^ DATA = parts[1];
+				MarshalString(TCD->Tc->Client->RemoteEndPoint->ToString(), CONNECTED_USER);
 
-				if (FLAG == "COMMAND")
-				{
-					cli::array<unsigned char>^ dd = Convert::FromBase64String(DATA);
+				CommandRequest cr;
+				cr.Sender = PK;
+				cr.User = CONNECTED_USER;
+				cr.Command = COMM;
+				cr.Data = DATA;
 
-					std::vector<unsigned char> raw(dd->Length);
-					System::Runtime::InteropServices::Marshal::Copy(dd, 0, IntPtr(&raw[0]), dd->Length);
-
-					vector<ProtocolDataType> datas = ProtocolPackager::UnPackRaw(raw);
-
-					vector <unsigned char> PK;
-					std::string COMM;
-					vector <unsigned char> DATA;
-					std::string CONNECTED_USER;
-
-					for each (ProtocolDataType var in datas)
-					{
-						if (var.NameType == 0)					
-							ProtocolPackager::UnpackByteVector(var, 0, PK);							
-
-						if (var.NameType == 1)						
-							ProtocolPackager::UnpackString(var, 1, COMM);						
-
-						if (var.NameType == 2)						
-							ProtocolPackager::UnpackByteVector(var, 2, DATA);	
-					}
-
-					if (PK.size() == 32 && COMM.size() > 2)
-					{
-						MarshalString(TCD->Tc->Client->RemoteEndPoint->ToString(), CONNECTED_USER);
-
-						CommandRequest cr;
-						cr.Sender = PK;
-						cr.User = CONNECTED_USER;
-						cr.Command = COMM;
-						cr.Data = DATA;
-
-						CommandQueue.push(cr);
-					}
-				}
+				CommandQueue.push(cr);
 			}
+
 		}
 		catch (Exception^ ex)
 		{
@@ -273,7 +265,7 @@ void NetworkClient::InternalUpdate()
 		if (ConnDict->ContainsKey(user))
 		{
 			StreamWriter ^ sw = gcnew StreamWriter(ConnDict[user]->Tc->GetStream());
-			
+
 			lH2->transaction(tq.Sender, tq.Receiver, tq.Money, tq.User, transEvent);
 		}
 	}
@@ -286,6 +278,13 @@ void NetworkClient::InternalUpdate()
 		{
 			StreamWriter ^ sw = gcnew StreamWriter(ConnDict[user]->Tc->GetStream());
 			if (cr.Command == "BAL")
+			{
+				BalanceType bt = lH2->getBalance(base64_encode_2((char const*)cr.Sender.data(), cr.Sender.size()), 0, cr.User, balanceEvent);
+				int64_t bal = bt.getBalance();
+				balanceEvent(cr.User, to_string(bal));
+			}
+
+			if (cr.Command == "TRX")
 			{
 				BalanceType bt = lH2->getBalance(base64_encode_2((char const*)cr.Sender.data(), cr.Sender.size()), 0, cr.User, balanceEvent);
 				int64_t bal = bt.getBalance();

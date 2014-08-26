@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TNetCommon.Transaction;
 using TNetWallet.WalletOperations;
 
 namespace TNetWallet
@@ -47,11 +48,11 @@ namespace TNetWallet
         {
             this.Dispatcher.Invoke(new Action(() =>
             {
-                if ("TRANS_RESP" == Type)
+                if ("TRX_RESP" == Type)
                 {
                     textBlock_Status.Text = Encoding.UTF8.GetString(Data);
 
-                    nw.SendCommand(SP_KEY, "BAL", "");
+                    nw.SendCommand(SP_KEY, "BAL", new byte[0]);
 
                    /* var paragraph = new Paragraph();
                     paragraph.Inlines.Add(new Run("\n : " + Encoding.UTF8.GetString(Data)));
@@ -84,8 +85,12 @@ namespace TNetWallet
         {
             try
             {
-                Transactions t = new Transactions(SP_KEY, REC_KEY, long.Parse(textBox_Money.Text), App.PublicKeyManagement);
-                nw.SendCommand(SP_KEY, "TRAN", t.Packet);
+                TransactionSink sink = new TransactionSink(REC_KEY, long.Parse(textBox_Money.Text));
+
+                TransactionContent tc = new TransactionContent(SP_KEY, DateTime.UtcNow.ToFileTimeUtc(),
+                    new TransactionSink[] { sink }, App.PublicKeyManagement.PrivateKey);
+
+                nw.SendCommand(SP_KEY, "TRX", tc.Serialize());
             }
             catch { }
         }
@@ -93,7 +98,7 @@ namespace TNetWallet
         private void button_Refresh_Click(object sender, RoutedEventArgs e)
         {
 
-            nw.SendCommand(SP_KEY, "BAL", "");
+            nw.SendCommand(SP_KEY, "BAL", new byte[0]);
         }
 
         private void textBox_Money_TextChanged(object sender, TextChangedEventArgs e)
@@ -122,7 +127,7 @@ namespace TNetWallet
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
 
-            nw.SendCommand(SP_KEY, "BAL", "");
+            nw.SendCommand(SP_KEY, "BAL", new byte[0]);
         }
     }
 }

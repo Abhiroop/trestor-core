@@ -7,18 +7,18 @@ using TNetCommon.Protocol;
 
 namespace TNetCommon.Transaction
 {
-    class TransactionSink
+    public class TransactionSink
     {
-        byte[] PublicKey_Sink;
-        long Amount;
+        public byte[] PublicKey_Sink;
+        public long Amount;
 
-        TransactionSink(byte[] PublicKey_Sink, long Amount)
+        public TransactionSink(byte[] PublicKey_Sink, long Amount)
         {
             this.PublicKey_Sink = PublicKey_Sink;
             this.Amount = Amount;
         }
 
-        byte[] Serialize()
+        public byte[] Serialize()
         {
             List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
 	        PDTs.Add(ProtocolPackager.Pack(PublicKey_Sink, 0));
