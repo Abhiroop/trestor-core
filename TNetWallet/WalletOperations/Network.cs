@@ -138,8 +138,7 @@ namespace TNetWallet.WalletOperations
 
                 byte [] pack = ProtocolPackager.PackRaw(packets);
 
-                sw.WriteLine("COMMAND|" + Convert.ToBase64String(pack));
-
+                sw.WriteLine(Convert.ToBase64String(pack));
 
                 /*sw.WriteLine("COMMAND|" + Convert.ToBase64String(PK) + "|" +
                     Convert.ToBase64String(Encoding.GetEncoding("ISO8859-1").GetBytes(Command)) + "|" +

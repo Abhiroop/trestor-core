@@ -115,10 +115,7 @@ Hash TransactionContent::GetTransactionDataAndSignature()
 	return _data;
 }
 
-
-
 ///////////////////////////////////////////////////////////
-
 
 /*
 Hash PublicKey_Source;
