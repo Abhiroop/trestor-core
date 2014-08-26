@@ -161,9 +161,7 @@ void NetworkClient::HandleClient(System::Object^ _TCD)
 						MarshalString(TCD->Tc->Client->RemoteEndPoint->ToString(), CONNECTED_USER);
 
 						int64_t MONEY = Int64::Parse(parts2[2]);
-
-						MarshalString(parts2[1], RECEIVER_PK);
-
+						
 						TransactionRequest tr;
 						tr.Sender = SENDER_PK;
 						tr.Receiver = RECEIVER_PK;
@@ -275,9 +273,7 @@ void NetworkClient::InternalUpdate()
 		if (ConnDict->ContainsKey(user))
 		{
 			StreamWriter ^ sw = gcnew StreamWriter(ConnDict[user]->Tc->GetStream());
-
-			//transEvent(tq.User, "DIE BITCH DIE");
-
+			
 			lH2->transaction(tq.Sender, tq.Receiver, tq.Money, tq.User, transEvent);
 		}
 	}
