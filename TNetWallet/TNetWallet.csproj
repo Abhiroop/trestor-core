@@ -77,7 +77,6 @@
     <Compile Include="WalletOperations\Network.cs" />
     <Compile Include="WalletOperations\TransactionDataType.cs" />
     <Compile Include="WalletOperations\TransactionHistory.cs" />
-    <Compile Include="WalletOperations\Transactions.cs" />
     <Page Include="HomeScreen.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

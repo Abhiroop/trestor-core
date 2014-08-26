@@ -110,7 +110,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			//execute
 			stmt.execDML();
 
-			transactionEvent(sender, "Transaction success");
+			transactionEvent(sender, (std::string)"Transaction success");
 
 			return 1;
 		}

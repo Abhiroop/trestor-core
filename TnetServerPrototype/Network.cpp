@@ -2,12 +2,14 @@
 #include "Network.h"
 #include "ProtocolPackager.h"
 
+#include "TransactionContent.h"
+#include "TransactionSink.h"
+
 #include "TCPClientData.h"
 #include "LedgerHandler.h"
 #include "..\TNET_UI\Sources\TBB\tbb\concurrent_queue.h"
 
 using namespace tbb;
-
 
 struct MessageData
 {
@@ -93,6 +95,11 @@ concurrent_queue<CommandRequest> CommandQueue;
 void transEvent(string user, string message)
 {
 	MessageQueue.push(MessageData(user, message, "TRX_RESP"));
+}
+
+void emptyEvent(string user, string message)
+{
+	//MessageQueue.push(MessageData(user, message, "TRX_RESP"));
 }
 
 void balanceEvent(string user, string message)
@@ -286,9 +293,33 @@ void NetworkClient::InternalUpdate()
 
 			if (cr.Command == "TRX")
 			{
-				BalanceType bt = lH2->getBalance(base64_encode_2((char const*)cr.Sender.data(), cr.Sender.size()), 0, cr.User, balanceEvent);
+				TransactionContent tc;
+
+				tc.Deserialize(cr.Data);
+
+				string sender = base64_encode_2((char const*)tc.PublicKey_Source.data(), tc.PublicKey_Source.size());
+
+				int64_t total_money = 0;
+				for (int i = 0; i < (int)tc.Destinations.size(); i++)
+				{
+					total_money += tc.Destinations[i].Amount;
+				}
+
+				BalanceType bt = lH2->getBalance(base64_encode_2((char const*)cr.Sender.data(), cr.Sender.size()), 0, cr.User, emptyEvent);
 				int64_t bal = bt.getBalance();
-				balanceEvent(cr.User, to_string(bal));
+
+
+				if (total_money > bal)
+					transEvent(tq.User, "Unsufficient Sender Balance");
+
+				else
+				{
+					for (int i = 0; i < (int)tc.Destinations.size(); i++)
+					{
+						string receiver = base64_encode_2((char const*)tc.Destinations[i].PublicKey_Sink.data(), tc.Destinations[i].PublicKey_Sink.size());
+						lH2->transaction(sender, receiver, tc.Destinations[i].Amount, tq.User, transEvent);
+					}
+				}
 			}
 		}
 	}

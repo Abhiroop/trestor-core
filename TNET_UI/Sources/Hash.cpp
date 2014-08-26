@@ -11,9 +11,6 @@
 #include "Hash.h"
 #include "Utils.h"
 
-#include <mutex>
-
-static std::mutex HMTX;
 
 Hash::Hash()
 {

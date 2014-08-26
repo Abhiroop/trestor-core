@@ -28,6 +28,12 @@
     <Filter Include="Source Files\Protocol">
       <UniqueIdentifier>{30f3a4c0-31a8-45ba-a9e6-2f4f9ff6e14c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Transaction">
+      <UniqueIdentifier>{f108a1ab-73df-4030-af60-e49d2c246ab8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ed25519">
+      <UniqueIdentifier>{26fc71b5-e47f-471d-b2e2-959b16d9b437}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -79,6 +85,36 @@
       <Filter>Source Files\Protocol</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\Conversions.h">
+      <Filter>Source Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TransactionContent.h">
+      <Filter>Source Files\Transaction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TransactionSink.h">
+      <Filter>Source Files\Transaction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\ed25519.h">
+      <Filter>Source Files\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\fe.h">
+      <Filter>Source Files\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\fixedint_.h">
+      <Filter>Source Files\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\ge.h">
+      <Filter>Source Files\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\precomp_data.h">
+      <Filter>Source Files\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\sc.h">
+      <Filter>Source Files\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\sha512.h">
+      <Filter>Source Files\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Hash.h">
       <Filter>Source Files\Utils</Filter>
     </ClInclude>
   </ItemGroup>
@@ -137,6 +173,48 @@
       <Filter>Source Files\Protocol</Filter>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\Conversions.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TransactionContent.cpp">
+      <Filter>Source Files\Transaction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TransactionSink.cpp">
+      <Filter>Source Files\Transaction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\add_scalar.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\fe.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\ge.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\key_exchange.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\keypair.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\sc.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\seed.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\sha512.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\sign.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\test_ec.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\verify.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Hash.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
