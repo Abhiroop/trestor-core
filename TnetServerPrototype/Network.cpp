@@ -80,11 +80,9 @@ struct CommandRequest
 	}
 };
 
-
 //shared_ptr<LedgerHandler> lH2;
 
 shared_ptr<LedgerHandler> lH2(new LedgerHandler);
-
 
 concurrent_queue<MessageData> MessageQueue;
 concurrent_queue<TransactionRequest> TransactionQueue;
@@ -111,11 +109,9 @@ void NetworkClient::ReplyToClient(string s)
 
 }
 
-
 void NetworkClient::MarshalString(String ^ s, string& os) {
 	using namespace Runtime::InteropServices;
-	const char* chars =
-		(const char*)(Marshal::StringToHGlobalAnsi(s)).ToPointer();
+	const char* chars =	(const char*)(Marshal::StringToHGlobalAnsi(s)).ToPointer();
 	os = chars;
 	Marshal::FreeHGlobal(IntPtr((void*)chars));
 }
