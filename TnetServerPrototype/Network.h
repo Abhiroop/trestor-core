@@ -23,6 +23,7 @@ public ref class NetworkClient
 public:
 
 	bool Updating = false;
+	bool NetworkAlive = true;
 
 	NetworkClient(/*shared_ptr<LedgerHandler> _lH*/);
 
@@ -35,6 +36,10 @@ public:
 	void UpdateEvents(Object^ data);
 
 	void InternalUpdate();
+
+	void ProcessMessages(Object^ obj);
+
+	void ProcessCommands(Object^ obj);
 
 };
 

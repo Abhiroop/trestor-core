@@ -1,7 +1,7 @@
 ﻿<Window x:Class="TNetWallet.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Width="480"  Height="640"  Loaded="Window_Loaded" WindowStyle="none" ResizeMode="NoResize" BorderThickness="1" BorderBrush="Black">
+        Title="Trestor Wallet v0.1 Alpha" Width="480"  Height="640"  Loaded="Window_Loaded" WindowStyle="none" ResizeMode="NoResize" BorderThickness="1" BorderBrush="Black">
     <Grid HorizontalAlignment="Stretch" >
         <Grid.RowDefinitions>
             <RowDefinition Height="5*"/>

@@ -62,7 +62,7 @@ namespace TNetWallet
                 }
                 else if("BAL_RESP" == Type)
                 {
-                    textBlock_Status.Text = "Balance: " + Encoding.UTF8.GetString(Data);
+                    //textBlock_Status.Text = "Balance: " + Encoding.UTF8.GetString(Data);
 
                     textBlock_TotalMoney.Text = "Balance: " + Encoding.UTF8.GetString(Data);
 

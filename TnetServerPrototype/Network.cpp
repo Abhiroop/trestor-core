@@ -27,50 +27,18 @@ struct MessageData
 	}
 };
 
-struct TransactionRequest
-{
-	// IP PORT for the client
-	string User;
-
-	// SenderPublic
-	string Sender;
-
-	// Receiver Public
-	string Receiver;
-	// Money / trests
-	int64_t Money;
-
-	// Signature
-	string Signature;
-
-	// Transaction Time
-	int64_t Time;
-
-	TransactionRequest(){};
-
-	TransactionRequest(string user, string sender, string receiver, int64_t money, string signature, int64_t time)
-	{
-		user = user;
-		Sender = Sender;
-		Receiver = receiver;
-		Money = money;
-		Signature = signature;
-		Time = time;
-	}
-};
-
 struct CommandRequest
 {
-	// IP PORT for the client
+	// IP:PORT for the client
 	string User;
 
-	// SenderPublic
+	// Public Key of the Sender
 	vector <unsigned char> Sender;
 
 	// Command
 	string Command;
 
-	// Command
+	// Data content of the request
 	vector <unsigned char> Data;
 
 	CommandRequest(){};
@@ -89,7 +57,6 @@ struct CommandRequest
 shared_ptr<LedgerHandler> lH2(new LedgerHandler);
 
 concurrent_queue<MessageData> MessageQueue;
-concurrent_queue<TransactionRequest> TransactionQueue;
 concurrent_queue<CommandRequest> CommandQueue;
 
 void transEvent(string user, string message)
@@ -107,10 +74,105 @@ void balanceEvent(string user, string message)
 	MessageQueue.push(MessageData(user, message, "BAL_RESP"));
 }
 
+void NetworkClient::ProcessMessages(Object^ obj)
+{
+	while (NetworkAlive)
+	{
+
+		MessageData md;
+		while (MessageQueue.try_pop(md))
+		{
+			String ^ dest = gcnew String(md.User.c_str());
+			String ^ msg = gcnew String(md.Message.c_str());
+			String ^ type = gcnew String(md.MessageType.c_str());
+
+			if (ConnDict->ContainsKey(dest))
+			{
+				StreamWriter ^ sw = gcnew StreamWriter(ConnDict[dest]->Tc->GetStream());
+
+				sw->WriteLine(type + "|" + Convert::ToBase64String(Encoding::UTF8->GetBytes(msg)));
+				sw->FlushAsync();
+
+				Console::WriteLine(DateTime::Now.ToShortTimeString() + " | " + dest + ": " + type + " : " + msg);
+			}
+		}
+
+		Thread::Sleep(20);
+	}
+}
+
+void NetworkClient::ProcessCommands(Object^ obj)
+{
+	while (NetworkAlive)
+	{
+		CommandRequest cr;
+		while (CommandQueue.try_pop(cr))
+		{
+			String ^ user = gcnew String(cr.User.c_str());
+			if (ConnDict->ContainsKey(user))
+			{
+				StreamWriter ^ sw = gcnew StreamWriter(ConnDict[user]->Tc->GetStream());
+				if (cr.Command == "BAL")
+				{
+					BalanceType bt = lH2->getBalance(base64_encode_2((char const*)cr.Sender.data(), cr.Sender.size()), 0, cr.User, balanceEvent);
+					int64_t bal = bt.getBalance();
+					balanceEvent(cr.User, to_string(bal));
+				}
+
+				if (cr.Command == "TRX")
+				{
+					TransactionContent tc;
+
+					tc.Deserialize(cr.Data);
+
+					string sender = base64_encode_2((char const*)tc.PublicKey_Source.data(), tc.PublicKey_Source.size());
+
+					int64_t total_money = 0;
+					for (int i = 0; i < (int)tc.Destinations.size(); i++)
+					{
+						total_money += tc.Destinations[i].Amount;
+					}
+
+					BalanceType bt = lH2->getBalance(base64_encode_2((char const*)cr.Sender.data(), cr.Sender.size()), 0, cr.User, emptyEvent);
+					int64_t bal = bt.getBalance();
+					
+					if (total_money > bal)
+					{
+						transEvent(cr.User, "Unsufficient Sender Balance");
+					}
+					else
+					{
+						int Trans = 0;
+
+						for (int i = 0; i < (int)tc.Destinations.size(); i++)
+						{
+							string receiver = base64_encode_2((char const*)tc.Destinations[i].PublicKey_Sink.data(), tc.Destinations[i].PublicKey_Sink.size());
+							int64_t money = tc.Destinations[i].Amount;
+							Trans += lH2->transaction(sender, receiver, money, cr.User, emptyEvent);
+						}
+
+						transEvent(cr.User, to_string(Trans) + " transaction(s) complete.");
+					}
+				}
+			}
+		}
+
+		Thread::Sleep(20);
+	}
+}
+
 NetworkClient::NetworkClient(/*shared_ptr<LedgerHandler> _lH*/)
 {
 	//lH2 = _lH;
 	tList->Start();
+
+	ParameterizedThreadStart^ pts = gcnew ParameterizedThreadStart(this, &NetworkClient::ProcessMessages);
+	Thread^ thr = gcnew Thread(pts);
+	thr->Start();
+
+	ParameterizedThreadStart^ pts2 = gcnew ParameterizedThreadStart(this, &NetworkClient::ProcessCommands);
+	Thread^ thr2 = gcnew Thread(pts2);
+	thr2->Start();
 }
 
 void NetworkClient::ReplyToClient(string s)
@@ -145,42 +207,6 @@ void NetworkClient::HandleClient(System::Object^ _TCD)
 			}
 
 			cli::array<unsigned char>^ TOTDATA = Convert::FromBase64String(data);
-
-			//cli::array<String^>^ parts = data->Split('|');
-
-			/*if (parts->Length == 2)
-			{
-			String^ FLAG = parts[0];
-			String^ DATA = parts[1];
-
-			String^ dd = Encoding::UTF8->GetString(Convert::FromBase64String(DATA));
-
-			if (FLAG == "TRAN")
-			{
-			cli::array<String^>^ parts2 = dd->Split('|');
-
-			if (parts2->Length == 3)
-			{
-			std::string SENDER_PK;
-			std::string RECEIVER_PK;
-			std::string CONNECTED_USER;
-
-			MarshalString(parts2[0], SENDER_PK);
-			MarshalString(parts2[1], RECEIVER_PK);
-			MarshalString(TCD->Tc->Client->RemoteEndPoint->ToString(), CONNECTED_USER);
-
-			int64_t MONEY = Int64::Parse(parts2[2]);
-
-			TransactionRequest tr;
-			tr.Sender = SENDER_PK;
-			tr.Receiver = RECEIVER_PK;
-			tr.Money = MONEY;
-			tr.User = CONNECTED_USER;
-
-			TransactionQueue.push(tr);
-			}
-			}
-			}*/
 
 			std::vector<unsigned char> raw(TOTDATA->Length);
 			System::Runtime::InteropServices::Marshal::Copy(TOTDATA, 0, IntPtr(&raw[0]), TOTDATA->Length);
@@ -246,92 +272,12 @@ void NetworkClient::InternalUpdate()
 		thr->Start(TCD);
 	}
 
-	MessageData md;
-	while (MessageQueue.try_pop(md))
-	{
-		String ^ dest = gcnew String(md.User.c_str());
-		String ^ msg = gcnew String(md.Message.c_str());
-		String ^ type = gcnew String(md.MessageType.c_str());
-
-		if (ConnDict->ContainsKey(dest))
-		{
-			StreamWriter ^ sw = gcnew StreamWriter(ConnDict[dest]->Tc->GetStream());
-
-			sw->WriteLine(type + "|" + Convert::ToBase64String(Encoding::UTF8->GetBytes(msg)));
-			sw->FlushAsync();
-
-			Console::WriteLine(DateTime::Now.ToShortTimeString() + " | " + dest + ": " + type + " : " + msg);
-		}
-	}
-
-
-	TransactionRequest tq;
-	while (TransactionQueue.try_pop(tq))
-	{
-		String ^ user = gcnew String(tq.User.c_str());
-		if (ConnDict->ContainsKey(user))
-		{
-			StreamWriter ^ sw = gcnew StreamWriter(ConnDict[user]->Tc->GetStream());
-
-			lH2->transaction(tq.Sender, tq.Receiver, tq.Money, tq.User, transEvent);
-		}
-	}
-
-	CommandRequest cr;
-	while (CommandQueue.try_pop(cr))
-	{
-		String ^ user = gcnew String(cr.User.c_str());
-		if (ConnDict->ContainsKey(user))
-		{
-			StreamWriter ^ sw = gcnew StreamWriter(ConnDict[user]->Tc->GetStream());
-			if (cr.Command == "BAL")
-			{
-				BalanceType bt = lH2->getBalance(base64_encode_2((char const*)cr.Sender.data(), cr.Sender.size()), 0, cr.User, balanceEvent);
-				int64_t bal = bt.getBalance();
-				balanceEvent(cr.User, to_string(bal));
-			}
-
-			if (cr.Command == "TRX")
-			{
-				TransactionContent tc;
-
-				tc.Deserialize(cr.Data);
-
-				string sender = base64_encode_2((char const*)tc.PublicKey_Source.data(), tc.PublicKey_Source.size());
-
-				int64_t total_money = 0;
-				for (int i = 0; i < (int)tc.Destinations.size(); i++)
-				{
-					total_money += tc.Destinations[i].Amount;
-				}
-
-				BalanceType bt = lH2->getBalance(base64_encode_2((char const*)cr.Sender.data(), cr.Sender.size()), 0, cr.User, emptyEvent);
-				int64_t bal = bt.getBalance();
-
-
-				if (total_money > bal)
-					transEvent(tq.User, "Unsufficient Sender Balance");
-
-				else
-				{
-					for (int i = 0; i < (int)tc.Destinations.size(); i++)
-					{
-						string receiver = base64_encode_2((char const*)tc.Destinations[i].PublicKey_Sink.data(), tc.Destinations[i].PublicKey_Sink.size());
-						lH2->transaction(sender, receiver, tc.Destinations[i].Amount, tq.User, transEvent);
-					}
-				}
-			}
-		}
-	}
-
 	Updating = false;
 }
 
 void NetworkClient::UpdateEvents(Object^ data)
 {
-
 	if (!Updating) InternalUpdate();
-
 }
 
 

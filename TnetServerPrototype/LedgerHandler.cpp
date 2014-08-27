@@ -9,7 +9,6 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 {
 	const __int64 current_time = time(0);
 
-	
 	/*
 	string qry = "select Balance from Ledger where PublicKey = '";
 	qry.append(senderPublickey);
@@ -34,9 +33,8 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 		if (sender_balance < transactionAmount)
 		{
 			transactionEvent(sender, "Unsufficient Sender Balance");
-			return -1;
-		}
-			
+			return 0;
+		}			
 
 		q.nextRow();
 	}
@@ -44,9 +42,8 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 	if (!senderExists)
 	{
 		transactionEvent(sender, "Sender Missing");
-		return -1;
+		return 0;
 	}
-
 
 	//check receiver
 	/*
@@ -262,7 +259,7 @@ BalanceType LedgerHandler::getBalance(string PublicKey, const __int64 queryTime,
 		balance_type.setBalance(balance);
 
 		//retrive history
-		CppSQLite3Statement stmt = 
+		/*CppSQLite3Statement stmt = 
 			global_db.compileStatement("select * from TransactionHistory where ( ((Sender = @u1) OR (Receiver = @u1)) AND (Time > @u2))");
 
 		stmt.bind("@u1", PublicKey.c_str());
@@ -275,12 +272,12 @@ BalanceType LedgerHandler::getBalance(string PublicKey, const __int64 queryTime,
 		{
 			string tran;
 
-			/*
-			get string from database
-			convert them to base64 format
-			then append them, individual rows will be separated by :
-			put them in a string vector
-			*/
+			
+			//get string from database
+			//convert them to base64 format
+			//then append them, individual rows will be separated by :
+			//put them in a string vector
+			
 			string ID = "";// q.fieldValue(0);
 			string ID_64 = base64_encode_2(ID.c_str(), ID.length());
 			
@@ -316,7 +313,7 @@ BalanceType LedgerHandler::getBalance(string PublicKey, const __int64 queryTime,
 			q.nextRow();
 		}
 		//vector set
-		balance_type.setTransactionHistory(transactionHistory);
+		balance_type.setTransactionHistory(transactionHistory);*/
 
 		return balance_type;
 	}

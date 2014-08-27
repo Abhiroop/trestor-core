@@ -97,26 +97,6 @@ namespace TNetWallet.WalletOperations
             }
         }
 
-        /*/// <summary>
-        /// Send Packet
-        /// </summary>
-        /// <param name="Packet"></param>
-        public void SendPacket(string Packet)
-        {
-            try
-            {
-                NetworkStream w = tc.GetStream();
-                StreamWriter sw = new StreamWriter(w);
-                sw.WriteLine(Packet);
-                sw.Flush();
-            }
-            catch
-            {
-                if (ConnectionError != null)
-                    ConnectionError();
-            }
-        }*/
-
         /// <summary>
         /// COMMAND FORMAT: TYPE : {0 BYTE[] PublicKey}, {1 string Command}, {2 byte[] CommandData},  
         /// </summary>
@@ -139,10 +119,6 @@ namespace TNetWallet.WalletOperations
                 byte [] pack = ProtocolPackager.PackRaw(packets);
 
                 sw.WriteLine(Convert.ToBase64String(pack));
-
-                /*sw.WriteLine("COMMAND|" + Convert.ToBase64String(PK) + "|" +
-                    Convert.ToBase64String(Encoding.GetEncoding("ISO8859-1").GetBytes(Command)) + "|" +
-                    Convert.ToBase64String(Encoding.GetEncoding("ISO8859-1").GetBytes(CommandData)));*/
 
                 sw.Flush();
             }

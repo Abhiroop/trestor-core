@@ -15,7 +15,7 @@ namespace TNetWallet
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App : Application
-    {
+    {       
         // ////////////// PAGES
 
         public static HomeScreen HomeScreen = new HomeScreen();

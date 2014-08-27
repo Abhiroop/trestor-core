@@ -57,6 +57,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -121,11 +122,16 @@
     <ResourceCompile Include="app.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\TNET_UI\Sources\Base64.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\Base64.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\Base64_2.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="..\TNET_UI\Sources\Conversions.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\Conversions.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\ed25519\add_scalar.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\ed25519\fe.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\ed25519\ge.cpp" />
@@ -137,15 +143,25 @@
     <ClCompile Include="..\TNET_UI\Sources\ed25519\sign.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\ed25519\test_ec.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\ed25519\verify.cpp" />
-    <ClCompile Include="..\TNET_UI\Sources\Hash.cpp" />
-    <ClCompile Include="..\TNET_UI\Sources\ProtocolPackager.cpp" />
-    <ClCompile Include="..\TNET_UI\Sources\SerializableBase.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\Hash.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ProtocolPackager.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\SerializableBase.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="..\TNET_UI\Sources\TransactionContent.cpp" />
-    <ClCompile Include="..\TNET_UI\Sources\TransactionSink.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\TransactionContent.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TransactionSink.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\Utils.cpp" />
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="Constants2.cpp">
