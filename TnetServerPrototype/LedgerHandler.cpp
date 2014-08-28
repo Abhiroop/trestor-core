@@ -2,7 +2,7 @@
 #include "LedgerHandler.h"
 #include "BalanceType.h"
 #include "Base64_2.h"
-#include <thread>
+//#include <thread>
 
 
 int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey, int64_t transactionAmount, string sender, function<void(string, string)> transactionEvent)
