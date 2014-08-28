@@ -52,5 +52,37 @@ namespace TNetWallet
                     Application.Current.MainWindow.DragMove();
                 }
         }
+
+        private void image_Settings_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            settingsMenu.PlacementTarget = this;
+            settingsMenu.IsOpen = true;
+        }
+        
+        private void image_Home_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            mainFrame.Content = App.HomeScreen;
+        }
+
+        private void image_Transaction_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+
+        }
+
+        private void image_Transaction_MouseUp_1(object sender, MouseButtonEventArgs e)
+        {
+
+        }
+
+        private void image_Users_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+
+        }
+
+        private void image_Refresh_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+
+        }
+
     }
 }
