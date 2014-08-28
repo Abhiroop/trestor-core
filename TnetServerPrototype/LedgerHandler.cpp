@@ -4,7 +4,6 @@
 #include "Base64_2.h"
 //#include <thread>
 
-
 int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey, int64_t transactionAmount, string sender, function<void(string, string)> transactionEvent)
 {
 	const __int64 current_time = time(0);
@@ -16,10 +15,9 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 	CppSQLite3Query q = global_db.execQuery(qry.c_str());
 	*/
 
-	CppSQLite3Statement stmt =global_db.compileStatement("select Balance from Ledger where PublicKey = @u1");
+	CppSQLite3Statement stmt = global_db.compileStatement("select Balance from Ledger where PublicKey = @u1");
 	stmt.bind("@u1", senderPublickey.c_str());
 	CppSQLite3Query q = stmt.execQuery();
-
 
 	int64_t sender_balance = 0;
 	bool senderExists = 0;
@@ -27,14 +25,14 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 	{
 		string baltemp = q.fieldValue(0);
 		sender_balance = atoll(baltemp.c_str());
-		
+
 		senderExists = 1;
 
 		if (sender_balance < transactionAmount)
 		{
 			transactionEvent(sender, "Unsufficient Sender Balance");
 			return 0;
-		}			
+		}
 
 		q.nextRow();
 	}
@@ -50,12 +48,12 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 	qry = "select Balance from Ledger where PublicKey = '";
 	qry.append(receiverPublicKey);
 	qry.append("';");
-    q = global_db.execQuery(qry.c_str());
+	q = global_db.execQuery(qry.c_str());
 	*/
 
 	stmt.reset();
 
-    stmt = global_db.compileStatement("select Balance from Ledger where PublicKey = @u1");
+	stmt = global_db.compileStatement("select Balance from Ledger where PublicKey = @u1");
 	stmt.bind("@u1", receiverPublicKey.c_str());
 	q = stmt.execQuery();
 
@@ -93,14 +91,14 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			//get the current system time here
 			stmt.bind("@u6", current_time);
 			int upate_rows = stmt.execDML();
-			
+
 			//update transaction history
 			stmt.reset();
-			
+
 			stmt = global_db.compileStatement("insert into TransactionHistory values(@u1,@u2,@u3,@u4,@u5,@u6);");
 			stmt.bind("@u2", senderPublickey.c_str());
 			stmt.bind("@u3", receiverPublicKey.c_str());
-			stmt.bind("@u4", transactionAmount);	
+			stmt.bind("@u4", transactionAmount);
 			stmt.bind("@u5", current_time);
 			//successful transaction
 			stmt.bind("@u6", 1);
@@ -122,7 +120,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			stmt.bind("@u6", current_time);
 
 			int n_rows = stmt.execDML();
-			
+
 			//update transaction history
 			stmt.reset();
 
@@ -141,7 +139,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 			return 0;
 		}
 
-		return 0;		
+		return 0;
 	}
 
 
@@ -158,13 +156,13 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 		stmt.bind("@u6", current_time);
 
 		int ex_row = stmt.execDML();
-		
+
 		//update receiver
 
 		if (ex_row == 1)
 		{
 			stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1, LastTransaction = @u6 where PublicKey = @u2");
-			
+
 			stmt.bind("@u1", receiverNewBalance);
 			stmt.bind("@u2", receiverPublicKey.c_str());
 			stmt.bind("@u6", current_time);
@@ -193,11 +191,11 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 		{
 			senderNewBalance += transactionAmount;
 			stmt.reset();
-			
+
 			stmt = global_db.compileStatement("UPDATE Ledger set Balance = @u1, LastTransaction = @u6 where PublicKey = @u2");
-			
+
 			stmt.bind("@u1", senderNewBalance);
-			stmt.bind("@u2", senderPublickey.c_str()); 
+			stmt.bind("@u2", senderPublickey.c_str());
 			stmt.bind("@u6", current_time);
 
 			stmt.execDML();
@@ -224,7 +222,7 @@ int LedgerHandler::transaction(string senderPublickey, string receiverPublicKey,
 		transactionEvent(sender, "Transaction failure");
 
 		return 0;
-		
+
 	}
 
 	transactionEvent(sender, "Transaction failure");
@@ -238,7 +236,7 @@ BalanceType LedgerHandler::getBalance(string PublicKey, const __int64 queryTime,
 	//make a balance type and modify it
 
 	BalanceType balance_type;
-	
+
 	/*
 	string qry = "select Balance from Ledger where PublicKey = '";
 	qry.append(PublicKey);
@@ -259,33 +257,33 @@ BalanceType LedgerHandler::getBalance(string PublicKey, const __int64 queryTime,
 		balance_type.setBalance(balance);
 
 		//retrive history
-		/*CppSQLite3Statement stmt = 
+		/*CppSQLite3Statement stmt =
 			global_db.compileStatement("select * from TransactionHistory where ( ((Sender = @u1) OR (Receiver = @u1)) AND (Time > @u2))");
 
-		stmt.bind("@u1", PublicKey.c_str());
-		stmt.bind("@u2", queryTime);
+			stmt.bind("@u1", PublicKey.c_str());
+			stmt.bind("@u2", queryTime);
 
-		CppSQLite3Query q = stmt.execQuery();
+			CppSQLite3Query q = stmt.execQuery();
 
-		vector<string> transactionHistory;
-		while (!q.eof())
-		{
+			vector<string> transactionHistory;
+			while (!q.eof())
+			{
 			string tran;
 
-			
+
 			//get string from database
 			//convert them to base64 format
 			//then append them, individual rows will be separated by :
 			//put them in a string vector
-			
+
 			string ID = "";// q.fieldValue(0);
 			string ID_64 = base64_encode_2(ID.c_str(), ID.length());
-			
+
 			tran = tran.append(ID_64);
 
 			string Sender = q.fieldValue(1);
 			string Sender_64 = base64_encode_2(Sender.c_str(), Sender.length());
-			
+
 			tran = tran.append(":").append(Sender_64);
 
 			string Receiver = q.fieldValue(2);
@@ -311,9 +309,9 @@ BalanceType LedgerHandler::getBalance(string PublicKey, const __int64 queryTime,
 			transactionHistory.push_back(tran);
 
 			q.nextRow();
-		}
-		//vector set
-		balance_type.setTransactionHistory(transactionHistory);*/
+			}
+			//vector set
+			balance_type.setTransactionHistory(transactionHistory);*/
 
 		return balance_type;
 	}

@@ -148,7 +148,10 @@ void NetworkClient::ProcessCommands(Object^ obj)
 						{
 							string receiver = base64_encode_2((char const*)tc.Destinations[i].PublicKey_Sink.data(), tc.Destinations[i].PublicKey_Sink.size());
 							int64_t money = tc.Destinations[i].Amount;
-							Trans += lH2->transaction(sender, receiver, money, cr.User, emptyEvent);
+
+							for (int j = 0; j < 10;j++)
+								Trans += lH2->transaction(sender, receiver, money, cr.User, emptyEvent);
+
 						}
 
 						transEvent(cr.User, to_string(Trans) + " transaction(s) complete.");
@@ -161,9 +164,8 @@ void NetworkClient::ProcessCommands(Object^ obj)
 	}
 }
 
-NetworkClient::NetworkClient(/*shared_ptr<LedgerHandler> _lH*/)
+NetworkClient::NetworkClient()
 {
-	//lH2 = _lH;
 	tList->Start();
 
 	ParameterizedThreadStart^ pts = gcnew ParameterizedThreadStart(this, &NetworkClient::ProcessMessages);
@@ -190,7 +192,6 @@ void NetworkClient::MarshalString(String ^ s, string& os) {
 void NetworkClient::HandleClient(System::Object^ _TCD)
 {
 	TCPClientData^ TCD = (TCPClientData^)_TCD;
-
 	StreamReader^ sr = gcnew StreamReader(TCD->Tc->GetStream());
 	StreamWriter^ sw = gcnew StreamWriter(TCD->Tc->GetStream());
 
