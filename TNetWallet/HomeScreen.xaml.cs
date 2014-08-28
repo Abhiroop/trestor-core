@@ -37,6 +37,7 @@ namespace TNetWallet
 
         private void button_Login_Click(object sender, RoutedEventArgs e)
         {
+            App.LoginPage.setUser("");
             NavigationService.Navigate(App.LoginPage);
         }
     }

@@ -43,14 +43,12 @@ namespace TNetWallet.WalletOperations
 
     class TransactionHistoryType
     {
-
         public string _ID;
         public string _Sender;
         public string _Receiver;
         public string _Amount;
         public string _Time;
         public string _IsSuccess;
-
 
         public string ID { get { return _ID; } }
         public string Sender { get { return _Sender; } }

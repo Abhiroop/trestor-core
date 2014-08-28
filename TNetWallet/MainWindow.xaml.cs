@@ -72,9 +72,15 @@ namespace TNetWallet
         private void image_Transaction_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (App.IsAnyBodyHome)
+            {
                 mainFrame.Content = App.TransactionHistoryPage;
+            }
+
             else
+            {
+                App.LoginPage.setUser("");
                 mainFrame.Content = App.LoginPage;
+            }
         }
 
         private void image_Users_MouseUp(object sender, MouseButtonEventArgs e)

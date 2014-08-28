@@ -45,8 +45,6 @@ namespace TNetWallet
 
             MainWindow mw = (MainWindow)App.Current.MainWindow;
 
-
-
             if (succ == 1)
             {
                 mw.SetUserName(u);
@@ -60,5 +58,7 @@ namespace TNetWallet
                 text_password.clearPassword();
             }
         }
+
+        
     }
 }

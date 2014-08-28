@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TNetCommon;
+using TNetCommon.Protocol;
 using TNetCommon.Transaction;
 using TNetWallet.WalletOperations;
 
@@ -77,8 +78,7 @@ namespace TNetWallet
                 }
             }));   
         }
-
-
+        
         byte[] SP_KEY = { 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7 };
         byte[] REC_KEY = { 1, 1, 2, 3, 4, 5, 6, 7, 1, 1, 2, 3, 4, 5, 6, 7, 1, 1, 2, 3, 4, 5, 6, 7, 1, 1, 2, 3, 4, 5, 6, 7 };
 
@@ -95,11 +95,17 @@ namespace TNetWallet
             }
             catch { }
         }
+        
+        byte[] GenerateBalancePacket(long Time)
+        {
+            List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
+            PDTs.Add(ProtocolPackager.Pack(Time, 0));
+            return ProtocolPackager.PackRaw(PDTs);
+        }
 
         private void button_Refresh_Click(object sender, RoutedEventArgs e)
         {
-
-            nw.SendCommand(SP_KEY, "BAL", new byte[0]);
+            nw.SendCommand(SP_KEY, "BAL", GenerateBalancePacket(TransactionHistory.GetLatestTransactionTime()));
         }
 
         private void textBox_Money_TextChanged(object sender, TextChangedEventArgs e)
@@ -119,8 +125,6 @@ namespace TNetWallet
                 }
                 catch { }
             }
-           
-           
 
             //MessageBox.Show("" + textBox_Money.Text);
         }

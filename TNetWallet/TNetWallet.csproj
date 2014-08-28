@@ -65,6 +65,7 @@
     <Compile Include="AccountCreated.xaml.cs">
       <DependentUpon>AccountCreated.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Constants.cs" />
     <Compile Include="CryptoUtility\UserAccessController.cs" />
     <Compile Include="PasswordScore.cs" />
     <Compile Include="PasswordStrength.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="WalletOperations\TransactionDataType.cs" />
     <Compile Include="WalletOperations\TransactionHistory.cs" />
     <Compile Include="WalletOperations\UserList.cs" />
+    <Compile Include="WalletOperations\UserRegistrationPacket.cs" />
     <Page Include="AccountCreated.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -10,21 +10,25 @@ namespace TNetCommon.Address
     class Address
     {
         byte[] PublicKey;
-        string Username;
+        string UserName;
+        int NetworkType = 1;
 
         public byte[] GetAddress
         {
             get
             {
-                byte[] joined = PublicKey.Concat(Encoding.GetEncoding(28591).GetBytes(Username)).ToArray();
+                byte[] joined = PublicKey.Concat(Encoding.GetEncoding(28591).GetBytes(UserName)).ToArray();
+
+
                 return (new SHA512Managed()).ComputeHash(joined).Take(32).ToArray();
             }
         }
 
-        public Address(byte[] PublicKey, string Username)
+        public Address(byte[] PublicKey, string UserName, int NetworkType=1)
         {
             this.PublicKey = PublicKey;
-            this.Username = Username;
+            this.UserName = UserName;
+            this.NetworkType = NetworkType;
         }
     }
 }

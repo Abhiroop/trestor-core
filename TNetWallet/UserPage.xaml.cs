@@ -49,12 +49,18 @@ namespace TNetWallet
 
             while (sqlite_datareader.Read())
             {
-                var now = sqlite_datareader["LastLoginTime"];
-                DateTime dt = DateTime.FromFileTime((long)now);
-                string datePatt = @"d/M/yyyy hh:mm:ss tt";
+                string LTime = "Not yet logged in";
+                try
+                {
+                    var now = sqlite_datareader["LastLoginTime"];
+                    DateTime dt = DateTime.FromFileTime((long)now);
+                    string datePatt = @"d/M/yyyy hh:mm:ss tt";
+                    LTime = dt.ToString(datePatt);
+                }
+                catch { }
 
                 UserList userList =
-                    new UserList(sqlite_datareader["Username"].ToString(), dt.ToString(datePatt));
+                    new UserList(sqlite_datareader["Username"].ToString(), LTime);
                 uList.Add(userList);
             }
             sqlite_datareader.Close();

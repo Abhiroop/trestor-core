@@ -4,33 +4,30 @@ using System.Data.SQLite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Security.Cryptography; 
+using System.Security.Cryptography;
 
 namespace TNetWallet.WalletOperations
 {
     class TransactionHistory
     {
-
-        public string getLatestTransactionTime()
+        public static long GetLatestTransactionTime()
         {
             SQLiteConnection sqlite_conn;
             SQLiteCommand sqlite_cmd;
             SQLiteDataReader sqlite_datareader;
-            sqlite_conn =
-                new SQLiteConnection(@"data source=..\..\db\db.dat; Version=3; New=True; Compress=True;");
-
-
+            sqlite_conn = new SQLiteConnection(Constants.ConnectionString);
             sqlite_conn.Open();
             sqlite_cmd = sqlite_conn.CreateCommand();
 
             sqlite_cmd.CommandText = "SELECT MAX(Time) FROM TransactionHistory";
             sqlite_datareader = sqlite_cmd.ExecuteReader();
 
-            string outMaxTime = "";
+            long outMaxTime = 0;
             while (sqlite_datareader.Read())
             {
-                outMaxTime = sqlite_datareader[0].ToString();
+                outMaxTime = (long)sqlite_datareader[0];
             }
+
             sqlite_datareader.Close();
             sqlite_conn.Close();
 
@@ -48,7 +45,7 @@ namespace TNetWallet.WalletOperations
             SQLiteConnection sqlite_conn;
             SQLiteCommand sqlite_cmd;
 
-            sqlite_conn = new SQLiteConnection(@"data source=..\..\db\db.dat; Version=3; New=True; Compress=True;");
+            sqlite_conn = new SQLiteConnection(Constants.ConnectionString);
 
             sqlite_conn.Open();
             sqlite_cmd = sqlite_conn.CreateCommand();
@@ -57,7 +54,7 @@ namespace TNetWallet.WalletOperations
 
 
 
-            foreach(TransactionHistoryType td in tds)
+            foreach (TransactionHistoryType td in tds)
             {
                 try
                 {

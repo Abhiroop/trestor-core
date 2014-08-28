@@ -69,7 +69,7 @@ namespace TNetWallet.CryptoUtility
             SQLiteConnection sqlite_conn;
             SQLiteCommand sqlite_cmd;
             SQLiteDataReader sqlite_datareader;
-            sqlite_conn = new SQLiteConnection(@"data source=..\..\db\db.dat; Version=3; New=True; Compress=True;");
+            sqlite_conn = new SQLiteConnection(Constants.ConnectionString);
             sqlite_conn.Open();
             sqlite_cmd = sqlite_conn.CreateCommand();
 
@@ -112,7 +112,7 @@ namespace TNetWallet.CryptoUtility
             SQLiteConnection sqlite_conn;
             SQLiteCommand sqlite_cmd;
             SQLiteDataReader sqlite_datareader;
-            sqlite_conn = new SQLiteConnection(@"data source=..\..\db\db.dat; Version=3; New=True; Compress=True;");
+            sqlite_conn = new SQLiteConnection(Constants.ConnectionString);
             sqlite_conn.Open();
             sqlite_cmd = sqlite_conn.CreateCommand();
 
@@ -202,7 +202,7 @@ namespace TNetWallet.CryptoUtility
             SQLiteConnection sqlite_conn;
             SQLiteCommand sqlite_cmd;
             SQLiteDataReader sqlite_datareader;
-            sqlite_conn = new SQLiteConnection(@"data source=..\..\db\db.dat; Version=3; New=True; Compress=True;");
+            sqlite_conn = new SQLiteConnection(Constants.ConnectionString);
             sqlite_conn.Open();
             sqlite_cmd = sqlite_conn.CreateCommand();
 
