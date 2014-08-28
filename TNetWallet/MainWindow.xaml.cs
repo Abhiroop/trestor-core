@@ -69,14 +69,9 @@ namespace TNetWallet
 
         }
 
-        private void image_Transaction_MouseUp_1(object sender, MouseButtonEventArgs e)
-        {
-
-        }
-
         private void image_Users_MouseUp(object sender, MouseButtonEventArgs e)
         {
-
+            mainFrame.Content = App.UserPage;
         }
 
         private void image_Refresh_MouseUp(object sender, MouseButtonEventArgs e)

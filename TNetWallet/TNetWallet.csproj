@@ -80,9 +80,13 @@
     <Compile Include="UserControls\TitledTextBox.xaml.cs">
       <DependentUpon>TitledTextBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserPage.xaml.cs">
+      <DependentUpon>UserPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WalletOperations\Network.cs" />
     <Compile Include="WalletOperations\TransactionDataType.cs" />
     <Compile Include="WalletOperations\TransactionHistory.cs" />
+    <Compile Include="WalletOperations\UserList.cs" />
     <Page Include="AccountCreated.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -133,6 +137,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\TitledTextBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
