@@ -29,8 +29,8 @@ namespace TNetWallet
         private void TextBlock_Loaded(object sender, RoutedEventArgs e)
         {
             textblock_message.Text = App.RegisterPage.message + 
-                "\nyour public key\n" + Convert.ToBase64String(App.PublicKeyManagement.PublicKey) +
-                "\nyour private key \n" + Convert.ToBase64String(App.PublicKeyManagement.PrivateKey);
+                "\nyour public key\n" + Convert.ToBase64String(App.UserAccessController.PublicKey) +
+                "\nyour private key \n" + Convert.ToBase64String(App.UserAccessController.PrivateKey);
         }
 
         private void Button_login_Click(object sender, RoutedEventArgs e)

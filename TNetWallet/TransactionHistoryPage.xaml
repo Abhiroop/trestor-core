@@ -1,11 +1,14 @@
-﻿<Page
+﻿
+
+
+<Page
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:TNetWallet" xmlns:UserControls="clr-namespace:TNetWallet.UserControls" x:Class="TNetWallet.UserPage" 
+      xmlns:local="clr-namespace:TNetWallet" xmlns:UserControls="clr-namespace:TNetWallet.UserControls" x:Class="TNetWallet.TransactionHistoryPage" 
       mc:Ignorable="d"
-	Title="UserPage" Height="600" Width="400" Loaded="Page_Loaded">
+	Title="TransactionHistoryPage" Height="600" Width="400" >
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -18,13 +21,14 @@
             <RowDefinition Height="251*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="18" Height="28" Grid.Column="1" Margin="0,21,0,0" FontWeight="Bold" Width="200" Text="User Selection" TextAlignment="Center" />
+        <TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="18" Height="28" Grid.Column="1" Margin="0,21,0,0" FontWeight="Bold" Width="200" Text="Transaction History" TextAlignment="Center" />
         <Line Margin="0,0,0,49"/>
-        <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Select a user to login" VerticalAlignment="Top" FontSize="14" Height="28" Margin="0,49,0,0" Width="200" Grid.Column="1" TextAlignment="Center" />
         <Button Name="button_Loging" Grid.ColumnSpan="3" Content="Log In" Margin="72,397,72,0" Grid.Row="1" Style="{DynamicResource TrestorButtonStyle}" Foreground="#FFFDFDFD" Background="#00000000" Height="38" VerticalAlignment="Top"  />
         <TextBlock Name="textBlock_Status"  Margin="0,321,0,147" FontSize="20" Grid.Row="1" Grid.Column="1"/>
         <TextBlock Name="textBlock_TotalMoney"  Margin="72,471,72,10" Grid.ColumnSpan="3" FontSize="16" Grid.Row="1"/>
-        <DataGrid Name="datagrid_UserGrid" Margin="20,43,21,0" Grid.Row="1" VerticalAlignment="Top" Height="273" Grid.ColumnSpan="3" Loaded="DataGrid_Loaded" MouseDoubleClick="datagrid_UserGrid_MouseDoubleClick"/>
+        <DataGrid Name="datagrid_TransactionHistory" Margin="20,43,21,0" Grid.Row="1" VerticalAlignment="Top" Height="273" Grid.ColumnSpan="3" Loaded="datagrid_TransactionHistory_Loaded" />
     </Grid>
 </Page>
 
+   
+    

@@ -29,7 +29,7 @@ namespace TNetWallet
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            
+
         }
 
         private void DataGrid_Loaded(object sender, RoutedEventArgs e)
@@ -41,7 +41,7 @@ namespace TNetWallet
             sqlite_conn.Open();
             sqlite_cmd = sqlite_conn.CreateCommand();
 
-            sqlite_cmd.CommandText = "SELECT Username FROM AppUserTable";
+            sqlite_cmd.CommandText = "SELECT Username, LastLoginTime FROM AppUserTable";
 
             sqlite_datareader = sqlite_cmd.ExecuteReader();
 
@@ -49,15 +49,39 @@ namespace TNetWallet
 
             while (sqlite_datareader.Read())
             {
-                UserList userList = new UserList(sqlite_datareader["Username"].ToString(), "");
+                var now = sqlite_datareader["LastLoginTime"];
+                DateTime dt = DateTime.FromFileTime((long)now);
+                string datePatt = @"d/M/yyyy hh:mm:ss tt";
+
+                UserList userList =
+                    new UserList(sqlite_datareader["Username"].ToString(), dt.ToString(datePatt));
                 uList.Add(userList);
             }
             sqlite_datareader.Close();
 
-          
+
             // ... Assign ItemsSource of DataGrid.
             var grid = sender as DataGrid;
             grid.ItemsSource = uList;
+        }
+
+        private void datagrid_UserGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            DataGrid dg = datagrid_UserGrid;
+
+            UserList ul = (UserList)dg.SelectedItem;
+
+            string username = ul.UserName;
+
+            App.LoginPage.setUser(ul.UserName);
+
+            App.UserAccessController.logOut();
+
+            ((MainWindow)App.Current.MainWindow).SetUserName("Welcome to Trestor Net");
+
+            NavigationService.Navigate(App.LoginPage);
+
+
         }
     }
 }

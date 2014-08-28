@@ -25,6 +25,11 @@ namespace TNetWallet
             InitializeComponent();
         }
 
+        public void SetUserName(string Name)
+        {
+            textBlock_LoggedInUserName.Text = Name;
+        }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             mainFrame.Content = App.HomeScreen;
@@ -66,7 +71,10 @@ namespace TNetWallet
 
         private void image_Transaction_MouseUp(object sender, MouseButtonEventArgs e)
         {
-
+            if (App.IsAnyBodyHome)
+                mainFrame.Content = App.TransactionHistoryPage;
+            else
+                mainFrame.Content = App.LoginPage;
         }
 
         private void image_Users_MouseUp(object sender, MouseButtonEventArgs e)
@@ -78,6 +86,17 @@ namespace TNetWallet
         {
 
         }
+
+        private void button_logout_Click(object sender, RoutedEventArgs e)
+        {
+            App.UserAccessController.logOut();
+           
+            ((MainWindow)App.Current.MainWindow).SetUserName("Welcome to Trestor Net");
+            mainFrame.Content = App.HomeScreen;
+
+        }
+
+     
 
     }
 }

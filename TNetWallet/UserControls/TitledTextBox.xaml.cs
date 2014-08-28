@@ -25,6 +25,11 @@ namespace TNetWallet
         public delegate void TextChangedHandler();
         public event TextChangedHandler PassTextChanged;
 
+        public void clearPassword()
+        {
+            passwordBox_Content.Password = "";
+        }
+
         public string TitleText
         {
             get
