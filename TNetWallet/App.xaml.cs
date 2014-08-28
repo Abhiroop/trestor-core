@@ -24,6 +24,7 @@ namespace TNetWallet
         public static SendMoney SendMoney = new SendMoney();
         public static RegistrationConfirm RegistrationConfirm = new RegistrationConfirm();
 
+        public static UserPage UserPage = new UserPage();
         // ////////////// .PAGES
 
         public static PublicKeyManagement PublicKeyManagement = new PublicKeyManagement();
