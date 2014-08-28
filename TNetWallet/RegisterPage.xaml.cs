@@ -85,7 +85,7 @@ namespace TNetWallet
             {
 
                 userName += "@trestor.com";
-                int succ = App.PublicKeyManagement.newUserRegistration(userName, passWord, out message);
+                int succ = App.UserAccessController.newUserRegistration(userName, passWord, out message);
 
                 textbox_passcheck.Text = message;
 
@@ -113,7 +113,7 @@ namespace TNetWallet
             else
             {
                 UserName += "@trestor.com";
-                if(App.PublicKeyManagement.UserExistsLocal(UserName))
+                if(App.UserAccessController.UserExistsLocal(UserName))
                 {
                     username_checker.Text = "UserName already exists";
                     textBox_UserName.Text = "";

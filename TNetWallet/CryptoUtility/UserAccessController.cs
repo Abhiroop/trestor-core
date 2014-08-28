@@ -11,7 +11,7 @@ using System.Data.SQLite;
 
 namespace TNetWallet.CryptoUtility
 {
-    public class PublicKeyManagement
+    public class UserAccessController
     {
         byte[] publicKey;
         private byte[] privateKey;
@@ -19,6 +19,7 @@ namespace TNetWallet.CryptoUtility
         byte[] randomSalt = new byte[8];
         byte[] encryptedRandomSeed;
         byte[] encryptedRandomSalt;
+        public string LoggedUser = "";
 
         static Encoding enc = Encoding.GetEncoding(28591);
 
@@ -38,6 +39,29 @@ namespace TNetWallet.CryptoUtility
                 return publicKey;
             }
 
+        }
+
+        public void logOut()
+        {
+            try
+            {
+                for (int i = 0; i < publicKey.Length; i++)
+                    publicKey[i] = 0;
+
+                for (int i = 0; i < privateKey.Length; i++)
+                    privateKey[i] = 0;
+
+               // App.IsAnyBodyHome = false;
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                LoggedUser = "";
+                App.IsAnyBodyHome = false;
+            }
         }
 
         public bool UserExistsLocal(string Username)
@@ -103,6 +127,7 @@ namespace TNetWallet.CryptoUtility
             while (sqlite_datareader.Read())
             {
                 message = "User "+username+" already exists";
+                sqlite_conn.Close();
                 return 0;
             }
 
@@ -144,9 +169,11 @@ namespace TNetWallet.CryptoUtility
             catch(Exception)
             {
                 message = "Database error";
+                sqlite_conn.Close();
                 return 0;
             }
 
+            sqlite_conn.Close();
             message = "User registration successful";
             return 1;
         }
@@ -160,7 +187,7 @@ namespace TNetWallet.CryptoUtility
         /// <returns></returns>
         public int userLogin(String username, String password, out string message)
         {
-            if(username.Length == 0)
+            if(username == "@trestor.com")
             {
                 message = "Username field can not be empty";
                 return 0;
@@ -203,6 +230,7 @@ namespace TNetWallet.CryptoUtility
             if (!userExist)
             {
                 message = "User " + username + " not exists in the app database";
+                sqlite_conn.Close();
                 return 0;
             }
 
@@ -216,6 +244,7 @@ namespace TNetWallet.CryptoUtility
             catch
             {
                 message = "Password error";
+                sqlite_conn.Close();
                 return 0;
             }
             //check if the key is correct or not
@@ -226,6 +255,7 @@ namespace TNetWallet.CryptoUtility
                     if (test_salt[i] != randomSalt[i])
                     {
                         message = "Password error";
+                        sqlite_conn.Close();
                         return 0;
                     }
                 }
@@ -233,6 +263,7 @@ namespace TNetWallet.CryptoUtility
             else
             {
                 message = "Password error";
+                sqlite_conn.Close();
                 return 0;
             }
 
@@ -244,12 +275,25 @@ namespace TNetWallet.CryptoUtility
             catch
             {
                 message = "Password error";
+                sqlite_conn.Close();
                 return 0;
             }
             //make keypair
             Ed25519.KeyPairFromSeed(out publicKey, out privateKey, randomSeed);
 
-            message = "Suuccess";
+
+
+            sqlite_cmd.CommandText =
+                    "UPDATE AppUserTable SET LastLoginTime=@u2 WHERE Username=@u1;";
+            sqlite_cmd.Parameters.Add(new SQLiteParameter("@u1", username));
+            sqlite_cmd.Parameters.Add(new SQLiteParameter("@u2", DateTime.Now.ToFileTimeUtc()));
+
+            sqlite_cmd.ExecuteNonQuery();
+
+
+            sqlite_conn.Close();
+            message = "Success";
+            LoggedUser = username;
             return 1;
         }
 

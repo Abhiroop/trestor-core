@@ -23,11 +23,15 @@ namespace TNetWallet
         public static RegisterPage RegisterPage = new RegisterPage();
         public static SendMoney SendMoney = new SendMoney();
         public static RegistrationConfirm RegistrationConfirm = new RegistrationConfirm();
+        public static TransactionHistoryPage TransactionHistoryPage = new TransactionHistoryPage();
+
+
+        public static bool IsAnyBodyHome = false;
 
         public static UserPage UserPage = new UserPage();
         // ////////////// .PAGES
 
-        public static PublicKeyManagement PublicKeyManagement = new PublicKeyManagement();
+        public static UserAccessController UserAccessController = new UserAccessController();
     
         
 

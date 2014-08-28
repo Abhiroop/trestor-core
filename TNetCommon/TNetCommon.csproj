@@ -110,6 +110,7 @@
     <Compile Include="Protocol\ProtocolPackager.cs" />
     <Compile Include="Transaction\TransactionContent.cs" />
     <Compile Include="Transaction\TransactionSink.cs" />
+    <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Chaos.NaCl\Internal\Salsa\replace regex.txt" />

@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TNetCommon;
 using TNetCommon.Transaction;
 using TNetWallet.WalletOperations;
 
@@ -87,8 +88,8 @@ namespace TNetWallet
             {
                 TransactionSink sink = new TransactionSink(REC_KEY, long.Parse(textBox_Money.Text));
 
-                TransactionContent tc = new TransactionContent(SP_KEY, DateTime.UtcNow.ToFileTimeUtc(),
-                    new TransactionSink[] { sink }, App.PublicKeyManagement.PrivateKey);
+                TransactionContent tc = new TransactionContent(SP_KEY, DateTime.UtcNow.ToUnixTime(),
+                    new TransactionSink[] { sink }, App.UserAccessController.PrivateKey);
 
                 nw.SendCommand(SP_KEY, "TRX", tc.Serialize());
             }

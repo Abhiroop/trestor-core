@@ -8,13 +8,17 @@ namespace TNetWallet.WalletOperations
 {
     class UserList
     {
-        public string UserName{set; get;}
-        public string LastLoginTime { set; get; }
+         string _UserName;
+         string _LastLoginTime;
+
+
+         public string UserName { get { return _UserName; } }
+         public string LastLoginTime { get { return _LastLoginTime; } }
 
         public UserList(string UserName, string LastLoginTime)
         {
-            this.UserName = UserName;
-            this.LastLoginTime = LastLoginTime;
+            _UserName = UserName;
+            _LastLoginTime = LastLoginTime;
         }
     }
 }

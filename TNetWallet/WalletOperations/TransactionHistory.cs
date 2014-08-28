@@ -57,7 +57,7 @@ namespace TNetWallet.WalletOperations
 
 
 
-            foreach(TransactionData td in tds)
+            foreach(TransactionHistoryType td in tds)
             {
                 try
                 {
@@ -65,11 +65,11 @@ namespace TNetWallet.WalletOperations
                         "INSERT INTO TransactionHistory (ID, Sender, Receiver, Amount, Time, IsSuccess) VALUES (@u1, @u2, u3, u4, u5, u6);";
 
                     sqlite_cmd.Parameters.Add(new SQLiteParameter("@u1", td.ID));
-                    sqlite_cmd.Parameters.Add(new SQLiteParameter("@u1", td.Sender));
-                    sqlite_cmd.Parameters.Add(new SQLiteParameter("@u1", td.Receiver));
-                    sqlite_cmd.Parameters.Add(new SQLiteParameter("@u1", td.Amount));
-                    sqlite_cmd.Parameters.Add(new SQLiteParameter("@u1", td.Time));
-                    sqlite_cmd.Parameters.Add(new SQLiteParameter("@u1", td.IsSuccess));
+                    sqlite_cmd.Parameters.Add(new SQLiteParameter("@u2", td.Sender));
+                    sqlite_cmd.Parameters.Add(new SQLiteParameter("@u3", td.Receiver));
+                    sqlite_cmd.Parameters.Add(new SQLiteParameter("@u4", td.Amount));
+                    sqlite_cmd.Parameters.Add(new SQLiteParameter("@u5", td.Time));
+                    sqlite_cmd.Parameters.Add(new SQLiteParameter("@u6", td.IsSuccess));
 
                     sqlite_cmd.ExecuteNonQuery();
                 }

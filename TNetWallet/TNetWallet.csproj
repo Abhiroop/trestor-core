@@ -65,7 +65,7 @@
     <Compile Include="AccountCreated.xaml.cs">
       <DependentUpon>AccountCreated.xaml</DependentUpon>
     </Compile>
-    <Compile Include="CryptoUtility\PublicKeyManagement.cs" />
+    <Compile Include="CryptoUtility\UserAccessController.cs" />
     <Compile Include="PasswordScore.cs" />
     <Compile Include="PasswordStrength.cs" />
     <Compile Include="RegistrationConfirm.xaml.cs">
@@ -73,6 +73,9 @@
     </Compile>
     <Compile Include="SendMoney.xaml.cs">
       <DependentUpon>SendMoney.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TransactionHistoryPage.xaml.cs">
+      <DependentUpon>TransactionHistoryPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\MoneyBar.xaml.cs">
       <DependentUpon>MoneyBar.xaml</DependentUpon>
@@ -129,6 +132,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="SendMoney.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TransactionHistoryPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
