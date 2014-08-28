@@ -10,16 +10,16 @@ using namespace Threading;
 
 /*void ThreadProc(Object^ data)
 {
-	//NetworkClient^ nc = gcnew NetworkClient(lH);
+//NetworkClient^ nc = gcnew NetworkClient(lH);
 
-	//TimerCallback^ tcb = gcnew TimerCallback(nc, &NetworkClient::UpdateEvents);
+//TimerCallback^ tcb = gcnew TimerCallback(nc, &NetworkClient::UpdateEvents);
 
-	//Threading::Timer^ stateTimer = gcnew Threading::Timer(tcb, nullptr, 30, 30);
+//Threading::Timer^ stateTimer = gcnew Threading::Timer(tcb, nullptr, 30, 30);
 
-	//while (true)
-	//{
-	//	Thread::Sleep(30);
-	//}
+//while (true)
+//{
+//	Thread::Sleep(30);
+//}
 
 }*/
 
@@ -210,7 +210,7 @@ namespace TnetServerPrototype {
 
 		}
 #pragma endregion
-			
+
 
 		NetworkClient^ nc = gcnew NetworkClient();
 
@@ -227,17 +227,17 @@ namespace TnetServerPrototype {
 
 	private: System::Void MainForm_Load(System::Object^  sender, System::EventArgs^  e) {
 
-				 global_db.open(".\\db\\ledger.dat");
+		global_db.open(".\\db\\ledger.dat");
 	}
 
 
-private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {
+	private: System::Void timer1_Tick(System::Object^  sender, System::EventArgs^  e) {
 
-			 nc->UpdateEvents("");
+		nc->UpdateEvents("");
 
-			 richTextBox_Log->AppendText(".");
-}
+		//richTextBox_Log->AppendText(".");
+	}
 
 
-};
+	};
 }

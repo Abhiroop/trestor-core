@@ -30,6 +30,18 @@ namespace TNetWallet
             textBlock_LoggedInUserName.Text = Name;
         }
 
+        public void SetNetworkStatus(bool Connected)
+        {
+            if (Connected)
+            {
+                image_Network.Source = new BitmapImage(new Uri("pack://application:,,,/TNetWallet;component/Resources/network_connected.ico"));
+            }
+            else
+            {
+                image_Network.Source = new BitmapImage(new Uri("pack://application:,,,/TNetWallet;component/Resources/network_unavailable.ico"));
+            }
+        }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             mainFrame.Content = App.HomeScreen;
@@ -63,7 +75,7 @@ namespace TNetWallet
             settingsMenu.PlacementTarget = this;
             settingsMenu.IsOpen = true;
         }
-        
+
         private void image_Home_MouseUp(object sender, MouseButtonEventArgs e)
         {
             mainFrame.Content = App.HomeScreen;
@@ -96,13 +108,12 @@ namespace TNetWallet
         private void button_logout_Click(object sender, RoutedEventArgs e)
         {
             App.UserAccessController.logOut();
-           
-            ((MainWindow)App.Current.MainWindow).SetUserName("Welcome to Trestor Net");
+            SetUserName("Welcome to Trestor Net");
             mainFrame.Content = App.HomeScreen;
 
         }
 
-     
+
 
     }
 }

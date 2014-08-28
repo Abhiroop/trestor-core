@@ -254,7 +254,6 @@ void NetworkClient::HandleClient(System::Object^ _TCD)
 	Console::WriteLine("User Disconnected : " + TCD->Tc->Client->RemoteEndPoint->ToString());
 }
 
-
 void NetworkClient::InternalUpdate()
 {
 	Updating = true;
@@ -266,11 +265,15 @@ void NetworkClient::InternalUpdate()
 		TC->ReceiveBufferSize = 64;
 		TC->SendBufferSize = 64;
 
+		String^ remoteHost = TC->Client->RemoteEndPoint->ToString();
+
 		TCPClientData^ TCD = gcnew TCPClientData(TC);
-		ConnDict->Add(TC->Client->RemoteEndPoint->ToString(), TCD);
+		ConnDict->Add(remoteHost, TCD);
 		ParameterizedThreadStart^ pts = gcnew ParameterizedThreadStart(this, &NetworkClient::HandleClient);
 		Thread^ thr = gcnew Thread(pts);
 		thr->Start(TCD);
+
+		Console::WriteLine("Accepted Connection : " + remoteHost);
 	}
 
 	Updating = false;

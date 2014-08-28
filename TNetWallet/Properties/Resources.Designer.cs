@@ -73,6 +73,16 @@ namespace TNetWallet.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
+        internal static System.Drawing.Icon correct_1 {
+            get {
+                object obj = ResourceManager.GetObject("correct_1", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
         internal static System.Drawing.Icon home_1 {
             get {
                 object obj = ResourceManager.GetObject("home_1", resourceCulture);
@@ -106,6 +116,46 @@ namespace TNetWallet.Properties {
         internal static System.Drawing.Icon logout_1 {
             get {
                 object obj = ResourceManager.GetObject("logout_1", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon network_adhoc {
+            get {
+                object obj = ResourceManager.GetObject("network_adhoc", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon network_connected {
+            get {
+                object obj = ResourceManager.GetObject("network_connected", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon network_idle {
+            get {
+                object obj = ResourceManager.GetObject("network_idle", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon network_unavailable {
+            get {
+                object obj = ResourceManager.GetObject("network_unavailable", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }

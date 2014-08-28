@@ -21,6 +21,9 @@
                 <Image x:Name="image_Home" Margin="10,0,0,0" Source="Resources/home_1.ico" Width="18" Height="18" MouseUp="image_Home_MouseUp"/>
                 <Image x:Name="image_Transaction" Margin="10,0,0,0" Source="Resources/cart_1.ico" Width="18" Height="18" MouseUp="image_Transaction_MouseUp"/>
                 <Image x:Name="image_Users" Margin="10,0,0,0" Source="Resources/users_1.ico" Width="18" Height="18" MouseUp="image_Users_MouseUp" />
+
+                <Image x:Name="image_Network" Margin="30,0,0,0" Source="Resources/network_unavailable.ico" Width="18" Height="18"/>
+
                 <Image x:Name="image_Refresh" Margin="10,0,0,0" Source="Resources/refresh_1.ico" Width="18" Height="18" MouseUp="image_Refresh_MouseUp"/>
 
 

@@ -142,4 +142,19 @@
   <data name="users_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\users_1.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="correct_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\correct_1.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="network_adhoc" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\network_adhoc.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="network_connected" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\network_connected.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="network_idle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\network_idle.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="network_unavailable" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\network_unavailable.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

@@ -211,6 +211,21 @@
   <ItemGroup>
     <Resource Include="Resources\users_1.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\correct_1.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\network_adhoc.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\network_connected.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\network_idle.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\network_unavailable.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
