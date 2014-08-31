@@ -23,7 +23,7 @@ namespace TNetWallet
     public partial class TitledTextBox : UserControl
     {
         public delegate void TextChangedHandler();
-        public event TextChangedHandler PassTextChanged;
+        public event TextChangedHandler TextChanged;
 
         public void clearPassword()
         {
@@ -183,7 +183,17 @@ namespace TNetWallet
                 passQuality = Colors.Green;
             }
 
-            if (PassTextChanged != null) PassTextChanged();
+            if (TextChanged != null) TextChanged();
+        }
+
+
+        private void textBox_Content_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (TextChanged != null) TextChanged();
+        }
+
+        private void passwordBox_Content_TextInput(object sender, TextCompositionEventArgs e)
+        {
         }
     }
 }

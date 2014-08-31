@@ -12,6 +12,7 @@
 #include "stdint.h"
 #include "sha512.h"
 
+
 /* the K array */
 static const uint64_t K[80] = {
     UINT64_C(0x428a2f98d728ae22), UINT64_C(0x7137449123ef65cd), 
@@ -272,4 +273,17 @@ int sha512(const unsigned char *message, size_t message_len, unsigned char *out)
     if ((ret = sha512_update(&ctx, message, message_len))) return ret;
     if ((ret = sha512_final(&ctx, out))) return ret;
     return 0;
+}
+
+std::vector<unsigned char> sha512(const unsigned char *message, size_t message_len)
+{
+	unsigned char out[64];
+
+	sha512_context ctx;
+
+	sha512_init(&ctx);
+	sha512_update(&ctx, message, message_len);
+	sha512_final(&ctx, out);
+	
+	return std::vector<unsigned char>(out, out + 64);
 }

@@ -1,7 +1,16 @@
 
+/*
+*
+*  @Author: Arpan Jati
+*  @Version: 1.0
+*  @Date: August 2014
+*/
+
 #include "TransactionContent.h"
 #include "ProtocolPackager.h"
 #include "Constants.h"
+
+#include "AddressFactory.h"
 
 TransactionContent::TransactionContent(Hash _PublicKey_Source, int64_t _Timestamp, vector<TransactionSink> _Destinations, Hash _Signature)
 {

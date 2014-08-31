@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:TNetWallet" x:Class="TNetWallet.RegisterPage" 
       mc:Ignorable="d"
-	Title="RegisterPage" Height="600" Width="400">
+	Title="RegisterPage" Height="600" Width="400" Loaded="Page_Loaded">
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -14,35 +14,44 @@
             <ColumnDefinition Width="10*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="98*"/>
-            <RowDefinition Height="369*"/>
-            <RowDefinition Height="133*"/>
+            <RowDefinition Height="85*"/>
+            <RowDefinition Height="339*"/>
+            <RowDefinition Height="176*"/>
         </Grid.RowDefinitions>
 
         <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Create New Account" VerticalAlignment="Top" FontSize="18" Height="28" Grid.Column="1" Margin="14,21,13,0" FontWeight="Bold" Width="173" />
-        <Button Grid.ColumnSpan="3" Content="Create Account" Margin="72,295,72,0" Grid.Row="1" Style="{DynamicResource TrestorButtonStyle}" Foreground="#FFFDFDFD" Background="#00000000" Height="38" VerticalAlignment="Top" Click="Button_Click"/>
+        <Button Grid.ColumnSpan="3" Content="Create Account" Margin="72,287,72,0" Grid.Row="1" Style="{DynamicResource TrestorButtonStyle}" Foreground="#FFFDFDFD" Background="#00000000" Height="38" VerticalAlignment="Top" Click="Button_Click"/>
         <Line Margin="0,0,0,49"/>
         <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="So, let's create your account, takes a few seconds." VerticalAlignment="Top" FontSize="14" Height="28" Grid.ColumnSpan="3" Margin="47,49,47,0" Width="306" />
 
-        <local:TitledTextBox x:Name="textBox_UserName" ToolTipService.Placement="Bottom" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="47,10,0,0" Grid.Row="1" VerticalAlignment="Top" Width="298" TitleText="CHOOSE A TRESTOR ID" LostFocus="textBox_UserName_LostFocus">
+        <local:TitledTextBox x:Name="textBox_UserName" TextChanged="textBox_UserName_TextChanged" ToolTipService.Placement="Bottom" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="47,10,0,0" Grid.Row="1" VerticalAlignment="Top" Width="298" TitleText="CHOOSE A TRESTOR ID" LostFocus="textBox_UserName_LostFocus">
             <local:TitledTextBox.ToolTip>
                 <Border  Margin="-6" Padding="5" Background="#FF747474">
                     <TextBlock Foreground="White" Text="A unique id, will be used to transfer trests. It is preferable to have an anonymous ID."></TextBlock>
                 </Border>
             </local:TitledTextBox.ToolTip>
         </local:TitledTextBox>
-        <local:TitledTextBox x:Name="textBox_Password" PassTextChanged="PassHandler"  ToolTipService.Placement="Bottom" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="47,96,0,0" Grid.Row="1" VerticalAlignment="Top" Width="298" TitleText="CHOOSE A PASSWORD"  IsPasswordBox="True">
+        <local:TitledTextBox x:Name="textBox_Password" TextChanged="PassHandler"  ToolTipService.Placement="Bottom" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="47,96,0,0" Grid.Row="1" VerticalAlignment="Top" Width="298" TitleText="CHOOSE A PASSWORD"  IsPasswordBox="True">
             <local:TitledTextBox.ToolTip>
                 <Border  Margin="-6" Padding="5" Background="{DynamicResource ToolTipBackgroundBrush}">
                     <TextBlock Foreground="White">Choose a strong password. This password will be used to secure your private keys.</TextBlock>
                 </Border>
             </local:TitledTextBox.ToolTip>
         </local:TitledTextBox>
-        <local:TitledTextBox x:Name="textBox_RepeatPassword" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="47,179,0,0" Grid.Row="1" VerticalAlignment="Top" Width="298" TitleText="RETYPE PASSWORD" IsPasswordBox="True"/>
-        <Ellipse Name="passQualityEllipse" Grid.Column="2" HorizontalAlignment="Left" Height="22" Margin="59,125,0,0" Grid.Row="1" VerticalAlignment="Top" Width="22"/>
+        <local:TitledTextBox x:Name="textBox_RepeatPassword"  TextChanged="PassHandler" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="47,179,0,0" Grid.Row="1" VerticalAlignment="Top" Width="298" TitleText="RETYPE PASSWORD" IsPasswordBox="True"/>
+        <Ellipse Name="passQualityEllipse" Grid.Column="2" HorizontalAlignment="Left" Height="22" Margin="55,126,0,0" Grid.Row="1" VerticalAlignment="Top" Width="22"/>
         <TextBlock x:Name="textbox_passcheck" HorizontalAlignment="Left" Margin="47,249,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Width="298" Height="28" Foreground="#FF59AE46" Grid.ColumnSpan="3" TextAlignment="Center"/>
-        <TextBlock Grid.Column="1" HorizontalAlignment="Left" Margin="171,80,0,0" Grid.Row="1" TextWrapping="Wrap" Text="@trestor.com" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="88" Foreground="#FF59AE46" FontSize="14"/>
         <TextBlock x:Name="username_checker" HorizontalAlignment="Left" Margin="56,77,0,0" Grid.Row="1" TextWrapping="Wrap" VerticalAlignment="Top" Height="19" Grid.ColumnSpan="2" Width="210" Foreground="#FF59AE46"/>
+
+        <TextBlock Name="textBox_AccountInfo" Grid.ColumnSpan="3" Margin="21,0,19,31" Grid.Row="2"/>
+
+        <Button Name="buttonRefresh" Grid.Column="2" Margin="47,290,14,15" Grid.Row="1" BorderThickness="0" Click="buttonRefresh_Click">
+            <Button.Content>
+                <Image Source="Resources/refresh_1.ico" Height="24" Width="29"></Image>
+            </Button.Content>
+        </Button>
+
+        <Image Name="Image_PassMatch" Source="Resources/correct_1.ico" Height="24" Width="29" Grid.Column="2" Margin="52,209,19,106" Grid.Row="1"/>
 
     </Grid>
 </Page>

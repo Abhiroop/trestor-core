@@ -8,9 +8,31 @@ using Chaos.NaCl;
 using System.IO;
 using System.Data.SQLite;
 
-
 namespace TNetWallet.CryptoUtility
 {
+    /// <summary>
+    /// Note: Essentially the Random seed is the actual Private key; and the Private key is [seed + public key]
+    /// </summary>
+    public class GeneratedKeyPairData
+    {
+        public byte[] randomSeed = new byte[32];
+        public byte[] publicKey = new byte[32];
+        public byte[] privateKey = new byte[32];
+
+        public GeneratedKeyPairData(byte[] randomSeed, byte[] publicKey, byte[] privateKey)
+        {
+            this.randomSeed = randomSeed;
+            this.publicKey = publicKey;
+            this.privateKey = privateKey;
+        }
+
+        public GeneratedKeyPairData()
+        {
+            (new RNGCryptoServiceProvider()).GetBytes(randomSeed);
+            Ed25519.KeyPairFromSeed(out publicKey, out privateKey, randomSeed);
+        }
+    }
+    
     public class UserAccessController
     {
         byte[] publicKey;
@@ -25,11 +47,11 @@ namespace TNetWallet.CryptoUtility
 
         public byte[] PrivateKey
         {
-            get 
+            get
             {
                 return privateKey;
             }
-            
+
         }
 
         public byte[] PublicKey
@@ -51,7 +73,7 @@ namespace TNetWallet.CryptoUtility
                 for (int i = 0; i < privateKey.Length; i++)
                     privateKey[i] = 0;
 
-               // App.IsAnyBodyHome = false;
+                // App.IsAnyBodyHome = false;
             }
             catch
             {
@@ -94,7 +116,7 @@ namespace TNetWallet.CryptoUtility
         /// <param name="password"></param>
         /// <returns></returns>
         /// 
-        public int newUserRegistration(String username, String password, out string message)
+        public int newUserRegistration(GeneratedKeyPairData keypairData, String username, String password, out string message)
         {
             if (username.Length == 0)
             {
@@ -126,16 +148,19 @@ namespace TNetWallet.CryptoUtility
             //TODO
             while (sqlite_datareader.Read())
             {
-                message = "User "+username+" already exists";
+                message = "User " + username + " already exists";
                 sqlite_conn.Close();
                 return 0;
             }
 
             sqlite_datareader.Close();
-          
+            
+            // (new RNGCryptoServiceProvider()).GetBytes(randomSeed);
+            // Ed25519.KeyPairFromSeed(out publicKey, out privateKey, randomSeed);
 
-            (new RNGCryptoServiceProvider()).GetBytes(randomSeed);
-            Ed25519.KeyPairFromSeed(out publicKey, out privateKey, randomSeed);
+            randomSeed = keypairData.randomSeed;
+            privateKey = keypairData.privateKey;
+            publicKey = keypairData.publicKey;
 
             (new RNGCryptoServiceProvider()).GetBytes(randomSalt);
 
@@ -166,7 +191,7 @@ namespace TNetWallet.CryptoUtility
                 sqlite_cmd.ExecuteNonQuery();
             }
 
-            catch(Exception)
+            catch (Exception)
             {
                 message = "Database error";
                 sqlite_conn.Close();
@@ -187,7 +212,7 @@ namespace TNetWallet.CryptoUtility
         /// <returns></returns>
         public int userLogin(String username, String password, out string message)
         {
-            if(username == "@trestor.com")
+            if (username == "@trestor.com")
             {
                 message = "Username field can not be empty";
                 return 0;
@@ -250,7 +275,7 @@ namespace TNetWallet.CryptoUtility
             //check if the key is correct or not
             if (test_salt.Length == randomSalt.Length)
             {
-                for(int i = 0; i<test_salt.Length; i++)
+                for (int i = 0; i < test_salt.Length; i++)
                 {
                     if (test_salt[i] != randomSalt[i])
                     {
@@ -309,7 +334,7 @@ namespace TNetWallet.CryptoUtility
                 throw new ArgumentNullException("plainText");
             if (Key == null || Key.Length <= 0)
                 throw new ArgumentNullException("Key");
-         
+
             byte[] encrypted;
             // Create an RijndaelManaged object 
             // with the specified key and IV. 
@@ -350,7 +375,7 @@ namespace TNetWallet.CryptoUtility
                 throw new ArgumentNullException("cipherText");
             if (Key == null || Key.Length <= 0)
                 throw new ArgumentNullException("Key");
-       
+
             // Declare the string used to hold 
             // the decrypted text. 
             string plaintext = null;
@@ -363,7 +388,7 @@ namespace TNetWallet.CryptoUtility
                 rijAlg.Mode = CipherMode.CBC;
                 rijAlg.Padding = PaddingMode.PKCS7;
                 // Create a decrytor to perform the stream transform.
-                ICryptoTransform decryptor = rijAlg.CreateDecryptor(rijAlg.Key, new byte [16]);
+                ICryptoTransform decryptor = rijAlg.CreateDecryptor(rijAlg.Key, new byte[16]);
 
                 // Create the streams used for decryption. 
                 using (MemoryStream msDecrypt = new MemoryStream(cipherText))

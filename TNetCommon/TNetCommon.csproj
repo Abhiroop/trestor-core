@@ -42,7 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Address\Address.cs" />
+    <Compile Include="Address\AddressFactory.cs" />
     <Compile Include="Chaos.NaCl\CryptoBytes.cs" />
     <Compile Include="Chaos.NaCl\Ed25519.cs" />
     <Compile Include="Chaos.NaCl\Internal\Array16.cs" />
@@ -105,6 +105,7 @@
     <Compile Include="Chaos.NaCl\MontgomeryCurve25519.cs" />
     <Compile Include="Chaos.NaCl\Sha512.cs" />
     <Compile Include="Chaos.NaCl\XSalsa20Poly1305.cs" />
+    <Compile Include="HexUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Protocol\Conversions.cs" />
     <Compile Include="Protocol\ProtocolPackager.cs" />

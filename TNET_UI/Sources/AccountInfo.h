@@ -7,7 +7,6 @@
 #ifndef AccountInfo_H
 #define AccountInfo_H
 
-
 #include "HashTree.h"
 #include "Utils.h"
 
@@ -25,6 +24,5 @@ public:
 	Hash GetHash();
 	Hash GetID();
 };
-
 
 #endif

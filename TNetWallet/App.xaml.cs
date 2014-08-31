@@ -87,9 +87,7 @@ namespace TNetWallet
                 }
             }));*/
         }
-
         
-
         private void Application_Exit(object sender, ExitEventArgs e)
         {
             Network.NetworkAlive = false;

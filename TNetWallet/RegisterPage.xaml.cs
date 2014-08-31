@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TNetCommon.Address;
+using TNetWallet.CryptoUtility;
 
 namespace TNetWallet
 {
@@ -20,7 +22,7 @@ namespace TNetWallet
     /// </summary>
     /// 
 
-   
+
     public partial class RegisterPage : Page
     {
         public string message;
@@ -31,7 +33,7 @@ namespace TNetWallet
                 return false;
 
 
-            foreach(char c in username)
+            foreach (char c in username)
             {
                 if (char.IsLetterOrDigit(c))
                     continue;
@@ -49,14 +51,18 @@ namespace TNetWallet
         {
             InitializeComponent();
         }
-        
+
         void PassHandler()
         {
             Color cc = textBox_Password.PasswordQuality;
 
             passQualityEllipse.Fill = new SolidColorBrush(cc);
 
+            Image_PassMatch.Visibility = (textBox_Password.Text.Length > 0 &&
+                textBox_Password.Text == textBox_RepeatPassword.Text) ? Visibility.Visible : Visibility.Hidden;
         }
+
+        GeneratedKeyPairData kpData = new GeneratedKeyPairData();
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -71,7 +77,7 @@ namespace TNetWallet
                 textBox_UserName.Text = "";
             }
 
-            else if(!validusername(userName))
+            else if (!validusername(userName))
             {
                 textbox_passcheck.Text = "Use only alphanumeric username, . is allowed";
                 textBox_UserName.Text = "";
@@ -83,9 +89,8 @@ namespace TNetWallet
 
             else
             {
-
                 userName += "@trestor.com";
-                int succ = App.UserAccessController.newUserRegistration(userName, passWord, out message);
+                int succ = App.UserAccessController.newUserRegistration(kpData, userName, passWord, out message);
 
                 textbox_passcheck.Text = message;
 
@@ -102,10 +107,10 @@ namespace TNetWallet
         {
             string UserName = textBox_UserName.Text.ToLower().Trim();
 
-            if(UserName.Length < 4 )
+            if (UserName.Length < 4)
                 username_checker.Text = "Minimum length is 3";
 
-            else if(!validusername(UserName))
+            else if (!validusername(UserName))
 
                 username_checker.Text = "Invalid Username";
 
@@ -113,7 +118,7 @@ namespace TNetWallet
             else
             {
                 UserName += "@trestor.com";
-                if(App.UserAccessController.UserExistsLocal(UserName))
+                if (App.UserAccessController.UserExistsLocal(UserName))
                 {
                     username_checker.Text = "UserName already exists";
                     textBox_UserName.Text = "";
@@ -122,12 +127,45 @@ namespace TNetWallet
                 {
                     username_checker.Text = "";
                     //send to server
-                    
+
                 }
             }
+        }
 
+        void UpdateAccountInfo()
+        {
+            textBox_AccountInfo.Text = "Public Key: \n" + Convert.ToBase64String(kpData.publicKey) +
+                "\nPrivate Key: \n" + Convert.ToBase64String(kpData.privateKey.Take(32).ToArray());
 
-            
+            // Account can have empty user or standard users
+
+            string userName = textBox_UserName.Text.ToLower().Trim();
+
+            if ((userName.Length == 0) || (validusername(userName) && (userName.Length > 3)))
+            {
+                textBox_AccountInfo.Text += "\nAddress: \n" +
+                    Convert.ToBase64String(AddressFactory.GetAddress(kpData.publicKey, userName));
+            }
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            Image_PassMatch.Visibility = System.Windows.Visibility.Hidden;
+            kpData = new GeneratedKeyPairData();
+
+            UpdateAccountInfo();
+        }
+
+        private void buttonRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            kpData = new GeneratedKeyPairData();
+
+            UpdateAccountInfo();
+        }
+
+        private void textBox_UserName_TextChanged()
+        {
+            UpdateAccountInfo();
         }
     }
 }

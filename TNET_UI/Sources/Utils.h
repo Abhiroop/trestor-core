@@ -25,6 +25,8 @@
 
 using namespace std;
 
+bool ByteArrayEquals(vector<byte> x, int xOffset, vector<byte> y, int yOffset, int length);
+
 byte GetNibble_(Hash val, int NibbleIndex);
 
 void split(vector<string> &tokens, const string &text, char sep);

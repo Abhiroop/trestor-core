@@ -3,6 +3,26 @@
 #include "Utils.h"
 #include "Base64.h"
 
+
+bool ByteArrayEquals(vector<byte> x, int xOffset, vector<byte> y, int yOffset, int length)
+{
+	if (x.size() == 0) return false;
+	if (y.size() == 0) return false;
+
+	if (length < 0) return false;
+	if (xOffset < 0 || x.size() - xOffset < length) return false;
+	if (yOffset < 0 || y.size() - yOffset < length) return false;
+
+	int DiffBytes = 0;
+
+	for (int i = 0; i < length; i++)
+	{
+		DiffBytes += (x[i + xOffset] != y[i + yOffset]) ? 1 : 0;
+	}
+
+	return (DiffBytes == 0) ? true : false;
+}
+
 byte GetNibble_(Hash val, int NibbleIndex)
 {
 	int Address = NibbleIndex >> 1;

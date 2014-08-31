@@ -43,8 +43,6 @@ public: Hash Source;
 
 } TransactionContentPack;
 
-
-
 class Node
 {
 	FakeNetwork network;
