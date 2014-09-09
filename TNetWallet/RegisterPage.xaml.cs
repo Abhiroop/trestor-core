@@ -144,7 +144,7 @@ namespace TNetWallet
             if ((userName.Length == 0) || (validusername(userName) && (userName.Length > 3)))
             {
                 textBox_AccountInfo.Text += "\nAddress: \n" +
-                    Convert.ToBase64String(AddressFactory.GetAddress(kpData.publicKey, userName));
+                   AddressFactory.GetAddressString(AddressFactory.GetAddress(kpData.publicKey, userName), true);
             }
         }
 

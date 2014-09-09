@@ -48,7 +48,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>..\TNET_UI\Sources;..\TNET_UI\Sources\ed25519;..\TNET_UI\Sources\SQLiteCpp;..\TNET_UI\Sources\TBB\;$(IncludePath)</IncludePath>
-    <LibraryPath>..\TNET_UI\Sources\TBB\lib\ia32\vc12;$(LibraryPath)</LibraryPath>
+    <LibraryPath>..\TNET_UI\Sources\TBB\lib\ia32\vc12;G:\TRESTOR_PROJECT\TNetUI\TNET_UI\Sources\SQLiteCpp;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -78,7 +78,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>main</EntryPointSymbol>
-      <AdditionalDependencies>tbb.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>tbb.lib;sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -187,6 +187,7 @@
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\SQLiteTest.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
@@ -219,6 +220,7 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\Utils.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\Varint2.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\VoteType.cpp" />
     <ClCompile Include="MainForm.cpp" />
     <ClCompile Include="NetworkVisualizer.cpp" />
@@ -326,6 +328,7 @@
     <ClInclude Include="..\TNET_UI\Sources\UserDataHandler.h" />
     <ClInclude Include="..\TNET_UI\Sources\UserDataMapHandler.h" />
     <ClInclude Include="..\TNET_UI\Sources\Utils.h" />
+    <ClInclude Include="..\TNET_UI\Sources\Varint2.h" />
     <ClInclude Include="..\TNET_UI\Sources\VoteType.h" />
     <ClInclude Include="MainForm.h">
       <FileType>CppForm</FileType>

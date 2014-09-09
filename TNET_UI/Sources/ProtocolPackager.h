@@ -1,11 +1,14 @@
 
 // @Author : Arpan Jati
-// @Date: 16th Aug 2014
+// @Date: 16th Aug 2014, 
+// Updated to use varint : Sept 7, 2014
 
 #ifndef PROTOCOL_PACKAGER_H
 #define PROTOCOL_PACKAGER_H
 
 #include "Utils.h"
+
+#include "Constants.h"
 
 struct ProtocolDataType
 {
@@ -16,16 +19,16 @@ struct ProtocolDataType
 	vector<byte> Data;
 };
 
-enum ProtocolData { PD_BYTE_VECTOR, PD_BYTE, PD_INT16, PD_INT32, PD_INT64, PD_FLOAT, PD_DOUBLE, PD_BOOL, PD_STRING };
+enum ProtocolData { PD_BYTE_VECTOR, PD_BYTE, PD_INT16, PD_INT32, PD_INT64, PD_FLOAT, PD_DOUBLE, PD_BOOL, PD_STRING, PD_VARINT };
 
 class ProtocolPackager
 {
 
 private:
 
-	static vector<unsigned char> IntToBytes(int paramInt);
+	/*static vector<unsigned char> IntToBytes(int paramInt);
 
-	static int BytesToInt(vector<unsigned char> paramInt);
+	static int BytesToInt(vector<unsigned char> paramInt);*/
 
 	static vector<byte> PackSingle(ProtocolDataType data);
 
@@ -56,6 +59,8 @@ public:
 
 	static unique_ptr<ProtocolDataType> Pack(double doubleValue, byte nameType);
 
+	static unique_ptr<ProtocolDataType> PackVarint(int64_t varintValue, byte nameType);
+
 	static unique_ptr<ProtocolDataType> Pack(bool boolValue, byte nameType);
 
 	static unique_ptr<ProtocolDataType> Pack(string stringValue, byte nameType);
@@ -78,9 +83,53 @@ public:
 
 	static bool UnpackDouble(ProtocolDataType packedData, byte nameType, double &  Data);
 
+	static bool UnpackVarint(ProtocolDataType packedData, byte nameType, int64_t & Data);
+
 	static bool UnpackBool(ProtocolDataType packedData, byte nameType, bool & Data);
 
 	static bool UnpackString(ProtocolDataType packedData, byte nameType, string &  Data);
+
+	#define count__  32
+
+	static void TestProtocolPackager()
+	{
+		vector<ProtocolDataType> PDTs;
+			
+		int datas[count__];
+
+		for (int i = 0; i < count__; i++)
+		{
+			int n = i;// rand();
+
+			datas[i] = n;
+			PDTs.push_back(*ProtocolPackager::PackVarint(n, 0));
+		}
+
+		vector<byte> packed = ProtocolPackager::PackRaw(PDTs);
+		vector<ProtocolDataType> l = ProtocolPackager::UnPackRaw(packed);
+
+		int fIndex = 0;
+
+		for (vector<ProtocolDataType>::iterator it = l.begin(); it != l.end(); it++)
+		{
+			ProtocolDataType p = *it;
+
+			int64_t R = 0;
+			ProtocolPackager::UnpackVarint(p, 0, R);
+
+			if (datas[fIndex] != R)
+			{
+				MessageQueue.push("FAIL AT : " + to_string(fIndex) + ", Value: " + to_string(R));
+			}
+
+			//MessageQueue.push("" + p.DataType.ToString() + " : " + p.NameType + " : " + R);
+			
+			fIndex++;
+		}
+
+		MessageQueue.push("\nVarint Test Complete ...");
+	}
+
 
 };
 

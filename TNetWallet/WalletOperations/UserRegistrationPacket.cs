@@ -18,8 +18,8 @@ namespace TNetWallet.WalletOperations
 
         public byte[] Address;
 
-        public byte NetworkType = 1;
-        public byte AccountType = 1;
+        public byte NetworkType = (byte) 'T';
+        public byte AccountType = (byte) 'S';
 
         private byte[] Signature;
 

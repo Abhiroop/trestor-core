@@ -22,7 +22,7 @@ class AddressFactory
 	/// </summary>
 public: 
 	
-	vector<byte> GetAddress(vector<byte> PublicKey, string UserName, byte NetworkType = 1, byte AccountType = 1);
+	vector<byte> GetAddress(vector<byte> PublicKey, string UserName, byte NetworkType, byte AccountType);
 
 	bool ValidateAddress(vector<byte> Address);
 

@@ -18,6 +18,7 @@
 #include "Simulator.h"
 #include "ProtocolPackager.h"
 #include "TransactionSink.h"
+#include "Varint2.h"
 
 //#include "tbb/concurrent_hash_map.h"
 
@@ -114,6 +115,7 @@ namespace TNETVALIDATORCLR {
 	private: System::Windows::Forms::ToolStripMenuItem^  timerTestsToolStripMenuItem;
 
 	private: System::Windows::Forms::Timer^  timer_UI;
+	private: System::Windows::Forms::ToolStripMenuItem^  protocolTestsToolStripMenuItem;
 	private: System::ComponentModel::IContainer^  components;
 
 
@@ -152,6 +154,7 @@ namespace TNETVALIDATORCLR {
 			this->fILEToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->menuStrip1 = (gcnew System::Windows::Forms::MenuStrip());
 			this->timer_UI = (gcnew System::Windows::Forms::Timer(this->components));
+			this->protocolTestsToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->tabPage2->SuspendLayout();
 			this->tableLayoutPanel1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->splitContainer1))->BeginInit();
@@ -302,14 +305,14 @@ namespace TNETVALIDATORCLR {
 			// 
 			this->simulateTreeToolStripMenuItem->Name = L"simulateTreeToolStripMenuItem";
 			this->simulateTreeToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::F4));
-			this->simulateTreeToolStripMenuItem->Size = System::Drawing::Size(200, 22);
+			this->simulateTreeToolStripMenuItem->Size = System::Drawing::Size(213, 22);
 			this->simulateTreeToolStripMenuItem->Text = L"Simulate Tree";
 			// 
 			// simulateVisualToolStripMenuItem
 			// 
 			this->simulateVisualToolStripMenuItem->Name = L"simulateVisualToolStripMenuItem";
 			this->simulateVisualToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::F3));
-			this->simulateVisualToolStripMenuItem->Size = System::Drawing::Size(200, 22);
+			this->simulateVisualToolStripMenuItem->Size = System::Drawing::Size(213, 22);
 			this->simulateVisualToolStripMenuItem->Text = L"Simulate Visual";
 			this->simulateVisualToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::simulateVisualToolStripMenuItem_Click);
 			// 
@@ -317,22 +320,23 @@ namespace TNETVALIDATORCLR {
 			// 
 			this->stopToolStripMenuItem->Name = L"stopToolStripMenuItem";
 			this->stopToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::F2));
-			this->stopToolStripMenuItem->Size = System::Drawing::Size(200, 22);
+			this->stopToolStripMenuItem->Size = System::Drawing::Size(213, 22);
 			this->stopToolStripMenuItem->Text = L"Stop";
 			// 
 			// simulateToolStripMenuItem
 			// 
 			this->simulateToolStripMenuItem->Name = L"simulateToolStripMenuItem";
 			this->simulateToolStripMenuItem->ShortcutKeys = static_cast<System::Windows::Forms::Keys>((System::Windows::Forms::Keys::Control | System::Windows::Forms::Keys::F1));
-			this->simulateToolStripMenuItem->Size = System::Drawing::Size(200, 22);
+			this->simulateToolStripMenuItem->Size = System::Drawing::Size(213, 22);
 			this->simulateToolStripMenuItem->Text = L"Simulate";
 			this->simulateToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::simulateToolStripMenuItem_Click);
 			// 
 			// cONTROLToolStripMenuItem
 			// 
-			this->cONTROLToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(5) {
+			this->cONTROLToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(6) {
 				this->simulateToolStripMenuItem,
-					this->stopToolStripMenuItem, this->simulateVisualToolStripMenuItem, this->simulateTreeToolStripMenuItem, this->timerTestsToolStripMenuItem
+					this->stopToolStripMenuItem, this->simulateVisualToolStripMenuItem, this->simulateTreeToolStripMenuItem, this->timerTestsToolStripMenuItem,
+					this->protocolTestsToolStripMenuItem
 			});
 			this->cONTROLToolStripMenuItem->Name = L"cONTROLToolStripMenuItem";
 			this->cONTROLToolStripMenuItem->Size = System::Drawing::Size(74, 20);
@@ -369,6 +373,13 @@ namespace TNETVALIDATORCLR {
 			// 
 			this->timer_UI->Enabled = true;
 			this->timer_UI->Tick += gcnew System::EventHandler(this, &MainForm::timer_UI_Tick);
+			// 
+			// protocolTestsToolStripMenuItem
+			// 
+			this->protocolTestsToolStripMenuItem->Name = L"protocolTestsToolStripMenuItem";
+			this->protocolTestsToolStripMenuItem->Size = System::Drawing::Size(213, 22);
+			this->protocolTestsToolStripMenuItem->Text = L"Protocol Tests";
+			this->protocolTestsToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::protocolTestsToolStripMenuItem_Click);
 			// 
 			// MainForm
 			// 
@@ -515,15 +526,10 @@ namespace TNETVALIDATORCLR {
 
 		TransactionSink tskDs;
 		tskDs.Deserialize(serialized);
-
-
-
+		
 		PrintMessage(tskDs.PublicKey_Sink.ToString());
-		PrintMessage("AMT:" + tskDs.Amount);
-	
+		PrintMessage("AMT:" + tskDs.Amount);	
 	}
-
-
 
 	private: System::Void timer_UI_Tick(System::Object^  sender, System::EventArgs^  e) {
 
@@ -551,5 +557,13 @@ namespace TNETVALIDATORCLR {
 
 	}
     
-	};
+	private: System::Void protocolTestsToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
+
+		//Varint2::TestVarint2();
+
+		ProtocolPackager::TestProtocolPackager();
+
+
+	}
+};
 }

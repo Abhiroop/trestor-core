@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 
 namespace TNetCommon.Protocol
 {
-    public enum PDataType { PD_BYTE_VECTOR, PD_BYTE, PD_INT16, PD_INT32, PD_INT64, PD_FLOAT, PD_DOUBLE, PD_BOOL, PD_STRING };
-    
+    public enum PDataType { PD_BYTE_VECTOR, PD_BYTE, PD_INT16, PD_INT32, PD_INT64, PD_FLOAT, PD_DOUBLE, PD_BOOL, PD_STRING, PD_VARINT };
+
     public struct ProtocolDataType
     {
         // Any Identifier based on protocol
@@ -22,12 +22,12 @@ namespace TNetCommon.Protocol
 
         public ProtocolDataType(byte NameType, PDataType DataType, byte[] Data)
         {
-           this.NameType = NameType;
-           this.DataType = DataType;
-           this.Data = Data;
+            this.NameType = NameType;
+            this.DataType = DataType;
+            this.Data = Data;
         }
     };
-   
+
     public class ProtocolPackager
     {
         static byte[] IntToBytes(int paramInt)
@@ -55,17 +55,15 @@ namespace TNetCommon.Protocol
             return PDType;
         }
 
-        // Make Variable Size Encoding Decoding
+        // Make Variable Size Encoding Decoding  
 
         static byte[] PackSingle(ProtocolDataType data)
         {
             List<byte> pack = new List<byte>();
-            byte[] SZ = IntToBytes(data.Data.Length);
             pack.Add(data.NameType);
             pack.Add((byte)data.DataType);
-            pack.Add(SZ[0]);
-            pack.Add(SZ[1]);
-            pack.Add(SZ[2]);
+            byte[] vLen = Varint2.Encode(data.Data.Length);
+            pack.AddRange(vLen);
             pack.AddRange(data.Data);
             return pack.ToArray();
         }
@@ -82,6 +80,95 @@ namespace TNetCommon.Protocol
         }
 
         public static List<ProtocolDataType> UnPackRaw(byte[] packedData)
+        {
+            List<ProtocolDataType> packets = new List<ProtocolDataType>();
+
+            int index = 0;
+            while (true)
+            {
+                if (packedData.Length - index >= 3)
+                {
+                    byte NameType = packedData[index + 0];
+                    byte DataType = packedData[index + 1];
+
+                    int readDelta;
+                    long Length = Varint2.Decode(packedData, index+2, out readDelta);
+                    index += readDelta;
+
+                    if (packedData.Length - index - Length >= 2)
+                    {
+                        byte[] Data = new byte[Length];
+                        for (int i = 0; i < Length; i++)
+                        {
+                            Data[i] = packedData[index + 2 + i];
+                        }
+
+                        ProtocolDataType packet = new ProtocolDataType();
+                        packet.NameType = NameType;
+                        packet.DataType = (PDataType)DataType;
+                        packet.Data = Data;
+                        packets.Add(packet);
+                    }
+                    else
+                    {
+                        break;
+                    }
+
+                    index += (int)(Length + 2);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return packets;
+        }
+
+        public static void TestPP()
+        {
+            List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
+
+            int count = 10000000;
+
+            int[] datas = new int[count];
+
+            Random r = new Random();
+
+            for (int i = 0; i < count; i++)
+            {
+                int n = r.Next();
+
+                datas[i] = n;
+                PDTs.Add(ProtocolPackager.PackVarint(n, 0));
+            }
+
+            byte[] packed = ProtocolPackager.PackRaw(PDTs);
+
+            List<ProtocolDataType> l = ProtocolPackager.UnPackRaw(packed);
+
+            int fIndex = 0;
+
+            foreach (ProtocolDataType p in l)
+            {
+                long R = 0;
+                ProtocolPackager.UnpackVarint(p, 0, ref R);
+
+                if(datas[fIndex] != R)
+                {
+                    Console.WriteLine("FAIL AT : " + fIndex + ", Value: " + R);
+                }
+
+                //Console.WriteLine("" + p.DataType.ToString() + " : " + p.NameType + " : " + R);
+
+
+                fIndex++;
+            }
+
+            Console.WriteLine("\nVarint Test Complete ...");
+        }
+
+        public static List<ProtocolDataType> UnPackRaw_Old(byte[] packedData)
         {
             List<ProtocolDataType> packets = new List<ProtocolDataType>();
 
@@ -128,6 +215,8 @@ namespace TNetCommon.Protocol
 
             return packets;
         }
+
+
 
         public static ProtocolDataType Pack(byte[] vectorValue, byte nameType)
         {
@@ -181,6 +270,12 @@ namespace TNetCommon.Protocol
             return PDType;
         }
 
+        public static ProtocolDataType PackVarint(long varintValue, byte nameType)
+        {
+            ProtocolDataType PDType = GenericPack(PDataType.PD_VARINT, nameType);
+            PDType.Data = Varint2.Encode(varintValue);
+            return PDType;
+        }
 
         public static ProtocolDataType Pack(bool boolValue, byte nameType)
         {
@@ -275,6 +370,20 @@ namespace TNetCommon.Protocol
             if (packedData.Data.Length == 8 && (nameType == packedData.NameType) && (packedData.DataType == PDataType.PD_DOUBLE)) // Doubles have 8 bytes
             {
                 Data = Conversions.VectorToDouble(packedData.Data);
+                return true;
+            }
+            else return false;
+        }
+
+        public static bool UnpackVarint(ProtocolDataType packedData, byte nameType, ref long Data)
+        {
+            if (packedData.Data.Length > 0 && packedData.Data.Length <= 9 && (nameType == packedData.NameType) && (packedData.DataType == PDataType.PD_VARINT)) // PD_VARINT has 1-9 bytes
+            {
+                try
+                {
+                    Data = Varint2.Decode(packedData.Data);
+                }
+                catch { return false; }
                 return true;
             }
             else return false;

@@ -9,7 +9,7 @@
 #include "AddressFactory.h"
 
 
-vector<byte> AddressFactory::GetAddress(vector<byte> PublicKey, string UserName, byte NetworkType = 1, byte AccountType = 1)
+vector<byte> AddressFactory::GetAddress(vector<byte> PublicKey, string UserName, byte NetworkType, byte AccountType)
 {
 	vector<byte> NAME(UserName.data(), UserName.data() + UserName.length());
 

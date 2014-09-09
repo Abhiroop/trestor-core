@@ -10,8 +10,8 @@ bool ByteArrayEquals(vector<byte> x, int xOffset, vector<byte> y, int yOffset, i
 	if (y.size() == 0) return false;
 
 	if (length < 0) return false;
-	if (xOffset < 0 || x.size() - xOffset < length) return false;
-	if (yOffset < 0 || y.size() - yOffset < length) return false;
+	if (xOffset < 0 || (int)x.size() - xOffset < length) return false;
+	if (yOffset < 0 || (int)y.size() - yOffset < length) return false;
 
 	int DiffBytes = 0;
 

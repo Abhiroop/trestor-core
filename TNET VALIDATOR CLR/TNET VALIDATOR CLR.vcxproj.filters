@@ -222,6 +222,9 @@
     <ClCompile Include="..\TNET_UI\Sources\AddressFactory.cpp">
       <Filter>Sources\Node</Filter>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Varint2.cpp">
+      <Filter>Sources\Protocol</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h">
@@ -535,6 +538,9 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\AddressFactory.h">
       <Filter>Sources\Node</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Varint2.h">
+      <Filter>Sources\Protocol</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

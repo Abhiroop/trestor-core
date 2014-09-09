@@ -4,35 +4,35 @@
 
 #include "Conversions.h"
 #include "ProtocolPackager.h"
+#include "Varint2.h"
 
-vector<unsigned char> ProtocolPackager::IntToBytes(int paramInt)
+
+/*vector<unsigned char> ProtocolPackager::IntToBytes(int paramInt)
 {
-	vector<unsigned char> arrayOfByte(3);
-	arrayOfByte[0] = (paramInt);
-	arrayOfByte[1] = (paramInt >> 8);
-	arrayOfByte[2] = (paramInt >> 16);
-	return arrayOfByte;
+vector<unsigned char> arrayOfByte(3);
+arrayOfByte[0] = (paramInt);
+arrayOfByte[1] = (paramInt >> 8);
+arrayOfByte[2] = (paramInt >> 16);
+return arrayOfByte;
 }
 
 int ProtocolPackager::BytesToInt(vector<unsigned char> paramInt)
 {
-	int val = (int)paramInt[0];
-	val |= ((int)paramInt[1]) << 8;
-	val |= ((int)paramInt[2]) << 16;
-	return val;
-}
+int val = (int)paramInt[0];
+val |= ((int)paramInt[1]) << 8;
+val |= ((int)paramInt[2]) << 16;
+return val;
+}*/
 
 // Make Variable Size Encoding Decoding
 
 vector<byte> ProtocolPackager::PackSingle(ProtocolDataType data)
 {
-	vector<byte> pack(5);
-	vector<byte> SZ = IntToBytes(data.Data.size());
-	pack[0] = data.NameType;
-	pack[1] = data.DataType;
-	pack[2] = SZ[0];
-	pack[3] = SZ[1];
-	pack[4] = SZ[2];
+	vector<byte> pack;
+	pack.push_back(data.NameType);
+	pack.push_back(data.DataType);
+	vector<byte> SZ = Varint2::Encode(data.Data.size());
+	pack.insert(pack.end(), SZ.begin(), SZ.end());
 	pack.insert(pack.end(), data.Data.begin(), data.Data.end());
 	return pack;
 }
@@ -55,23 +55,23 @@ vector<ProtocolDataType> ProtocolPackager::UnPackRaw(vector<byte> packedData)
 	int index = 0;
 	while (true)
 	{
-		if (packedData.size() - index >= 5)
+		if (packedData.size() - index >= 3)
 		{
 			vector<byte> L_Bytes(3);
 			byte NameType = packedData[index + 0];
 			byte DataType = packedData[index + 1];
-			L_Bytes[0] = packedData[index + 2];
-			L_Bytes[1] = packedData[index + 3];
-			L_Bytes[2] = packedData[index + 4];
 
-			int Length = BytesToInt(L_Bytes);
+			int readDelta;
+			int64_t Length = 0;
+			Varint2::Decode(packedData, index + 2, readDelta, Length);
+			index += readDelta;
 
 			if (packedData.size() - index - Length >= 5)
 			{
-				vector<byte> Data(Length);
+				vector<byte> Data((unsigned int)Length);
 				for (int i = 0; i < Length; i++)
 				{
-					Data[i] = packedData[index + 5 + i];
+					Data[i] = packedData[index + 2 + i];
 				}
 
 				ProtocolDataType packet;
@@ -85,7 +85,7 @@ vector<ProtocolDataType> ProtocolPackager::UnPackRaw(vector<byte> packedData)
 				break;
 			}
 
-			index += (Length + 5);
+			index += (unsigned int)(Length + 2);
 		}
 		else
 		{
@@ -95,6 +95,54 @@ vector<ProtocolDataType> ProtocolPackager::UnPackRaw(vector<byte> packedData)
 
 	return packets;
 }
+
+/*vector<ProtocolDataType> ProtocolPackager::UnPackRaw(vector<byte> packedData)
+{
+vector<ProtocolDataType> packets;
+
+int index = 0;
+while (true)
+{
+if (packedData.size() - index >= 5)
+{
+vector<byte> L_Bytes(3);
+byte NameType = packedData[index + 0];
+byte DataType = packedData[index + 1];
+L_Bytes[0] = packedData[index + 2];
+L_Bytes[1] = packedData[index + 3];
+L_Bytes[2] = packedData[index + 4];
+
+int Length = BytesToInt(L_Bytes);
+
+if (packedData.size() - index - Length >= 5)
+{
+vector<byte> Data(Length);
+for (int i = 0; i < Length; i++)
+{
+Data[i] = packedData[index + 5 + i];
+}
+
+ProtocolDataType packet;
+packet.NameType = NameType;
+packet.DataType = DataType;
+packet.Data = Data;
+packets.push_back(packet);
+}
+else
+{
+break;
+}
+
+index += (Length + 5);
+}
+else
+{
+break;
+}
+}
+
+return packets;
+}*/
 
 unique_ptr<ProtocolDataType> ProtocolPackager::GenericPack(byte DataType, byte nameType)
 {
@@ -123,7 +171,7 @@ unique_ptr<ProtocolDataType> ProtocolPackager::Pack(byte byteValue, byte nameTyp
 
 unique_ptr<ProtocolDataType> ProtocolPackager::Pack(int16_t shortValue, byte nameType)
 {
-	unique_ptr<ProtocolDataType> PDType = GenericPack(PD_INT16, nameType);	
+	unique_ptr<ProtocolDataType> PDType = GenericPack(PD_INT16, nameType);
 	PDType->Data = Conversions::Int16ToVector(shortValue);
 	return PDType;
 }
@@ -156,6 +204,12 @@ unique_ptr<ProtocolDataType> ProtocolPackager::Pack(double doubleValue, byte nam
 	return PDType;
 }
 
+unique_ptr<ProtocolDataType> ProtocolPackager::PackVarint(int64_t varintValue, byte nameType)
+{
+	unique_ptr<ProtocolDataType> PDType = GenericPack(PD_VARINT, nameType);
+	PDType->Data = Varint2::Encode(varintValue);
+	return PDType;
+}
 
 unique_ptr<ProtocolDataType> ProtocolPackager::Pack(bool boolValue, byte nameType)
 {
@@ -177,7 +231,7 @@ unique_ptr<ProtocolDataType> ProtocolPackager::Pack(string stringValue, byte nam
 
 bool ProtocolPackager::UnpackByteVector(ProtocolDataType packedData, byte nameType, vector<byte> & Data)
 {
-	if ( (nameType == packedData.NameType) && (packedData.DataType == PD_BYTE_VECTOR))
+	if ((nameType == packedData.NameType) && (packedData.DataType == PD_BYTE_VECTOR))
 	{
 		Data = packedData.Data;
 		return true;
@@ -251,6 +305,16 @@ bool ProtocolPackager::UnpackDouble(ProtocolDataType packedData, byte nameType, 
 	{
 		Data = Conversions::VectorToDouble(packedData.Data);
 		return true;
+	}
+	else return false;
+}
+
+bool ProtocolPackager::UnpackVarint(ProtocolDataType packedData, byte nameType, int64_t & Data)
+{
+	if (packedData.Data.size() > 0 && packedData.Data.size() <= 9 && (nameType == packedData.NameType) && (packedData.DataType == PD_VARINT)) // PD_VARINT has 1-9 bytes
+	{
+		int l;
+		return Varint2::Decode(packedData.Data, 0, l, Data);
 	}
 	else return false;
 }
