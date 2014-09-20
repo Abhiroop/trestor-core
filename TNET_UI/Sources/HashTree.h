@@ -104,6 +104,11 @@ public:
 
 	void TraverseTreeAndReturn(vector<shared_ptr<LeafDataType>> & tempLeaves, TreeNodeX* Root, int64_t & FoundNodes, int _depth);
 
+	void GetDifference(TreeNodeX* Root_1, TreeNodeX* Root_2, int depth);
+
+	void getAllLeafUnderNode(TreeNodeX* Root);
+
+	vector<TreeNodeX> NodeDifferenceVec;
 
 	/// <summary>
 	/// Gets the element at the position specified by the ID.
@@ -392,6 +397,67 @@ vector<shared_ptr<LeafDataType>> HashTree<T>::TraverseNodesAndReturnLeaf()
 
 	//TraverseLevelOrder(Root, ref nodes);
 	return tempLeaves;
+}
+
+/*
+Get difference of two trees rooted at Root_1 and Root_2
+Root_1 at responder
+Root_2 at query side
+*/
+
+template<typename T>
+void HashTree<T>::GetDifference(TreeNodeX* Root_1, TreeNodeX* Root_2, int depth)
+{
+	int newDepth = depth + 1;
+
+	if (Root_1->ID == Root_2->ID)
+		return;
+	
+	if (Root_1->ID != Root_2->ID)
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			if (Root_1->Children[i] != nullptr)
+			{
+				if (Root_1->Children[i]->IsLeaf)
+				{
+					//base case
+					NodeDifferenceVec.push_back(Root_1->Children[i]);
+				}
+				else if (Root_2->Children[i] == nullptr)
+				{
+					//inder all leaves shold be pushed back
+					getAllLeafUnderNode(Root_1);
+				}
+				else
+				{
+					GetDifference(Root_1->Children[i], Root_2->Children[i], newDepth);
+				}
+			}
+		}
+	}
+}
+
+template<typename T>
+void HashTree<T>::getAllLeafUnderNode(TreeNodeX* Root)
+{
+	for (int i = 0; i < 16; i++)
+	{
+		if (Root->Children[i] != nullptr)
+		{
+			if (Root->Children[i]->IsLeaf)
+			{
+				//base case
+				NodeDifferenceVec.push_back(Root->Children[i]);
+				return;
+			}
+			else
+			{
+				//rec
+				getAllLeafUnderNode(Root->Children[i]);
+			}
+		}
+	}
 }
 
 
