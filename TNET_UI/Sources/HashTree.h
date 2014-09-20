@@ -26,7 +26,7 @@
 #include "ed25519\sha512.h"
 
 #include "Utils.h"
-
+#include "TreeLevelDataType.h"
 class LeafDataType
 {
 public:
@@ -100,9 +100,9 @@ public:
 
 	void TraverseLevelOrder(TreeNodeX* Root, int64_t & FoundNodes);
 
-	vector<TreeNodeX*> TraverseLevelOrderDepth(int depth);
+	vector<TreeLevelDataType> TraverseLevelOrderDepth(int depth);
 
-	vector<TreeNodeX*> TraverseLevelOrderDepth(TreeNodeX* Root, int depth);
+	vector<TreeLevelDataType> TraverseLevelOrderDepth(TreeNodeX* Root, int depth);
 
 	void TraverseTree(TreeNodeX* Root, int64_t & FoundNodes, int _depth);
 
@@ -118,6 +118,7 @@ public:
 
 	vector<TreeNodeX> NodeDifferenceVec;
 
+	
 	/// <summary>
 	/// Gets the element at the position specified by the ID.
 	/// </summary>
@@ -508,8 +509,11 @@ void HashTree<T>::TraverseLevelOrder(TreeNodeX* Root, int64_t & FoundNodes)
 
 }
 
+/*
+starts with depth 0
+*/
 template<typename T>
-vector<TreeNodeX*> HashTree<T>::TraverseLevelOrderDepth(int depth)
+vector<TreeLevelDataType> HashTree<T>::TraverseLevelOrderDepth(int depth)
 {
 	return(TraverseLevelOrderDepth(Root, depth));
 }
@@ -517,21 +521,25 @@ vector<TreeNodeX*> HashTree<T>::TraverseLevelOrderDepth(int depth)
 starts with depth 0
 */
 template<typename T>
-vector<TreeNodeX*> HashTree<T>::TraverseLevelOrderDepth(TreeNodeX* Root, int depth)
+vector<TreeLevelDataType> HashTree<T>::TraverseLevelOrderDepth(TreeNodeX* Root, int depth)
 {
 	
 	if (depth >= 64)
 	{
-		vector<TreeNodeX*> list0;
+		vector<TreeLevelDataType> list0;
 		cout << "Bitch please!";
 		return list0;
 	}
 	
 	int _depth = 0;
-	vector<TreeNodeX*> list1; 
-	vector<TreeNodeX*> list2;
+	vector<TreeLevelDataType> list1;
+	vector<TreeLevelDataType> list2;
 	//initialize with the root
-	list1.push_back(Root);
+	
+	vector<char> c;
+	
+	TreeLevelDataType td(Root, c);
+	list1.push_back(td);
 
 	while ( _depth!= depth)
 	{
@@ -547,9 +555,13 @@ vector<TreeNodeX*> HashTree<T>::TraverseLevelOrderDepth(TreeNodeX* Root, int dep
 		{
 			for (int j = 0; j < 16; j++)
 			{
-				if (list2[i]->Children[j] != nullptr)
+				if (list2[i].treeNodeX->Children[j] != nullptr)
 				{
-					list1.push_back(list2[i]->Children[j]);
+					vector<char> c = list2[i].address;
+					c.push_back(Constants::hexChars[j]);
+					TreeLevelDataType td(list2[i].treeNodeX->Children[j], c);
+
+					list1.push_back(td);
 				}
 			}
 		}

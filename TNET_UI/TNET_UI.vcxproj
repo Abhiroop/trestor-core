@@ -202,6 +202,7 @@
     <ClInclude Include="Sources\TransactionSetType.h" />
     <ClInclude Include="Sources\TransactionSink.h" />
     <ClInclude Include="Sources\TreeLeafNode.h" />
+    <ClInclude Include="Sources\TreeLevelDataType.h" />
     <ClInclude Include="Sources\TreeNodeX.h" />
     <ClInclude Include="Sources\UserDataHandler.h" />
     <ClInclude Include="Sources\UserDataMapHandler.h" />
@@ -295,6 +296,7 @@
     <ClCompile Include="Sources\Timer.cpp" />
     <ClCompile Include="Sources\TransactionContent.cpp" />
     <ClCompile Include="Sources\TransactionSink.cpp" />
+    <ClCompile Include="Sources\TreeLevelDataType.cpp" />
     <ClCompile Include="Sources\TreeNodeX.cpp" />
     <ClCompile Include="Sources\UserDataHandler.cpp" />
     <ClCompile Include="Sources\UserDataMapHandler.cpp" />

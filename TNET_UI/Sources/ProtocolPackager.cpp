@@ -159,6 +159,16 @@ unique_ptr<ProtocolDataType> ProtocolPackager::Pack(vector<byte> vectorValue, by
 	return PDType;
 }
 
+unique_ptr<ProtocolDataType> ProtocolPackager::Pack(vector<char> vectorValue, byte nameType)
+{
+	unique_ptr<ProtocolDataType> PDType = GenericPack(PD_BYTE_VECTOR, nameType);
+	vector<byte> vectorValue2((unsigned char)vectorValue.data(), vectorValue.size());
+
+
+	PDType->Data = vectorValue2;
+	return PDType;
+}
+
 unique_ptr<ProtocolDataType> ProtocolPackager::Pack(byte byteValue, byte nameType)
 {
 	unique_ptr<ProtocolDataType> PDType = GenericPack(PD_BYTE, nameType);
@@ -234,6 +244,23 @@ bool ProtocolPackager::UnpackByteVector(ProtocolDataType packedData, byte nameTy
 	if ((nameType == packedData.NameType) && (packedData.DataType == PD_BYTE_VECTOR))
 	{
 		Data = packedData.Data;
+		return true;
+	}
+	else return false;
+}
+
+bool ProtocolPackager::UnpackByteVector_char(ProtocolDataType packedData, byte nameType, vector<char> & Data)
+{
+	if ((nameType == packedData.NameType) && (packedData.DataType == PD_BYTE_VECTOR))
+	{
+		//char * gg = (char*)packedData.Data.data();
+
+		//size_t sz = (size_t)packedData.Data.size();
+
+		vector<char> newOne = vector<char>(packedData.Data.begin(), packedData.Data.end());
+
+		Data = newOne;
+
 		return true;
 	}
 	else return false;

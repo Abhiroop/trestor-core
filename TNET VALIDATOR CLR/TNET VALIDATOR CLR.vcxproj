@@ -207,6 +207,7 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TreeLevelDataType.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\TreeNodeX.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -323,6 +324,7 @@
     <ClInclude Include="..\TNET_UI\Sources\TransactionIDInfo.h" />
     <ClInclude Include="..\TNET_UI\Sources\TransactionSetType.h" />
     <ClInclude Include="..\TNET_UI\Sources\TransactionSink.h" />
+    <ClInclude Include="..\TNET_UI\Sources\TreeLevelDataType.h" />
     <ClInclude Include="..\TNET_UI\Sources\TreeNodeX.h" />
     <ClInclude Include="..\TNET_UI\Sources\Types.h" />
     <ClInclude Include="..\TNET_UI\Sources\UserDataHandler.h" />

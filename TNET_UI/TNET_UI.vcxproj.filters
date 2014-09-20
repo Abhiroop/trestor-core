@@ -210,6 +210,7 @@
     <ClCompile Include="Sources\ProtocolPackager.cpp" />
     <ClCompile Include="Sources\Simulator.cpp" />
     <ClCompile Include="Sources\Timer.cpp" />
+    <ClCompile Include="Sources\TreeLevelDataType.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -314,6 +315,7 @@
     <ClInclude Include="Sources\Simulator.h" />
     <ClInclude Include="Sources\Timer.h" />
     <ClInclude Include="Sources\TransactionSetType.h" />
+    <ClInclude Include="Sources\TreeLevelDataType.h" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

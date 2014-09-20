@@ -225,6 +225,9 @@
     <ClCompile Include="..\TNET_UI\Sources\Varint2.cpp">
       <Filter>Sources\Protocol</Filter>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TreeLevelDataType.cpp">
+      <Filter>Sources\HashTree</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h">
@@ -541,6 +544,9 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\Varint2.h">
       <Filter>Sources\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TreeLevelDataType.h">
+      <Filter>Sources\HashTree</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

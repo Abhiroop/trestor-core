@@ -47,6 +47,8 @@ public:
 
 	static unique_ptr<ProtocolDataType> Pack(vector<byte> input, byte nameType);
 
+	static unique_ptr<ProtocolDataType> ProtocolPackager::Pack(vector<char> vectorValue, byte nameType);
+
 	static unique_ptr<ProtocolDataType> Pack(byte byteValue, byte nameType);
 
 	static unique_ptr<ProtocolDataType> Pack(int16_t shortValue, byte nameType);
@@ -70,6 +72,8 @@ public:
 	static bool UnpackByteVector(ProtocolDataType packedData, byte nameType, vector<byte> & Data);
 
 	static bool UnpackByteVector_s(ProtocolDataType packedData, byte nameType, int ExpectedSize, vector<byte> & Data);
+
+	static bool UnpackByteVector_char(ProtocolDataType packedData, byte nameType, vector<char> & Data);
 
 	static bool UnpackByte(ProtocolDataType packedData, byte nameType, byte & Data);
 
