@@ -100,6 +100,10 @@ public:
 
 	void TraverseLevelOrder(TreeNodeX* Root, int64_t & FoundNodes);
 
+	vector<TreeNodeX*> TraverseLevelOrderDepth(int depth);
+
+	vector<TreeNodeX*> TraverseLevelOrderDepth(TreeNodeX* Root, int depth);
+
 	void TraverseTree(TreeNodeX* Root, int64_t & FoundNodes, int _depth);
 
 	void TraverseTreeAndSave(fstream& Ledger, TreeNodeX* Root, int64_t & FoundNodes, int _depth);
@@ -482,6 +486,78 @@ void HashTree<T>::GetDifference(TreeNodeX* Root_1, TreeNodeX* Root_2, int depth)
 
 }
 
+
+template<typename T>
+void HashTree<T>::TraverseLevelOrder(TreeNodeX* Root, int64_t & FoundNodes)
+{
+	TreeNodeX* temp = Root;
+	queue<TreeNodeX*> q;
+	while (temp)
+	{
+		NodeDifferenceVec.push_back(temp);
+		for (int i = 0; i < 16; i++)
+		{
+			if (Root->Children[i] != nullptr)
+			{				
+				q.push(Root);
+			}
+		}
+		temp = q.front();
+		q.pop();
+	}
+
+}
+
+template<typename T>
+vector<TreeNodeX*> HashTree<T>::TraverseLevelOrderDepth(int depth)
+{
+	return(TraverseLevelOrderDepth(Root, depth));
+}
+/*
+starts with depth 0
+*/
+template<typename T>
+vector<TreeNodeX*> HashTree<T>::TraverseLevelOrderDepth(TreeNodeX* Root, int depth)
+{
+	
+	if (depth >= 64)
+	{
+		vector<TreeNodeX*> list0;
+		cout << "Bitch please!";
+		return list0;
+	}
+	
+	int _depth = 0;
+	vector<TreeNodeX*> list1; 
+	vector<TreeNodeX*> list2;
+	//initialize with the root
+	list1.push_back(Root);
+
+	while ( _depth!= depth)
+	{
+		for (int i = 0; i < list1.size(); i++)
+		{
+			list2.push_back(list1.at(i));			
+		}
+		_depth++;
+		//destroy list 1
+		list1.clear();
+
+		for (int i = 0; i < list2.size(); i++)
+		{
+			for (int j = 0; j < 16; j++)
+			{
+				if (list2[i]->Children[j] != nullptr)
+				{
+					list1.push_back(list2[i]->Children[j]);
+				}
+			}
+		}
+		//destroy list2
+		list2.clear();
+	}
+	return list1;
+}
 
 template<typename T>
 void HashTree<T>::getAllLeafUnderNode(TreeNodeX* Root)

@@ -3,7 +3,7 @@
 #include "MainForm.h"
 
 using namespace TNETVALIDATORCLR;
-
+/*
 [STAThreadAttribute]
 int main(cli::array<System::String ^> ^args)
 {
@@ -15,3 +15,4 @@ int main(cli::array<System::String ^> ^args)
 	Application::Run(gcnew MainForm());
 	return 0;
 }
+*/
