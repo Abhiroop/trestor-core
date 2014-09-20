@@ -2,6 +2,7 @@
 /*
 *
 *  @Author: Arpan Jati
+*  @Author: Aritra Dhar
 *  @Version: 1.0
 *  @Description: HashTree
 *      Features: Depth 64
@@ -71,6 +72,7 @@ public:
 	int64_t _TotalLeaves = 0;
 	int64_t TotalMoney = 0;
 
+	int THRESHOLD_DEPTH = 10;
 	//template<class LeafDataType>
 	int64_t TotalNodes();
 	int64_t TotalLeaves();
@@ -103,6 +105,8 @@ public:
 	void TraverseTreeAndSave(fstream& Ledger, TreeNodeX* Root, int64_t & FoundNodes, int _depth);
 
 	void TraverseTreeAndReturn(vector<shared_ptr<LeafDataType>> & tempLeaves, TreeNodeX* Root, int64_t & FoundNodes, int _depth);
+
+	void GetDifference(TreeNodeX* Root_1, TreeNodeX* Root_2);
 
 	void GetDifference(TreeNodeX* Root_1, TreeNodeX* Root_2, int depth);
 
@@ -406,10 +410,8 @@ Root_2 at query side
 */
 
 template<typename T>
-void HashTree<T>::GetDifference(TreeNodeX* Root_1, TreeNodeX* Root_2, int depth)
+void HashTree<T>::GetDifference(TreeNodeX* Root_1, TreeNodeX* Root_2)
 {
-	int newDepth = depth + 1;
-
 	if (Root_1->ID == Root_2->ID)
 		return;
 	
@@ -431,12 +433,55 @@ void HashTree<T>::GetDifference(TreeNodeX* Root_1, TreeNodeX* Root_2, int depth)
 				}
 				else
 				{
-					GetDifference(Root_1->Children[i], Root_2->Children[i], newDepth);
+					GetDifference(Root_1->Children[i], Root_2->Children[i]);
 				}
 			}
 		}
 	}
 }
+
+//limit in depth
+template<typename T>
+void HashTree<T>::GetDifference(TreeNodeX* Root_1, TreeNodeX* Root_2, int depth)
+{
+	int newDepth = depth++;
+	if (Root_1->ID == Root_2->ID)
+		return;
+
+	if (Root_1->ID != Root_2->ID)
+	{
+		//after thiis depth just take all the laves
+		//under this node
+		if (depth > THRESHOLD_DEPTH)
+		{
+			getAllLeafUnderNode(Root_1);
+			return;
+		}
+
+		for (int i = 0; i < 16; i++)
+		{
+			if (Root_1->Children[i] != nullptr)
+			{
+				if (Root_1->Children[i]->IsLeaf)
+				{
+					//base case
+					NodeDifferenceVec.push_back(Root_1->Children[i]);
+				}
+				else if (Root_2->Children[i] == nullptr)
+				{
+					//inder all leaves shold be pushed back
+					getAllLeafUnderNode(Root_1);
+				}
+				else
+				{
+					GetDifference(Root_1->Children[i], Root_2->Children[i], newDepth);
+				}
+			}
+		}
+	}
+
+}
+
 
 template<typename T>
 void HashTree<T>::getAllLeafUnderNode(TreeNodeX* Root)
