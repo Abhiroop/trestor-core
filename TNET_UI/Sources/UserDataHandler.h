@@ -14,4 +14,5 @@ class UserDataHandler
 public:
 	int setData(string username, string userdata);
 	string getData(string username);
+	
 };

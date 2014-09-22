@@ -40,7 +40,7 @@ void split(vector<string> &tokens, const string &text, char sep)
 	tokens.push_back(text.substr(start));
 }
 
-string convertVector(Hash data)
+string ToBase64String(Hash data)
 {
 	unsigned char* newStr;
 

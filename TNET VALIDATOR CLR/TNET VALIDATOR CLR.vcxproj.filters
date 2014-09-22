@@ -548,6 +548,9 @@
     <ClInclude Include="..\TNET_UI\Sources\TreeLevelDataType.h">
       <Filter>Sources\HashTree</Filter>
     </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LeafDataType.h">
+      <Filter>Sources\HashTree</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MainForm.resx">

@@ -1,112 +1,106 @@
-//
-//#include "LedgerFileHandler.h"
-//#include <string>
-//#include <hash_map>
-//#include "Utils.h"
-//#include "AccountInfo.h"
-//#include "Constants.h"
-//
-//void LedgerFileHandler::loadledger()
-//{
-//	std::fstream ledgerStream;
-//	ledgerStream.open(Const_LedgerFileName, ios::in | ios::out);// | ios::binary);	
-//	//hash tree 
-//		
-//	//hash map for name-key binding
-//
-//	hash_map<string, Hash> name_key_map;
-//
-//	int line_counter = 0;
-//	string line;
-//
-//	//string lcl_time, ledger_sequence, ledger_hash;
-//	
-//
-//	while (std::getline(ledgerStream, line))
-//	{
-//		++line_counter;
-//
-//		//cout << line_counter << endl;
-//		
-//		if (line_counter == 1)
-//			cout<< "LCL time : "<< atol(line.c_str())<< endl ;
-//		
-//		if (line_counter == 2)
-//		{
-//			LCLsequence = atol(line.c_str());
-//		}
-//		
-//		//if (line_counter == 3)
-//			//ledger_hash = line;
-//	    
-//		if (line_counter>=4)
-//		{
-//			Hash hash_vector;
-//
-//			string hash, name;
-//			int64_t balance;
-//			int64_t lastdate;
-//
-//			vector<string> tokens;
-//			split(tokens, line, ' ');
-//			
-//			//super critial stuffs
-//			hash = tokens[0].c_str();
-//
-//			balance = atoi(tokens[1].c_str());
-//
-//			name = tokens[2].c_str();
-//
-//			lastdate = atoi(tokens[3].c_str());
-//			//hell yah!
-//
-//			for (int i = 0; i< (int)hash.length(); i++)
-//				hash_vector.push_back((unsigned char)hash.at(i));
-//			
-//
-//			name_key_map[name] = hash_vector;
-//
-//			//cout << hash << "  "<<balance<<" "<<name<< " " <<line_counter<<endl;
-//			
-//			AccountInfo newAcc = AccountInfo(hash_vector, balance, name, lastdate);
-//			//ht.AddUpdate(newAcc);
-//		}		
-//	}
-//	ledgerStream.close();
-//	cout << "done   " <<line_counter<< endl;
-//}
-//
-//
-//void LedgerFileHandler::storeLedger()
-//{
-//	fstream ledgerStream;
-//	ledgerStream.open(Const_LedgerFileName, ios::out);
-//
-//	//make ledger heardes
-//	LCLtime = getCurrentUTFtime();
-//	ledgerStream << LCLtime << "\n";
-//
-//	//Oh shit! genesis ledger Historial!!!
-//	if (LCLsequence == 0)
-//	{
-//		LCLsequence = 1;
-//		cout << "Genesis ledger detected" << endl << endl;
-//		ledgerStream << LCLsequence << "\n";
-//	}
-//
-//	//else some boring stuff to do
-//	else
-//	{
-//		LCLsequence += 1;
-//		ledgerStream << LCLsequence << "\n\n";
-//	}
-//
-//	ledgerTree.TraverseNodesAndSave(ledgerStream);
-//	ledgerStream.close();
-//}
-//
-//
-//LedgerFileHandler::LedgerFileHandler(HashTree< AccountInfo > accountTree)
-//{
-//	ledgerTree = accountTree;
-//}
+
+#include "LedgerFileHandler.h"
+#include <string>
+#include <hash_map>
+#include <functional>
+#include "Utils.h"
+#include "AccountInfo.h"
+#include "Constants.h"
+
+
+
+LedgerFileHandler::LedgerFileHandler(HashTree< AccountInfo > accountTree)
+{
+	AccountTree = accountTree;
+}
+
+int LedgerFileHandler::MakeVerifyLedgerTree()
+{
+	if (!ledger_db.tableExists("Ledger"))
+	{
+		try
+		{
+			ledger_db.execDML("create table Ledger (PublicKey varchar(128) PRIMARY KEY, UserName varchar(64), Balance integer, IsBlocked int, LastTransaction integer);");
+			return 1;
+		}
+
+		catch (exception &ex)
+		{
+			cout << "Problem in making new table";
+			return 0;
+		}
+	}
+}
+
+int LedgerFileHandler::SaveToDB_Callback(AccountInfo leaf)
+{
+	AccountInfo ai = (AccountInfo) leaf;
+
+	fCall++;
+	
+	return treeToDB(ai.AccountID, ai.Money, ai.Name, ai.LastTransactionTime);
+}
+
+int LedgerFileHandler::SaveToDB()
+{
+	//bind(&Node::Receive, *NewNode, _1));
+
+	AccountTree.TraverseTreeAndFetch_do(bind(&LedgerFileHandler::SaveToDB_Callback, *this, std::placeholders::_1));
+
+	return 1;
+}
+
+int LedgerFileHandler::treeToDB(Hash accountID, int64_t money, string name, int64_t lastTransactionTime)
+{
+	string AccountID = ToBase64String(accountID);
+		
+	CppSQLite3Statement stmt = ledger_db.compileStatement("select PublicKey from Ledger where PublicKey = @u1");
+	stmt.bind("@u1", AccountID.c_str());
+
+
+	CppSQLite3Query q = stmt.execQuery();
+
+	//int row_counter = 0;
+	while (!q.eof())
+	{
+		string ret = q.fieldValue(0);
+		stmt.reset();
+
+		stmt = ledger_db.compileStatement("UPDATE Ledger SET UserName = @u2, Balance = @u3, LastTransaction = @u4 WHERE PublicKey = @u1; ");
+
+		stmt.bind("@u1", AccountID.c_str());
+		stmt.bind("@u3", money);
+		stmt.bind("@u2", name.c_str());
+		stmt.bind("@u4", lastTransactionTime);
+
+		int n_rows = stmt.execDML();
+		if (n_rows != 1)
+		{
+			cout << "Problem in updating";
+			return 0;
+		}
+		return 1;
+	}
+	stmt.reset();
+
+	stmt = ledger_db.compileStatement("insert into Ledger values(@u1,@u2,@u3,@u4,@u5);");
+	
+	stmt.bind("@u1", AccountID.c_str());
+	stmt.bind("@u3", money);
+	stmt.bind("@u2", name.c_str());
+	stmt.bind("@u4", 0);
+	stmt.bind("@u5", lastTransactionTime);
+
+	int n_rows = stmt.execDML();
+	if (n_rows != 1)
+	{
+		cout << "Problem in inserting";
+		return 0;
+	}
+	return 1;
+}
+/*
+HashTree< AccountInfo > LedgerFileHandler::DBToTree(Hash AccountID, int64_t Money, string Name, int64_t LastTransactionTime)
+{
+
+}*/

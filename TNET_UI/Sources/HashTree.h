@@ -23,16 +23,15 @@
 
 #include "TreeNodeX.h"
 
+#include <functional>
+
 #include "ed25519\sha512.h"
 
 #include "Utils.h"
 #include "TreeLevelDataType.h"
-class LeafDataType
-{
-public:
-	Hash GetHash();
-	Hash GetID();
-};
+//#include "LedgerFileHandler.h"
+
+#include "LeafDataType.h"
 
 
 template<typename T>
@@ -106,7 +105,8 @@ public:
 
 	void TraverseTree(TreeNodeX* Root, int64_t & FoundNodes, int _depth);
 
-	void TraverseTreeAndSave(fstream& Ledger, TreeNodeX* Root, int64_t & FoundNodes, int _depth);
+	void TraverseTreeAndFetch(TreeNodeX* Root, int64_t & FoundNodes, int _depth, function<int(T)> fun);
+	void TraverseTreeAndFetch_do(function<int(T)> fun);
 
 	void TraverseTreeAndReturn(vector<shared_ptr<LeafDataType>> & tempLeaves, TreeNodeX* Root, int64_t & FoundNodes, int _depth);
 
@@ -633,10 +633,21 @@ void HashTree<T>::TraverseTree(TreeNodeX* Root, int64_t & FoundNodes, int _depth
 	}
 }
 
+
 template<typename T>
-void HashTree<T>::TraverseTreeAndSave(fstream& Ledger, TreeNodeX* Root, int64_t & FoundNodes, int _depth)
+void HashTree<T>::TraverseTreeAndFetch_do(function<int(T)> fun)
+{
+	int64_t FoundNodes=0; int _depth=0;
+	TraverseTreeAndFetch(Root, FoundNodes, _depth, fun);
+}
+
+
+template<typename T>
+void HashTree<T>::TraverseTreeAndFetch(TreeNodeX* Root, int64_t & FoundNodes, int _depth, function<int(T)> fun)
 {
 	int depth = _depth + 1;
+
+	//lf.MakeVerifyLedgerTree();
 
 	for (int i = 0; i < 16; i++)
 	{
@@ -644,17 +655,19 @@ void HashTree<T>::TraverseTreeAndSave(fstream& Ledger, TreeNodeX* Root, int64_t 
 		{
 			if (!Root->Children[i]->IsLeaf)
 			{
-				TraverseTreeAndSave(Ledger, Root->Children[i], FoundNodes, depth);
+				TraverseTreeAndFetch(Root->Children[i], FoundNodes, depth, fun);
 			}
 			if (Root->Children[i]->IsLeaf)
 			{
 				TreeLeafNode<T>* Leaf = (TreeLeafNode<T>*)Root->Children[i];
 
-				AccountInfo ai = (AccountInfo)Leaf->Value;
+				fun(Leaf->Value);
 
-				TotalMoney += ai.Money;
+				//AccountInfo ai = (AccountInfo)Leaf->Value;
 
-				Ledger << convertVector(ai.AccountID) << " " << ai.Money << " " << ai.Name << " " << ai.LastTransactionTime << "\n";
+				//TotalMoney += ai.Money;
+				//Ledger << ToBase64String(ai.AccountID) << " " << ai.Money << " " << ai.Name << " " << ai.LastTransactionTime << "\n";
+				//lf.treeToDB(ai.AccountID, ai.Money, ai.Money, ai.LastTransactionTime);
 
 				FoundNodes++;
 			}

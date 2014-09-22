@@ -31,7 +31,7 @@ byte GetNibble_(Hash val, int NibbleIndex);
 
 void split(vector<string> &tokens, const string &text, char sep);
 
-string convertVector(Hash data);
+string ToBase64String(Hash data);
 
 uint64_t getCurrentUTFtime();
 

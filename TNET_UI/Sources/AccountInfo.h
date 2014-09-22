@@ -7,8 +7,8 @@
 #ifndef AccountInfo_H
 #define AccountInfo_H
 
-#include "HashTree.h"
 #include "Utils.h"
+#include "LeafDataType.h"
 
 class AccountInfo : public LeafDataType
 {

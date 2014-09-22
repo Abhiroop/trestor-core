@@ -10,12 +10,14 @@
 
 #include "tbb/concurrent_queue.h"
 #include "tbb/concurrent_hash_map.h"
-//#include "SQLiteCpp\CppSQLite3.h"
+#include "SQLiteCpp/CppSQLite3.h"
 //extern CppSQLite3DB global_db;
 
 extern tbb::concurrent_queue<string> MessageQueue;
 
 extern concurrent_hash_map<Hash, AccountInfo> GLOBAL_LEDGER_MAP;
+
+extern CppSQLite3DB ledger_db;
 
 class Constants
 {

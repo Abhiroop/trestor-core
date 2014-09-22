@@ -5,22 +5,31 @@
 #include <fstream>
 #include <iostream>
 #include "AccountInfo.h"
+#include "LeafDataType.h"
+#include "HashTree.h"
 
 class LedgerFileHandler
 {
 public:
-	
-	HashTree< AccountInfo > ledgerTree;
 
 	int64_t LCLtime;
 	int64_t LCLsequence;
 	Hash LCLhash;
+	HashTree< AccountInfo > AccountTree;
 
-	void storeLedger();
-	void loadledger();
+	int fCall = 0;
+
+	int treeToDB(Hash accountID, int64_t money, string name, int64_t lastTransactionTime);
+	
+	HashTree< AccountInfo > DBToTree(Hash AccountID, int64_t Money, string Name, int64_t LastTransactionTime);
 
 	LedgerFileHandler(HashTree< AccountInfo > accountTree);
 
+	int SaveToDB_Callback(AccountInfo leaf);
+
+	int SaveToDB();
+
+	int MakeVerifyLedgerTree();
 };
 
 #endif

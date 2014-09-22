@@ -48,7 +48,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>..\TNET_UI\Sources;..\TNET_UI\Sources\ed25519;..\TNET_UI\Sources\SQLiteCpp;..\TNET_UI\Sources\TBB\;$(IncludePath)</IncludePath>
-    <LibraryPath>..\TNET_UI\Sources\TBB\lib\ia32\vc12;G:\TRESTOR_PROJECT\TNetUI\TNET_UI\Sources\SQLiteCpp;$(LibraryPath)</LibraryPath>
+    <LibraryPath>..\TNET_UI\Sources\TBB\lib\ia32\vc12;..\TNET_UI\Sources\SQLiteCpp;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -249,6 +249,7 @@
     <ClInclude Include="..\TNET_UI\Sources\FakeSocket.h" />
     <ClInclude Include="..\TNET_UI\Sources\Hash.h" />
     <ClInclude Include="..\TNET_UI\Sources\HashTree.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LeafDataType.h" />
     <ClInclude Include="..\TNET_UI\Sources\Ledger.h" />
     <ClInclude Include="..\TNET_UI\Sources\LedgerFileHandler.h" />
     <ClInclude Include="..\TNET_UI\Sources\Node.h" />
