@@ -118,6 +118,12 @@ public:
 
 	vector<TreeNodeX> NodeDifferenceVec;
 
+	T FindData(TreeNodeX* root, Hash ValueID, int pos);
+	
+	bool getStack(TreeNodeX* root, Hash ValueID, int pos, stack<TreeNodeX*>)
+
+	bool DeleteData(T Value);
+
 	
 	/// <summary>
 	/// Gets the element at the position specified by the ID.
@@ -323,6 +329,79 @@ bool HashTree<T>::AddUpdate(T Value)
 	}
 
 	return Good;
+}
+
+/*
+Delete a value from the hash tree
+*/
+template<typename T>
+T HashTree<T>::FindData(TreeNodeX* root,  Hash ValueID, int pos)
+{
+	byte Nibble = GetNibble(ID, pos);
+	
+	if (root->Children[Nibble] == null)
+	{
+		return nullptr;
+	}
+	
+	else if (root->IsLeaf)
+	{
+		TreeLeafNode<T>* ai = (TreeLeafNode<T>*)root;
+		return ai->Value;
+	}
+	else
+	{
+		int _pos = pos + 1;
+		return FindData(root->Children[Nibble], ValueID, _pos);
+	}
+}
+
+template<typename T>
+bool HashTree<T>::getStack(TreeNodeX* root, Hash ValueID, int pos, stack<TreeNodeX*> Stack)
+{
+	byte Nibble = GetNibble(ID, pos);
+
+	//in case there is not leaf return an empty stack
+	if (root->Children[Nibble] == null )
+	{
+		return false;
+	}
+
+	else if (root->IsLeaf)
+	{
+		TreeLeafNode<T>* ai = (TreeLeafNode<T>*)root;
+		Stack.push(ai);
+		return true;
+	}
+	else
+	{
+		int _pos = pos + 1;
+		Stack.push(root->Children[Nibble]);
+		
+		if (Stack.size > 64)
+			return false;
+		
+		return FindData(root->Children[Nibble], ValueID, _pos, Stack);
+	}
+}
+
+template<typename T>
+bool HashTree<T>::DeleteData(T Value)
+{
+	Hash ID = (Value).GetID();
+	int HLEN = ID.size() << 1;
+	TreeNodeX* TempRoot = Root;
+
+	if (FindData(root, ID, 0) == nullptr)
+	{
+		cout << "Leaf not exists in the tree";
+		return false;
+	}
+
+	else
+	{
+
+	}
 }
 
 

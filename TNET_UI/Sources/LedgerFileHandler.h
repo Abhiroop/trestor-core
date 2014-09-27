@@ -17,7 +17,7 @@ public:
 	Hash LCLhash;
 	HashTree< AccountInfo > AccountTree;
 
-	int fCall = 0;
+	static int fCall;
 
 	int treeToDB(Hash accountID, int64_t money, string name, int64_t lastTransactionTime);
 	

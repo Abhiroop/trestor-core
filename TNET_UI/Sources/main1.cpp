@@ -72,7 +72,7 @@ int main()
 
 	lh.SaveToDB();
 
-	cout << "FCALL:" << lh.fCall;
+	cout << "FCALL:" << LedgerFileHandler::fCall;
 
 	vector<TreeLevelDataType> vc = ht.TraverseLevelOrderDepth(55);
 
