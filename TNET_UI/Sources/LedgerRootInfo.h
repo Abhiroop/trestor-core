@@ -3,8 +3,8 @@
 *  @Author: Aritra Dhar + Arpan Jati
 *  @Version: 1.0
 */
-#include"RootDataType.h"
-#include<stdint.h>
+#include "RootDataType.h"
+#include <stdint.h>
 
 #ifndef LedgerRootInfo_H
 #define LedgerRootInfo_H

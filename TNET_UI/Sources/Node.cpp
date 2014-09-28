@@ -61,7 +61,7 @@ Node::Node(FakeNetwork _network, string _Name, int _ConnectionLimit, shared_ptr<
 
 	Name = _Name;
 
-	AI = AccountInfo(PublicKey, Money, _Name, 0);
+	AI = AccountInfo(PublicKey, Money, _Name, 0, 0);
 
 	ledger->AddUserToLedger(AI);
 

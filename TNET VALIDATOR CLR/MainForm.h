@@ -442,7 +442,7 @@ namespace TNETVALIDATORCLR {
 
 			Hash AID = Hash(A_ID, A_ID + 32);
 
-			AccountInfo ss = AccountInfo(AID, MNY, (std::string)"NO_NAME", 0);
+			AccountInfo ss = AccountInfo(AID, MNY, (std::string)"NO_NAME", 0, 0);
 
 			ais.push_back(ss);
 

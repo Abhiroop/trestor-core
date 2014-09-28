@@ -154,5 +154,6 @@ HashTree< AccountInfo > LedgerFileHandler::DBToTree()
 	}
 
 
+	return hashTree;
 	 
 }

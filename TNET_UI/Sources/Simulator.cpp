@@ -96,7 +96,7 @@ void Simulator::StartSimulation()
 
 		//shared_ptr<Hash> pk = n->PublicKey;
 
-		AccountInfo si = AccountInfo(*pk, 500, CN, 0);
+		AccountInfo si = AccountInfo(*pk, 500, CN, 0, 0);
 		nodeHashes.push_back(pk);
 		lgr->AddUserToLedger(si);
 		//sim_nodes[*pk] = NewNode;

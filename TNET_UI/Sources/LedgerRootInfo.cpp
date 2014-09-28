@@ -14,5 +14,5 @@ LedgerRootInfo::LedgerRootInfo(Hash _LedgerHash, Hash _LastLedgerHash, int64_t _
 
 Hash LedgerRootInfo::getLedgerHash()
 {
-
+	return Hash();
 }
