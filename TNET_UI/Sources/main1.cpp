@@ -50,7 +50,7 @@ int main()
 
 		string name = "a";
 		int64_t lastdate = 0;
-		AccountInfo si = AccountInfo(h, Taka++, name, lastdate);
+		AccountInfo si = AccountInfo(h, Taka++, name, 1, lastdate);
 
 		//Hash HH = si.GetHash();
 
@@ -64,8 +64,10 @@ int main()
 		ht.AddUpdate(si);
 		
 	}
-
+	/*Open the ledger db file to instantiate
+	*/
 	ledger_db.open("LedgerT.db");
+	
 
 	LedgerFileHandler lh(ht);
 	lh.MakeVerifyLedgerTree();

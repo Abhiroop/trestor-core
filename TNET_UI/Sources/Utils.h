@@ -1,6 +1,9 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+//@Author : Aritra Dhar + Arpan Jati
+
+
 // GET RID OF THESE on other platforms
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -34,6 +37,8 @@ void split(vector<string> &tokens, const string &text, char sep);
 string ToBase64String(Hash data);
 
 uint64_t getCurrentUTFtime();
+
+Hash Base64ToHash(string data);
 
 /// <summary>
 /// Generates nRandom Numbers

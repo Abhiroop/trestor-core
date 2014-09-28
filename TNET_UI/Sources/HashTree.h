@@ -55,6 +55,24 @@ TreeLeafNode<T>::TreeLeafNode(Hash _ID, T _Value)
 	IsLeaf = true;
 }
 
+
+template<typename R>
+class TreeRootNode : public TreeNodeX
+{
+public:
+	R Value;
+
+	TreeRootNode(Hash ID, R Value);
+	TreeRootNode();
+};
+
+template<typename R>
+TreeRootNode<R>::TreeRootNode(Hash _ID, R _Value)
+{
+	Value = _Value;
+	
+}
+
 /// <summary>
 /// This represents a Merkle Hash tree, each node has 16 child nodes.
 /// The depth is defined by the length of the Hash in Nibbles.
@@ -711,6 +729,8 @@ vector<TreeLevelDataType> HashTree<T>::TraverseLevelOrderDepth(int depth)
 	return(TraverseLevelOrderDepth(Root, depth));
 }
 /*
+Given a depth return a vector with the nodes and 
+their IDs.
 starts with depth 0
 */
 template<typename T>
@@ -850,7 +870,7 @@ void HashTree<T>::TraverseTreeAndFetch(TreeNodeX* Root, int64_t & FoundNodes, in
 			{
 				TraverseTreeAndFetch(Root->Children[i], FoundNodes, depth, fun);
 			}
-			if (Root->Children[i]->IsLeaf)
+			if (Root->Children[i]->IsLeaf && depth<=64)
 			{
 				TreeLeafNode<T>* Leaf = (TreeLeafNode<T>*)Root->Children[i];
 

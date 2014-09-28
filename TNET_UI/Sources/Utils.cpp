@@ -1,3 +1,4 @@
+//@Author : Aritra Dhar + Arpan Jati
 
 #include <ctime>
 #include "Utils.h"
@@ -50,6 +51,15 @@ string ToBase64String(Hash data)
 	string output = Base_64::encode(newStr, data.size(), &lens);
 
 	return output;
+}
+
+Hash Base64ToHash(string data)
+{
+	size_t lens;
+	byte* decoded = Base_64::decode(data.data(), data.length(), &lens);
+	Hash h(decoded, decoded + lens);
+
+	return h;
 }
 
 

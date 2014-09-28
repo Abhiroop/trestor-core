@@ -1,6 +1,6 @@
 /*
 *
-*  @Author: Arpan Jati
+*  @Author: Arpan Jati + Aritra Dhar
 *  @Version: 1.0
 */
 
@@ -17,10 +17,11 @@ public:
 	Hash AccountID;
 	int64_t Money;
 	string Name;
+	byte IsBlocked;
 	int64_t LastTransactionTime;
 
 	AccountInfo();
-	AccountInfo(Hash _AccountID, int64_t _Money, string Name, int64_t LastTransactionTime);
+	AccountInfo(Hash _AccountID, int64_t _Money, string Name, byte IsBlocked, int64_t LastTransactionTime);
 	Hash GetHash();
 	Hash GetID();
 };

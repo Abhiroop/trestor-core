@@ -39,6 +39,8 @@ public :
 
 static const char* dbFile = "test.db";
 
+static const char* dbInfoFile = "LedgerInfo.db";
+
 static const char* Const_LedgerFileName = "Ledger.txt";
 
 extern concurrent_hash_map<Hash, shared_ptr<Node>> GlobalNodes;

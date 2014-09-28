@@ -1,6 +1,6 @@
 /*
 *
-*  @Author: Arpan Jati
+*  @Author: Arpan Jati + Aritra Dhar
 *  @Version: 1.0
 */
 
@@ -21,11 +21,12 @@ AccountInfo::AccountInfo()
 
 }
 
-AccountInfo::AccountInfo(Hash _AccountID, int64_t _Money, string _Name, int64_t _LastTransactionTime)
+AccountInfo::AccountInfo(Hash _AccountID, int64_t _Money, string _Name, byte _IsBlocked, int64_t _LastTransactionTime)
 {
 	AccountID = _AccountID;
 	Money = _Money;
 	Name = _Name;
+	IsBlocked = _IsBlocked;
 	LastTransactionTime = _LastTransactionTime;
 }
 
@@ -39,6 +40,8 @@ Hash AccountInfo::GetHash()
 	vector<byte> money = Conversions::Int64ToVector(Money);
 
 	data.insert(data.end(), money.begin(), money.end());
+
+	data.push_back(IsBlocked);
 
 	byte Hout[64];
 

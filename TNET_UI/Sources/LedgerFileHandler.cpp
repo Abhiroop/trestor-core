@@ -1,4 +1,6 @@
 
+//@Author : Aritra Dhar + Arpan Jati
+
 #include "LedgerFileHandler.h"
 #include <string>
 #include <hash_map>
@@ -6,7 +8,7 @@
 #include "Utils.h"
 #include "AccountInfo.h"
 #include "Constants.h"
-
+#include "LedgerRootInfo.h"
 
 
 LedgerFileHandler::LedgerFileHandler(HashTree< AccountInfo > accountTree)
@@ -103,8 +105,54 @@ int LedgerFileHandler::treeToDB(Hash accountID, int64_t money, string name, int6
 	}
 	return 1;
 }
-/*
-HashTree< AccountInfo > LedgerFileHandler::DBToTree(Hash AccountID, int64_t Money, string Name, int64_t LastTransactionTime)
-{
 
-}*/
+/*
+From scratch
+*/
+
+HashTree< AccountInfo > LedgerFileHandler::DBToTree()
+{
+	//load ledger info
+	CppSQLite3Statement stmt = ledger_db.compileStatement("select * from LedgerInfo");
+	CppSQLite3Query q = stmt.execQuery();
+
+	while (!q.eof())
+	{
+		int len;
+		unsigned char* lh = (unsigned char*) q.getBlobField("LedgerHash", len);
+		Hash LedgerHash(lh, lh + len);
+
+		lh = (unsigned char*)q.getBlobField("LastLedgerhash", len);
+		Hash LastLedgerHash(lh, lh + len);
+
+		int64_t LCLTime = q.getInt64Field("LCLTime");
+		int64_t SequenceNumber = q.getInt64Field("SequenceNumber");
+
+		LedgerRootInfo LRI(LedgerHash, LastLedgerHash, LCLTime, SequenceNumber);
+	}
+
+	stmt.reset();
+	stmt = ledger_db.compileStatement("select * from Ledger");
+	q = stmt.execQuery();
+
+	HashTree<AccountInfo> hashTree;
+
+	//int row_counter = 0;
+	while (!q.eof())
+	{
+		string pkBase64 = q.fieldValue("PublicKey");
+		Hash PublicKey = Base64ToHash(pkBase64);
+
+		string UserName = q.fieldValue("UserName");
+		int64_t Balance = q.getInt64Field("Balance");
+		byte IsBlocked = q.getIntField("IsBlocked");
+		int64_t LastTransaction = q.getInt64Field("LastTransaction");
+
+
+		AccountInfo accountInfo = AccountInfo(PublicKey, Balance, UserName, IsBlocked, LastTransaction);
+		hashTree.AddUpdate(accountInfo);
+	}
+
+
+	 
+}

@@ -228,6 +228,9 @@
     <ClCompile Include="..\TNET_UI\Sources\TreeLevelDataType.cpp">
       <Filter>Sources\HashTree</Filter>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LedgerRootInfo.cpp">
+      <Filter>Sources\Ledger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h">
@@ -549,6 +552,15 @@
       <Filter>Sources\HashTree</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\LeafDataType.h">
+      <Filter>Sources\HashTree</Filter>
+    </ClInclude>
+    <ClInclude Include="TreeLevelData.h">
+      <Filter>Sources\HashTree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LedgerRootInfo.h">
+      <Filter>Sources\Ledger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\RootDataType.h">
       <Filter>Sources\HashTree</Filter>
     </ClInclude>
   </ItemGroup>

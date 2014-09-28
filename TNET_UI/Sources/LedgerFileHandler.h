@@ -1,6 +1,7 @@
 
 #ifndef LedgerFileHandler_H
 #define LedgerFileHandler_H
+//@Author : Aritra Dhar + Arpan Jati
 
 #include <fstream>
 #include <iostream>
@@ -21,7 +22,7 @@ public:
 
 	int treeToDB(Hash accountID, int64_t money, string name, int64_t lastTransactionTime);
 	
-	HashTree< AccountInfo > DBToTree(Hash AccountID, int64_t Money, string Name, int64_t LastTransactionTime);
+	HashTree< AccountInfo > DBToTree();
 
 	LedgerFileHandler(HashTree< AccountInfo > accountTree);
 

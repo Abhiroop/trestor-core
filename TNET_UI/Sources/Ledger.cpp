@@ -226,8 +226,10 @@ LedgerOpStatistics Ledger::ApplyTransactionToLedger(hash_map<Hash, TransactionCo
 		{
 			string name = "";
 			int64_t lastTransactionTime=0;
+			byte IsBlocked = 0;
 
-			AccountInfo ai(kvp->second.ai.AccountID, kvp->second.Money + kvp->second.Credits - kvp->second.Debits, name, lastTransactionTime);
+
+			AccountInfo ai(kvp->second.ai.AccountID, kvp->second.Money + kvp->second.Credits - kvp->second.Debits, name, IsBlocked, lastTransactionTime);
 			LedgerTree.AddUpdate(ai); // GetNodeData(kvp.Key);
 		}
 	}

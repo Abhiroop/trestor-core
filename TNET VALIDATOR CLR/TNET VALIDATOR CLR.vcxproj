@@ -147,6 +147,7 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LedgerRootInfo.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\main1.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -252,6 +253,7 @@
     <ClInclude Include="..\TNET_UI\Sources\LeafDataType.h" />
     <ClInclude Include="..\TNET_UI\Sources\Ledger.h" />
     <ClInclude Include="..\TNET_UI\Sources\LedgerFileHandler.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LedgerRootInfo.h" />
     <ClInclude Include="..\TNET_UI\Sources\Node.h" />
     <ClInclude Include="..\TNET_UI\Sources\OnionConnectionEstablish.h" />
     <ClInclude Include="..\TNET_UI\Sources\OnionNodeList.h" />
@@ -259,6 +261,7 @@
     <ClInclude Include="..\TNET_UI\Sources\Point2.h" />
     <ClInclude Include="..\TNET_UI\Sources\PrivateKeyManage.h" />
     <ClInclude Include="..\TNET_UI\Sources\ProtocolPackager.h" />
+    <ClInclude Include="..\TNET_UI\Sources\RootDataType.h" />
     <ClInclude Include="..\TNET_UI\Sources\SerializableBase.h" />
     <ClInclude Include="..\TNET_UI\Sources\Signal.h" />
     <ClInclude Include="..\TNET_UI\Sources\Simulator.h" />
@@ -339,6 +342,7 @@
     <ClInclude Include="NetworkVisualizer.h">
       <FileType>CppControl</FileType>
     </ClInclude>
+    <ClInclude Include="TreeLevelData.h" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
