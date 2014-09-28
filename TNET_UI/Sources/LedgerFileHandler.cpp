@@ -12,7 +12,7 @@
 LedgerFileHandler::LedgerFileHandler(HashTree< AccountInfo > accountTree)
 {
 	AccountTree = accountTree;
-	fCall = 0;
+	//fCall = 0;
 }
 
 int LedgerFileHandler::MakeVerifyLedgerTree()
@@ -31,15 +31,16 @@ int LedgerFileHandler::MakeVerifyLedgerTree()
 			return 0;
 		}
 	}
+	return 1;
 }
 
 int LedgerFileHandler::SaveToDB_Callback(AccountInfo leaf)
 {
 	AccountInfo ai = (AccountInfo) leaf;
 
-	LedgerFileHandler::fCall++;
+	//LedgerFileHandler::fCall++;
 
-	cout << "$$$$$$$$$$$$$$" << LedgerFileHandler::fCall << endl;
+	//cout << "$$$$$$$$$$$$$$" << LedgerFileHandler::fCall << endl;
 	
 	return treeToDB(ai.AccountID, ai.Money, ai.Name, ai.LastTransactionTime);
 }

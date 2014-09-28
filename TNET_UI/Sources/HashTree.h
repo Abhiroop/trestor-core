@@ -33,6 +33,7 @@
 
 #include "LeafDataType.h"
 
+using namespace std;
 
 template<typename T>
 class TreeLeafNode : public TreeNodeX
@@ -75,7 +76,7 @@ public:
 	//template<class LeafDataType>
 	int64_t TotalNodes();
 	int64_t TotalLeaves();
-	
+
 	TreeNodeX* Root;
 
 	HashTree();
@@ -119,12 +120,14 @@ public:
 	vector<TreeNodeX> NodeDifferenceVec;
 
 	T FindData(TreeNodeX* root, Hash ValueID, int pos);
-	
-	bool getStack(TreeNodeX* root, Hash ValueID, int pos, stack<TreeNodeX*>)
 
-	bool DeleteData(T Value);
+	bool getStack(TreeNodeX* root, Hash ValueID, int pos, stack<TreeNodeX*> treeNodeStack);
 
-	
+	bool getStack_Itr(Hash ID, stack<TreeNodeX*> &treeNodeStack);
+
+	bool DeleteData(Hash ID);
+
+
 	/// <summary>
 	/// Gets the element at the position specified by the ID.
 	/// </summary>
@@ -250,6 +253,9 @@ bool HashTree<T>::AddUpdate(T Value)
 				TempRoot->Children[Nibble] = new TreeLeafNode<T>(ID, Value);
 				_TotalNodes++;
 				_TotalLeaves++;
+
+				//printf("\nLeaf Node Added: %08x", (TempRoot->Children[Nibble]));
+
 				// DisplayUtils.Display("Node Added: " + HexUtil.ToString(ID.Hex));
 				Good = true;
 			}
@@ -335,15 +341,15 @@ bool HashTree<T>::AddUpdate(T Value)
 Delete a value from the hash tree
 */
 template<typename T>
-T HashTree<T>::FindData(TreeNodeX* root,  Hash ValueID, int pos)
+T HashTree<T>::FindData(TreeNodeX* root, Hash ValueID, int pos)
 {
 	byte Nibble = GetNibble(ID, pos);
-	
+
 	if (root->Children[Nibble] == null)
 	{
 		return nullptr;
 	}
-	
+
 	else if (root->IsLeaf)
 	{
 		TreeLeafNode<T>* ai = (TreeLeafNode<T>*)root;
@@ -362,7 +368,7 @@ bool HashTree<T>::getStack(TreeNodeX* root, Hash ValueID, int pos, stack<TreeNod
 	byte Nibble = GetNibble(ID, pos);
 
 	//in case there is not leaf return an empty stack
-	if (root->Children[Nibble] == null )
+	if (root->Children[Nibble] == null)
 	{
 		return false;
 	}
@@ -377,30 +383,138 @@ bool HashTree<T>::getStack(TreeNodeX* root, Hash ValueID, int pos, stack<TreeNod
 	{
 		int _pos = pos + 1;
 		Stack.push(root->Children[Nibble]);
-		
+
 		if (Stack.size > 64)
 			return false;
-		
+
 		return FindData(root->Children[Nibble], ValueID, _pos, Stack);
 	}
 }
 
 template<typename T>
-bool HashTree<T>::DeleteData(T Value)
+bool HashTree<T>::getStack_Itr(Hash ID, stack<TreeNodeX*> &treeNodeStack)
 {
-	Hash ID = (Value).GetID();
+	TreeNodeX* TempRoot = Root;
+	int len = ID.size() * 2;
+
+	for (int i = 0; i < len; i++)
+	{
+		byte Nibble = GetNibble(ID, i);
+
+		TempRoot = TempRoot->Children[Nibble];
+
+		//boundary conditions
+		if (TempRoot == nullptr)
+		{
+			cout << "not found null  " << ID.ToString();
+			return false;
+		}
+
+		//printf("\nPushing to Stack : %08x  : i = %d : Nibble = %d", (TempRoot), i, Nibble);
+		treeNodeStack.push(TempRoot);
+
+		if (TempRoot->IsLeaf)
+		{
+			cout << "found  " << ID.ToString();
+			return true;
+		}
+	}
+
+	cout << "not found  " << ID.ToString();
+	return false;
+}
+
+
+template<typename T>
+bool HashTree<T>::DeleteData(Hash ID)
+{
+	bool doDelete = true;
 	int HLEN = ID.size() << 1;
 	TreeNodeX* TempRoot = Root;
 
-	if (FindData(root, ID, 0) == nullptr)
+	stack<TreeNodeX*> treeNodeStack;
+	bool b = getStack_Itr(ID, treeNodeStack);
+
+	if (!b)
 	{
-		cout << "Leaf not exists in the tree";
+		cout << "Leaf does not exists in the tree";
 		return false;
 	}
 
 	else
 	{
+		if (treeNodeStack.size() < 64)
+		{
+			cout << "Problem level : Bitch please";
+			return false;
+		}
 
+		//cout << endl << "Stack size  " << treeNodeStack.size();
+		int counter = 0;
+		while (treeNodeStack.size() > 0)
+		{
+			counter++;
+			TreeNodeX* retNode = treeNodeStack.top();
+			treeNodeStack.pop();
+
+			if (retNode->IsLeaf)
+			{
+				//printf("\nDELETED Leaf Node: %08x", (retNode));
+				
+				delete retNode;
+				retNode = nullptr;
+				
+				//cout << "\n###" << counter<< endl;
+			}
+
+			else
+			{
+				bool haveBabies = false;
+				vector<byte> hashDataArray;
+
+				for (int i = 0; i < 16; i++)
+				{
+
+					if (retNode->Children[i] != nullptr)
+					{
+						haveBabies = true;
+
+						if (treeNodeStack.size() == 63)
+						{
+							TreeLeafNode<T>* ai = (TreeLeafNode<T>*)retNode->Children[i];
+							Hash hsh = ai->Value.GetHash();
+							hashDataArray.insert(hashDataArray.end(), hsh.begin(), hsh.end());
+						}
+						else
+						{
+							TreeNodeX* ai = (TreeNodeX*)retNode->Children[i];
+							unsigned char * IDS = ai->ID;
+							vector<unsigned char> hsh(IDS, IDS + 32);
+							hashDataArray.insert(hashDataArray.end(), hsh.begin(), hsh.end());
+						}
+					}
+				}
+
+
+				if (!haveBabies)
+				{
+					//printf("\nDELETED Node: %08x", (retNode));
+					delete retNode;
+					retNode = nullptr;
+					//cout << "\n##"<< counter;
+				}
+				else
+				{
+					byte Hout[64];
+					sha512(hashDataArray.data(), hashDataArray.size(), Hout);
+					memcpy((unsigned char*)(retNode->ID), Hout, 32);
+				}
+
+			}
+
+		}
+
+		//cout << endl << "Counter  " << counter << endl;
 	}
 }
 
@@ -480,7 +594,7 @@ vector<shared_ptr<LeafDataType>> HashTree<T>::TraverseNodesAndReturnLeaf()
 	vector<shared_ptr<LeafDataType>> tempLeaves;
 	int64_t nodes = 0;
 	int depth = 0;
-		
+
 	TraverseTreeAndReturn(tempLeaves, Root, nodes, depth);
 
 	//TraverseLevelOrder(Root, ref nodes);
@@ -498,7 +612,7 @@ void HashTree<T>::GetDifference(TreeNodeX* Root_1, TreeNodeX* Root_2)
 {
 	if (Root_1->ID == Root_2->ID)
 		return;
-	
+
 	if (Root_1->ID != Root_2->ID)
 	{
 		for (int i = 0; i < 16; i++)
@@ -578,7 +692,7 @@ void HashTree<T>::TraverseLevelOrder(TreeNodeX* Root, int64_t & FoundNodes)
 		for (int i = 0; i < 16; i++)
 		{
 			if (Root->Children[i] != nullptr)
-			{				
+			{
 				q.push(Root);
 			}
 		}
@@ -602,29 +716,29 @@ starts with depth 0
 template<typename T>
 vector<TreeLevelDataType> HashTree<T>::TraverseLevelOrderDepth(TreeNodeX* Root, int depth)
 {
-	
+
 	if (depth >= 64)
 	{
 		vector<TreeLevelDataType> list0;
 		cout << "Bitch please!";
 		return list0;
 	}
-	
+
 	int _depth = 0;
 	vector<TreeLevelDataType> list1;
 	vector<TreeLevelDataType> list2;
 	//initialize with the root
-	
+
 	vector<char> c;
-	
+
 	TreeLevelDataType td(Root, c);
 	list1.push_back(td);
 
-	while ( _depth!= depth)
+	while (_depth != depth)
 	{
 		for (int i = 0; i < list1.size(); i++)
 		{
-			list2.push_back(list1.at(i));			
+			list2.push_back(list1.at(i));
 		}
 		_depth++;
 		//destroy list 1
@@ -716,7 +830,7 @@ void HashTree<T>::TraverseTree(TreeNodeX* Root, int64_t & FoundNodes, int _depth
 template<typename T>
 void HashTree<T>::TraverseTreeAndFetch_do(function<int(T)> fun)
 {
-	int64_t FoundNodes=0; int _depth=0;
+	int64_t FoundNodes = 0; int _depth = 0;
 	TraverseTreeAndFetch(Root, FoundNodes, _depth, fun);
 }
 
