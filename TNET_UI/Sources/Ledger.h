@@ -7,6 +7,7 @@
 #include "AccountInfo.h"
 #include "TransactionContent.h"
 #include "CreditDebitData.h"
+#include "LedgerRootInfo.h"
 
 //SHIT JUST GOT REAL HERE!!!!
 
@@ -24,7 +25,8 @@ class Ledger
 {
 
 public:
-	HashTree<AccountInfo> LedgerTree;
+
+	HashTree<AccountInfo, LedgerRootInfo> LedgerTree;
 	int64_t TransactionFees;
 	//int64_t TotalAmount;
 	int64_t CloseTime;
@@ -36,7 +38,7 @@ public:
 	/// </summary>
 	hash_set<Hash> BlackList;
 
-	Ledger();
+	Ledger(LedgerRootInfo ledgerRootInfo);
 
 	bool GetAccount(Hash userInfo, AccountInfo & ltd);
 

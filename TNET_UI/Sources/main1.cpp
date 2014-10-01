@@ -13,6 +13,7 @@
 #include "Constants.h"
 #include "ed25519\sha512.h"
 #include "LedgerFileHandler.h"
+#include "LedgerRootInfo.h"
 
 using namespace std;
 
@@ -21,7 +22,7 @@ int main()
 
 	cout << "TEST 3.0" << endl;
 
-	HashTree< AccountInfo > ht;
+	HashTree< AccountInfo, LedgerRootInfo > ht;
 
 
 

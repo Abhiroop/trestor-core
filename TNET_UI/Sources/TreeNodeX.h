@@ -19,6 +19,8 @@ public:
 	unsigned char ID[32];
 	bool IsLeaf;
 
+	bool IsRoot;
+
 	TreeNodeX **Children = nullptr;
 
 	TreeNodeX();

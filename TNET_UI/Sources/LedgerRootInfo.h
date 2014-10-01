@@ -18,6 +18,7 @@ class LedgerRootInfo : public RootDataType
 
 public:
 
+	LedgerRootInfo();
 	LedgerRootInfo(Hash LedgerHash, Hash LastLedgerhash, int64_t LCLTime, int64_t SequenceNumber);
 
 	Hash getLedgerHash();

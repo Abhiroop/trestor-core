@@ -71,6 +71,8 @@ TreeRootNode<R>::TreeRootNode(Hash _ID, R _Value)
 {
 	Value = _Value;
 	
+	IsRoot = true;
+	IsLeaf = false;
 }
 
 /// <summary>
@@ -80,7 +82,7 @@ TreeRootNode<R>::TreeRootNode(Hash _ID, R _Value)
 /// </summary>
 
 
-template<typename T>
+template<typename T,typename R>
 class HashTree
 {
 
@@ -97,7 +99,7 @@ public:
 
 	TreeNodeX* Root;
 
-	HashTree();
+	HashTree(R Value);
 
 	Hash GetRootHash();
 
@@ -107,6 +109,7 @@ public:
 	/// <param name="Value">The Value to be added</param>
 	/// <returns></returns>
 	//bool AddUpdate(LeafDataType Value);
+	
 
 	bool AddUpdate(T);
 
@@ -146,6 +149,7 @@ public:
 	bool DeleteData(Hash ID);
 
 
+
 	/// <summary>
 	/// Gets the element at the position specified by the ID.
 	/// </summary>
@@ -160,8 +164,8 @@ public:
 
 using namespace std;
 
-template<typename T>
-int64_t HashTree<T>::TotalNodes()
+template<typename T, typename R>
+int64_t HashTree<T, R>::TotalNodes()
 {
 	return _TotalNodes;
 }
@@ -172,24 +176,27 @@ int64_t HashTree<T>::TotalNodes()
 /// TODO: THINK OF A BETTER WAY
 /// </summary>
 /// <returns></returns>
-template<typename T>
-int64_t HashTree<T>::TotalLeaves()
+template<typename T, typename R>
+int64_t HashTree<T, R>::TotalLeaves()
 {
 	return _TotalLeaves;
 }
 
-template<typename T>
-HashTree<T>::HashTree()
+template<typename T, typename R>
+HashTree<T, R>::HashTree(R Value)
 {
-	Root = new TreeNodeX();
+	//Root = new TreeNodeX();
+	Hash ID = (Value).getID();
+	Root = new TreeRootNode<R>(ID, _Value);
+	
 }
 
 /// <summary>
 /// Get the RootHash of the Merkle Tree
 /// </summary>
 /// <returns></returns>
-template<typename T>
-Hash HashTree<T>::GetRootHash()
+template<typename T, typename R>
+Hash HashTree<T, R>::GetRootHash()
 {
 	if (Root != nullptr)
 	{
@@ -230,8 +237,8 @@ inline byte GetNibble(Hash val, int NibbleIndex)
 /// <param name="Value">The Value to be added</param>
 /// <returns></returns>
 
-template<typename T>
-bool HashTree<T>::AddUpdate(T Value)
+template<typename T, typename R>
+bool HashTree<T, R>::AddUpdate(T Value)
 {
 	bool Good = false;
 
@@ -358,8 +365,8 @@ bool HashTree<T>::AddUpdate(T Value)
 /*
 Delete a value from the hash tree
 */
-template<typename T>
-T HashTree<T>::FindData(TreeNodeX* root, Hash ValueID, int pos)
+template<typename T, typename R>
+T HashTree<T, R>::FindData(TreeNodeX* root, Hash ValueID, int pos)
 {
 	byte Nibble = GetNibble(ID, pos);
 
@@ -380,8 +387,8 @@ T HashTree<T>::FindData(TreeNodeX* root, Hash ValueID, int pos)
 	}
 }
 
-template<typename T>
-bool HashTree<T>::getStack(TreeNodeX* root, Hash ValueID, int pos, stack<TreeNodeX*> Stack)
+template<typename T, typename R>
+bool HashTree<T, R>::getStack(TreeNodeX* root, Hash ValueID, int pos, stack<TreeNodeX*> Stack)
 {
 	byte Nibble = GetNibble(ID, pos);
 
@@ -409,8 +416,8 @@ bool HashTree<T>::getStack(TreeNodeX* root, Hash ValueID, int pos, stack<TreeNod
 	}
 }
 
-template<typename T>
-bool HashTree<T>::getStack_Itr(Hash ID, stack<TreeNodeX*> &treeNodeStack)
+template<typename T, typename R>
+bool HashTree<T, R>::getStack_Itr(Hash ID, stack<TreeNodeX*> &treeNodeStack)
 {
 	TreeNodeX* TempRoot = Root;
 	int len = ID.size() * 2;
@@ -443,8 +450,8 @@ bool HashTree<T>::getStack_Itr(Hash ID, stack<TreeNodeX*> &treeNodeStack)
 }
 
 
-template<typename T>
-bool HashTree<T>::DeleteData(Hash ID)
+template<typename T, typename R>
+bool HashTree<T, R>::DeleteData(Hash ID)
 {
 	bool doDelete = true;
 	int HLEN = ID.size() << 1;
@@ -542,8 +549,8 @@ bool HashTree<T>::DeleteData(Hash ID)
 /// </summary>
 /// <param name="ID"></param>
 /// <returns></returns>
-template<typename T>
-bool HashTree<T>::GetNodeData(Hash ID, T & Response)
+template<typename T, typename R>
+bool HashTree<T, R>::GetNodeData(Hash ID, T & Response)
 {
 	TreeNodeX *TempRoot = Root;
 
@@ -580,8 +587,8 @@ bool HashTree<T>::GetNodeData(Hash ID, T & Response)
 	return false;//throw exception("Node does not exist.");
 }
 
-template<typename T>
-int64_t HashTree<T>::TraverseNodes()
+template<typename T, typename R>
+int64_t HashTree<T, R>::TraverseNodes()
 {
 	int64_t nodes = 0;
 	int depth = 0;
@@ -593,8 +600,8 @@ int64_t HashTree<T>::TraverseNodes()
 }
 
 
-template<typename T>
-int64_t HashTree<T>::TraverseNodesAndSave(fstream& Ledger)
+template<typename T, typename R>
+int64_t HashTree<T, R>::TraverseNodesAndSave(fstream& Ledger)
 {
 	int64_t nodes = 0;
 	int depth = 0;
@@ -606,8 +613,8 @@ int64_t HashTree<T>::TraverseNodesAndSave(fstream& Ledger)
 }
 
 
-template<typename T>
-vector<shared_ptr<LeafDataType>> HashTree<T>::TraverseNodesAndReturnLeaf()
+template<typename T, typename R>
+vector<shared_ptr<LeafDataType>> HashTree<T, R>::TraverseNodesAndReturnLeaf()
 {
 	vector<shared_ptr<LeafDataType>> tempLeaves;
 	int64_t nodes = 0;
@@ -625,8 +632,8 @@ Root_1 at responder
 Root_2 at query side
 */
 
-template<typename T>
-void HashTree<T>::GetDifference(TreeNodeX* Root_1, TreeNodeX* Root_2)
+template<typename T, typename R>
+void HashTree<T, R>::GetDifference(TreeNodeX* Root_1, TreeNodeX* Root_2)
 {
 	if (Root_1->ID == Root_2->ID)
 		return;
@@ -657,8 +664,8 @@ void HashTree<T>::GetDifference(TreeNodeX* Root_1, TreeNodeX* Root_2)
 }
 
 //limit in depth
-template<typename T>
-void HashTree<T>::GetDifference(TreeNodeX* Root_1, TreeNodeX* Root_2, int depth)
+template<typename T, typename R>
+void HashTree<T, R>::GetDifference(TreeNodeX* Root_1, TreeNodeX* Root_2, int depth)
 {
 	int newDepth = depth++;
 	if (Root_1->ID == Root_2->ID)
@@ -699,8 +706,8 @@ void HashTree<T>::GetDifference(TreeNodeX* Root_1, TreeNodeX* Root_2, int depth)
 }
 
 
-template<typename T>
-void HashTree<T>::TraverseLevelOrder(TreeNodeX* Root, int64_t & FoundNodes)
+template<typename T, typename R>
+void HashTree<T, R>::TraverseLevelOrder(TreeNodeX* Root, int64_t & FoundNodes)
 {
 	TreeNodeX* temp = Root;
 	queue<TreeNodeX*> q;
@@ -723,8 +730,8 @@ void HashTree<T>::TraverseLevelOrder(TreeNodeX* Root, int64_t & FoundNodes)
 /*
 starts with depth 0
 */
-template<typename T>
-vector<TreeLevelDataType> HashTree<T>::TraverseLevelOrderDepth(int depth)
+template<typename T, typename R>
+vector<TreeLevelDataType> HashTree<T, R>::TraverseLevelOrderDepth(int depth)
 {
 	return(TraverseLevelOrderDepth(Root, depth));
 }
@@ -733,8 +740,8 @@ Given a depth return a vector with the nodes and
 their IDs.
 starts with depth 0
 */
-template<typename T>
-vector<TreeLevelDataType> HashTree<T>::TraverseLevelOrderDepth(TreeNodeX* Root, int depth)
+template<typename T, typename R>
+vector<TreeLevelDataType> HashTree<T, R>::TraverseLevelOrderDepth(TreeNodeX* Root, int depth)
 {
 
 	if (depth >= 64)
@@ -784,8 +791,8 @@ vector<TreeLevelDataType> HashTree<T>::TraverseLevelOrderDepth(TreeNodeX* Root, 
 	return list1;
 }
 
-template<typename T>
-void HashTree<T>::getAllLeafUnderNode(TreeNodeX* Root)
+template<typename T, typename R>
+void HashTree<T, R>::getAllLeafUnderNode(TreeNodeX* Root)
 {
 	for (int i = 0; i < 16; i++)
 	{
@@ -807,8 +814,8 @@ void HashTree<T>::getAllLeafUnderNode(TreeNodeX* Root)
 }
 
 
-template<typename T>
-void HashTree<T>::TraverseTree(TreeNodeX* Root, int64_t & FoundNodes, int _depth)
+template<typename T, typename R>
+void HashTree<T, R>::TraverseTree(TreeNodeX* Root, int64_t & FoundNodes, int _depth)
 {
 	int depth = _depth + 1;
 
@@ -847,16 +854,16 @@ void HashTree<T>::TraverseTree(TreeNodeX* Root, int64_t & FoundNodes, int _depth
 }
 
 
-template<typename T>
-void HashTree<T>::TraverseTreeAndFetch_do(function<int(T)> fun)
+template<typename T, typename R>
+void HashTree<T, R>::TraverseTreeAndFetch_do(function<int(T)> fun)
 {
 	int64_t FoundNodes = 0; int _depth = 0;
 	TraverseTreeAndFetch(Root, FoundNodes, _depth, fun);
 }
 
 
-template<typename T>
-void HashTree<T>::TraverseTreeAndFetch(TreeNodeX* Root, int64_t & FoundNodes, int _depth, function<int(T)> fun)
+template<typename T, typename R>
+void HashTree<T, R>::TraverseTreeAndFetch(TreeNodeX* Root, int64_t & FoundNodes, int _depth, function<int(T)> fun)
 {
 	int depth = _depth + 1;
 
@@ -889,8 +896,8 @@ void HashTree<T>::TraverseTreeAndFetch(TreeNodeX* Root, int64_t & FoundNodes, in
 }
 
 
-template<typename T>
-void HashTree<T>::TraverseTreeAndReturn(vector<shared_ptr<LeafDataType>> & tempLeaves, TreeNodeX* Root, int64_t & FoundNodes, int _depth)
+template<typename T, typename R>
+void HashTree<T, R>::TraverseTreeAndReturn(vector<shared_ptr<LeafDataType>> & tempLeaves, TreeNodeX* Root, int64_t & FoundNodes, int _depth)
 {
 	int depth = _depth + 1;
 

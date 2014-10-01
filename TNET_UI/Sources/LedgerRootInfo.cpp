@@ -3,6 +3,10 @@
 
 #include "LedgerRootInfo.h"
 
+LedgerRootInfo::LedgerRootInfo()
+{
+
+}
 
 LedgerRootInfo::LedgerRootInfo(Hash _LedgerHash, Hash _LastLedgerHash, int64_t _LCLTime, int64_t _SequenceNumber)
 {

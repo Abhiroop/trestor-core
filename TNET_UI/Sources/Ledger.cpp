@@ -9,8 +9,9 @@
 #include "Ledger.h"
 
 
-Ledger::Ledger()
+Ledger::Ledger(LedgerRootInfo ledgerRootInfo)
 {
+
 	//LedgerTree;
 	TransactionFees = 0;
 	//TotalAmount = 0;

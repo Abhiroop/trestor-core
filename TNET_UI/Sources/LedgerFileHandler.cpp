@@ -11,7 +11,7 @@
 #include "LedgerRootInfo.h"
 
 
-LedgerFileHandler::LedgerFileHandler(HashTree< AccountInfo > accountTree)
+LedgerFileHandler::LedgerFileHandler(HashTree< AccountInfo, LedgerRootInfo > accountTree)
 {
 	AccountTree = accountTree;
 	//fCall = 0;
@@ -110,7 +110,7 @@ int LedgerFileHandler::treeToDB(Hash accountID, int64_t money, string name, int6
 From scratch
 */
 
-HashTree< AccountInfo > LedgerFileHandler::DBToTree()
+HashTree< AccountInfo, LedgerRootInfo > LedgerFileHandler::DBToTree()
 {
 	//load ledger info
 	CppSQLite3Statement stmt = ledger_db.compileStatement("select * from LedgerInfo");
@@ -135,7 +135,8 @@ HashTree< AccountInfo > LedgerFileHandler::DBToTree()
 	stmt = ledger_db.compileStatement("select * from Ledger");
 	q = stmt.execQuery();
 
-	HashTree<AccountInfo> hashTree;
+	LedgerRootInfo ledgerRootInfo;
+	HashTree<AccountInfo, LedgerRootInfo> hashTree(ledgerRootInfo);
 
 	//int row_counter = 0;
 	while (!q.eof())
