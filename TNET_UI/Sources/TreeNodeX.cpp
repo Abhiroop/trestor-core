@@ -18,6 +18,8 @@ TreeNodeX::TreeNodeX()
 {
 	//ID = NULL;
 
+	LeafCount = 0;
+
 	Children = new TreeNodeX*[16];
 
 	for (int i = 0; i < 16; i++)

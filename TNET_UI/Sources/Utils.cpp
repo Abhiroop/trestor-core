@@ -4,6 +4,41 @@
 #include "Utils.h"
 #include "Base64.h"
 
+char* s = "0123456789ABCDEF";
+int getIndex(char c)
+{
+	for (int i = 0; i < 16; i++)
+	{
+		if (s[i] == c)
+			return i;
+	}
+	throw exception("Bal hex char hoeche!");
+}
+int CompareHexString(vector<char> i, vector<char> j)
+{
+	for (int t = 0; t < i.size(); t++)
+	{
+		if (getIndex(i[t]) > getIndex(j[t]))
+			return 1;
+
+		if (getIndex(i[t]) < getIndex(j[t]))
+			return -1;
+	}
+	return 0;
+}
+
+bool CompareCharString(unsigned char* i, unsigned char* j, int len1, int len2)
+{
+	if (len1 != len2)
+		return false;
+
+	for (int t = 0; t < len1; t++)
+	{
+		if (i[t] != j[t])
+			return false;
+	}
+	return true;
+}
 
 bool ByteArrayEquals(vector<byte> x, int xOffset, vector<byte> y, int yOffset, int length)
 {

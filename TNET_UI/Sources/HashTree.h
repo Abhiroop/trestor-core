@@ -141,6 +141,8 @@ public:
 
 	void getAllLeafUnderNode(TreeNodeX* Root);
 
+	vector<TreeLevelDataType> GetDifference(vector<TreeLevelDataType> other, vector<TreeLevelDataType> me);
+
 	vector<TreeNodeX> NodeDifferenceVec;
 
 	T FindData(TreeNodeX* root, Hash ValueID, int pos);
@@ -299,7 +301,6 @@ bool HashTree<T, R>::AddUpdate(T Value)
 				_TotalLeaves++;
 
 				//printf("\nLeaf Node Added: %08x", (TempRoot->Children[Nibble]));
-
 				// DisplayUtils.Display("Node Added: " + HexUtil.ToString(ID.Hex));
 				Good = true;
 			}
@@ -308,7 +309,6 @@ bool HashTree<T, R>::AddUpdate(T Value)
 				//if (*(TempRoot->Children[Nibble]->ID) == ID)
 				{
 					((TreeLeafNode<T>*)TempRoot->Children[Nibble])->Value = Value;
-
 					Good = true;
 				}
 				//else
@@ -335,15 +335,16 @@ bool HashTree<T, R>::AddUpdate(T Value)
 		if (!LeafDone)
 		{
 			vector<byte> hashDataArray;// = new vector<byte>();
+			int nLeaves = 0;
 			for (int i = 0; i < 16; i++)
 			{
 				if (val->Children[i] != nullptr)
 				{
 					//printf("\n CH : \n-  %01x - ", i);
-
 					TreeLeafNode<T>* ai = (TreeLeafNode<T>*)val->Children[i];
 					Hash hsh = ai->Value.GetHash();
 					hashDataArray.insert(hashDataArray.end(), hsh.begin(), hsh.end());
+					nLeaves++;
 					//printHash(hsh);
 				}
 			}
@@ -351,29 +352,31 @@ bool HashTree<T, R>::AddUpdate(T Value)
 			byte Hout[64];
 			sha512(hashDataArray.data(), hashDataArray.size(), Hout);
 			memcpy((unsigned char*)(val->ID), Hout, 32);
+			val->LeafCount = nLeaves;
 			LeafDone = true;
 		}
 		else
 		{
 			vector<byte> hashDataArray;
+			int64_t nLeaves = 0;
 			for (int i = 0; i < 16; i++)
 			{
 				if (val->Children[i] != nullptr)
 				{
 					//printf("\n-  %01x - ", i);
-
 					TreeNodeX* ai = (TreeNodeX*)val->Children[i];
 					unsigned char * IDS = ai->ID;
 					vector<unsigned char> hsh(IDS, IDS + 32);
 					hashDataArray.insert(hashDataArray.end(), hsh.begin(), hsh.end());
+					nLeaves += ai->LeafCount;
 					//printHash(hsh);
 				}
 			}
 
 			byte Hout[64];
 			sha512(hashDataArray.data(), hashDataArray.size(), Hout);
-
 			memcpy((unsigned char*)(val->ID), Hout, 32);
+			val->LeafCount = nLeaves;
 
 		}
 	}
@@ -381,9 +384,7 @@ bool HashTree<T, R>::AddUpdate(T Value)
 	return Good;
 }
 
-/*
-Delete a value from the hash tree
-*/
+
 template<typename T, typename R>
 T HashTree<T, R>::FindData(TreeNodeX* root, Hash ValueID, int pos)
 {
@@ -468,7 +469,9 @@ bool HashTree<T, R>::getStack_Itr(Hash ID, stack<TreeNodeX*> &treeNodeStack)
 	return false;
 }
 
-
+/*
+Delete a value from the hash tree
+*/
 template<typename T, typename R>
 bool HashTree<T, R>::DeleteData(Hash ID)
 {
@@ -516,11 +519,14 @@ bool HashTree<T, R>::DeleteData(Hash ID)
 				bool haveBabies = false;
 				vector<byte> hashDataArray;
 
+				int64_t nLeaves = 0;
+
 				for (int i = 0; i < 16; i++)
 				{
 
 					if (retNode->Children[i] != nullptr)
 					{
+						nLeaves++;
 						haveBabies = true;
 
 						if (treeNodeStack.size() == 63)
@@ -552,6 +558,7 @@ bool HashTree<T, R>::DeleteData(Hash ID)
 					byte Hout[64];
 					sha512(hashDataArray.data(), hashDataArray.size(), Hout);
 					memcpy((unsigned char*)(retNode->ID), Hout, 32);
+					retNode->LeafCount = nLeaves;
 				}
 
 			}
@@ -560,6 +567,8 @@ bool HashTree<T, R>::DeleteData(Hash ID)
 
 		//cout << endl << "Counter  " << counter << endl;
 	}
+
+	return true;
 }
 
 
@@ -782,7 +791,7 @@ vector<TreeLevelDataType> HashTree<T, R>::TraverseLevelOrderDepth(TreeNodeX* Roo
 
 	while (_depth != depth)
 	{
-		for (int i = 0; i < list1.size(); i++)
+		for (int i = 0; i < (int)list1.size(); i++)
 		{
 			list2.push_back(list1.at(i));
 		}
@@ -790,7 +799,7 @@ vector<TreeLevelDataType> HashTree<T, R>::TraverseLevelOrderDepth(TreeNodeX* Roo
 		//destroy list 1
 		list1.clear();
 
-		for (int i = 0; i < list2.size(); i++)
+		for (int i = 0; i < (int)list2.size(); i++)
 		{
 			for (int j = 0; j < 16; j++)
 			{
@@ -941,4 +950,55 @@ void HashTree<T, R>::TraverseTreeAndReturn(vector<shared_ptr<LeafDataType>> & te
 	}
 }
 
+/*
+Difference
+*/
+ template<typename T, typename R>
+ vector<TreeLevelDataType> HashTree<T, R>::GetDifference(vector<TreeLevelDataType> other, vector<TreeLevelDataType> me)
+ {	 
+	 vector<TreeLevelDataType> out;
+	 int i, j; 
+	 i = j = 0;
+	 while (true)
+	 {
+		 if (i == other.size())
+			 break;
+
+		 if (j == me.size())
+		 {
+			 for (int t = i; t < other.size(); t++)
+			 {
+				 out.push_back(other[t]);
+			 }
+			 break;
+		 }
+		 if (other[i].address.size() != me[j].address.size())
+		 {
+			 return vector<TreeLevelDataType>();
+		 }
+		 int compare = CompareHexString(other[i].address, me[j].address);
+		 
+		 if ( compare == 0)
+		 {
+			 if (!CompareCharString(other[i].treeNodeX->ID, me[i].treeNodeX->ID, 32, 32))
+			 {
+				 out.push_back(other[i]);
+			 }
+
+			 i++;
+			 j++;
+		 }
+		 else if (compare == -1)
+		 {
+			 out.push_back(other[i]);
+			 i++;
+		 }
+		 else
+		 {
+			 j++;
+		 }
+	 }
+
+	 return out;
+ }
 #endif

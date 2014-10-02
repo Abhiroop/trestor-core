@@ -72,7 +72,11 @@ int LedgerFileHandler::SaveToDB()
 	stmt.bind("@u3", LCLTime);
 	stmt.bind("@u4", SequenceNumber);
 
+	ledger_db.execDML("BEGIN TRANSACTION");
+
 	AccountTree.TraverseTreeAndFetch_do(bind(&LedgerFileHandler::SaveToDB_Callback, *this, std::placeholders::_1));
+
+	ledger_db.execDML("END TRANSACTION");
 
 	return 1;
 }

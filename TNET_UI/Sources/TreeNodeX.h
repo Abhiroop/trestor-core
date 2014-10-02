@@ -16,6 +16,8 @@ class TreeNodeX
 
 public: 
 	
+	int64_t LeafCount;
+
 	unsigned char ID[32];
 	bool IsLeaf;
 

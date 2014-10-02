@@ -30,6 +30,8 @@ using namespace std;
 
 bool ByteArrayEquals(vector<byte> x, int xOffset, vector<byte> y, int yOffset, int length);
 
+bool CompareCharString(unsigned char* i, unsigned char* j, int len1, int len2);
+
 byte GetNibble_(Hash val, int NibbleIndex);
 
 void split(vector<string> &tokens, const string &text, char sep);
@@ -39,6 +41,8 @@ string ToBase64String(Hash data);
 uint64_t getCurrentUTFtime();
 
 Hash Base64ToHash(string data);
+
+int CompareHexString(vector<char> i, vector<char> j);
 
 /// <summary>
 /// Generates nRandom Numbers

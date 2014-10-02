@@ -22,7 +22,7 @@ int main()
 
 	cout << "TEST 3.0" << endl;
 
-	HashTree< AccountInfo, LedgerRootInfo > ht;
+	HashTree< AccountInfo, LedgerRootInfo > ht,ht1;
 
 
 
@@ -63,8 +63,13 @@ int main()
 		//Hash h3 = ht.GetRootHash();
 
 		ht.AddUpdate(si);
+		ht1.AddUpdate(si);
 		
 	}
+
+
+
+
 	/*Open the ledger db file to instantiate
 	*/
 	ledger_db.open("LedgerT.db");
@@ -82,11 +87,11 @@ int main()
 	vector<ProtocolDataType> PDTs;
 
 
-	byte search[] = { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF,
+	byte search[] = { 0xA, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF,
 		0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
 	
 	Hash h(search,search + 32);
-	
+
 	stack<TreeNodeX*> treeNodeStack, bp;
 	ht.getStack_Itr(h, treeNodeStack);
 
@@ -94,7 +99,7 @@ int main()
 
 	ht.getStack_Itr(h, bp);
 
-	for (int i = 0; i < vc.size(); i++)
+	for (int i = 0; i < (int)vc.size(); i++)
 	{			
 		PDTs.push_back(*ProtocolPackager::Pack(vc[i].address, 0));
 		//PDTs.push_back(*ProtocolPackager::Pack(Vote, 1));
@@ -119,6 +124,11 @@ int main()
 		cout << endl << endl;
 	}
 	cout << vc.size() << endl;
+
+
+	vector<TreeLevelDataType> hamba = ht.GetDifference(ht.TraverseLevelOrderDepth(55), ht1.TraverseLevelOrderDepth(55));
+
+	cout << "Hamba :" << string(hamba[0].address.begin(), hamba[0].address.end());
 
 	//
 	//	LedgerFileHandler lfh = LedgerFileHandler(ht);
