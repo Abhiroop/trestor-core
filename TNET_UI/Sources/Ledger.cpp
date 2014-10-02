@@ -9,7 +9,7 @@
 #include "Ledger.h"
 
 
-Ledger::Ledger(LedgerRootInfo ledgerRootInfo)
+Ledger::Ledger()
 {
 
 	//LedgerTree;

@@ -10,7 +10,7 @@ class RootDataType
 public:
 
 	Hash getRootHash();
-	
+	Hash getID();
 
 };
 

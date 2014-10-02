@@ -25,7 +25,7 @@ private:
 	
 	vector<Hash> ValidatorPublickey;
 	shared_ptr<Ledger> Ledger;
-	HashTree<TransactionSetType> TranasctionSetTree;
+	//HashTree<TransactionSetType > TranasctionSetTree;
 	concurrent_hash_map<Hash, bool> forwardedTransaction;
 	concurrent_hash_map<Hash, TransactionContent> presentTransaction;
 

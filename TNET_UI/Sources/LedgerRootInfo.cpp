@@ -16,7 +16,27 @@ LedgerRootInfo::LedgerRootInfo(Hash _LedgerHash, Hash _LastLedgerHash, int64_t _
 	SequenceNumber = _SequenceNumber;
 }
 
-Hash LedgerRootInfo::getLedgerHash()
+Hash LedgerRootInfo::getID()
 {
 	return Hash();
+}
+
+Hash LedgerRootInfo::getLedgerHash()
+{
+	return LedgerHash;
+}
+
+Hash LedgerRootInfo::getLastLedgerHash()
+{
+	return LastLedgerHash;
+}
+
+int64_t LedgerRootInfo::getLCLTime()
+{
+	return LCLTime;
+}
+
+int64_t LedgerRootInfo::getSequenceNumber()
+{
+	return SequenceNumber;
 }

@@ -26,7 +26,9 @@ class Ledger
 
 public:
 
-	HashTree<AccountInfo, LedgerRootInfo> LedgerTree;
+	LedgerRootInfo ledgerRootInfo;
+
+	HashTree<AccountInfo, LedgerRootInfo> LedgerTree; //(ledgerRootInfo);
 	int64_t TransactionFees;
 	//int64_t TotalAmount;
 	int64_t CloseTime;
@@ -38,7 +40,7 @@ public:
 	/// </summary>
 	hash_set<Hash> BlackList;
 
-	Ledger(LedgerRootInfo ledgerRootInfo);
+	Ledger();
 
 	bool GetAccount(Hash userInfo, AccountInfo & ltd);
 

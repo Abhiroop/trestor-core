@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <iostream>
+#include "Hash.h"
 #include "AccountInfo.h"
 #include "LeafDataType.h"
 #include "HashTree.h"

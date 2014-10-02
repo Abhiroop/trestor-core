@@ -51,18 +51,36 @@ int LedgerFileHandler::SaveToDB()
 {
 	//bind(&Node::Receive, *NewNode, _1));
 
+	LedgerRootInfo ledgerRootInfo = AccountTree.GetRootInfo();
+	
+	Hash LedgerHash = ledgerRootInfo.getLedgerHash();
+	Hash LastLedgerHash =  ledgerRootInfo.getLastLedgerHash();
+	int64_t LCLTime = ledgerRootInfo.getLCLTime();
+	int64_t SequenceNumber = ledgerRootInfo.getSequenceNumber();
+
+	CppSQLite3Statement stmt = ledger_db.compileStatement("DELETE FROM LedgerInfo");
+	int rows = stmt.execDML();
+	if (rows < 1)
+	{
+		cout << "problem in removing entry from LedgerInfo table";
+	}
+
+	stmt.reset();
+	stmt = ledger_db.compileStatement("insert into LedgerInfo values(@u1,@u2,@u3,@u4);");
+	stmt.bind("@u1", LedgerHash.data(), LedgerHash.size());
+	stmt.bind("@u2", LastLedgerHash.data(), LastLedgerHash.size());
+	stmt.bind("@u3", LCLTime);
+	stmt.bind("@u4", SequenceNumber);
+
 	AccountTree.TraverseTreeAndFetch_do(bind(&LedgerFileHandler::SaveToDB_Callback, *this, std::placeholders::_1));
 
 	return 1;
 }
 
 int LedgerFileHandler::treeToDB(Hash accountID, int64_t money, string name, int64_t lastTransactionTime)
-{
-	string AccountID = ToBase64String(accountID);
-		
+{		
 	CppSQLite3Statement stmt = ledger_db.compileStatement("select PublicKey from Ledger where PublicKey = @u1");
-	stmt.bind("@u1", AccountID.c_str());
-
+	stmt.bind("@u1", accountID.data(), accountID.size());
 
 	CppSQLite3Query q = stmt.execQuery();
 
@@ -74,7 +92,7 @@ int LedgerFileHandler::treeToDB(Hash accountID, int64_t money, string name, int6
 
 		stmt = ledger_db.compileStatement("UPDATE Ledger SET UserName = @u2, Balance = @u3, LastTransaction = @u4 WHERE PublicKey = @u1; ");
 
-		stmt.bind("@u1", AccountID.c_str());
+		stmt.bind("@u1", accountID.data(), accountID.size());
 		stmt.bind("@u3", money);
 		stmt.bind("@u2", name.c_str());
 		stmt.bind("@u4", lastTransactionTime);
@@ -91,7 +109,7 @@ int LedgerFileHandler::treeToDB(Hash accountID, int64_t money, string name, int6
 
 	stmt = ledger_db.compileStatement("insert into Ledger values(@u1,@u2,@u3,@u4,@u5);");
 	
-	stmt.bind("@u1", AccountID.c_str());
+	stmt.bind("@u1", accountID.data(), accountID.size());
 	stmt.bind("@u3", money);
 	stmt.bind("@u2", name.c_str());
 	stmt.bind("@u4", 0);
@@ -115,9 +133,16 @@ HashTree< AccountInfo, LedgerRootInfo > LedgerFileHandler::DBToTree()
 	//load ledger info
 	CppSQLite3Statement stmt = ledger_db.compileStatement("select * from LedgerInfo");
 	CppSQLite3Query q = stmt.execQuery();
-
+	
+	LedgerRootInfo _LRI;
+	
+	int counter = 0;
 	while (!q.eof())
 	{
+		if (counter > 0)
+			break;
+
+		counter++;
 		int len;
 		unsigned char* lh = (unsigned char*) q.getBlobField("LedgerHash", len);
 		Hash LedgerHash(lh, lh + len);
@@ -129,20 +154,21 @@ HashTree< AccountInfo, LedgerRootInfo > LedgerFileHandler::DBToTree()
 		int64_t SequenceNumber = q.getInt64Field("SequenceNumber");
 
 		LedgerRootInfo LRI(LedgerHash, LastLedgerHash, LCLTime, SequenceNumber);
+		_LRI = LRI;
 	}
 
 	stmt.reset();
 	stmt = ledger_db.compileStatement("select * from Ledger");
 	q = stmt.execQuery();
 
-	LedgerRootInfo ledgerRootInfo;
-	HashTree<AccountInfo, LedgerRootInfo> hashTree(ledgerRootInfo);
+	HashTree<AccountInfo, LedgerRootInfo> hashTree(_LRI);
 
 	//int row_counter = 0;
 	while (!q.eof())
 	{
-		string pkBase64 = q.fieldValue("PublicKey");
-		Hash PublicKey = Base64ToHash(pkBase64);
+		int len;
+		unsigned char* lh = (unsigned char*)q.getBlobField("PublicKey", len);
+		Hash PublicKey(lh, lh + len);
 
 		string UserName = q.fieldValue("UserName");
 		int64_t Balance = q.getInt64Field("Balance");

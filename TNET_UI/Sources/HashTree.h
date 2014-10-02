@@ -85,6 +85,8 @@ TreeRootNode<R>::TreeRootNode(Hash _ID, R _Value)
 template<typename T,typename R>
 class HashTree
 {
+private:
+	TreeRootNode<R>* Root;
 
 public:
 
@@ -96,8 +98,8 @@ public:
 	//template<class LeafDataType>
 	int64_t TotalNodes();
 	int64_t TotalLeaves();
-
-	TreeNodeX* Root;
+	
+	HashTree();
 
 	HashTree(R Value);
 
@@ -110,6 +112,7 @@ public:
 	/// <returns></returns>
 	//bool AddUpdate(LeafDataType Value);
 	
+	R GetRootInfo();
 
 	bool AddUpdate(T);
 
@@ -169,7 +172,11 @@ int64_t HashTree<T, R>::TotalNodes()
 {
 	return _TotalNodes;
 }
-
+template<typename T, typename R>
+R HashTree<T, R>::GetRootInfo()
+{
+	return Root->Value;
+}
 
 /// <summary>
 /// Gets the total leaves in the tree, this is incremented on add operation.
@@ -182,12 +189,24 @@ int64_t HashTree<T, R>::TotalLeaves()
 	return _TotalLeaves;
 }
 
+
+template<typename T, typename R>
+HashTree<T, R>::HashTree()
+{
+	//Root = new TreeNodeX();
+	Hash ID;
+	R Value;
+	Root = new TreeRootNode<R>(ID, Value);
+
+}
+
+
 template<typename T, typename R>
 HashTree<T, R>::HashTree(R Value)
 {
 	//Root = new TreeNodeX();
 	Hash ID = (Value).getID();
-	Root = new TreeRootNode<R>(ID, _Value);
+	Root = new TreeRootNode<R>(ID, Value);
 	
 }
 

@@ -26,6 +26,8 @@ public:
 	int64_t getLCLTime();
 	int64_t getSequenceNumber();
 
+	Hash LedgerRootInfo::getID();
+
 };
 
 #endif
