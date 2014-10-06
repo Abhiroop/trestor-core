@@ -32,6 +32,8 @@ public :
 	static const int KEYLEN_PUBLIC = 32;
 	static const int KEYLEN_PRIVATE = 32;
 	static const int KEYLEN_SIGNATURE = 64;
+
+	static const int SYNC_LEAF_COUNT_THRESHOLD = 200;
 		
 	static string hexChars;
 

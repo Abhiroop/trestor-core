@@ -44,6 +44,10 @@ Hash Base64ToHash(string data);
 
 int CompareHexString(vector<char> i, vector<char> j);
 
+int getIndex(char c);
+
+char getNibbleSingle(int index);
+
 /// <summary>
 /// Generates nRandom Numbers
 /// </summary>

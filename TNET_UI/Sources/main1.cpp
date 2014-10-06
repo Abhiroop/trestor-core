@@ -23,7 +23,7 @@ int main()
 
 	cout << "TEST 3.0" << endl;
 
-	HashTree< AccountInfo, LedgerRootInfo > ht,ht1;
+	HashTree< AccountInfo, LedgerRootInfo > ht, ht1;
 	
 	//lfh.loadledger();
 	
@@ -39,21 +39,22 @@ int main()
 
 	uint64_t Taka = 0;
 
+	int MAX_ITR = 256*64;
 	//for (int k = 0; k < 4; k++)
-	//for (int j = 0; j < 256; j++)
-	for (int i = 0; i < 1000000; i++)
+	for (int j = 0; j < 64; j++)
+	for (int i = 0; i < 256; i++)
 	{
 
-		/*byte PK[32] = { i, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF,
-			0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };*/
+		byte PK[32] = { i, j, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF,
+			0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
 		
-		byte PK[32];
+		/*byte PK[32];
 
 		if (!::CryptGenRandom(hProvider, 32, PK))
 		{
 			::CryptReleaseContext(hProvider, 0);
 			return 1;
-		}
+		}*/
 
 		//long TAKA = 1000;
 
@@ -61,7 +62,7 @@ int main()
 
 		h_PKS = h;
 
-		string name = "a";
+		string name = "a" + to_string(i) +"-"+ to_string(j);
 		int64_t lastdate = 0;
 		AccountInfo si = AccountInfo(h, Taka++, name, 1, lastdate);
 
@@ -77,10 +78,34 @@ int main()
 		ht.AddUpdate(si);
 		
 	}
-	
-	vector<TreeLevelDataType> vc = ht.TraverseLevelOrderDepth(20);
 
-	cout << "Vector: " << vc.size();
+
+	
+	//vector<TreeLevelDataType> vc = ht.TraverseLevelOrderDepth(3);
+
+	//cout << "Vector: " << vc.size()<<endl;
+
+	/*vector<TreeSyncData> LSD = ht.TraverseLevelOrderDepthSync(3);
+
+	vector<TreeSyncData> in;
+	vector<AccountInfo> ac;
+
+	for (int x = 0; x < MAX_ITR/100; x++)
+	{
+		TreeSyncData tmp(LSD[x], true);
+		LSD.push_back(tmp);
+	}
+	
+	ht.GetSyncNodeInfo(LSD, in, ac);
+	cout << in.size() << endl << ac.size() << endl;
+	
+	for (int x = 0; x < ac.size(); x++)
+	{
+		cout << x << ": " << ac[x].AccountID.ToString() << ": " << ac[x].Name << endl;
+	}*/
+
+
+
 
 	/*
 	for (int i = 0; i < 20; i++)

@@ -5,11 +5,11 @@
 #include "Hash.h"
 #include <stdint.h>
 
-class LedgerSyncData
+class TreeSyncData
 {
 public:
-	LedgerSyncData(Hash _ID, vector<char> _Address, int64_t _LeafCount, bool _GetAll);
-	LedgerSyncData(LedgerSyncData _LSD, bool _GetAll);
+	TreeSyncData(Hash _ID, vector<char> _Address, int64_t _LeafCount, bool _GetAll);
+	TreeSyncData(TreeSyncData _LSD, bool _GetAll);
 
 	Hash ID;
 	vector<char> Address;

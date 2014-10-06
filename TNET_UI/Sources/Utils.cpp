@@ -14,6 +14,12 @@ int getIndex(char c)
 	}
 	throw exception("Bal hex char hoeche!");
 }
+
+char getNibbleSingle(int index)
+{
+	return s[index];
+}
+
 int CompareHexString(vector<char> i, vector<char> j)
 {
 	for (int t = 0; t < i.size(); t++)

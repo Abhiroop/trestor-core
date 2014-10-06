@@ -29,7 +29,7 @@
 
 #include "Utils.h"
 #include "TreeLevelDataType.h"
-#include "LedgerSyncData.h"
+#include "TreeSyncData.h"
 //#include "LedgerFileHandler.h"
 
 #include "LeafDataType.h"
@@ -71,7 +71,7 @@ template<typename R>
 TreeRootNode<R>::TreeRootNode(Hash _ID, R _Value)
 {
 	Value = _Value;
-	
+
 	IsRoot = true;
 	IsLeaf = false;
 }
@@ -83,7 +83,7 @@ TreeRootNode<R>::TreeRootNode(Hash _ID, R _Value)
 /// </summary>
 
 
-template<typename T,typename R>
+template<typename T, typename R>
 class HashTree
 {
 private:
@@ -99,7 +99,7 @@ public:
 	//template<class LeafDataType>
 	int64_t TotalNodes();
 	int64_t TotalLeaves();
-	
+
 	HashTree();
 
 	HashTree(R Value);
@@ -112,7 +112,7 @@ public:
 	/// <param name="Value">The Value to be added</param>
 	/// <returns></returns>
 	//bool AddUpdate(LeafDataType Value);
-	
+
 	R GetRootInfo();
 
 	bool AddUpdate(T);
@@ -127,7 +127,7 @@ public:
 
 	vector<TreeLevelDataType> TraverseLevelOrderDepth(int depth);
 
-	vector<LedgerSyncData> TraverseLevelOrderDepthSync(int depth);
+	vector<TreeSyncData> TraverseLevelOrderDepthSync(int depth);
 
 	void TraverseTree(TreeNodeX* Root, int64_t & FoundNodes, int _depth);
 
@@ -142,7 +142,12 @@ public:
 
 	void getAllLeafUnderNode(TreeNodeX* Root);
 
-	vector<LedgerSyncData> GetDifference(vector<LedgerSyncData> other, vector<LedgerSyncData> me);
+	void getAllLeafUnderNode(TreeNodeX* Root, vector<T>& Leaves);
+
+	vector<TreeSyncData> GetDifference(vector<TreeSyncData> other, vector<TreeSyncData> me);
+
+	//returns two vector of TreeSyncData and AccountInfo
+	void GetSyncNodeInfo(vector<TreeSyncData> input, vector<TreeSyncData>& internalNodes, vector<T>& leadNodes);
 
 	vector<TreeNodeX> NodeDifferenceVec;
 
@@ -199,7 +204,6 @@ HashTree<T, R>::HashTree()
 	Hash ID;
 	R Value;
 	Root = new TreeRootNode<R>(ID, Value);
-
 }
 
 
@@ -209,7 +213,6 @@ HashTree<T, R>::HashTree(R Value)
 	//Root = new TreeNodeX();
 	Hash ID = (Value).getID();
 	Root = new TreeRootNode<R>(ID, Value);
-	
 }
 
 /// <summary>
@@ -507,10 +510,10 @@ bool HashTree<T, R>::DeleteData(Hash ID)
 			if (retNode->IsLeaf)
 			{
 				//printf("\nDELETED Leaf Node: %08x", (retNode));
-				
+
 				delete retNode;
 				retNode = nullptr;
-				
+
 				//cout << "\n###" << counter<< endl;
 			}
 
@@ -755,7 +758,7 @@ void HashTree<T, R>::TraverseLevelOrder(TreeNodeX* Root, int64_t & FoundNodes)
 
 }
 /*
-Given a depth return a vector with the nodes and 
+Given a depth return a vector with the nodes and
 their IDs.
 starts with depth 0
 */
@@ -811,11 +814,11 @@ vector<TreeLevelDataType> HashTree<T, R>::TraverseLevelOrderDepth(int depth)
 }
 
 template<typename T, typename R>
-vector<LedgerSyncData> HashTree<T, R>:: TraverseLevelOrderDepthSync(int depth)
+vector<TreeSyncData> HashTree<T, R>::TraverseLevelOrderDepthSync(int depth)
 {
 	if (depth >= 64)
 	{
-		vector<LedgerSyncData> list0;
+		vector<TreeSyncData> list0;
 		cout << "Bitch please!";
 		return list0;
 	}
@@ -823,7 +826,7 @@ vector<LedgerSyncData> HashTree<T, R>:: TraverseLevelOrderDepthSync(int depth)
 	int _depth = 0;
 	vector<TreeLevelDataType> list1;
 	vector<TreeLevelDataType> list2;
-	vector<LedgerSyncData> list3;
+	vector<TreeSyncData> list3;
 	//initialize with the root
 
 	vector<char> c;
@@ -859,10 +862,10 @@ vector<LedgerSyncData> HashTree<T, R>:: TraverseLevelOrderDepthSync(int depth)
 		list2.clear();
 	}
 
-	for (int i = 0; i < list1.size(); i++)
+	for (int i = 0; i < (int)list1.size(); i++)
 	{
 		Hash hash(list1[i].treeNodeX->ID, list1[i].treeNodeX->ID + 32);
-		LedgerSyncData LSD(hash, list1[i].address, list1[i].treeNodeX->LeafCount, false);
+		TreeSyncData LSD(hash, list1[i].address, list1[i].treeNodeX->LeafCount, false);
 
 		list3.push_back(LSD);
 	}
@@ -886,6 +889,29 @@ void HashTree<T, R>::getAllLeafUnderNode(TreeNodeX* Root)
 			{
 				//rec
 				getAllLeafUnderNode(Root->Children[i]);
+			}
+		}
+	}
+}
+
+template<typename T, typename R>
+void HashTree<T, R>::getAllLeafUnderNode(TreeNodeX* Root, vector<T>& Leaves)
+{
+	for (int i = 0; i < 16; i++)
+	{
+		if (Root->Children[i] != nullptr)
+		{
+			if (Root->Children[i]->IsLeaf)
+			{
+				//base case
+				TreeLeafNode<T>* Leaf = (TreeLeafNode<T>*)Root->Children[i];
+				Leaves.push_back(Leaf->Value);
+				return;
+			}
+			else
+			{
+				//recursive
+				getAllLeafUnderNode(Root->Children[i], Leaves);
 			}
 		}
 	}
@@ -955,7 +981,7 @@ void HashTree<T, R>::TraverseTreeAndFetch(TreeNodeX* Root, int64_t & FoundNodes,
 			{
 				TraverseTreeAndFetch(Root->Children[i], FoundNodes, depth, fun);
 			}
-			if (Root->Children[i]->IsLeaf && depth<=64)
+			if (Root->Children[i]->IsLeaf && depth <= 64)
 			{
 				TreeLeafNode<T>* Leaf = (TreeLeafNode<T>*)Root->Children[i];
 
@@ -1003,62 +1029,141 @@ void HashTree<T, R>::TraverseTreeAndReturn(vector<shared_ptr<LeafDataType>> & te
 /*
 Difference
 */
- template<typename T, typename R>
- vector<LedgerSyncData> HashTree<T, R>::GetDifference(vector<LedgerSyncData> other, vector<LedgerSyncData> me)
- {	 
-	 vector<LedgerSyncData> out;
-	 int i, j; 
-	 i = j = 0;
+template<typename T, typename R>
+vector<TreeSyncData> HashTree<T, R>::GetDifference(vector<TreeSyncData> other, vector<TreeSyncData> me)
+{
+	vector<TreeSyncData> out;
+	int i, j;
+	i = j = 0;
 
-	 while (true)
-	 {
-		 if (i == other.size())
-			 break;
+	while (true)
+	{
+		if (i == other.size())
+			break;
 
-		 //all new
-		 if (j == me.size())
-		 {
-			 for (int t = i; t < other.size(); t++)
-			 {
-				 LedgerSyncData LSD(other[t], true);
-				 out.push_back(LSD);
-			 }
-			 break;
-		 }
-		 if (other[i].Address.size() != me[j].Address.size())
-		 {
-			 return vector<LedgerSyncData>();
-		 }
-		 int compare = CompareHexString(other[i].Address, me[j].Address);
-		 
-		 if ( compare == 0)
-		 {
+		//all new
+		if (j == me.size())
+		{
+			for (int t = i; t < other.size(); t++)
+			{
+				TreeSyncData LSD(other[t], false);
+				
+				// Get leaf nodes if the count is below threshold.
+				LSD.GetAll = (other[t].LeafCount <= Constants::SYNC_LEAF_COUNT_THRESHOLD);
 
-			 if (!CompareCharString(other[i].ID, me[j].ID, 32, 32))
-			 {
-				 out.push_back(other[i]);
-			 }
+				out.push_back(LSD);
+			}
+			break;
+		}
+		if (other[i].Address.size() != me[j].Address.size())
+		{
+			return vector<TreeSyncData>();
+		}
+		int compare = CompareHexString(other[i].Address, me[j].Address);
 
-			 i++;
-			 j++;
-		 }
-		 //new
-		 else if (compare == -1)
-		 {
-			 LedgerSyncData LSD(other[t], true);
-			 out.push_back(LSD);
+		if (compare == 0)
+		{
 
-			 i++;
-		 }
-		 else
-		 {
-			 // thenga i have you dont
-			 j++;
-		 }
-	 }
+			if (!CompareCharString(other[i].ID, me[j].ID, 32, 32))
+			{
+				out.push_back(other[i]);
+			}
 
-	 return out;
- }
+			i++;
+			j++;
+		}
+		//new
+		else if (compare == -1)
+		{
+			TreeSyncData LSD(other[t], false);
+
+			// Get leaf nodes if the count is below threshold.
+			LSD.GetAll = (other[t].LeafCount <= Constants::SYNC_LEAF_COUNT_THRESHOLD);
+
+			out.push_back(LSD);
+
+			i++;
+		}
+		else
+		{
+			// thenga i have you dont
+			j++;
+		}
+	}
+
+	return out;
+}
+
+// This will run for the synced node.
+template<typename T, typename R>
+void HashTree<T, R>::GetSyncNodeInfo(vector<TreeSyncData> input,
+	vector<TreeSyncData>& internalNodes, vector<T>& leafNodes)
+{
+	//sanity check
+	if (input.size() == 0)
+		return;
+
+	for (int i = 0; i < (int)input.size(); i++)
+	{
+		//if only next internal is required
+		if (!input[i].GetAll)
+		{
+			// cout << "false " << input[i].GetAll << endl;
+			vector<char> Address = input[i].Address;
+
+			TreeNodeX* temp = Root;
+
+			//get to node
+			for (int j = 0; j < Address.size(); j++)
+			{
+				if (temp->Children[getIndex(Address[j])] == nullptr)
+					return;
+
+				temp = temp->Children[getIndex(Address[j])];
+			}
+
+			//fetch all of its children
+			//and put to the vector
+			for (int j = 0; j < 16; j++)
+			{
+				if (temp->Children[j] != nullptr)
+				{
+					TreeNodeX* chana = temp->Children[j];
+					//make a local copy
+					vector<char> _Address = Address;
+					_Address.push_back(getNibbleSingle(j));
+
+					Hash ChanaID(chana->ID, chana->ID + 32);
+					TreeSyncData LSDchana(ChanaID, _Address, chana->LeafCount, false);
+					internalNodes.push_back(LSDchana);
+				}
+			}
+		}
+
+		if (input[i].GetAll)
+		{
+			// cout << "true " << input[i].GetAll << endl;
+
+			vector<char> Address = input[i].Address;
+
+			TreeNodeX* temp = Root;
+
+			// Get to node
+			for (int j = 0; j < (int)Address.size(); j++)
+			{
+				if (temp->Children[getIndex(Address[j])] == nullptr)
+					return;
+
+				temp = temp->Children[getIndex(Address[j])];
+			}
+
+			// Fetch all of its leaves
+			// and put to the vector 
+			getAllLeafUnderNode(temp, leafNodes);
+
+		}
+	}
+}
 
 
 

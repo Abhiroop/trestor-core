@@ -231,6 +231,9 @@
     <ClCompile Include="..\TNET_UI\Sources\LedgerRootInfo.cpp">
       <Filter>Sources\Ledger</Filter>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LedgerSyncData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h">
@@ -562,6 +565,9 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\RootDataType.h">
       <Filter>Sources\HashTree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LedgerSyncData.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
