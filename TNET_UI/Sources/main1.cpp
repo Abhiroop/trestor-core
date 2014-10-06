@@ -1,5 +1,4 @@
 
-
 // ARPAN MAIN
 
 #include <vector>
@@ -15,6 +14,8 @@
 #include "LedgerFileHandler.h"
 #include "LedgerRootInfo.h"
 
+#pragma comment(lib, "advapi32.lib")
+
 using namespace std;
 
 int main()
@@ -23,10 +24,13 @@ int main()
 	cout << "TEST 3.0" << endl;
 
 	HashTree< AccountInfo, LedgerRootInfo > ht,ht1;
-
-
-
+	
 	//lfh.loadledger();
+	
+	HCRYPTPROV hProvider = 0;
+
+	if (!::CryptAcquireContextW(&hProvider, 0, 0, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
+		return 1;
 
 	byte PKS[32] = { 128, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF,
 		0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
@@ -37,11 +41,19 @@ int main()
 
 	//for (int k = 0; k < 4; k++)
 	//for (int j = 0; j < 256; j++)
-	for (int i = 0; i < 20; i++)
+	for (int i = 0; i < 1000000; i++)
 	{
 
-		byte PK[32] = { i, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF,
-			0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
+		/*byte PK[32] = { i, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF,
+			0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };*/
+		
+		byte PK[32];
+
+		if (!::CryptGenRandom(hProvider, 32, PK))
+		{
+			::CryptReleaseContext(hProvider, 0);
+			return 1;
+		}
 
 		//long TAKA = 1000;
 
@@ -63,15 +75,43 @@ int main()
 		//Hash h3 = ht.GetRootHash();
 
 		ht.AddUpdate(si);
-		ht1.AddUpdate(si);
 		
 	}
+	
+	vector<TreeLevelDataType> vc = ht.TraverseLevelOrderDepth(20);
 
+	cout << "Vector: " << vc.size();
+
+	/*
+	for (int i = 0; i < 20; i++)
+	{
+		byte PK[32];
+
+		if (!::CryptGenRandom(hProvider, 32, PK))
+		{
+			::CryptReleaseContext(hProvider, 0);
+			return 1;
+		}
+
+		Hash h = Hash(PK, PK + 32);
+
+		h_PKS = h;
+
+		string name = "a";
+		int64_t lastdate = 0;
+		AccountInfo si = AccountInfo(h, Taka++, name, 1, lastdate);
+
+
+		ht1.AddUpdate(si);
+
+	}*/
 
 
 
 	/*Open the ledger db file to instantiate
 	*/
+
+	/*
 	ledger_db.open("LedgerT.db");
 	
 
@@ -125,10 +165,14 @@ int main()
 	}
 	cout << vc.size() << endl;
 
+	*/
 
-	vector<TreeLevelDataType> hamba = ht.GetDifference(ht.TraverseLevelOrderDepth(55), ht1.TraverseLevelOrderDepth(55));
 
-	cout << "Hamba :" << string(hamba[0].address.begin(), hamba[0].address.end());
+	/*vector<TreeLevelDataType> hamba = ht.GetDifference(ht.TraverseLevelOrderDepth(2), ht1.TraverseLevelOrderDepth(2));
+
+
+	for (int i = 0;i<hamba.size() ;i++)
+	cout << "Hamba : " << i << ": " << string(hamba[i].address.begin(), hamba[i].address.end()) << endl;*/
 
 	//
 	//	LedgerFileHandler lfh = LedgerFileHandler(ht);

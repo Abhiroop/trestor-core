@@ -29,6 +29,7 @@
 
 #include "Utils.h"
 #include "TreeLevelDataType.h"
+#include "LedgerSyncData.h"
 //#include "LedgerFileHandler.h"
 
 #include "LeafDataType.h"
@@ -126,7 +127,7 @@ public:
 
 	vector<TreeLevelDataType> TraverseLevelOrderDepth(int depth);
 
-	vector<TreeLevelDataType> TraverseLevelOrderDepth(TreeNodeX* Root, int depth);
+	vector<LedgerSyncData> TraverseLevelOrderDepthSync(int depth);
 
 	void TraverseTree(TreeNodeX* Root, int64_t & FoundNodes, int _depth);
 
@@ -141,7 +142,7 @@ public:
 
 	void getAllLeafUnderNode(TreeNodeX* Root);
 
-	vector<TreeLevelDataType> GetDifference(vector<TreeLevelDataType> other, vector<TreeLevelDataType> me);
+	vector<LedgerSyncData> GetDifference(vector<LedgerSyncData> other, vector<LedgerSyncData> me);
 
 	vector<TreeNodeX> NodeDifferenceVec;
 
@@ -152,7 +153,6 @@ public:
 	bool getStack_Itr(Hash ID, stack<TreeNodeX*> &treeNodeStack);
 
 	bool DeleteData(Hash ID);
-
 
 
 	/// <summary>
@@ -754,22 +754,13 @@ void HashTree<T, R>::TraverseLevelOrder(TreeNodeX* Root, int64_t & FoundNodes)
 	}
 
 }
-
-/*
-starts with depth 0
-*/
-template<typename T, typename R>
-vector<TreeLevelDataType> HashTree<T, R>::TraverseLevelOrderDepth(int depth)
-{
-	return(TraverseLevelOrderDepth(Root, depth));
-}
 /*
 Given a depth return a vector with the nodes and 
 their IDs.
 starts with depth 0
 */
 template<typename T, typename R>
-vector<TreeLevelDataType> HashTree<T, R>::TraverseLevelOrderDepth(TreeNodeX* Root, int depth)
+vector<TreeLevelDataType> HashTree<T, R>::TraverseLevelOrderDepth(int depth)
 {
 
 	if (depth >= 64)
@@ -817,6 +808,65 @@ vector<TreeLevelDataType> HashTree<T, R>::TraverseLevelOrderDepth(TreeNodeX* Roo
 		list2.clear();
 	}
 	return list1;
+}
+
+template<typename T, typename R>
+vector<LedgerSyncData> HashTree<T, R>:: TraverseLevelOrderDepthSync(int depth)
+{
+	if (depth >= 64)
+	{
+		vector<LedgerSyncData> list0;
+		cout << "Bitch please!";
+		return list0;
+	}
+
+	int _depth = 0;
+	vector<TreeLevelDataType> list1;
+	vector<TreeLevelDataType> list2;
+	vector<LedgerSyncData> list3;
+	//initialize with the root
+
+	vector<char> c;
+
+	TreeLevelDataType td(Root, c);
+	list1.push_back(td);
+
+	while (_depth != depth)
+	{
+		for (int i = 0; i < (int)list1.size(); i++)
+		{
+			list2.push_back(list1.at(i));
+		}
+		_depth++;
+		//destroy list 1
+		list1.clear();
+
+		for (int i = 0; i < (int)list2.size(); i++)
+		{
+			for (int j = 0; j < 16; j++)
+			{
+				if (list2[i].treeNodeX->Children[j] != nullptr)
+				{
+					vector<char> c = list2[i].address;
+					c.push_back(Constants::hexChars[j]);
+					TreeLevelDataType td(list2[i].treeNodeX->Children[j], c);
+
+					list1.push_back(td);
+				}
+			}
+		}
+		//destroy list2
+		list2.clear();
+	}
+
+	for (int i = 0; i < list1.size(); i++)
+	{
+		Hash hash(list1[i].treeNodeX->ID, list1[i].treeNodeX->ID + 32);
+		LedgerSyncData LSD(hash, list1[i].address, list1[i].treeNodeX->LeafCount, false);
+
+		list3.push_back(LSD);
+	}
+	return list3;
 }
 
 template<typename T, typename R>
@@ -954,33 +1004,37 @@ void HashTree<T, R>::TraverseTreeAndReturn(vector<shared_ptr<LeafDataType>> & te
 Difference
 */
  template<typename T, typename R>
- vector<TreeLevelDataType> HashTree<T, R>::GetDifference(vector<TreeLevelDataType> other, vector<TreeLevelDataType> me)
+ vector<LedgerSyncData> HashTree<T, R>::GetDifference(vector<LedgerSyncData> other, vector<LedgerSyncData> me)
  {	 
-	 vector<TreeLevelDataType> out;
+	 vector<LedgerSyncData> out;
 	 int i, j; 
 	 i = j = 0;
+
 	 while (true)
 	 {
 		 if (i == other.size())
 			 break;
 
+		 //all new
 		 if (j == me.size())
 		 {
 			 for (int t = i; t < other.size(); t++)
 			 {
-				 out.push_back(other[t]);
+				 LedgerSyncData LSD(other[t], true);
+				 out.push_back(LSD);
 			 }
 			 break;
 		 }
-		 if (other[i].address.size() != me[j].address.size())
+		 if (other[i].Address.size() != me[j].Address.size())
 		 {
-			 return vector<TreeLevelDataType>();
+			 return vector<LedgerSyncData>();
 		 }
-		 int compare = CompareHexString(other[i].address, me[j].address);
+		 int compare = CompareHexString(other[i].Address, me[j].Address);
 		 
 		 if ( compare == 0)
 		 {
-			 if (!CompareCharString(other[i].treeNodeX->ID, me[i].treeNodeX->ID, 32, 32))
+
+			 if (!CompareCharString(other[i].ID, me[j].ID, 32, 32))
 			 {
 				 out.push_back(other[i]);
 			 }
@@ -988,17 +1042,24 @@ Difference
 			 i++;
 			 j++;
 		 }
+		 //new
 		 else if (compare == -1)
 		 {
-			 out.push_back(other[i]);
+			 LedgerSyncData LSD(other[t], true);
+			 out.push_back(LSD);
+
 			 i++;
 		 }
 		 else
 		 {
+			 // thenga i have you dont
 			 j++;
 		 }
 	 }
 
 	 return out;
  }
+
+
+
 #endif
