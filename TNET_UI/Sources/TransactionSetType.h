@@ -11,11 +11,6 @@ class TransactionSetType : public LeafDataType
 public:
 
 	Hash PublicKey;
-	/*
-	set<Hash> TransactionIDs;
-	set<Hash> VoterPublickey;
-	bool IsMine;
-	*/
 	vector<TransactionIDInfo> TranIDinfo;
 
 	TransactionSetType();

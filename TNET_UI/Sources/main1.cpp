@@ -14,6 +14,8 @@
 #include "LedgerFileHandler.h"
 #include "LedgerRootInfo.h"
 
+#include "ConsensusMap.h"
+
 #pragma comment(lib, "advapi32.lib")
 
 using namespace std;
@@ -37,28 +39,36 @@ int main()
 
 	Hash h_PKS = Hash(PKS, PKS + 32);
 
+
+	vector<VoteType> votes;
+
 	uint64_t Taka = 0;
 
 	int MAX_ITR = 256*64;
 	//for (int k = 0; k < 4; k++)
-	for (int j = 0; j < 64; j++)
+/*	for (int j = 0; j < 64; j++)
 	for (int i = 0; i < 256; i++)
 	{
 
 		byte PK[32] = { i, j, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF,
 			0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
+				
 		
-		/*byte PK[32];
+		//byte PK[32];
 
-		if (!::CryptGenRandom(hProvider, 32, PK))
-		{
-			::CryptReleaseContext(hProvider, 0);
-			return 1;
-		}*/
+		//if (!::CryptGenRandom(hProvider, 32, PK))
+		//{
+		//	::CryptReleaseContext(hProvider, 0);
+		//	return 1;
+		//}
 
 		//long TAKA = 1000;
 
 		Hash h = Hash(PK, PK + 32);
+
+		VoteType vt(h, i % 2 == 0 ? true : false);
+
+		votes.push_back(vt);
 
 		h_PKS = h;
 
@@ -78,6 +88,48 @@ int main()
 		ht.AddUpdate(si);
 		
 	}
+	*/
+
+	ConsensusMap cm;
+
+	for (int j = 0; j < 2; j++)
+	{
+		//byte PKS[32];
+
+		byte PKS[32] = { j, 6, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF,
+			0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
+
+		//CryptGenRandom(hProvider, 32, PKS);		
+
+		Hash hs = Hash(PKS, PKS + 32);
+
+		for (int i = 0; i < 2; i++)
+		{
+			//byte PK[32];
+
+			byte PK[32] = { 1 & 0xf, 5, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF,
+				0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF };
+
+			//CryptGenRandom(hProvider, 32, PK);
+			
+			Hash h = Hash(PK, PK + 32);
+
+			VoteType vt(h, i % 2 == 0 ? true : false);
+
+			votes.push_back(vt);
+
+			//h_PKS = h;
+		}
+
+		cm.updateVote(votes, hs);
+
+		votes.clear();
+
+	}
+
+	cout << "DONE";
+	
+
 
 
 	

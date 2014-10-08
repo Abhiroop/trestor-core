@@ -204,12 +204,6 @@
     <ClCompile Include="..\TNET_UI\Sources\Consensus.cpp">
       <Filter>Sources\Consensus</Filter>
     </ClCompile>
-    <ClCompile Include="..\TNET_UI\Sources\TransactionSetType.cpp">
-      <Filter>Sources\Consensus</Filter>
-    </ClCompile>
-    <ClCompile Include="..\TNET_UI\Sources\TransactionIDInfo.cpp">
-      <Filter>Sources\Consensus</Filter>
-    </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\VoteType.cpp">
       <Filter>Sources\Consensus</Filter>
     </ClCompile>
@@ -231,8 +225,11 @@
     <ClCompile Include="..\TNET_UI\Sources\LedgerRootInfo.cpp">
       <Filter>Sources\Ledger</Filter>
     </ClCompile>
-    <ClCompile Include="..\TNET_UI\Sources\LedgerSyncData.cpp">
+    <ClCompile Include="..\TNET_UI\Sources\TreeSyncData.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ConsensusMap.cpp">
+      <Filter>Sources\Consensus</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -515,9 +512,6 @@
     <ClInclude Include="..\TNET_UI\Sources\Consensus.h">
       <Filter>Sources\Consensus</Filter>
     </ClInclude>
-    <ClInclude Include="..\TNET_UI\Sources\TransactionSetType.h">
-      <Filter>Sources\Consensus</Filter>
-    </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\ProtocolPackager.h">
       <Filter>Sources\Protocol</Filter>
     </ClInclude>
@@ -529,9 +523,6 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\SerializableBase.h">
       <Filter>Sources\Protocol</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TNET_UI\Sources\TransactionIDInfo.h">
-      <Filter>Sources\Consensus</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\VoteType.h">
       <Filter>Sources\Consensus</Filter>
@@ -566,8 +557,11 @@
     <ClInclude Include="..\TNET_UI\Sources\RootDataType.h">
       <Filter>Sources\HashTree</Filter>
     </ClInclude>
-    <ClInclude Include="..\TNET_UI\Sources\LedgerSyncData.h">
+    <ClInclude Include="..\TNET_UI\Sources\TreeSyncData.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ConsensusMap.h">
+      <Filter>Sources\Consensus</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

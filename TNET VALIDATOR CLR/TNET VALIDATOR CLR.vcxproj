@@ -100,7 +100,13 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="..\TNET_UI\Sources\Consensus.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\Consensus.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ConsensusMap.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\Constants.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -208,8 +214,6 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="..\TNET_UI\Sources\TransactionIDInfo.cpp" />
-    <ClCompile Include="..\TNET_UI\Sources\TransactionSetType.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\TransactionSink.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -231,7 +235,9 @@
     <ClCompile Include="..\TNET_UI\Sources\Varint2.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="..\TNET_UI\Sources\VoteType.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\VoteType.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="MainForm.cpp" />
     <ClCompile Include="NetworkVisualizer.cpp" />
     <ClCompile Include="Program.cpp" />
@@ -244,6 +250,7 @@
     <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h" />
     <ClInclude Include="..\TNET_UI\Sources\CandidateSet.h" />
     <ClInclude Include="..\TNET_UI\Sources\Consensus.h" />
+    <ClInclude Include="..\TNET_UI\Sources\ConsensusMap.h" />
     <ClInclude Include="..\TNET_UI\Sources\Constants.h" />
     <ClInclude Include="..\TNET_UI\Sources\Conversions.h" />
     <ClInclude Include="..\TNET_UI\Sources\CreditDebitData.h" />
@@ -334,8 +341,6 @@
     <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tick_count.h" />
     <ClInclude Include="..\TNET_UI\Sources\Timer.h" />
     <ClInclude Include="..\TNET_UI\Sources\TransactionContent.h" />
-    <ClInclude Include="..\TNET_UI\Sources\TransactionIDInfo.h" />
-    <ClInclude Include="..\TNET_UI\Sources\TransactionSetType.h" />
     <ClInclude Include="..\TNET_UI\Sources\TransactionSink.h" />
     <ClInclude Include="..\TNET_UI\Sources\TreeLevelDataType.h" />
     <ClInclude Include="..\TNET_UI\Sources\TreeNodeX.h" />
