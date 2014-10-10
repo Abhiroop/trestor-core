@@ -33,7 +33,7 @@ public:
 	//int64_t TotalAmount;
 	int64_t CloseTime;
 
-	hash_map<Hash, TransactionContent> newCandidates;
+	//hash_map<Hash, TransactionContent> newCandidates;
 
 	/// <summary>
 	/// List of public nodes which have sent bad transactions.
@@ -56,7 +56,7 @@ public:
 	/// Inserts the list of new transactions to the proposed candidate set.
 	/// </summary>
 	/// <param name="proposedTransactions"></param>
-	void PushNewProposedTransactions(vector<TransactionContent> proposedTransactions);
+	//void PushNewProposedTransactions(vector<TransactionContent> proposedTransactions);
 
 	/// <summary>
 	/// Check the list of proposed transactions for consistencey, and add it to candidate set.
@@ -64,17 +64,17 @@ public:
 	/// </summary>
 	/// <param name="Candidates"></param>
 	/// <returns></returns>
-	hash_map<Hash, TransactionContent> GetValidatedTransactions(hash_map<Hash, TransactionContent> Candidates);
+	//hash_map<Hash, TransactionContent> GetValidatedTransactions(hash_map<Hash, TransactionContent> Candidates);
 
 	/// <summary>
 	/// </summary>
 	/// <param name="Candidates"></param>
 	/// <returns></returns>
-	LedgerOpStatistics ApplyTransactionToLedger(hash_map<Hash, TransactionContent> Candidates);
+	//LedgerOpStatistics ApplyTransactionToLedger(hash_map<Hash, TransactionContent> Candidates);
 
 	void RefreshValidTransactions();
 
-	hash_map<Hash, TransactionContent> getCandidates();
+	//hash_map<Hash, TransactionContent> getCandidates();
 
 	Hash GetRootHash();
 

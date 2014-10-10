@@ -133,7 +133,7 @@ while (PendingIncomingTransactions.Count > 0)
 
 void Node::CreateArbitraryTransactionAndSendToTrustedNodes()
 {
-	vector<TransactionSink> tsks;
+	vector<TransactionEntity> tsks;
 	
 	//GlobalNodes.
 
@@ -143,12 +143,12 @@ void Node::CreateArbitraryTransactionAndSendToTrustedNodes()
 
 		int64_t Amount = this->Money() / 8;
 
-		TransactionSink tsk = TransactionSink(dest->PublicKey, Amount);
+		TransactionEntity tsk = TransactionEntity(dest->PublicKey, Amount);
 		tsks.push_back(tsk);
 
-		TransactionContent tco = TransactionContent(this->PublicKey, 0, tsks, Hash() );
+		//TransactionContent tco = TransactionContent(this->PublicKey, 0, tsks, Hash() );
 		
-		vector<byte> data = tco.Serialize();
+		vector<byte> data;// = tco.Serialize();
 		
 		network.SendPacket(NetworkPacketQueueEntry(_ts->second->PublicKey, NetworkPacket(this->PublicKey, TPT_TRANS_REQUEST, data)));
 
@@ -164,7 +164,7 @@ void Node::CreateArbitraryTransactionAndSendToTrustedNodes()
 	{
 		int Amount = Constants.random.Next(0, (int)(Money / 2));
 
-		TransactionSink tsk = new TransactionSink(destNode.PublicKey, Amount);
+		TransactionEntity tsk = new TransactionEntity(destNode.PublicKey, Amount);
 		tsks.Add(tsk);
 
 		TransactionContent tco = new TransactionContent(PublicKey, 0, tsks.ToArray(), new byte[0]);

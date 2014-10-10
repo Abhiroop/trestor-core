@@ -1,27 +1,27 @@
 #include "Constants.h"
-#include "TransactionSink.h"
+#include "TransactionEntity.h"
 #include "ProtocolPackager.h"
 
-TransactionSink::TransactionSink(Hash _PublicKey_Sink, int64_t _Amount)
+TransactionEntity::TransactionEntity(Hash _PublicKey, int64_t _Amount)
 {
-	PublicKey_Sink = _PublicKey_Sink;
+	PublicKey = _PublicKey;
 	Amount = _Amount;
 }
 
-TransactionSink::TransactionSink()
+TransactionEntity::TransactionEntity()
 {
 
 }
 
-vector<byte> TransactionSink::Serialize()
+vector<byte> TransactionEntity::Serialize()
 {
 	vector<ProtocolDataType> PDTs;
-	PDTs.push_back(*ProtocolPackager::Pack(PublicKey_Sink, 0));
+	PDTs.push_back(*ProtocolPackager::Pack(PublicKey, 0));
 	PDTs.push_back(*ProtocolPackager::Pack(Amount, 1));
 	return ProtocolPackager::PackRaw(PDTs);
 }
 
-void TransactionSink::Deserialize(vector<byte> Data)
+void TransactionEntity::Deserialize(vector<byte> Data)
 {
 	vector<ProtocolDataType> PDTs = ProtocolPackager::UnPackRaw(Data);
 	int cnt = 0;
@@ -33,7 +33,7 @@ void TransactionSink::Deserialize(vector<byte> Data)
 		switch (PDT->NameType)
 		{
 		case 0:
-			ProtocolPackager::UnpackByteVector_s(*PDT, 0, Constants::KEYLEN_PUBLIC, PublicKey_Sink);
+			ProtocolPackager::UnpackByteVector_s(*PDT, 0, Constants::KEYLEN_PUBLIC, PublicKey);
 			break;
 
 		case 1:

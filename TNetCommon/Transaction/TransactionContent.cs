@@ -12,10 +12,10 @@ namespace TNetCommon.Transaction
     {
         byte[] PublicKey_Source;
         long Timestamp;
-        TransactionSink[] Destinations;
+        TransactionEntity[] Destinations;
         byte[] Signature;
 
-        public TransactionContent(byte[] PublicKey_Source, long Timestamp, TransactionSink[] Destinations, byte[] ExpandedPrivateKey)
+        public TransactionContent(byte[] PublicKey_Source, long Timestamp, TransactionEntity[] Destinations, byte[] ExpandedPrivateKey)
         {
             this.Destinations = Destinations;
             this.Timestamp = Timestamp;
@@ -37,7 +37,7 @@ namespace TNetCommon.Transaction
 
             for (int i = 0; i < (int)Destinations.Length; i++)
             {
-                TransactionSink ts = Destinations[i];
+                TransactionEntity ts = Destinations[i];
 
                 _data.AddRange(ts.PublicKey_Sink);
                 _data.AddRange(Conversions.Int64ToVector(ts.Amount));
@@ -56,7 +56,7 @@ namespace TNetCommon.Transaction
             PDTs.Add(ProtocolPackager.Pack(PublicKey_Source, 0));
             PDTs.Add(ProtocolPackager.Pack(Timestamp, 1));
 
-            foreach (TransactionSink it in Destinations)
+            foreach (TransactionEntity it in Destinations)
             {
                 PDTs.Add(ProtocolPackager.Pack(it.Serialize(), 2));
             }

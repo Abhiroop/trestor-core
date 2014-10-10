@@ -3,7 +3,7 @@
 #include "ProtocolPackager.h"
 
 #include "TransactionContent.h"
-#include "TransactionSink.h"
+#include "TransactionEntity.h"
 
 #include "TCPClientData.h"
 #include "LedgerHandler.h"

@@ -24,7 +24,7 @@ public:
 
 	void AddTransaction(TransactionContent transaction);
 
-	void GenerateTransactions(vector<AccountInfo> accounts);
+	//void GenerateTransactions(vector<AccountInfo> accounts);
 
 };
 

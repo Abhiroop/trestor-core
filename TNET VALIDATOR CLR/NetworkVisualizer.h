@@ -193,10 +193,10 @@ namespace TNETVALIDATORCLR {
 				" Money:" + (int)(ndd->LocalMoney + ndd->Money());
 
 			g->DrawString(sss, gcnew System::Drawing::Font("Consolas", 8, FontStyle::Regular), Brushes::DarkMagenta, Point(nd->Center.X, nd->Center.Y+15));
-			g->DrawString("InCD:" + ndd->ledger->getCandidates().size() + " OutTX:" + ndd->OutTransactionCount +
+			/*g->DrawString("InCD:" + ndd->ledger->getCandidates().size() + " OutTX:" + ndd->OutTransactionCount +
 				" InTX:" + ndd->InTransactionCount +
 				" InPendingTX:" + ndd->PendingIncomingTransactions.unsafe_size(), gcnew System::Drawing::Font("Consolas", 8, FontStyle::Regular), Brushes::DarkGreen, Point(nd->Center.X, nd->Center.Y + 30));
-
+				*/
 		}
 	}
 

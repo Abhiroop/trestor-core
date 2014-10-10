@@ -4,7 +4,7 @@
 
 #include "HashTree.h"
 #include "Utils.h"
-#include "TransactionSink.h"
+#include "TransactionEntity.h"
 #include <inttypes.h>
 #include <list>
 #include "ed25519\ed25519.h"
@@ -23,21 +23,23 @@ public:
 	/*
 	Hash getPublicKey_Source();
 	int64_t getTimestamp();
-	vector<TransactionSink> getDestinations();
+	vector<TransactionEntity> getDestinations();
 	Hash getSignature();*/
 
-	Hash PublicKey_Source;
+	vector<TransactionEntity> Sources;
 	int64_t Timestamp;
-	vector<TransactionSink> Destinations;
-	Hash Signature;
+	vector<TransactionEntity> Destinations;
+	vector<Hash> Signatures;
 
-	TransactionContent(Hash _PublicKey_Source, int64_t _Timestamp, vector<TransactionSink> _Destinations, Hash _Signature);
+	TransactionContent(vector<TransactionEntity> _PublicKey_Source, int64_t _Timestamp, vector<TransactionEntity> _Destinations, vector<Hash> _Signature);
 
 	TransactionContent();
 
 	Hash GetTransactionData();
 
-	void UpdateAndSignContent(Hash _PublicKey_Source, int64_t _Timestamp, vector<TransactionSink> _Destinations, Hash _ExpandedPrivateKey);
+	void UpdateAndSignContent(vector<TransactionEntity> _PublicKey_Source, int64_t _Timestamp, vector<TransactionEntity> _Destinations, vector<Hash> _ExpandedPrivateKey);
+
+	bool IntegrityCheck();
 
 	bool VerifySignature();
 

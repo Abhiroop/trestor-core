@@ -7,12 +7,12 @@ using TNetCommon.Protocol;
 
 namespace TNetCommon.Transaction
 {
-    public class TransactionSink
+    public class TransactionEntity
     {
         public byte[] PublicKey_Sink;
         public long Amount;
 
-        public TransactionSink(byte[] PublicKey_Sink, long Amount)
+        public TransactionEntity(byte[] PublicKey_Sink, long Amount)
         {
             this.PublicKey_Sink = PublicKey_Sink;
             this.Amount = Amount;

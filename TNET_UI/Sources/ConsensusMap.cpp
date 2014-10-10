@@ -5,19 +5,43 @@
 
 using namespace std;
 
+typedef concurrent_hash_map<Hash, concurrent_hash_map<Hash, bool>> HM;
+
 ConsensusMap::ConsensusMap()
 {
 
 }
 
+ConsensusMap::ConsensusMap(IncomingTransactionMap _incomingTransactionMap)
+{
+	incomingTransactionMap = _incomingTransactionMap;
+}
+
+//check double spending here
+void ConsensusMap::CheckTransactions()
+{
+	hash_map<Hash, int64_t> spend;
+	for (HM::iterator it = consensusVoteMap.begin(); it != consensusVoteMap.end(); ++it)
+	{
+		Hash transactionID = it->first;
+		TransactionContentData TCD;
+		if (incomingTransactionMap.GetTransactionContentData(TCD, transactionID))
+		{
+			TransactionContent TC = TCD.TC;
+			//TC.
+		}
+	}
+}
+
+
 void ConsensusMap::updateVote(vector<VoteType> votes, Hash publicKey)
 {
-	for (int i = 0; i < votes.size(); i++)
+	for (int i = 0; i < (int)votes.size(); i++)
 	{
 		Hash TransactionID = votes[i].TransactionID;
 		bool vote = votes[i].Vote;
 
-		concurrent_hash_map<Hash, concurrent_hash_map<Hash, bool>>::accessor acc;
+		HM::accessor acc;
 		if (!consensusVoteMap.find(acc, TransactionID))
 		{
 			concurrent_hash_map<Hash, bool> hm;

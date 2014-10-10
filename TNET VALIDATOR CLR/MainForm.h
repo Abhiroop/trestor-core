@@ -17,7 +17,7 @@
 
 #include "Simulator.h"
 #include "ProtocolPackager.h"
-#include "TransactionSink.h"
+#include "TransactionEntity.h"
 #include "Varint2.h"
 
 //#include "tbb/concurrent_hash_map.h"
@@ -452,7 +452,7 @@ namespace TNETVALIDATORCLR {
 		PrintMessage("ADD Complete");
 
 		CandidateSet cs;
-		cs.GenerateTransactions(ais);
+		//cs.GenerateTransactions(ais);
 		int64_t TransactionVolume = 0;
 
 		PrintMessage(" ===========  BEFORE ============ ");
@@ -464,7 +464,7 @@ namespace TNETVALIDATORCLR {
 
 		PrintMessage(" ===========  AFTER ============ ");
 
-		LedgerOpStatistics st = lgr.ApplyTransactionToLedger(cs.getTransactions());
+		/*LedgerOpStatistics st = lgr.ApplyTransactionToLedger(cs.getTransactions());
 
 		PrintMessage("Tree Root Hash: " + StringUtils::stops(lgr.GetRootHash().ToString()));
 		T_Nodes = lgr.LedgerTree.TraverseNodes();
@@ -476,7 +476,7 @@ namespace TNETVALIDATORCLR {
 		PrintMessage("Failed Transactions : " + st.FailedTransactions);
 		PrintMessage("Good Transactions   : " + st.GoodTransactions);
 		PrintMessage("BlackLists          : " + st.BlackLists);
-
+		*/
 	}
 
 	private: System::Void simulateVisualToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
@@ -520,11 +520,11 @@ namespace TNETVALIDATORCLR {
 
 		Hash h(data, data+32);
 
-		TransactionSink tsk = TransactionSink(h, 1234567);
+		TransactionEntity tsk = TransactionEntity(h, 1234567);
 
 		Hash serialized = tsk.Serialize();
 
-		TransactionSink tskDs;
+		TransactionEntity tskDs;
 		tskDs.Deserialize(serialized);
 		
 		PrintMessage(tskDs.PublicKey_Sink.ToString());
@@ -549,11 +549,7 @@ namespace TNETVALIDATORCLR {
 
 		nv->Invalidate();
 		
-		/*if (sim.Refreshed)
-		{
-			sim.Refreshed = false;
-			nv->Invalidate();
-		}*/
+	
 
 	}
     

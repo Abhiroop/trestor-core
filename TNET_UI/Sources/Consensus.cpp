@@ -31,10 +31,10 @@
 //
 //	if (presentTransaction.find(conHashMap_accr, *ID))
 //	{
-//		vector<TransactionSink> Destinations = conHashMap_accr->second.Destinations;
+//		vector<TransactionEntity> Destinations = conHashMap_accr->second.Destinations;
 //
 //		
-//		for (vector<TransactionSink>::iterator it = Destinations.begin(); it != Destinations.end(); ++it)
+//		for (vector<TransactionEntity>::iterator it = Destinations.begin(); it != Destinations.end(); ++it)
 //		{
 //			totalMoney += it->Amount;
 //			loopCounter++;

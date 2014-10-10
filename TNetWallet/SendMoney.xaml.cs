@@ -62,10 +62,10 @@ namespace TNetWallet
         {
             try
             {
-                TransactionSink sink = new TransactionSink(REC_KEY, long.Parse(textBox_Money.Text));
+                TransactionEntity sink = new TransactionEntity(REC_KEY, long.Parse(textBox_Money.Text));
 
                 TransactionContent tc = new TransactionContent(SP_KEY, DateTime.UtcNow.ToUnixTime(),
-                    new TransactionSink[] { sink }, App.UserAccessController.PrivateKey);
+                    new TransactionEntity[] { sink }, App.UserAccessController.PrivateKey);
 
                 App.Network.SendCommand(SP_KEY, "TRX", tc.Serialize());
             }

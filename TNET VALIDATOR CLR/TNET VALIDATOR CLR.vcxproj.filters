@@ -147,9 +147,6 @@
     <ClCompile Include="..\TNET_UI\Sources\TransactionContent.cpp">
       <Filter>Sources\Transactions</Filter>
     </ClCompile>
-    <ClCompile Include="..\TNET_UI\Sources\TransactionSink.cpp">
-      <Filter>Sources\Transactions</Filter>
-    </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\Ledger.cpp">
       <Filter>Sources\Ledger</Filter>
     </ClCompile>
@@ -234,6 +231,9 @@
     <ClCompile Include="..\TNET_UI\Sources\IncomingTransactionMap.cpp">
       <Filter>Sources\Consensus</Filter>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TransactionEntity.cpp">
+      <Filter>Sources\Transactions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h">
@@ -300,9 +300,6 @@
       <Filter>Sources\Transactions</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\TransactionContent.h">
-      <Filter>Sources\Transactions</Filter>
-    </ClInclude>
-    <ClInclude Include="..\TNET_UI\Sources\TransactionSink.h">
       <Filter>Sources\Transactions</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\Ledger.h">
@@ -568,6 +565,9 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\IncomingTransactionMap.h">
       <Filter>Sources\Consensus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TransactionEntity.h">
+      <Filter>Sources\Transactions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

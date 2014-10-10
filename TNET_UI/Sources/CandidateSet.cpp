@@ -21,7 +21,7 @@ void CandidateSet::AddTransaction(TransactionContent transaction)
 	_transactions[transaction.GetHash()]= transaction;	
 }
 
-void CandidateSet::GenerateTransactions(vector<AccountInfo> accounts)
+/*void CandidateSet::GenerateTransactions(vector<AccountInfo> accounts)
 {
 	_transactions.clear();
 
@@ -52,7 +52,7 @@ void CandidateSet::GenerateTransactions(vector<AccountInfo> accounts)
 
 		long spendingAmt = (amountToSpend / (long)nodes);
 
-		vector<TransactionSink> tsks;
+		vector<TransactionEntity> tsks;
 
 		for (int dest = 0; dest < nodes; dest++)
 		{
@@ -63,7 +63,7 @@ void CandidateSet::GenerateTransactions(vector<AccountInfo> accounts)
 			double d = unif(re);
 			long amountToSpendPerSink = (long)(spendingAmt * d);
 
-			TransactionSink tsk = TransactionSink(sinkAccount.AccountID, amountToSpendPerSink);
+			TransactionEntity tsk = TransactionEntity(sinkAccount.AccountID, amountToSpendPerSink);
 			tsks.push_back(tsk);
 		}
 
@@ -72,4 +72,4 @@ void CandidateSet::GenerateTransactions(vector<AccountInfo> accounts)
 		_transactions[h] = tco;
 	}
 
-}
+}*/

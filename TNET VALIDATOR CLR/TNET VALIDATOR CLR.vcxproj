@@ -198,6 +198,7 @@
     <ClCompile Include="..\TNET_UI\Sources\Simulator.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
@@ -215,7 +216,7 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="..\TNET_UI\Sources\TransactionSink.cpp">
+    <ClCompile Include="..\TNET_UI\Sources\TransactionEntity.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
@@ -239,9 +240,13 @@
     <ClCompile Include="..\TNET_UI\Sources\VoteType.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="MainForm.cpp" />
+    <ClCompile Include="MainForm.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="NetworkVisualizer.cpp" />
-    <ClCompile Include="Program.cpp" />
+    <ClCompile Include="Program.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TNET_UI\Sources\AccountInfo.h" />
@@ -343,7 +348,7 @@
     <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tick_count.h" />
     <ClInclude Include="..\TNET_UI\Sources\Timer.h" />
     <ClInclude Include="..\TNET_UI\Sources\TransactionContent.h" />
-    <ClInclude Include="..\TNET_UI\Sources\TransactionSink.h" />
+    <ClInclude Include="..\TNET_UI\Sources\TransactionEntity.h" />
     <ClInclude Include="..\TNET_UI\Sources\TreeLevelDataType.h" />
     <ClInclude Include="..\TNET_UI\Sources\TreeNodeX.h" />
     <ClInclude Include="..\TNET_UI\Sources\Types.h" />
