@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+using namespace std;
+
 ConsensusMap::ConsensusMap()
 {
 
@@ -37,13 +39,13 @@ void ConsensusMap::updateVote(vector<VoteType> votes, Hash publicKey)
 			{
 				oldHm.insert(make_pair(publicKey, vote));
 
-				std::cout << endl << "-- Insert";
+				//std::cout << endl << "-- Insert";
 			}
 			else
 			{
 				accinner->second = vote;
 
-				std::cout<< endl  << "-- Update";
+				//std::cout<< endl  << "-- Update";
 			}	
 		}
 

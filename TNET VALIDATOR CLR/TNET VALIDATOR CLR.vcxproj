@@ -146,6 +146,7 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\IncomingTransactionMap.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\Ledger.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -265,6 +266,7 @@
     <ClInclude Include="..\TNET_UI\Sources\FakeSocket.h" />
     <ClInclude Include="..\TNET_UI\Sources\Hash.h" />
     <ClInclude Include="..\TNET_UI\Sources\HashTree.h" />
+    <ClInclude Include="..\TNET_UI\Sources\IncomingTransactionMap.h" />
     <ClInclude Include="..\TNET_UI\Sources\LeafDataType.h" />
     <ClInclude Include="..\TNET_UI\Sources\Ledger.h" />
     <ClInclude Include="..\TNET_UI\Sources\LedgerFileHandler.h" />

@@ -231,6 +231,9 @@
     <ClCompile Include="..\TNET_UI\Sources\ConsensusMap.cpp">
       <Filter>Sources\Consensus</Filter>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\IncomingTransactionMap.cpp">
+      <Filter>Sources\Consensus</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h">
@@ -561,6 +564,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\ConsensusMap.h">
+      <Filter>Sources\Consensus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\IncomingTransactionMap.h">
       <Filter>Sources\Consensus</Filter>
     </ClInclude>
   </ItemGroup>

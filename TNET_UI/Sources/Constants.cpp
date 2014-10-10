@@ -9,4 +9,6 @@ concurrent_hash_map<Hash, AccountInfo> GLOBAL_LEDGER_MAP;
 
 string Constants::hexChars = "0123456789ABCDEF";
 
+concurrent_vector<Hash> GlobalBlacklistedValidators;
+
 CppSQLite3DB ledger_db;

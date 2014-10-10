@@ -39,6 +39,8 @@ public:
 
 	void UpdateAndSignContent(Hash _PublicKey_Source, int64_t _Timestamp, vector<TransactionSink> _Destinations, Hash _ExpandedPrivateKey);
 
+	bool VerifySignature();
+
 	Hash GetHash();
 
 	Hash GetID();

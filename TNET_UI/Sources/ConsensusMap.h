@@ -17,6 +17,8 @@ public:
 	concurrent_hash_map<Hash, concurrent_hash_map<Hash, bool>> consensusVoteMap;
 
 	void updateVote(vector<VoteType> votes, Hash publickey);
+
+	
 };
 
 

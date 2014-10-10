@@ -92,7 +92,7 @@ int main()
 
 	ConsensusMap cm;
 
-	for (int j = 0; j < 2; j++)
+	for (int j = 0; j < 500; j++)
 	{
 		//byte PKS[32];
 

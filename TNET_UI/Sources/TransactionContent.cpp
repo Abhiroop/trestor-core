@@ -94,6 +94,14 @@ void TransactionContent::UpdateAndSignContent(Hash _PublicKey_Source, int64_t _T
 	UpdateIntHash();
 }
 
+bool TransactionContent::VerifySignature()
+{
+	byte temp_signature[64];
+	Hash getTranData = GetTransactionData();
+
+	return ed25519_verify(Signature.data(), getTranData.data(), getTranData.size(), PublicKey_Source.data()) == 1 ? true : false;
+}
+
 void TransactionContent::UpdateIntHash()
 {
 	byte Hout[64];
@@ -111,7 +119,7 @@ Hash TransactionContent::GetHash()
 
 Hash TransactionContent::GetID()
 {
-	return GetHash();
+	return intHash;
 }
 
 Hash TransactionContent::GetTransactionDataAndSignature()
