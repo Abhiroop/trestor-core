@@ -94,6 +94,34 @@ Hash TransactionContent::GetTransactionData()
 	UpdateIntHash();
 }*/
 
+bool TransactionContent::IsSource(Hash SourcePublicKey)
+{
+	for (int i = 0; i < (int)Sources.size(); i++)
+	{
+		TransactionEntity TE = Sources[i];
+		
+		if (TE.PublicKey == SourcePublicKey)
+			return true;
+	}
+
+	return false;
+}
+
+bool TransactionContent::IsDestination(Hash DestinationPublicKey)
+{
+	for (int i = 0; i < (int)Destinations.size(); i++)
+	{
+		TransactionEntity TE = Destinations[i];
+
+		if (TE.PublicKey == DestinationPublicKey)
+			return true;
+	}
+
+	return false;
+}
+
+
+
 bool TransactionContent::IntegrityCheck()
 {
 	int64_t incoming = 0;

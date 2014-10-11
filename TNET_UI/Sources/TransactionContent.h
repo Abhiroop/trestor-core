@@ -39,6 +39,10 @@ public:
 
 	void UpdateAndSignContent(vector<TransactionEntity> _PublicKey_Source, int64_t _Timestamp, vector<TransactionEntity> _Destinations, vector<Hash> _ExpandedPrivateKey);
 
+	bool IsSource(Hash SourcePublicKey);
+
+	bool IsDestination(Hash DestinationPublicKey);
+
 	bool IntegrityCheck();
 
 	bool VerifySignature();
