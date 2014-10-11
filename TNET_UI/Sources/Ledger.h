@@ -44,6 +44,8 @@ public:
 
 	bool GetAccount(Hash userInfo, AccountInfo & ltd);
 
+	bool GetAccountBalance(Hash userInfo, int64_t & balance);
+
 	/// <summary>
 	/// Add User, false if user already exists.
 	/// </summary>

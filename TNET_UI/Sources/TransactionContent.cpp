@@ -101,16 +101,21 @@ bool TransactionContent::IntegrityCheck()
 
 	for (int i = 0; i < (int)Sources.size(); i++)
 	{
+		if (Sources[i].Amount <= 0)
+			return false;
+
 		incoming += Sources[i].Amount;
 	}
 
 	for (int i = 0; i < (int)Destinations.size(); i++)
 	{
+		if (Destinations[i].Amount <= 0)
+			return false;
+
 		outgoing += Destinations[i].Amount;
 	}
 
 	if ((incoming == outgoing) &&
-		(incoming > 0) && 
 		(Sources.size() > 0) && 
 		(Destinations.size() > 0))
 	{

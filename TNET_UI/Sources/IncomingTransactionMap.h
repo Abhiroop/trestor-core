@@ -23,6 +23,7 @@ class IncomingTransactionMap
 private:
 	//[Transaction ID] ->[[Transaction Content] -> [vector of sender address]]
 	concurrent_hash_map<Hash, TransactionContentData> TransactionMap;
+
 public:
 
 	bool GetTransactionContentData(TransactionContentData& transactionContentData, Hash transactionID);
@@ -31,6 +32,7 @@ public:
 	void InsertTransactionContent(TransactionContent tc, Hash forwarderPublicKey);
 	void UpdateTransactionID(Hash transactionID, Hash forwarderPublicKey);
 
+	vector<TransactionContent> FetchTransactionContent(vector<Hash> differenceTransactionIDs);
 	vector<Hash> FetchAllTransactionID();
 
 	bool HaveTransactionInfo(Hash transactionID);

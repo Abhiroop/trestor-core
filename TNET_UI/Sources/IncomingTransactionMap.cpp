@@ -5,6 +5,9 @@ using namespace std;
 
 typedef concurrent_hash_map<Hash, TransactionContentData> HM;
 
+/*
+Given a transactionID returns current associated TransactionContentData, else return false
+*/
 bool IncomingTransactionMap::GetTransactionContentData(TransactionContentData& transactionContentData, Hash transactionID)
 {
 	HM::accessor acc;
@@ -30,6 +33,31 @@ vector<Hash> IncomingTransactionMap::FetchAllTransactionID()
 	return toSent;
 }
 
+/*
+given a set of transaction IDs get the associated transaction contents
+*/
+vector<TransactionContent> IncomingTransactionMap::FetchTransactionContent(vector<Hash> differenceTransactionIDs)
+{
+	vector<TransactionContent> toSent;
+
+	HM::accessor acc;
+
+	for (int i = 0; i < (int)differenceTransactionIDs.size(); i++)
+	{
+		Hash transactionID = differenceTransactionIDs[i];
+		
+		if (TransactionMap.find(acc, transactionID))
+		{
+			TransactionContentData TCD = acc->second;
+			TransactionContent TC = TCD.TC;
+			toSent.push_back(TC);
+		}
+
+	}
+
+	return toSent;
+}
+
 bool IncomingTransactionMap::HaveTransactionInfo(Hash transactionID)
 {
 	HM::accessor ac;
@@ -37,6 +65,9 @@ bool IncomingTransactionMap::HaveTransactionInfo(Hash transactionID)
 	return (TransactionMap.find(ac, transactionID));
 }
 
+/*
+Given a transaction ID from a validator, upate it in the current transactionMap
+*/
 void IncomingTransactionMap::UpdateTransactionID(Hash transactionID, Hash forwarderPublicKey)
 {
 	HM::accessor acc;
@@ -64,7 +95,9 @@ void IncomingTransactionMap::UpdateTransactionID(Hash transactionID, Hash forwar
 		}
 	}
 }
-
+/*
+Given a transaction ID from a validator, insert it in the current transactionMap
+*/
 void IncomingTransactionMap::InsertTransactionContent(TransactionContent tc, Hash forwarderPublicKey)
 {
 	//verifye signature

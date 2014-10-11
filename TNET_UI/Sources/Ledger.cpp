@@ -43,6 +43,19 @@ bool Ledger::GetAccount(Hash userInfo, AccountInfo & ltd)
 	return LedgerTree.GetNodeData(userInfo, ltd);
 }
 
+bool Ledger::GetAccountBalance(Hash userInfo, int64_t & balance)
+{
+	AccountInfo ac;
+
+	if (LedgerTree.GetNodeData(userInfo, ac))
+	{
+		balance = ac.Money;
+		return true;
+	}
+
+	return false;
+}
+
 //void Ledger::PushNewProposedTransactions(vector<TransactionContent> proposedTransactions)
 //{
 //	for (int i = 0; i < (int)proposedTransactions.size(); i++)
