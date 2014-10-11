@@ -12,11 +12,11 @@
 
 //std::mutex MTX;
 
-/*Ledger Node::getLocalLedger()
+Ledger Node::getLedger()
 {
 	return ledger;
 }
-*/
+
 
 Node::Node()
 {
@@ -42,7 +42,7 @@ void Node::UpdateEvent()
 
 void CALLBACK TimerProcND(void* lpParametar, BOOLEAN TimerOrWaitFired);
 
-Node::Node(FakeNetwork _network, string _Name, int _ConnectionLimit, shared_ptr<Ledger> _ledger, long Money, int TimerRate)
+Node::Node(FakeNetwork _network, string _Name, int _ConnectionLimit, Ledger _ledger, long Money, int TimerRate)
 {
 	network = _network;
 
@@ -63,7 +63,7 @@ Node::Node(FakeNetwork _network, string _Name, int _ConnectionLimit, shared_ptr<
 
 	AI = AccountInfo(PublicKey, Money, _Name, 0, 0);
 
-	ledger->AddUserToLedger(AI);
+	ledger.AddUserToLedger(AI);
 
 	LocalMoney = 0;
 
@@ -181,7 +181,7 @@ void Node::InitializeValuesFromGlobalLedger()
 int64_t Node::Money()
 {
 	AccountInfo ai;
-	bool got = ledger->GetAccount(PublicKey, ai);
+	bool got = ledger.GetAccount(PublicKey, ai);
 
 	if (got)
 		return ai.Money;

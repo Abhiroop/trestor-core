@@ -53,6 +53,9 @@ class Node
 	HANDLE hTimer = NULL;
 
 public:
+	Ledger ledger;
+	Ledger getLedger();
+
 	hash_map<Hash, shared_ptr<Node>> Connections;
 
 	hash_map<Hash, shared_ptr<Node>> TrustedNodes;
@@ -71,11 +74,7 @@ public:
 
 	Node(FakeNetwork _network);
 
-	AccountInfo AI;
-
-	shared_ptr<Ledger> ledger;
-
-	Ledger getLocalLedger();
+	AccountInfo AI;	
 
 	byte _PrivateKey[32];
 	byte _PublicKey[32];
@@ -86,7 +85,7 @@ public:
 
 	int64_t LocalMoney;
 
-	Node(FakeNetwork _network, string _Name, int _ConnectionLimit, shared_ptr<Ledger> ledger, long Money, int TimerRate);
+	Node(FakeNetwork _network, string _Name, int _ConnectionLimit, Ledger ledger, long Money, int TimerRate);
 
 	void CreateArbitraryTransactionAndSendToTrustedNodes();
 
