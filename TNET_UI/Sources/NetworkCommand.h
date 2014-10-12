@@ -14,7 +14,7 @@ struct NetworkCommand
 	string IPPort;
 
 	// Public Key of the Sender
-	vector <unsigned char> Sender;
+	Hash Sender;
 
 	// Command
 	string Command;
@@ -24,7 +24,7 @@ struct NetworkCommand
 
 	NetworkCommand(){};
 
-	NetworkCommand(string ip_port, vector <unsigned char> sender, uint8_t command, vector <unsigned char> data)
+	NetworkCommand(string ip_port, Hash sender, uint8_t command, vector <unsigned char> data)
 	{
 		IPPort = ip_port;
 		Sender = Sender;

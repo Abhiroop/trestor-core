@@ -27,7 +27,7 @@ int LedgerFileHandler::MakeVerifyLedgerTree()
 			return 1;
 		}
 
-		catch (exception &ex)
+		catch (exception)
 		{
 			cout << "Problem in making new table";
 			return 0;

@@ -1,4 +1,9 @@
 
+//
+// @Author : Arpan Jati
+// @Date: 12th Oct 2014
+//
+
 #include <Windows.h>
 
 #include "Node.h"
@@ -42,7 +47,7 @@ void Node::UpdateEvent()
 
 void CALLBACK TimerProcND(void* lpParametar, BOOLEAN TimerOrWaitFired);
 
-Node::Node(FakeNetwork _network, string _Name, int _ConnectionLimit, Ledger _ledger, long Money, int TimerRate)
+Node::Node(FakeNetwork _network, string _Name, int _ConnectionLimit,  long Money, int TimerRate)
 {
 	network = _network;
 
@@ -57,7 +62,7 @@ Node::Node(FakeNetwork _network, string _Name, int _ConnectionLimit, Ledger _led
 
 	PublicKey = Hash(_PublicKey, _PublicKey + 32);
 
-	ledger = _ledger;
+	//ledger = _ledger;
 
 	Name = _Name;
 
@@ -219,13 +224,11 @@ void Node::SendCandidates(Hash source, vector<TransactionContent> Transactions)
 	}
 }
 
-
 void Node::Receive(NetworkPacket Packet)
 {
 	/*string _SZ = ", " + to_string( Packet.Data.size()) + (string)" Bytes";
 	string _OTH_MSG = " Received Packet :" + to_string(Packet.Type) + (string)", From:" + Packet.PublicKey_Src.ToString() + _SZ;
 	string MSG = (string)"[" + PublicKey.ToString() + "] : " + _OTH_MSG;
-
 	MessageQueue.push(MSG);*/
 	
 	switch (Packet.Type)

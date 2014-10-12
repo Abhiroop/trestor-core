@@ -22,7 +22,7 @@ char getNibbleSingle(int index)
 
 int CompareHexString(vector<char> i, vector<char> j)
 {
-	for (int t = 0; t < i.size(); t++)
+	for (int t = 0; t < (int)i.size(); t++)
 	{
 		if (getIndex(i[t]) > getIndex(j[t]))
 			return 1;

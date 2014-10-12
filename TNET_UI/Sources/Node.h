@@ -85,7 +85,7 @@ public:
 
 	int64_t LocalMoney;
 
-	Node(FakeNetwork _network, string _Name, int _ConnectionLimit, Ledger ledger, long Money, int TimerRate);
+	Node(FakeNetwork _network, string _Name, int _ConnectionLimit, long Money, int TimerRate);
 
 	void CreateArbitraryTransactionAndSendToTrustedNodes();
 

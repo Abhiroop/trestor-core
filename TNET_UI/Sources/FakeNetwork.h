@@ -11,7 +11,6 @@
 
 //#include "Timer.h"
 
-
 #include <Windows.h>
 #include <Threadpoolapiset.h>
 

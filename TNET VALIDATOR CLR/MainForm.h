@@ -527,7 +527,7 @@ namespace TNETVALIDATORCLR {
 		TransactionEntity tskDs;
 		tskDs.Deserialize(serialized);
 		
-		PrintMessage(tskDs.PublicKey_Sink.ToString());
+		PrintMessage(tskDs.PublicKey.ToString());
 		PrintMessage("AMT:" + tskDs.Amount);	
 	}
 

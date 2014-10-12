@@ -58,6 +58,9 @@
     <Filter Include="Sources\SQLLiteCpp">
       <UniqueIdentifier>{6f09fe2c-6b1d-44bd-84b7-dfc8111dca7c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Network">
+      <UniqueIdentifier>{83a8fe07-e7a3-4dba-8fce-d3cdc3075ec3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TNET_UI\Sources\BaseNetwork.cpp">
@@ -222,9 +225,6 @@
     <ClCompile Include="..\TNET_UI\Sources\LedgerRootInfo.cpp">
       <Filter>Sources\Ledger</Filter>
     </ClCompile>
-    <ClCompile Include="..\TNET_UI\Sources\TreeSyncData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\ConsensusMap.cpp">
       <Filter>Sources\Consensus</Filter>
     </ClCompile>
@@ -233,6 +233,9 @@
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\TransactionEntity.cpp">
       <Filter>Sources\Transactions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TreeSyncData.cpp">
+      <Filter>Sources\HashTree</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -557,9 +560,6 @@
     <ClInclude Include="..\TNET_UI\Sources\RootDataType.h">
       <Filter>Sources\HashTree</Filter>
     </ClInclude>
-    <ClInclude Include="..\TNET_UI\Sources\TreeSyncData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\ConsensusMap.h">
       <Filter>Sources\Consensus</Filter>
     </ClInclude>
@@ -568,6 +568,15 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\TransactionEntity.h">
       <Filter>Sources\Transactions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\NetworkManager.h">
+      <Filter>Sources\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\NetworkCommand.h">
+      <Filter>Sources\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TreeSyncData.h">
+      <Filter>Sources\HashTree</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

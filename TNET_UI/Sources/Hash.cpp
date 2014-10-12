@@ -11,6 +11,7 @@
 #include "Hash.h"
 #include "Utils.h"
 
+#include "Constants.h"
 
 Hash::Hash()
 {
@@ -80,14 +81,16 @@ string Hash::ToString() const
 {	
 	int length = (int)(*this).size();
 
+	
+
 	if (length > 0)
 	{
 		vector<char> finalStr = vector<char>();
 		finalStr.reserve(length << 1);
 		for (int i = 0; i < length; i++)
 		{
-			finalStr.push_back((char)hexs[(((*this)[i]) >> 4) & 0xF]);
-			finalStr.push_back((char)hexs[(*this)[i] & 0xF]);
+			finalStr.push_back((char)Constants::hexChars[(((*this)[i]) >> 4) & 0xF]);
+			finalStr.push_back((char)Constants::hexChars[(*this)[i] & 0xF]);
 		}
 
 		return string(finalStr.begin(), finalStr.end());

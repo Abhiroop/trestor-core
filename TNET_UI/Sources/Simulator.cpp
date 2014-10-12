@@ -76,8 +76,7 @@ void Simulator::StartSimulation()
 	GlobalNodes.clear();
 
 	//Ledger lgr;
-
-	shared_ptr<Ledger> lgr(new Ledger());
+	//Ledger lgr;
 
 	vector<Hash*> nodeHashes;
 
@@ -87,7 +86,7 @@ void Simulator::StartSimulation()
 
 		//Node n3 = Node(CN, 4, lgr, 100 * i, 100);
 
-		shared_ptr<Node> NewNode(new Node(network, CN, 4, lgr, 100 * i, 100));
+		shared_ptr<Node> NewNode(new Node(network, CN, 4, 100 * i, 100));
 		
 		//Node *n = dynamic_cast<Node*> (&n3);
 		//Nodes.push_back(*n);
@@ -96,9 +95,9 @@ void Simulator::StartSimulation()
 
 		//shared_ptr<Hash> pk = n->PublicKey;
 
-		AccountInfo si = AccountInfo(*pk, 500, CN, 0, 0);
+		//AccountInfo si = AccountInfo(*pk, 500, CN, 0, 0);
 		nodeHashes.push_back(pk);
-		lgr->AddUserToLedger(si);
+		//lgr->AddUserToLedger(si);
 		//sim_nodes[*pk] = NewNode;
 
 		GlobalNodes.insert(make_pair(*pk, NewNode));
