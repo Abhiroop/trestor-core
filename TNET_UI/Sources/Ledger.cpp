@@ -11,7 +11,7 @@
 Ledger::Ledger()
 {
 	TransactionFees = 0;
-	ledgerFileHandler = LedgerFileHandler(LedgerTree, "LedgerT.db");
+	//ledgerFileHandler = LedgerFileHandler(LedgerTree, "LedgerT.db");
 }
 
 Ledger::Ledger(string LedgerDB_FileName, FakeNetwork _network)
@@ -19,6 +19,8 @@ Ledger::Ledger(string LedgerDB_FileName, FakeNetwork _network)
 	network = _network;
 	TransactionFees = 0;
 	ledgerFileHandler = LedgerFileHandler(LedgerTree, LedgerDB_FileName);
+
+	LedgerTree = ledgerFileHandler.DBToTree();
 }
 
 bool Ledger::AddUserToLedger(AccountInfo userInfo)
@@ -73,6 +75,9 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 	{
 
 	case TPT_LSYNC_FETCH_ROOT:
+
+
+
 	case TPT_LSYNC_FETCH_LAYER_INFO:
 	case TPT_LSYNC_FETCH_LAYER_DATA:
 

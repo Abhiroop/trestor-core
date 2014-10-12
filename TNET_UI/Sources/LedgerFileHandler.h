@@ -35,9 +35,11 @@ public:
 	
 	int SaveToDB_Callback(AccountInfo leaf);
 
+	int UpdateLedgerInfo(Hash LedgerHash, Hash LastLedgerHash, int64_t LCLTime, int64_t SequenceNumber);
+
 	int SaveToDB();
 
-	int MakeVerifyLedgerTree();
+	int VerifyDatabase();
 };
 
 #endif

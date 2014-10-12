@@ -20,16 +20,17 @@ LedgerFileHandler::LedgerFileHandler(HashTree< AccountInfo, LedgerRootInfo > acc
 {
 	AccountTree = accountTree;
 	ledger_db.open(LedgerDB_FileName.data());
+
+	VerifyDatabase();
 }
 
-int LedgerFileHandler::MakeVerifyLedgerTree()
+int LedgerFileHandler::VerifyDatabase()
 {
 	if (!ledger_db.tableExists("Ledger"))
 	{
 		try
 		{
-			ledger_db.execDML("create table Ledger (PublicKey varchar(128) PRIMARY KEY, UserName varchar(64), Balance integer, IsBlocked int, LastTransaction integer);");
-			return 1;
+			ledger_db.execDML("create table Ledger (PublicKey blob PRIMARY KEY, UserName varchar(64), Balance integer, IsBlocked int, LastTransaction integer);");
 		}
 
 		catch (exception)
@@ -38,6 +39,21 @@ int LedgerFileHandler::MakeVerifyLedgerTree()
 			return 0;
 		}
 	}
+	if (!ledger_db.tableExists("LedgerInfo"))
+	{
+		try
+		{
+			ledger_db.execDML("create table LedgerInfo (LedgerHash blob PRIMARY KEY, LastLedgerHash blob, LCLTime integer, SequenceNumber integer);");
+		}
+
+		catch (exception)
+		{
+			cout << "Problem in making new table";
+			return 0;
+		}
+
+	}
+
 	return 1;
 }
 
@@ -51,8 +67,23 @@ int LedgerFileHandler::SaveToDB_Callback(AccountInfo leaf)
 	return treeToDB(ai.AccountID, ai.Money, ai.Name, ai.LastTransactionTime);
 }
 
+int LedgerFileHandler::UpdateLedgerInfo(Hash LedgerHash, Hash LastLedgerHash, int64_t LCLTime, int64_t SequenceNumber)
+{
+	VerifyDatabase();
+
+	CppSQLite3Statement stmt = ledger_db.compileStatement("update LedgerInfo set LedgerHash = @u1, LastLedgerHash = @u2,LCLTime = @u3,SequenceNumber = @u4 where 1=1;");
+	stmt.bind("@u1", LedgerHash.data(), LedgerHash.size());
+	stmt.bind("@u2", LastLedgerHash.data(), LastLedgerHash.size());
+	stmt.bind("@u3", LCLTime);
+	stmt.bind("@u4", SequenceNumber);
+
+}
+
 int LedgerFileHandler::SaveToDB()
 {
+	VerifyDatabase();
+
+
 	//bind(&Node::Receive, *NewNode, _1));
 
 	LedgerRootInfo ledgerRootInfo = AccountTree.GetRootInfo();
@@ -62,6 +93,7 @@ int LedgerFileHandler::SaveToDB()
 	int64_t LCLTime = ledgerRootInfo.getLCLTime();
 	int64_t SequenceNumber = ledgerRootInfo.getSequenceNumber();
 
+	/*
 	CppSQLite3Statement stmt = ledger_db.compileStatement("DELETE FROM LedgerInfo");
 	int rows = stmt.execDML();
 	if (rows < 1)
@@ -75,6 +107,8 @@ int LedgerFileHandler::SaveToDB()
 	stmt.bind("@u2", LastLedgerHash.data(), LastLedgerHash.size());
 	stmt.bind("@u3", LCLTime);
 	stmt.bind("@u4", SequenceNumber);
+	*/
+	UpdateLedgerInfo(LedgerHash, LastLedgerHash, LCLTime, SequenceNumber);
 
 	ledger_db.execDML("BEGIN TRANSACTION");
 
