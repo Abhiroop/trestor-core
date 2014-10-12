@@ -33,11 +33,14 @@ public :
 	static const int SIM_REFRESH_MS = 50;
 	static const int SIM_REFRESH_MS_SIM = 50;
 
+	static const int LEN_TRANSACTION_ID = 32;
+
 	static const int KEYLEN_PUBLIC = 32;
 	static const int KEYLEN_PRIVATE = 32;
 	static const int KEYLEN_SIGNATURE = 64;
 
-	static const int CONS_TRUSTED_VALIDATOR_THRESHOLD_PERC = 60;
+	static const int CONS_TRUSTED_VALIDATOR_THRESHOLD_PERC = 50;
+	static const int CONS_VOTING_ACCEPTANCE_THRESHOLD_PERC = 75;
 
 	static const int SYNC_LEAF_COUNT_THRESHOLD = 200;
 		
