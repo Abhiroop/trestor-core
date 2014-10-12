@@ -557,7 +557,7 @@ namespace TNETVALIDATORCLR {
 
 		//Varint2::TestVarint2();
 
-		ProtocolPackager::TestProtocolPackager();
+		//ProtocolPackager::TestProtocolPackager();
 
 
 	}

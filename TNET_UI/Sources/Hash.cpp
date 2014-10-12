@@ -81,8 +81,6 @@ string Hash::ToString() const
 {	
 	int length = (int)(*this).size();
 
-	
-
 	if (length > 0)
 	{
 		vector<char> finalStr = vector<char>();

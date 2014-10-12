@@ -8,8 +8,6 @@
 
 #include "Utils.h"
 
-#include "Constants.h"
-
 struct ProtocolDataType
 {
 	// Any Identifier based on protocol
@@ -95,7 +93,7 @@ public:
 
 	#define count__  32
 
-	static void TestProtocolPackager()
+	/*static void TestProtocolPackager()
 	{
 		vector<ProtocolDataType> PDTs;
 			
@@ -132,7 +130,7 @@ public:
 		}
 
 		MessageQueue.push("\nVarint Test Complete ...");
-	}
+	}*/
 
 
 };

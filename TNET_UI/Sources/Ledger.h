@@ -8,6 +8,7 @@
 #include "TransactionContent.h"
 #include "CreditDebitData.h"
 #include "LedgerRootInfo.h"
+#include "LedgerFileHandler.h"
 
 //SHIT JUST GOT REAL HERE!!!!
 
@@ -25,15 +26,13 @@ class Ledger
 {
 
 public:
-
+	
 	LedgerRootInfo ledgerRootInfo;
+	HashTree<AccountInfo, LedgerRootInfo> LedgerTree;
+	LedgerFileHandler ledgerFileHandler;
 
-	HashTree<AccountInfo, LedgerRootInfo> LedgerTree; //(ledgerRootInfo);
 	int64_t TransactionFees;
-	//int64_t TotalAmount;
 	int64_t CloseTime;
-
-	//hash_map<Hash, TransactionContent> newCandidates;
 
 	/// <summary>
 	/// List of public nodes which have sent bad transactions.
@@ -41,6 +40,8 @@ public:
 	hash_set<Hash> BlackList;
 
 	Ledger();
+
+	Ledger(string LedgerDB_FileName);
 
 	bool GetAccount(Hash userInfo, AccountInfo & ltd);
 
@@ -55,20 +56,6 @@ public:
 	bool AddUserToLedger(AccountInfo userInfo);
 
 	/// <summary>
-	/// Inserts the list of new transactions to the proposed candidate set.
-	/// </summary>
-	/// <param name="proposedTransactions"></param>
-	//void PushNewProposedTransactions(vector<TransactionContent> proposedTransactions);
-
-	/// <summary>
-	/// Check the list of proposed transactions for consistencey, and add it to candidate set.
-	/// Do it when the source is trustworthy [think].
-	/// </summary>
-	/// <param name="Candidates"></param>
-	/// <returns></returns>
-	//hash_map<Hash, TransactionContent> GetValidatedTransactions(hash_map<Hash, TransactionContent> Candidates);
-
-	/// <summary>
 	/// </summary>
 	/// <param name="Candidates"></param>
 	/// <returns></returns>
@@ -79,6 +66,9 @@ public:
 	//hash_map<Hash, TransactionContent> getCandidates();
 
 	Hash GetRootHash();
+
+	void ProcessIncomingPacket(NetworkPacket packet);
+
 
 };
 

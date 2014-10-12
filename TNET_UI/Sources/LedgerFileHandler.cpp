@@ -11,10 +11,15 @@
 #include "LedgerRootInfo.h"
 
 
-LedgerFileHandler::LedgerFileHandler(HashTree< AccountInfo, LedgerRootInfo > accountTree)
+LedgerFileHandler::LedgerFileHandler()
+{
+
+}
+
+LedgerFileHandler::LedgerFileHandler(HashTree< AccountInfo, LedgerRootInfo > accountTree, string LedgerDB_FileName)
 {
 	AccountTree = accountTree;
-	//fCall = 0;
+	ledger_db.open(LedgerDB_FileName.data());
 }
 
 int LedgerFileHandler::MakeVerifyLedgerTree()
@@ -41,7 +46,6 @@ int LedgerFileHandler::SaveToDB_Callback(AccountInfo leaf)
 	AccountInfo ai = (AccountInfo) leaf;
 
 	//LedgerFileHandler::fCall++;
-
 	//cout << "$$$$$$$$$$$$$$" << LedgerFileHandler::fCall << endl;
 	
 	return treeToDB(ai.AccountID, ai.Money, ai.Name, ai.LastTransactionTime);

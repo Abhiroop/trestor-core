@@ -2,6 +2,7 @@
 #define CONSTANTS_H
 
 #include <hash_map>
+#include <string>
 #include <vector>
 #include "Utils.h"
 #include "Node.h"
@@ -11,14 +12,14 @@
 #include "tbb/concurrent_queue.h"
 #include "tbb/concurrent_hash_map.h"
 #include "tbb/concurrent_vector.h"
-#include "SQLiteCpp/CppSQLite3.h"
+//#include "SQLiteCpp/CppSQLite3.h"
 //extern CppSQLite3DB global_db;
+
+using namespace tbb;
 
 extern tbb::concurrent_queue<string> MessageQueue;
 
 extern concurrent_hash_map<Hash, AccountInfo> GLOBAL_LEDGER_MAP;
-
-extern CppSQLite3DB ledger_db;
 
 //Potential bokapatha warning!
 extern concurrent_vector<Hash> GlobalBlacklistedValidators;
@@ -44,12 +45,13 @@ public :
 
 };
 
-static const char* dbFile = "test.db";
+//static const char* dbFile = "test.db";
 
-static const char* dbInfoFile = "LedgerInfo.db";
+///static const char* dbInfoFile = "LedgerInfo.db";
 
-static const char* Const_LedgerFileName = "Ledger.txt";
+//static const char* Const_LedgerFileName = "Ledger.txt";
 
+/// FOR SIMULATION PURPOSES ONLY
 extern concurrent_hash_map<Hash, shared_ptr<Node>> GlobalNodes;
 
 

@@ -1,3 +1,8 @@
+//
+// @Author : Arpan Jati
+// @Date: 12th Oct 2014
+//
+
 #ifndef NODE_CONTROLLER_H
 #define NODE_CONTROLLER_H
 
@@ -11,6 +16,7 @@
 #include <Windows.h>
 #include "tbb/concurrent_queue.h"
 #include "FakeNetwork.h"
+#include "Consensus.h"
 
 using namespace tbb;
 
@@ -23,6 +29,7 @@ public: bool Vote;
 			Vote = _Vote;
 			Forwarded = _Forwarded;
 		}
+
 } CandidateStatus;
 
 typedef struct TransactionContentPack
@@ -56,8 +63,9 @@ public:
 	Ledger ledger;
 	Ledger getLedger();
 
-	hash_map<Hash, shared_ptr<Node>> Connections;
+	Consensus consensus;
 
+	hash_map<Hash, shared_ptr<Node>> Connections;
 	hash_map<Hash, shared_ptr<Node>> TrustedNodes;
 
 	/// <summary>

@@ -1,4 +1,6 @@
 
+
+
 #include "Constants.h"
 
 concurrent_hash_map<Hash, shared_ptr<Node>> GlobalNodes;
@@ -11,4 +13,3 @@ string Constants::hexChars = "0123456789ABCDEF";
 
 concurrent_vector<Hash> GlobalBlacklistedValidators;
 
-CppSQLite3DB ledger_db;

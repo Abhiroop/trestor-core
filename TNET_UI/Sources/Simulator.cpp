@@ -27,8 +27,6 @@ void Simulator::Timestep()
 		//hash<Hash> h;
 		//Refreshed = true;
 
-		
-
 
 	}
 }
@@ -82,7 +80,7 @@ void Simulator::StartSimulation()
 
 	for (int i = 0; i < 8; i++)
 	{
-		string CN = "NO_NAME_" + to_string(i) + "_";
+		string CN = "NAME_" + to_string(i) + "_";
 
 		//Node n3 = Node(CN, 4, lgr, 100 * i, 100);
 

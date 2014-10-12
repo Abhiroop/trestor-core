@@ -1,8 +1,7 @@
-#ifndef UTILS_H
-#define UTILS_H
-
 //@Author : Aritra Dhar + Arpan Jati
 
+#ifndef UTILS_H
+#define UTILS_H
 
 // GET RID OF THESE on other platforms
 #define _CRT_SECURE_NO_WARNINGS
@@ -64,6 +63,7 @@ enum PacketTypes {
 	TPT_TRANS_REQUEST = 0x20,
 	
 	TPT_TRANS_FORWARDING = 0x21,
+
 	TPT_CONS_STATE = 0x30, TPT_CONS_CURRENT_SET = 0x31, TPT_CONS_REQUEST_TX = 0x32, TPT_CONS_RESP_TX = 0x33,
 
 	TPT_CONS_VOTES = 0x34, TPT_CONS_TIME_SYNC = 0x35, TPT_CONS_DOUBLESPENDERS = 0x36,

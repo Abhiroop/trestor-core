@@ -1,4 +1,3 @@
-
 //
 // @Author : Arpan Jati
 // @Date: 12th Oct 2014
@@ -15,17 +14,14 @@
 #include <mutex>
 #include <memory>
 
-//std::mutex MTX;
-
 Ledger Node::getLedger()
 {
 	return ledger;
 }
 
-
 Node::Node()
 {
-
+	
 }
 
 Node::Node(FakeNetwork _network)
@@ -35,15 +31,11 @@ Node::Node(FakeNetwork _network)
 
 void Node::UpdateEvent()
 {
-	//MTX.lock();
 	//MessageQueue.push(this->PublicKey.ToString() + " Is Awake");
 	LocalMoney ++;
 
 	CreateArbitraryTransactionAndSendToTrustedNodes();
-	//MTX.unlock();
 }
-
-//Timer Tmr;
 
 void CALLBACK TimerProcND(void* lpParametar, BOOLEAN TimerOrWaitFired);
 
@@ -62,7 +54,9 @@ Node::Node(FakeNetwork _network, string _Name, int _ConnectionLimit,  long Money
 
 	PublicKey = Hash(_PublicKey, _PublicKey + 32);
 
-	//ledger = _ledger;
+	ledger = Ledger("LEDGER_" + _Name + ".dat");
+
+	consensus = Consensus(ledger);
 
 	Name = _Name;
 
@@ -233,18 +227,38 @@ void Node::Receive(NetworkPacket Packet)
 	
 	switch (Packet.Type)
 	{
+
 	case TPT_TRANS_REQUEST:
 
-		TransactionContent tc;
-		tc.Deserialize(Packet.Data);
+		{
+			TransactionContent tc;
+			tc.Deserialize(Packet.Data);
 
-		PendingIncomingTransactions.push(TransactionContentPack(Packet.PublicKey_Src, tc));
-		InTransactionCount++;
+			PendingIncomingTransactions.push(TransactionContentPack(Packet.PublicKey_Src, tc));
+			InTransactionCount++;
 
-		MessageQueue.push(to_string(InTransactionCount));
+			MessageQueue.push(to_string(InTransactionCount));
+		}
 
 		break;
 
+	case TPT_CONS_STATE:
+	case TPT_CONS_CURRENT_SET:
+	case TPT_CONS_REQUEST_TX:
+	case TPT_CONS_RESP_TX:
+	case TPT_CONS_VOTES:
+	case TPT_CONS_TIME_SYNC:
+	case TPT_CONS_DOUBLESPENDERS:
+
+		consensus.ProcessIncomingPacket(Packet);
+
+		break;
+
+	case TPT_LSYNC_FETCH_ROOT:
+	case TPT_LSYNC_FETCH_LAYER_INFO:
+	case TPT_LSYNC_FETCH_LAYER_DATA:
+
+		ledger.ProcessIncomingPacket(Packet);
 
 	}
 
