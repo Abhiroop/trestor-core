@@ -2,6 +2,7 @@
 #ifndef IncomingTransactionMap_H
 #define IncomingTransactionMap_H
 
+
 #include "Hash.h"
 #include "TransactionContent.h"
 #include "tbb\concurrent_hash_map.h"
@@ -14,7 +15,7 @@ class TransactionContentData
 {
 	public:
 	TransactionContent TC;
-	set<Hash> ForwardersPK;
+	hash_set<Hash> ForwardersPK;
 };
 
 
@@ -31,6 +32,10 @@ public:
 	//this method will also check for double spending
 	void InsertTransactionContent(TransactionContent tc, Hash forwarderPublicKey);
 	void UpdateTransactionID(Hash transactionID, Hash forwarderPublicKey);
+
+	void GetEligibleTransactionForConsensus(vector<Hash> connectedValidators, vector<Hash>& transactionIDtoMigrate);
+
+	void RemoveTransactionsFromTransactionMap(vector<Hash> transactionID);
 
 	vector<TransactionContent> FetchTransactionContent(vector<Hash> differenceTransactionIDs);
 	vector<Hash> FetchAllTransactionID();

@@ -1,6 +1,6 @@
 
 #include "IncomingTransactionMap.h"
-
+#include "Constants.h"
 using namespace std;
 
 typedef concurrent_hash_map<Hash, TransactionContentData> HM;
@@ -18,6 +18,42 @@ bool IncomingTransactionMap::GetTransactionContentData(TransactionContentData& t
 	}
 
 	return false;
+}
+
+void IncomingTransactionMap::GetEligibleTransactionForConsensus(vector<Hash> connectedValidators, vector<Hash>& transactionIDtoMigrate)
+{
+	for (HM::iterator it = TransactionMap.begin(); it != TransactionMap.begin(); ++it)
+	{
+		Hash TransactionID = it->first;
+		TransactionContentData TCD = it->second;
+		hash_set<Hash> ForwardersPKs = TCD.ForwardersPK;
+
+		//run through connectedValidators
+		int counter = 0;
+		for (int i = 0; i < (int)connectedValidators.size(); i++)
+		{
+			Hash validatorPK = connectedValidators[i];
+			hash_set<Hash>::iterator itr = ForwardersPKs.find(validatorPK);
+
+			if (itr != ForwardersPKs.end())
+			{
+				++counter;
+			}
+		}
+		float perc = (float) counter / connectedValidators.size();
+		if (perc * 100 >= Constants::CONS_TRUSTED_VALIDATOR_THRESHOLD_PERC)
+			transactionIDtoMigrate.push_back(TransactionID);
+	}    
+}
+
+void IncomingTransactionMap::RemoveTransactionsFromTransactionMap(vector<Hash> transactionIDs)
+{
+	for (int i = 0; i < (int)transactionIDs.size(); i++)
+	{
+		Hash transactionID = transactionIDs[i];
+		
+		TransactionMap.erase(transactionID);
+	}
 }
 
 vector<Hash> IncomingTransactionMap::FetchAllTransactionID()
@@ -76,10 +112,10 @@ void IncomingTransactionMap::UpdateTransactionID(Hash transactionID, Hash forwar
 	{
 		TransactionContentData tcd = acc->second;
 
-		set<Hash> fpk = tcd.ForwardersPK;
+		hash_set<Hash> fpk = tcd.ForwardersPK;
 
 		bool exists = false;
-		for (set<Hash>::iterator it = fpk.begin(); it != fpk.end(); ++it)
+		for (hash_set<Hash>::iterator it = fpk.begin(); it != fpk.end(); ++it)
 		{
 			Hash tmp = *it;
 			if (tmp == forwarderPublicKey)
@@ -96,7 +132,7 @@ void IncomingTransactionMap::UpdateTransactionID(Hash transactionID, Hash forwar
 	}
 }
 /*
-Given a transaction ID from a validator, insert it in the current transactionMap
+Given a transaction ID from a validator, update it in the current transactionMap
 */
 void IncomingTransactionMap::InsertTransactionContent(TransactionContent tc, Hash forwarderPublicKey)
 {
@@ -127,10 +163,10 @@ void IncomingTransactionMap::InsertTransactionContent(TransactionContent tc, Has
 	{
 		TransactionContentData tcd = acc->second;
 
-		set<Hash> ForwardersPK = tcd.ForwardersPK;
+		hash_set<Hash> ForwardersPK = tcd.ForwardersPK;
 
 		bool exists = false;
-		for (set<Hash>::iterator it = ForwardersPK.begin(); it != ForwardersPK.end(); ++it)
+		for (hash_set<Hash>::iterator it = ForwardersPK.begin(); it != ForwardersPK.end(); ++it)
 		{
 			Hash tmp = *it;
 			if (tmp == forwarderPublicKey)
@@ -145,5 +181,4 @@ void IncomingTransactionMap::InsertTransactionContent(TransactionContent tc, Has
 			ForwardersPK.insert(forwarderPublicKey);
 		}
 	}
-
 }
