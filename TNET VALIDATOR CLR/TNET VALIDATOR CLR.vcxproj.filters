@@ -237,6 +237,9 @@
     <ClCompile Include="..\TNET_UI\Sources\TreeSyncData.cpp">
       <Filter>Sources\HashTree</Filter>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\MoneyInOutFlow.cpp">
+      <Filter>Sources\Ledger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h">
@@ -577,6 +580,9 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\TreeSyncData.h">
       <Filter>Sources\HashTree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\MoneyInOutFlow.h">
+      <Filter>Sources\Ledger</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
