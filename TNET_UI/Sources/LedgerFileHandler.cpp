@@ -94,10 +94,10 @@ int LedgerFileHandler::SaveToDB()
 
 	LedgerRootInfo ledgerRootInfo = AccountTree.GetRootInfo();
 	
-	Hash LedgerHash = ledgerRootInfo.getLedgerHash();
-	Hash LastLedgerHash =  ledgerRootInfo.getLastLedgerHash();
-	int64_t LCLTime = ledgerRootInfo.getLCLTime();
-	int64_t SequenceNumber = ledgerRootInfo.getSequenceNumber();
+	Hash LedgerHash = ledgerRootInfo.LedgerHash;
+	Hash LastLedgerHash =  ledgerRootInfo.LastLedgerHash;
+	int64_t LCLTime = ledgerRootInfo.LCLTime;
+	int64_t SequenceNumber = ledgerRootInfo.SequenceNumber;
 
 	/*
 	CppSQLite3Statement stmt = ledger_db.compileStatement("DELETE FROM LedgerInfo");

@@ -66,7 +66,7 @@ concurrent_hash_map<Hash, MoneyInOutFlow> ConsensusMap::GetAcceptedAccountDelta(
 		vector<TransactionEntity> sources = TC.Sources;
 		vector<TransactionEntity> destinations = TC.Destinations;
 		//update sources
-		for (int i = 0; i < sources.size(); i++)
+		for (int i = 0; i < (int)sources.size(); i++)
 		{
 			Hash PKsource = sources[i].PublicKey;
 			int64_t outMoney = sources[i].Amount;
@@ -86,7 +86,7 @@ concurrent_hash_map<Hash, MoneyInOutFlow> ConsensusMap::GetAcceptedAccountDelta(
 			}
 		}
 		//update destinations
-		for (int i = 0; i < destinations.size(); i++)
+		for (int i = 0; i < (int)destinations.size(); i++)
 		{
 			Hash PKdestination = destinations[i].PublicKey;
 			int64_t inMoney = destinations[i].Amount;

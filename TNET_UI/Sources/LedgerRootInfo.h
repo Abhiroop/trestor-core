@@ -11,22 +11,17 @@
 
 class LedgerRootInfo : public RootDataType
 {
+public:	
+	
 	Hash LedgerHash;
 	Hash LastLedgerHash;
 	int64_t LCLTime;
 	int64_t SequenceNumber;
 
-public:
-
 	LedgerRootInfo();
 	LedgerRootInfo(Hash LedgerHash, Hash LastLedgerhash, int64_t LCLTime, int64_t SequenceNumber);
 
-	Hash getLedgerHash();
-	Hash getLastLedgerHash();
-	int64_t getLCLTime();
-	int64_t getSequenceNumber();
-
-	Hash LedgerRootInfo::getID();
+	Hash getID();
 
 };
 
