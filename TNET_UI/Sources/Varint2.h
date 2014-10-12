@@ -5,8 +5,13 @@
 #ifndef VARINT_2
 #define VARINT_2
 
-#include "Utils.h"
-#include "Constants.h"
+#include <vector>
+#include <stdint.h>
+
+using namespace std;
+
+//#include "Utils.h"
+//#include "Constants.h"
 
 /// <summary>
 /// A variable length integer with, the following format:
@@ -20,13 +25,13 @@ public:
 
 	static int GetBitLength(int64_t value);
 
-	static vector<byte> Encode(int64_t value);
+	static vector<uint8_t> Encode(int64_t value);
 		
-	static bool Decode(vector<byte> value, int startIndex, int & length, int64_t & result);
+	static bool Decode(vector<uint8_t> value, int startIndex, int & length, int64_t & result);
 	
-	static bool Decode(vector<byte> value, int64_t result);	
+	static bool Decode(vector<uint8_t> value, int64_t result);
 
-	static void TestVarint2()
+	/*static void TestVarint2()
 	{
 		//Random rnd = new Random();
 
@@ -54,7 +59,7 @@ public:
 		}
 
 		MessageQueue.push(" TEST FINISHED ---------------------------");
-	}
+	}*/
 
 };
 

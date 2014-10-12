@@ -8,15 +8,15 @@
 
 #include "Ledger.h"
 
-
 Ledger::Ledger()
 {
 	TransactionFees = 0;
 	ledgerFileHandler = LedgerFileHandler(LedgerTree, "LedgerT.db");
 }
 
-Ledger::Ledger(string LedgerDB_FileName)
+Ledger::Ledger(string LedgerDB_FileName, FakeNetwork _network)
 {
+	network = _network;
 	TransactionFees = 0;
 	ledgerFileHandler = LedgerFileHandler(LedgerTree, LedgerDB_FileName);
 }

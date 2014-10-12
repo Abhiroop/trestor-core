@@ -10,6 +10,9 @@
 #include "LedgerRootInfo.h"
 #include "LedgerFileHandler.h"
 
+// FOR TESTING
+#include "FakeNetwork.h"
+
 //SHIT JUST GOT REAL HERE!!!!
 
 typedef struct LedgerOpStatistics
@@ -26,6 +29,8 @@ class Ledger
 {
 
 public:
+
+	FakeNetwork network;
 	
 	LedgerRootInfo ledgerRootInfo;
 	HashTree<AccountInfo, LedgerRootInfo> LedgerTree;
@@ -41,7 +46,7 @@ public:
 
 	Ledger();
 
-	Ledger(string LedgerDB_FileName);
+	Ledger(string LedgerDB_FileName, FakeNetwork network);
 
 	bool GetAccount(Hash userInfo, AccountInfo & ltd);
 

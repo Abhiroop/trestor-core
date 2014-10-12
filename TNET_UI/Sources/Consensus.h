@@ -13,6 +13,9 @@
 #include "ProtocolPackager.h"
 #include "TransactionIDInfo.h"
 
+// FOR TESTING
+#include "FakeNetwork.h"
+
 #include "ConsensusMap.h"
 #include "IncomingTransactionMap.h"
 #include "NetworkCommand.h"
@@ -25,11 +28,13 @@ class Consensus
 	IncomingTransactionMap incomingTransactionMap;
 	Ledger ledger;
 
+	FakeNetwork network;
+
 public:
 
 	Consensus();
 
-	Consensus(Ledger _ledger);
+	Consensus(Ledger _ledger, FakeNetwork _network);
 
 	void ProcessIncomingPacket(NetworkPacket packet);
 

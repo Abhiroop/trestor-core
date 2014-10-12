@@ -17,7 +17,6 @@
 #include <functional>
 
 //void CALLBACK TimerProc(void* lpParametar, BOOLEAN TimerOrWaitFired);
-
 //typedef void(*NetworkCallback)(NetworkPacket Packet);
 
 VOID CALLBACK TimerCallbackX(PTP_CALLBACK_INSTANCE Instance, PVOID Parameter, PTP_TIMER Timer);

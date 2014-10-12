@@ -18,9 +18,10 @@ Consensus::Consensus()
 
 }
 
-Consensus::Consensus(Ledger _ledger)
+Consensus::Consensus(Ledger _ledger, FakeNetwork _network)
 {
 	ledger = _ledger;
+	network = _network;
 }
 
 void Consensus::ProcessIncomingPacket(NetworkPacket packet)
