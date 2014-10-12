@@ -20,6 +20,7 @@ vector<byte> VoteType::Serialize()
 	PDTs.push_back(*ProtocolPackager::Pack(Vote, 1));
 	return ProtocolPackager::PackRaw(PDTs);
 }
+
 void VoteType::Deserialize(vector<byte> Data)
 {
 

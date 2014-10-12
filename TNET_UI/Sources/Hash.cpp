@@ -77,12 +77,7 @@ ostream& operator<<(ostream &os, Hash &mc)
 }
 
 string Hash::ToString() const
-{
-	//bool Have_Lock = HMTX.try_lock();
-
-	//if (Have_Lock)
-	//{
-	uint8_t hexs[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+{	
 	int length = (int)(*this).size();
 
 	if (length > 0)
@@ -98,9 +93,6 @@ string Hash::ToString() const
 		return string(finalStr.begin(), finalStr.end());
 	}
 
-	//HMTX.unlock();
-	//}
-
-	return "NULLDATA";
+	return "NULL_DATA_BAD_BAD_BAD";
 }
 

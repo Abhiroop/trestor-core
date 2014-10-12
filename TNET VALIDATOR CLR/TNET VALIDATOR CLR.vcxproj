@@ -276,6 +276,8 @@
     <ClInclude Include="..\TNET_UI\Sources\Ledger.h" />
     <ClInclude Include="..\TNET_UI\Sources\LedgerFileHandler.h" />
     <ClInclude Include="..\TNET_UI\Sources\LedgerRootInfo.h" />
+    <ClInclude Include="..\TNET_UI\Sources\NetworkCommand.h" />
+    <ClInclude Include="..\TNET_UI\Sources\NetworkManager.h" />
     <ClInclude Include="..\TNET_UI\Sources\TreeSyncData.h" />
     <ClInclude Include="..\TNET_UI\Sources\Node.h" />
     <ClInclude Include="..\TNET_UI\Sources\OnionConnectionEstablish.h" />

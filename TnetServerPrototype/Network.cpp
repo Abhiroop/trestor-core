@@ -125,7 +125,7 @@ void NetworkClient::ProcessCommands(Object^ obj)
 
 					tc.Deserialize(cr.Data);
 
-					string sender = base64_encode_2((char const*)tc.PublicKey_Source.data(), tc.PublicKey_Source.size());
+					string sender = base64_encode_2((char const*)tc.PublicKey.data(), tc.PublicKey.size());
 
 					int64_t total_money = 0;
 					for (int i = 0; i < (int)tc.Destinations.size(); i++)

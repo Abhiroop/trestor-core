@@ -27,7 +27,6 @@ class Constants
 {
 public :
 
-	
 	static const uint64_t FIN_MIN_BALANCE = 1500;
 	static const int VALIDATOR_COUNT = 5;
 	static const int SIM_REFRESH_MS = 50;

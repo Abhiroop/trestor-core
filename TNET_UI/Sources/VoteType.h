@@ -2,7 +2,6 @@
 #ifndef VoteType_H
 #define VoteType_H
 
-
 #include "Utils.h"
 #include "SerializableBase.h"
 

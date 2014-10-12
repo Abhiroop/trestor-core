@@ -14,6 +14,10 @@ typedef vector<unsigned char> HashData;
 class Hash : public HashData
 {
 
+private:
+
+	const uint8_t hexs[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+
 public:
 
 	static const size_t bucket_size = 5;
@@ -42,6 +46,5 @@ public:
 	string ToString() const;
 
 };
-
 
 #endif
