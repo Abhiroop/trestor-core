@@ -17,53 +17,82 @@
 
 Consensus::Consensus()
 {
-
+	
 }
 
-Consensus::Consensus(Ledger _ledger, FakeNetwork _network)
+Consensus::Consensus(Hash _PublicKey, Ledger _ledger, FakeNetwork _network)
 {
+	PublicKey = _PublicKey;
 	ledger = _ledger;
 	network = _network;
 }
 
 void Consensus::ProcessIncomingPacket(NetworkPacket packet)
 {
-
 	switch (packet.Type)
 	{
 
 	case TPT_CONS_STATE:
 
 
-	case TPT_CONS_CURRENT_SET: //
+	case TPT_CONS_CURRENT_SET:
 
 		// SET OF TRANSACTION ID's
 		// This means a node has sent its current consensus set, we should consider that and add it to our 
 		// list of current candidate transactions.
 
 	{
-		vector<Hash> TransactionIDs;
+		// Decode the request as a sequence of TransactionID's
+		vector<vector<unsigned char>> TransactionIDs;
+		ProtocolPackager::UnpackVectorVector_s(packet.Data, Constants::LEN_TRANSACTION_ID, TransactionIDs);
 
-		vector<ProtocolDataType> PDTs = ProtocolPackager::UnPackRaw(packet.Data);
-
-		for (int i = 0; i < (int)PDTs.size(); i++)
+		for (int i = 0; i < (int)TransactionIDs.size(); i++)
 		{
-			vector<byte> TR_ID;
-			if (ProtocolPackager::UnpackByteVector_s(PDTs[i++], 0, Constants::LEN_TRANSACTION_ID, TR_ID))
+			// We dont have transaction info for the transaction, so get it from others.
+			if (!incomingTransactionMap.HaveTransactionInfo(TransactionIDs[i]))
 			{
-				TransactionIDs.push_back(TR_ID);
+
 			}
 		}
+	}
+
+		break;
+
+	case TPT_CONS_REQUEST_TX:
+
+		// Its a request for TransactionContent objects for corresponding list of TransactionID's
+	{
+		// Decode the request as a sequence of TransactionID's
+		vector<vector<unsigned char>> TransactionIDs;
+		ProtocolPackager::UnpackVectorVector_s(packet.Data, Constants::LEN_TRANSACTION_ID, TransactionIDs);
+
+		vector<vector<unsigned char>> ResponseList;
+
+		for (int i = 0; i < (int)TransactionIDs.size(); i++)
+		{
+			TransactionContentData TCD;
+			// Apparently, we dp have the TransactionID, yayy, add it to the list to be sent back.
+			if (incomingTransactionMap.GetTransactionContentData(TCD, TransactionIDs[i]))
+			{				
+				ResponseList.push_back(TCD.TC.Serialize());
+			}
+		}
+
+		NetworkPacketQueueEntry npqe;
+
+		//  Set the reply address
+		npqe.PublicKey_Dest = packet.PublicKey_Src;
+		npqe.Packet.Type = TPT_CONS_RESP_TX;
+		npqe.Packet.PublicKey_Src = PublicKey;
+		npqe.Packet.Data = ProtocolPackager::Pack(ResponseList);
+
+		network.SendPacket(npqe);
+				
 
 	}
 
 		break;
 
-		// 
-
-		//incomingTransactionMap.
-
-	case TPT_CONS_REQUEST_TX:
 	case TPT_CONS_RESP_TX:
 	case TPT_CONS_VOTES:
 	case TPT_CONS_TIME_SYNC:

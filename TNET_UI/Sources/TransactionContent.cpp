@@ -26,7 +26,7 @@ TransactionContent::TransactionContent()
 {
 	//PublicKey_Source = Hash();
 	Timestamp = 0;
-	Destinations = vector<TransactionEntity>();
+	//Destinations = vector<TransactionEntity>();
 	//Signature = Hash();
 }
 
@@ -51,7 +51,7 @@ Hash TransactionContent::GetTransactionData()
 		((int64_t*)(temp1))[0] = ts.Amount;
 
 		vector<unsigned char> temp2(temp1, temp1 + 8);
-		
+
 		_data.insert(_data.end(), ts.PublicKey.begin(), ts.PublicKey.end());
 		_data.insert(_data.end(), temp2.begin(), temp2.end());
 	}
@@ -82,16 +82,16 @@ Hash TransactionContent::GetTransactionData()
 
 /*void TransactionContent::UpdateAndSignContent(vector<TransactionEntity> _Sources, int64_t _Timestamp, vector<TransactionEntity> _Destinations, vector<Hash> _ExpandedPrivateKeys)
 {
-	Destinations = _Destinations;
-	Timestamp = _Timestamp;
-	Sources = _Sources;
+Destinations = _Destinations;
+Timestamp = _Timestamp;
+Sources = _Sources;
 
-	byte temp_signature[64];
-	Hash getTranData = GetTransactionData();
-	ed25519_sign(temp_signature, getTranData.data(), getTranData.size(), PublicKey_Source.data(), _ExpandedPrivateKeys.data());
-	Signature = Hash(temp_signature, temp_signature + 64);
+byte temp_signature[64];
+Hash getTranData = GetTransactionData();
+ed25519_sign(temp_signature, getTranData.data(), getTranData.size(), PublicKey_Source.data(), _ExpandedPrivateKeys.data());
+Signature = Hash(temp_signature, temp_signature + 64);
 
-	UpdateIntHash();
+UpdateIntHash();
 }*/
 
 bool TransactionContent::IsSource(Hash SourcePublicKey)
@@ -99,7 +99,7 @@ bool TransactionContent::IsSource(Hash SourcePublicKey)
 	for (int i = 0; i < (int)Sources.size(); i++)
 	{
 		TransactionEntity TE = Sources[i];
-		
+
 		if (TE.PublicKey == SourcePublicKey)
 			return true;
 	}
@@ -144,7 +144,7 @@ bool TransactionContent::IntegrityCheck()
 	}
 
 	if ((incoming == outgoing) &&
-		(Sources.size() > 0) && 
+		(Sources.size() > 0) &&
 		(Destinations.size() > 0))
 	{
 		return true;
@@ -161,7 +161,7 @@ bool TransactionContent::VerifySignature()
 	}
 
 	Hash getTranData = GetTransactionData();
-	
+
 	if (Sources.size() == Signatures.size())
 	{
 		// Adding Sources
@@ -225,25 +225,26 @@ Hash TransactionContent::GetTransactionDataAndSignature()
 
 ///////////////////////////////////////////////////////////
 
-/*
-Hash PublicKey_Source;
-int64_t Timestamp;
-vector<TransactionEntity> Destinations;
-Hash Signature;
-*/
-
 vector<byte> TransactionContent::Serialize()
 {
 	vector<ProtocolDataType> PDTs;
-	/*PDTs.push_back(*ProtocolPackager::Pack(PublicKey_Source, 0));
-	PDTs.push_back(*ProtocolPackager::Pack(Timestamp, 1));
+
+	PDTs.push_back(*ProtocolPackager::Pack(Timestamp, 0));
+
+	for (vector<TransactionEntity>::iterator it = Sources.begin(); it != Sources.end(); ++it)
+	{
+		PDTs.push_back(*ProtocolPackager::Pack((*it).Serialize(), 1));
+	}
 
 	for (vector<TransactionEntity>::iterator it = Destinations.begin(); it != Destinations.end(); ++it)
 	{
 		PDTs.push_back(*ProtocolPackager::Pack((*it).Serialize(), 2));
 	}
 
-	PDTs.push_back(*ProtocolPackager::Pack(Signature, 3));*/
+	for (vector<Hash>::iterator it = Signatures.begin(); it != Signatures.end(); ++it)
+	{
+		PDTs.push_back(*ProtocolPackager::Pack((*it), 3));
+	}
 
 	return ProtocolPackager::PackRaw(PDTs);
 }
@@ -255,45 +256,68 @@ void TransactionContent::Deserialize(vector<byte> Data)
 {
 	TransactionContent();
 
-	/*vector<ProtocolDataType> PDTs = ProtocolPackager::UnPackRaw(Data);
+	vector<ProtocolDataType> PDTs = ProtocolPackager::UnPackRaw(Data);
 	int cnt = 0;
 
 	while (cnt < (int)PDTs.size())
 	{
 		ProtocolDataType* PDT = &PDTs[cnt++];
 
-
-
 		switch (PDT->NameType)
 		{
 		case 0:
-			ProtocolPackager::UnpackByteVector_s(*PDT, 0, Constants::KEYLEN_PUBLIC, PublicKey_Source);
+
+			ProtocolPackager::UnpackInt64(*PDT, 0, Timestamp);
+
 			break;
 
 		case 1:
-			ProtocolPackager::UnpackInt64(*PDT, 1, Timestamp);
+
+		{
+			vector<byte> tempVector;
+			ProtocolPackager::UnpackByteVector(*PDT, 1, tempVector);
+			if (tempVector.size() > 0)
+			{
+				TransactionEntity tsk;
+				tsk.Deserialize(tempVector);
+				Sources.push_back(tsk);
+			}
+		}
+
 			break;
 
 		case 2:
 
 		{
-				  vector<byte> tempVector;
-				  ProtocolPackager::UnpackByteVector(*PDT, 2, tempVector);
-				  if (tempVector.size() > 0)
-				  {
-					  TransactionEntity tsk;
-					  tsk.Deserialize(tempVector);
-					  Destinations.push_back(tsk);
-				  }
+			vector<byte> tempVector;
+			ProtocolPackager::UnpackByteVector(*PDT, 2, tempVector);
+			if (tempVector.size() > 0)
+			{
+				TransactionEntity tsk;
+				tsk.Deserialize(tempVector);
+				Destinations.push_back(tsk);
+			}
 		}
 
 			break;
 
 		case 3:
-			ProtocolPackager::UnpackByteVector_s(*PDT, 3, Constants::KEYLEN_SIGNATURE, Signature);
+
+		{
+			vector<byte> tempVector;
+			ProtocolPackager::UnpackByteVector(*PDT, 3, tempVector);
+			if (tempVector.size() > 0)
+			{
+				TransactionEntity tsk;
+				tsk.Deserialize(tempVector);
+				Signatures.push_back(tempVector);
+			}
+		}
+
 			break;
 		}
-	}*/
+
+	}
 
 }
 

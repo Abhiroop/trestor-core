@@ -20,11 +20,6 @@ private:
 	void UpdateIntHash();
 
 public:
-	/*
-	Hash getPublicKey_Source();
-	int64_t getTimestamp();
-	vector<TransactionEntity> getDestinations();
-	Hash getSignature();*/
 
 	vector<TransactionEntity> Sources;
 	int64_t Timestamp;

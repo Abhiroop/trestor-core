@@ -28,13 +28,15 @@ class Consensus
 	IncomingTransactionMap incomingTransactionMap;
 	Ledger ledger;
 
+	Hash PublicKey;
+
 	FakeNetwork network;
 
 public:
 
 	Consensus();
 
-	Consensus(Ledger _ledger, FakeNetwork _network);
+	Consensus(Hash _PublicKey, Ledger _ledger, FakeNetwork _network);
 
 	void ProcessIncomingPacket(NetworkPacket packet);
 

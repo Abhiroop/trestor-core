@@ -159,6 +159,30 @@ unique_ptr<ProtocolDataType> ProtocolPackager::Pack(vector<byte> vectorValue, by
 	return PDType;
 }
 
+vector<byte> ProtocolPackager::Pack(vector<vector<unsigned char>> vectorValue)
+{
+	vector<ProtocolDataType> PDTs;
+
+	for (int i = 0; i < (int)vectorValue.size(); i++)
+	{
+		PDTs.push_back(*ProtocolPackager::Pack(vectorValue[i], 0));
+	}
+
+	return PackRaw(PDTs);
+}
+
+vector<byte> ProtocolPackager::Pack(vector<vector<char>> vectorValue)
+{	
+	vector<ProtocolDataType> PDTs;
+	
+	for (int i = 0; i < (int)vectorValue.size(); i++)
+	{
+		PDTs.push_back(*ProtocolPackager::Pack(vectorValue[i], 0));
+	}
+
+	return PackRaw(PDTs);
+}
+
 unique_ptr<ProtocolDataType> ProtocolPackager::Pack(vector<char> vectorValue, byte nameType)
 {
 	unique_ptr<ProtocolDataType> PDType = GenericPack(PD_BYTE_VECTOR, nameType);
@@ -264,6 +288,38 @@ bool ProtocolPackager::UnpackByteVector_char(ProtocolDataType packedData, byte n
 		return true;
 	}
 	else return false;
+}
+
+bool ProtocolPackager::UnpackVectorVector(vector<byte> rawData, vector<vector<byte>> & Data)
+{
+	vector<ProtocolDataType> PDTs = ProtocolPackager::UnPackRaw(rawData);
+
+	for (int i = 0; i < (int)PDTs.size(); i++)
+	{
+		vector<byte> TR_ID;
+		if (ProtocolPackager::UnpackByteVector(PDTs[i++], 0, TR_ID))
+		{
+			Data.push_back(TR_ID);
+		}
+	}
+
+	return true;
+}
+
+bool ProtocolPackager::UnpackVectorVector_s(vector<byte> rawData, int ExpectedSize, vector<vector<byte>> & Data)
+{
+	vector<ProtocolDataType> PDTs = ProtocolPackager::UnPackRaw(rawData);
+
+	for (int i = 0; i < (int)PDTs.size(); i++)
+	{
+		vector<byte> TR_ID;
+		if (ProtocolPackager::UnpackByteVector_s(PDTs[i++], 0, ExpectedSize, TR_ID))
+		{
+			Data.push_back(TR_ID);
+		}
+	}
+
+	return true;
 }
 
 bool ProtocolPackager::UnpackByteVector_s(ProtocolDataType packedData, byte nameType, int ExpectedSize, vector<byte> & Data)
