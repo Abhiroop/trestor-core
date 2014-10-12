@@ -156,6 +156,7 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\LedgerRootInfo.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\MoneyInOutFlow.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\TreeSyncData.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\main1.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
@@ -271,6 +272,7 @@
     <ClInclude Include="..\TNET_UI\Sources\Ledger.h" />
     <ClInclude Include="..\TNET_UI\Sources\LedgerFileHandler.h" />
     <ClInclude Include="..\TNET_UI\Sources\LedgerRootInfo.h" />
+    <ClInclude Include="..\TNET_UI\Sources\MoneyInOutFlow.h" />
     <ClInclude Include="..\TNET_UI\Sources\NetworkCommand.h" />
     <ClInclude Include="..\TNET_UI\Sources\NetworkManager.h" />
     <ClInclude Include="..\TNET_UI\Sources\TreeSyncData.h" />

@@ -77,6 +77,12 @@ int LedgerFileHandler::UpdateLedgerInfo(Hash LedgerHash, Hash LastLedgerHash, in
 	stmt.bind("@u3", LCLTime);
 	stmt.bind("@u4", SequenceNumber);
 
+	int row = stmt.execDML();
+
+	if (row > 0)
+		return 1;
+
+	return 0;
 }
 
 int LedgerFileHandler::SaveToDB()
