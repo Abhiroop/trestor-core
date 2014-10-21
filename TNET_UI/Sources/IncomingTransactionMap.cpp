@@ -5,6 +5,7 @@ using namespace std;
 
 typedef concurrent_hash_map<Hash, TransactionContentData> HM;
 
+
 /*
 Given a transactionID returns current associated TransactionContentData, else return false
 */
@@ -18,6 +19,27 @@ bool IncomingTransactionMap::GetTransactionContentData(TransactionContentData& t
 	}
 
 	return false;
+}
+
+void IncomingTransactionMap::InsertNewTransaction(TransactionContent tc, Hash userPublicKey)
+{
+	if (tc.VerifySignature())
+	{
+		concurrent_hash_map<Hash, TransactionContent>::accessor acc;
+
+		// Insert if the transaction does not already exist.
+		if (!IncomingTransactions.find(acc, tc.GetID()))
+		{
+			IncomingTransactions.insert(make_pair(tc.GetID(), tc));
+		}
+	}
+	else
+	{
+		// Add the user to the blacklist id signature is invalid or integrity checks fails.
+		GlobalBlacklistedUsers.push_back(userPublicKey);
+	}
+
+	
 }
 
 void IncomingTransactionMap::GetEligibleTransactionForConsensus(vector<Hash> connectedValidators, vector<Hash>& transactionIDtoMigrate)

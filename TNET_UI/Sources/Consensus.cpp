@@ -32,6 +32,20 @@ void Consensus::ProcessIncomingPacket(NetworkPacket packet)
 	switch (packet.Type)
 	{
 
+	case TPT_TRANS_REQUEST:
+
+		{
+			TransactionContent tc;
+			tc.Deserialize(packet.Data);
+
+			incomingTransactionMap.InsertNewTransaction(tc, packet.PublicKey_Src);
+
+			// PendingIncomingTransactions.push(TransactionContentPack(Packet.PublicKey_Src, tc));
+			// MessageQueue.push(to_string(InTransactionCount));
+		}
+
+		break;
+
 	case TPT_CONS_STATE:
 
 

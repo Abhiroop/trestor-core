@@ -13,3 +13,5 @@ string Constants::hexChars = "0123456789ABCDEF";
 
 concurrent_vector<Hash> GlobalBlacklistedValidators;
 
+concurrent_vector<Hash> GlobalBlacklistedUsers;
+

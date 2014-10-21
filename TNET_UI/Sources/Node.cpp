@@ -187,37 +187,6 @@ int64_t Node::Money()
 	else return -1;
 }
 
-
-/*/// <summary>
-/// [TO BE CALLED BY OTHER NODES] Sends transactions to destination, only valid ones will be processed.
-/// </summary>
-/// <param name="source"></param>
-/// <param name="Transactions"></param>
-void Node::SendTransaction(Hash source, TransactionContent Transaction)
-{
-	PendingIncomingTransactions.push(TransactionContentPack(source, Transaction));
-	InTransactionCount++;
-}
-*/
-
-/// <summary>
-/// [TO BE CALLED BY OTHER NODES] Sends candidates to destination [ONLY AFTER > 50% voting], only valid ones will be processed.
-/// </summary>
-/// <param name="source"></param>
-/// <param name="Transactions"></param>
-void Node::SendCandidates(Hash source, vector<TransactionContent> Transactions)
-{
-	if (TrustedNodes.count(source) > 0) // Is Trusted Node
-	{
-		for (int i = 0; i < (int)Transactions.size(); i++)
-		{
-			TransactionContent tc = Transactions[i];
-			PendingIncomingCandidates.push(TransactionContentPack(source, tc));
-			InCandidatesCount++;
-		}
-	}
-}
-
 void Node::Receive(NetworkPacket Packet)
 {
 	/*string _SZ = ", " + to_string( Packet.Data.size()) + (string)" Bytes";
@@ -229,18 +198,6 @@ void Node::Receive(NetworkPacket Packet)
 	{
 
 	case TPT_TRANS_REQUEST:
-
-		{
-			TransactionContent tc;
-			tc.Deserialize(Packet.Data);
-
-			PendingIncomingTransactions.push(TransactionContentPack(Packet.PublicKey_Src, tc));
-			InTransactionCount++;
-
-			MessageQueue.push(to_string(InTransactionCount));
-		}
-
-		break;
 
 	case TPT_CONS_STATE:
 	case TPT_CONS_CURRENT_SET:

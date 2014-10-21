@@ -24,6 +24,9 @@ extern concurrent_hash_map<Hash, AccountInfo> GLOBAL_LEDGER_MAP;
 //Potential bokapatha warning!
 extern concurrent_vector<Hash> GlobalBlacklistedValidators;
 
+// Users sending bad transaction requests.
+extern concurrent_vector<Hash> GlobalBlacklistedUsers;
+
 class Constants
 {
 public :

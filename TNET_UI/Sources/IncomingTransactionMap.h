@@ -22,12 +22,20 @@ class TransactionContentData
 class IncomingTransactionMap
 {
 private:
-	//[Transaction ID] ->[[Transaction Content] -> [vector of sender address]]
+	//[Transaction ID] -> [[Transaction Content] -> [vector of sender address]]
 	concurrent_hash_map<Hash, TransactionContentData> TransactionMap;
+
+	//[Transaction ID] -> Transaction Data
+	concurrent_hash_map<Hash, TransactionContent> IncomingTransactions;
 
 public:
 
 	bool GetTransactionContentData(TransactionContentData& transactionContentData, Hash transactionID);
+	
+
+	// Adds a transaction to the current processing queue (IncomingTransactions), 
+	// if valid, it will be broadcasted to other connected validators.
+	void InsertNewTransaction(TransactionContent tc, Hash userPublicKey);
 
 	//this method will also check for double spending
 	void InsertTransactionContent(TransactionContent tc, Hash forwarderPublicKey);
