@@ -139,6 +139,13 @@ vector<int> GenerateNonRepeatingDistribution(int maxNumber, int Count, int self)
 }
 
 
+Hash GenerateNewToken32()
+{
+	unsigned char dp[32];
+	RandomFillBytes(dp, 32);
+	return Hash(dp, dp + 32);
+}
+
 //there may be some petalevel bullshit 
 uint64_t getCurrentUTFtime()
 {

@@ -30,7 +30,7 @@ Consensus::Consensus(State _state, Hash _PublicKey, Ledger _ledger, FakeNetwork 
 	network = _network;
 }
 
-// Process pending/queued operations.
+// Process pending / queued operations.
 void Consensus::DoEvents()
 {
 	incomingTransactionMap.DoEvents();
@@ -85,7 +85,7 @@ void Consensus::ProcessIncomingPacket(NetworkPacket packet)
 
 		break;
 
-	case TPT_CONS_REQUEST_TX:
+	case TPT_CONS_REQUEST_TC_TX:
 
 		// Its a request for TransactionContent objects for corresponding list of TransactionID's
 	{
@@ -109,18 +109,41 @@ void Consensus::ProcessIncomingPacket(NetworkPacket packet)
 
 		//  Set the reply address
 		npqe.PublicKey_Dest = packet.PublicKey_Src;
-		npqe.Packet.Type = TPT_CONS_RESP_TX;
+		npqe.Packet.Token = packet.Token;
+		npqe.Packet.Type = TPT_CONS_RESP_TC_TX;
 		npqe.Packet.PublicKey_Src = PublicKey;
 		npqe.Packet.Data = ProtocolPackager::Pack(ResponseList);
-
+		
 		network.SendPacket(npqe);
-
 
 	}
 
 		break;
 
-	case TPT_CONS_RESP_TX:
+	case TPT_CONS_RESP_TC_TX:
+	
+		// We have received a response form a validator, check if valid and continue
+	{
+		vector<vector<unsigned char>> TransactionContents;
+		ProtocolPackager::UnpackVectorVector(packet.Data, TransactionContents);
+
+		for (int i = 0; i < (int)TransactionContents.size(); i++)
+		{
+			// PROPERLY DECODE A
+			TransactionContent tc;
+			tc.Deserialize(TransactionContents[i]);
+
+			// This may be redundant, check, think.
+			if (tc.IntegrityCheck())
+			{
+				incomingTransactionMap.InsertTransactionContent(tc, packet.PublicKey_Src);
+			}
+
+		}
+
+	}
+		break;
+
 	case TPT_CONS_VOTES:
 	case TPT_CONS_TIME_SYNC:
 	case TPT_CONS_DOUBLESPENDERS:

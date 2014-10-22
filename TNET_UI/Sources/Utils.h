@@ -47,6 +47,8 @@ int getIndex(char c);
 
 char getNibbleSingle(int index);
 
+Hash GenerateNewToken32();
+
 /// <summary>
 /// Generates nRandom Numbers
 /// </summary>
@@ -64,7 +66,7 @@ enum PacketTypes {
 	
 	TPT_TRANS_FORWARDING = 0x21,
 
-	TPT_CONS_STATE = 0x30, TPT_CONS_CURRENT_SET = 0x31, TPT_CONS_REQUEST_TX = 0x32, TPT_CONS_RESP_TX = 0x33,
+	TPT_CONS_STATE = 0x30, TPT_CONS_CURRENT_SET = 0x31, TPT_CONS_REQUEST_TC_TX = 0x32, TPT_CONS_RESP_TC_TX = 0x33,
 
 	TPT_CONS_VOTES = 0x34, TPT_CONS_TIME_SYNC = 0x35, TPT_CONS_DOUBLESPENDERS = 0x36,
 
@@ -77,10 +79,13 @@ enum PacketTypes {
 
 struct NetworkPacket
 {
+	// Network layer security must make sure that this value is correct.
+	// Must check signature.
 	Hash PublicKey_Src;
 	byte Type;
 	vector<byte> Data;
-	NetworkPacket(Hash publicKey_Src, byte type, vector<byte> data) : PublicKey_Src(publicKey_Src), Type(type), Data(data) { }
+	Hash Token;
+	NetworkPacket(Hash publicKey_Src, byte type, vector<byte> data, Hash token) : PublicKey_Src(publicKey_Src), Type(type), Data(data), Token(token) { }
 	NetworkPacket() {}
 };
 

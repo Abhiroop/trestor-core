@@ -148,8 +148,10 @@ void Node::CreateArbitraryTransactionAndSendToTrustedNodes()
 		//TransactionContent tco = TransactionContent(this->PublicKey, 0, tsks, Hash() );
 		
 		vector<byte> data;// = tco.Serialize();
+
+		Hash token;
 		
-		network.SendPacket(NetworkPacketQueueEntry(_ts->second->PublicKey, NetworkPacket(this->PublicKey, TPT_TRANS_REQUEST, data)));
+		network.SendPacket(NetworkPacketQueueEntry(_ts->second->PublicKey, NetworkPacket(this->PublicKey, TPT_TRANS_REQUEST, data, token)));
 
 		//_ts->second->SendTransaction(this->PublicKey, tco);
 
@@ -201,8 +203,8 @@ void Node::Receive(NetworkPacket Packet)
 
 	case TPT_CONS_STATE:
 	case TPT_CONS_CURRENT_SET:
-	case TPT_CONS_REQUEST_TX:
-	case TPT_CONS_RESP_TX:
+	case TPT_CONS_REQUEST_TC_TX:
+	case TPT_CONS_RESP_TC_TX:
 	case TPT_CONS_VOTES:
 	case TPT_CONS_TIME_SYNC:
 	case TPT_CONS_DOUBLESPENDERS:

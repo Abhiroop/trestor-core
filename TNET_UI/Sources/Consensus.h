@@ -40,6 +40,11 @@ class Consensus
 	// set have.
 	concurrent_queue<Hash> TransactionsToBeFetched;
 
+	// Public_Key, Token
+	// This is used to validate if the received item was requested in the first place,
+	// Useful for some scenarios.
+	concurrent_hash_map<Hash, Hash> RequestedTokens;
+
 	FakeNetwork network;
 
 public:

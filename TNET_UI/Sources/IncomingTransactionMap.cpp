@@ -165,7 +165,7 @@ Given a transaction ID from a validator, update it in the current transactionMap
 */
 void IncomingTransactionMap::InsertTransactionContent(TransactionContent tc, Hash forwarderPublicKey)
 {
-	//verifye signature
+	//verify signature
 	if (!tc.VerifySignature())
 	{
 		state.GlobalBlacklistedValidators.push_back(forwarderPublicKey);
