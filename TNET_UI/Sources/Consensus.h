@@ -20,6 +20,9 @@
 #include "IncomingTransactionMap.h"
 #include "NetworkCommand.h"
 
+
+#include "tbb\concurrent_queue.h"
+
 using namespace tbb;
 
 class Consensus
@@ -30,11 +33,17 @@ class Consensus
 
 	Hash PublicKey;
 
+	// A list of transactions which we don't have, but others in the public
+	// set have.
+	concurrent_queue<Hash> TransactionsToBeFetched;
+
 	FakeNetwork network;
 
 public:
 
 	Consensus();
+
+	void DoEvents();
 
 	Consensus(Hash _PublicKey, Ledger _ledger, FakeNetwork _network);
 

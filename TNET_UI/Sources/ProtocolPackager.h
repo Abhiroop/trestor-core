@@ -99,45 +99,45 @@ public:
 
 	static bool UnpackString(ProtocolDataType packedData, byte nameType, string &  Data);
 
-	#define count__  32
+#define count__  32
 
 	/*static void TestProtocolPackager()
 	{
-		vector<ProtocolDataType> PDTs;
-			
-		int datas[count__];
+	vector<ProtocolDataType> PDTs;
 
-		for (int i = 0; i < count__; i++)
-		{
-			int n = i;// rand();
+	int datas[count__];
 
-			datas[i] = n;
-			PDTs.push_back(*ProtocolPackager::PackVarint(n, 0));
-		}
+	for (int i = 0; i < count__; i++)
+	{
+	int n = i;// rand();
 
-		vector<byte> packed = ProtocolPackager::PackRaw(PDTs);
-		vector<ProtocolDataType> l = ProtocolPackager::UnPackRaw(packed);
+	datas[i] = n;
+	PDTs.push_back(*ProtocolPackager::PackVarint(n, 0));
+	}
 
-		int fIndex = 0;
+	vector<byte> packed = ProtocolPackager::PackRaw(PDTs);
+	vector<ProtocolDataType> l = ProtocolPackager::UnPackRaw(packed);
 
-		for (vector<ProtocolDataType>::iterator it = l.begin(); it != l.end(); it++)
-		{
-			ProtocolDataType p = *it;
+	int fIndex = 0;
 
-			int64_t R = 0;
-			ProtocolPackager::UnpackVarint(p, 0, R);
+	for (vector<ProtocolDataType>::iterator it = l.begin(); it != l.end(); it++)
+	{
+	ProtocolDataType p = *it;
 
-			if (datas[fIndex] != R)
-			{
-				MessageQueue.push("FAIL AT : " + to_string(fIndex) + ", Value: " + to_string(R));
-			}
+	int64_t R = 0;
+	ProtocolPackager::UnpackVarint(p, 0, R);
 
-			//MessageQueue.push("" + p.DataType.ToString() + " : " + p.NameType + " : " + R);
-			
-			fIndex++;
-		}
+	if (datas[fIndex] != R)
+	{
+	MessageQueue.push("FAIL AT : " + to_string(fIndex) + ", Value: " + to_string(R));
+	}
 
-		MessageQueue.push("\nVarint Test Complete ...");
+	//MessageQueue.push("" + p.DataType.ToString() + " : " + p.NameType + " : " + R);
+
+	fIndex++;
+	}
+
+	MessageQueue.push("\nVarint Test Complete ...");
 	}*/
 
 

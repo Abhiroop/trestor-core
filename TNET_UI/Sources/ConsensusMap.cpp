@@ -280,3 +280,11 @@ void ConsensusMap::updateVote(vector<VoteType> votes, Hash publicKey)
 
 	}
 }
+
+
+// Process pending/queued operations.
+void ConsensusMap::DoEvents()
+{
+
+
+}

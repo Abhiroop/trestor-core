@@ -5,6 +5,15 @@ using namespace std;
 
 typedef concurrent_hash_map<Hash, TransactionContentData> HM;
 
+IncomingTransactionMap::IncomingTransactionMap()
+{
+
+}
+
+IncomingTransactionMap::IncomingTransactionMap(State _state)
+{
+	state = _state;
+}
 
 /*
 Given a transactionID returns current associated TransactionContentData, else return false
@@ -36,10 +45,8 @@ void IncomingTransactionMap::InsertNewTransaction(TransactionContent tc, Hash us
 	else
 	{
 		// Add the user to the blacklist id signature is invalid or integrity checks fails.
-		GlobalBlacklistedUsers.push_back(userPublicKey);
+		state.GlobalBlacklistedUsers.push_back(userPublicKey);
 	}
-
-	
 }
 
 void IncomingTransactionMap::GetEligibleTransactionForConsensus(vector<Hash> connectedValidators, vector<Hash>& transactionIDtoMigrate)
@@ -62,10 +69,10 @@ void IncomingTransactionMap::GetEligibleTransactionForConsensus(vector<Hash> con
 				++counter;
 			}
 		}
-		float perc = (float) counter / connectedValidators.size();
+		float perc = (float)counter / connectedValidators.size();
 		if (perc * 100 >= Constants::CONS_TRUSTED_VALIDATOR_THRESHOLD_PERC)
 			transactionIDtoMigrate.push_back(TransactionID);
-	}    
+	}
 }
 
 void IncomingTransactionMap::RemoveTransactionsFromTransactionMap(vector<Hash> transactionIDs)
@@ -73,7 +80,7 @@ void IncomingTransactionMap::RemoveTransactionsFromTransactionMap(vector<Hash> t
 	for (int i = 0; i < (int)transactionIDs.size(); i++)
 	{
 		Hash transactionID = transactionIDs[i];
-		
+
 		TransactionMap.erase(transactionID);
 	}
 }
@@ -103,7 +110,7 @@ vector<TransactionContent> IncomingTransactionMap::FetchTransactionContent(vecto
 	for (int i = 0; i < (int)differenceTransactionIDs.size(); i++)
 	{
 		Hash transactionID = differenceTransactionIDs[i];
-		
+
 		if (TransactionMap.find(acc, transactionID))
 		{
 			TransactionContentData TCD = acc->second;
@@ -119,7 +126,7 @@ vector<TransactionContent> IncomingTransactionMap::FetchTransactionContent(vecto
 bool IncomingTransactionMap::HaveTransactionInfo(Hash transactionID)
 {
 	HM::accessor ac;
-	
+
 	return (TransactionMap.find(ac, transactionID));
 }
 
@@ -161,7 +168,7 @@ void IncomingTransactionMap::InsertTransactionContent(TransactionContent tc, Has
 	//verifye signature
 	if (!tc.VerifySignature())
 	{
-		GlobalBlacklistedValidators.push_back(forwarderPublicKey);
+		state.GlobalBlacklistedValidators.push_back(forwarderPublicKey);
 		return;
 	}
 
@@ -203,4 +210,11 @@ void IncomingTransactionMap::InsertTransactionContent(TransactionContent tc, Has
 			ForwardersPK.insert(forwarderPublicKey);
 		}
 	}
+}
+
+// Process pending/queued operations.
+void IncomingTransactionMap::DoEvents()
+{
+
+
 }

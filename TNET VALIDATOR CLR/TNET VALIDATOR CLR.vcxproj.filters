@@ -240,6 +240,9 @@
     <ClCompile Include="..\TNET_UI\Sources\MoneyInOutFlow.cpp">
       <Filter>Sources\Ledger</Filter>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\State.cpp">
+      <Filter>Sources\Node</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h">
@@ -583,6 +586,9 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\MoneyInOutFlow.h">
       <Filter>Sources\Ledger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\State.h">
+      <Filter>Sources\Node</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

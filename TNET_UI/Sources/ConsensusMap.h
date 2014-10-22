@@ -33,8 +33,10 @@ public:
 	//transaction IDs which will be given -ve votes as 
 	//they have traces of double spending
 	void CheckTransactions(vector<Hash>& DoubleSpenderPublicKey, vector<Hash>& DoubleSpendingTransaction);
-	
+
 	void ConsolidateToLedger(concurrent_hash_map<Hash, MoneyInOutFlow> delta);
+
+	void DoEvents();
 };
 
 

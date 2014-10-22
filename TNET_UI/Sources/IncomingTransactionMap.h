@@ -8,12 +8,13 @@
 #include "tbb\concurrent_hash_map.h"
 #include "tbb\concurrent_unordered_set.h"
 
+#include "State.h"
 
 using namespace tbb;
 
 class TransactionContentData
 {
-	public:
+public:
 	TransactionContent TC;
 	hash_set<Hash> ForwardersPK;
 };
@@ -28,10 +29,17 @@ private:
 	//[Transaction ID] -> Transaction Data
 	concurrent_hash_map<Hash, TransactionContent> IncomingTransactions;
 
+	State state;
+
 public:
 
-	bool GetTransactionContentData(TransactionContentData& transactionContentData, Hash transactionID);
+	IncomingTransactionMap();
+	IncomingTransactionMap(State _state);
 	
+
+
+	bool GetTransactionContentData(TransactionContentData& transactionContentData, Hash transactionID);
+
 
 	// Adds a transaction to the current processing queue (IncomingTransactions), 
 	// if valid, it will be broadcasted to other connected validators.
@@ -49,6 +57,8 @@ public:
 	vector<Hash> FetchAllTransactionID();
 
 	bool HaveTransactionInfo(Hash transactionID);
+
+	void DoEvents();
 };
 
 #endif

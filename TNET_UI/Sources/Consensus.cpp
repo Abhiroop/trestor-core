@@ -17,7 +17,7 @@
 
 Consensus::Consensus()
 {
-	
+
 }
 
 Consensus::Consensus(Hash _PublicKey, Ledger _ledger, FakeNetwork _network)
@@ -27,6 +27,15 @@ Consensus::Consensus(Hash _PublicKey, Ledger _ledger, FakeNetwork _network)
 	network = _network;
 }
 
+// Process pending/queued operations.
+void Consensus::DoEvents()
+{
+	incomingTransactionMap.DoEvents();
+	consensusMap.DoEvents();
+
+	// Do Blacklist processing
+}
+
 void Consensus::ProcessIncomingPacket(NetworkPacket packet)
 {
 	switch (packet.Type)
@@ -34,15 +43,15 @@ void Consensus::ProcessIncomingPacket(NetworkPacket packet)
 
 	case TPT_TRANS_REQUEST:
 
-		{
-			TransactionContent tc;
-			tc.Deserialize(packet.Data);
+	{
+		TransactionContent tc;
+		tc.Deserialize(packet.Data);
 
-			incomingTransactionMap.InsertNewTransaction(tc, packet.PublicKey_Src);
+		incomingTransactionMap.InsertNewTransaction(tc, packet.PublicKey_Src);
 
-			// PendingIncomingTransactions.push(TransactionContentPack(Packet.PublicKey_Src, tc));
-			// MessageQueue.push(to_string(InTransactionCount));
-		}
+		// PendingIncomingTransactions.push(TransactionContentPack(Packet.PublicKey_Src, tc));
+		// MessageQueue.push(to_string(InTransactionCount));
+	}
 
 		break;
 
@@ -62,10 +71,11 @@ void Consensus::ProcessIncomingPacket(NetworkPacket packet)
 
 		for (int i = 0; i < (int)TransactionIDs.size(); i++)
 		{
-			// We dont have transaction info for the transaction, so get it from others.
+			// We don't have transaction info for the transaction, so get it from others.
 			if (!incomingTransactionMap.HaveTransactionInfo(TransactionIDs[i]))
 			{
-
+				// Add to the queue of pending transactions.
+				TransactionsToBeFetched.push(TransactionIDs[i]);
 			}
 		}
 	}
@@ -87,7 +97,7 @@ void Consensus::ProcessIncomingPacket(NetworkPacket packet)
 			TransactionContentData TCD;
 			// Apparently, we dp have the TransactionID, yayy, add it to the list to be sent back.
 			if (incomingTransactionMap.GetTransactionContentData(TCD, TransactionIDs[i]))
-			{				
+			{
 				ResponseList.push_back(TCD.TC.Serialize());
 			}
 		}
@@ -101,7 +111,7 @@ void Consensus::ProcessIncomingPacket(NetworkPacket packet)
 		npqe.Packet.Data = ProtocolPackager::Pack(ResponseList);
 
 		network.SendPacket(npqe);
-				
+
 
 	}
 
