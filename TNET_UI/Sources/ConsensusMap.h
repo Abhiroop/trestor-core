@@ -9,17 +9,22 @@
 #include "Ledger.h"
 #include "Hash.h"
 #include "MoneyInOutFlow.h"
+#include "State.h"
+
 using namespace tbb;
 
 class ConsensusMap
 {
 private:
+
+	State state;
 	IncomingTransactionMap incomingTransactionMap;
+
 	Ledger ledger;
 
 public:
 	ConsensusMap();
-	ConsensusMap(IncomingTransactionMap incomingTransactionMap, Ledger _ledger);
+	ConsensusMap(State _state, IncomingTransactionMap incomingTransactionMap, Ledger _ledger);
 	// [TransactionID --> (VoterPublicKey --> Vote)]
 	concurrent_hash_map<Hash, concurrent_hash_map<Hash, bool>> consensusVoteMap;
 	concurrent_hash_map<Hash, bool> currentAcceptedSet;

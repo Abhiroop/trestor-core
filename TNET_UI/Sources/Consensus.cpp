@@ -17,11 +17,14 @@
 
 Consensus::Consensus()
 {
-
+	
 }
 
-Consensus::Consensus(Hash _PublicKey, Ledger _ledger, FakeNetwork _network)
+Consensus::Consensus(State _state, Hash _PublicKey, Ledger _ledger, FakeNetwork _network)
 {
+	state = _state;
+	incomingTransactionMap = IncomingTransactionMap(_state);
+	consensusMap = ConsensusMap(_state, incomingTransactionMap, _ledger);
 	PublicKey = _PublicKey;
 	ledger = _ledger;
 	network = _network;
@@ -95,7 +98,7 @@ void Consensus::ProcessIncomingPacket(NetworkPacket packet)
 		for (int i = 0; i < (int)TransactionIDs.size(); i++)
 		{
 			TransactionContentData TCD;
-			// Apparently, we dp have the TransactionID, yayy, add it to the list to be sent back.
+			// Apparently, we do have the TransactionID, yayy, add it to the list to be sent back.
 			if (incomingTransactionMap.GetTransactionContentData(TCD, TransactionIDs[i]))
 			{
 				ResponseList.push_back(TCD.TC.Serialize());

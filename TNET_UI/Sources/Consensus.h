@@ -20,6 +20,7 @@
 #include "IncomingTransactionMap.h"
 #include "NetworkCommand.h"
 
+#include "State.h"
 
 #include "tbb\concurrent_queue.h"
 
@@ -27,6 +28,8 @@ using namespace tbb;
 
 class Consensus
 {
+	State state;
+
 	ConsensusMap consensusMap;
 	IncomingTransactionMap incomingTransactionMap;
 	Ledger ledger;
@@ -42,14 +45,11 @@ class Consensus
 public:
 
 	Consensus();
-
-	void DoEvents();
-
-	Consensus(Hash _PublicKey, Ledger _ledger, FakeNetwork _network);
+	Consensus(State _state, Hash _PublicKey, Ledger _ledger, FakeNetwork _network);
 
 	void ProcessIncomingPacket(NetworkPacket packet);
 
-
+	void DoEvents();
 };
 
 

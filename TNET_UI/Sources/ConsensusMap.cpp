@@ -12,8 +12,9 @@ ConsensusMap::ConsensusMap()
 
 }
 
-ConsensusMap::ConsensusMap(IncomingTransactionMap _incomingTransactionMap, Ledger _ledger)
+ConsensusMap::ConsensusMap(State _state, IncomingTransactionMap _incomingTransactionMap, Ledger _ledger)
 {
+	state = _state;
 	incomingTransactionMap = _incomingTransactionMap;
 	ledger = _ledger;
 }

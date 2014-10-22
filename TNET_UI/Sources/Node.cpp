@@ -56,7 +56,7 @@ Node::Node(FakeNetwork _network, string _Name, int _ConnectionLimit,  long Money
 
 	ledger = Ledger("LEDGER_" + _Name + ".dat", network);
 
-	consensus = Consensus(PublicKey, ledger, network);
+	consensus = Consensus(state, PublicKey, ledger, network);
 
 	Name = _Name;
 

@@ -52,6 +52,7 @@ public: Hash Source;
 
 class Node
 {
+	State state;
 	FakeNetwork network;
 
 	HANDLE hTimerQueue = nullptr;

@@ -36,10 +36,7 @@ public:
 	IncomingTransactionMap();
 	IncomingTransactionMap(State _state);
 	
-
-
 	bool GetTransactionContentData(TransactionContentData& transactionContentData, Hash transactionID);
-
 
 	// Adds a transaction to the current processing queue (IncomingTransactions), 
 	// if valid, it will be broadcasted to other connected validators.
@@ -62,3 +59,4 @@ public:
 };
 
 #endif
+
