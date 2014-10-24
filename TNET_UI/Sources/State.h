@@ -8,6 +8,8 @@
 
 #include "Hash.h"
 #include "tbb/concurrent_vector.h"
+#include "tbb/concurrent_hash_map.h"
+#include<stdint.h>
 
 using namespace tbb;
 
@@ -23,7 +25,13 @@ public:
 
 	// Users sending bad transaction requests.
 	concurrent_vector<Hash> GlobalBlacklistedUsers;
+	
+	concurrent_hash_map<Hash, int64_t> timeMap;
+	concurrent_hash_map<Hash, Hash> tokenPKMap;
 
+	concurrent_vector<Hash> ConnectedValidators;
+
+	int64_t current_time;
 };
 
 

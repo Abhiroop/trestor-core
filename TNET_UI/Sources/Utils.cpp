@@ -139,11 +139,18 @@ vector<int> GenerateNonRepeatingDistribution(int maxNumber, int Count, int self)
 }
 
 
-Hash GenerateNewToken32()
+Hash GenerateNewToken()
 {
-	unsigned char dp[32];
-	RandomFillBytes(dp, 32);
-	return Hash(dp, dp + 32);
+	unsigned char dp[8];
+	RandomFillBytes(dp, 8);
+	return Hash(dp, dp + 8);
+}
+
+Hash GenerateNewToken(int len)
+{
+	unsigned char* dp = (unsigned char*) malloc(sizeof(char)* len);
+	RandomFillBytes(dp, len);
+	return Hash(dp, dp + len);
 }
 
 //there may be some petalevel bullshit 

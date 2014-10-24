@@ -47,7 +47,9 @@ int getIndex(char c);
 
 char getNibbleSingle(int index);
 
-Hash GenerateNewToken32();
+//generate 64 bit random token
+Hash GenerateNewToken();
+Hash GenerateNewToken(int len);
 
 /// <summary>
 /// Generates nRandom Numbers

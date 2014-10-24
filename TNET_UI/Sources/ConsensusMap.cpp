@@ -19,7 +19,7 @@ ConsensusMap::ConsensusMap(State _state, IncomingTransactionMap _incomingTransac
 	ledger = _ledger;
 }
 
-vector<Hash> ConsensusMap::GetTransactionsWithThresholdVotes(vector<Hash> connectedUsers)
+vector<Hash> ConsensusMap::GetTransactionsWithThresholdVotes(vector<Hash> TrustedVoters)
 {
 	vector<Hash> toSent;
 
@@ -38,7 +38,7 @@ vector<Hash> ConsensusMap::GetTransactionsWithThresholdVotes(vector<Hash> connec
 			}
 		}
 
-		float perc = (float)voteCounter / connectedUsers.size();
+		float perc = (float)voteCounter / TrustedVoters.size();
 		if (perc * 100 > Constants::CONS_VOTING_ACCEPTANCE_THRESHOLD_PERC)
 			toSent.push_back(transactionID);
 	}
@@ -98,7 +98,7 @@ concurrent_hash_map<Hash, MoneyInOutFlow> ConsensusMap::GetAcceptedAccountDelta(
 			concurrent_hash_map<Hash, MoneyInOutFlow>::accessor acc;
 			if (accountMoneyFlow.find(acc, PKdestination))
 			{
-				acc->second.outFlow += inMoney;
+				acc->second.inFlow += inMoney;
 			}
 			else
 			{
