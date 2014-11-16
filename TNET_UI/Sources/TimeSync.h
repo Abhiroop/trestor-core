@@ -13,10 +13,15 @@ class TimeSync
 public:
 	State state;
 	TimeSync(State state);
-	int64_t current_time;
 
 	void SendTimeRequest();
-	void SetTime(Hash publicKey, Hash token);
+	
+	/*if everything is ok the 0
+	else 1
+	*/
+	bool SetTime(Hash publicKey, Hash token, int64_t time);
+
+	int64_t CalculateAvgTime();
 };
 
 #endif

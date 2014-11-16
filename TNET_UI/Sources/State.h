@@ -13,6 +13,15 @@
 
 using namespace tbb;
 
+struct TimeStruct
+{
+	int64_t sendTime;
+	int64_t receivedTime;
+	int64_t TimeFromValidator;
+	Hash token;
+	int64_t timeDifference; //my time - other time
+};
+
 class State
 {
 
@@ -26,12 +35,12 @@ public:
 	// Users sending bad transaction requests.
 	concurrent_vector<Hash> GlobalBlacklistedUsers;
 	
-	concurrent_hash_map<Hash, int64_t> timeMap;
-	concurrent_hash_map<Hash, Hash> tokenPKMap;
+	concurrent_hash_map<Hash, TimeStruct> timeMap;
+
 
 	concurrent_vector<Hash> ConnectedValidators;
 
-	int64_t current_time;
+	int64_t system_time, network_time;
 };
 
 
