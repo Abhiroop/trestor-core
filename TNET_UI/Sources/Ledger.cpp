@@ -7,6 +7,8 @@
 */
 
 #include "Ledger.h"
+#include "ProtocolPackager.h"
+#include "Constants.h"
 
 Ledger::Ledger()
 {
@@ -68,6 +70,15 @@ Hash Ledger::GetRootHash()
 	return LedgerTree.GetRootHash();
 }
 
+
+vector<byte> Ledger::GetRootInfo()
+{
+	Hash RootHash = GetRootHash();
+
+	return RootHash;
+}
+
+
 void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 {
 
@@ -76,7 +87,38 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 
 	case TPT_LSYNC_FETCH_ROOT:
 
+	{
+		/*
+		// The client is asking for the root of the ledger.
 
+		// Decode the request as a sequence of TransactionID's
+		vector<vector<unsigned char>> TransactionIDs;
+		ProtocolPackager::UnpackVectorVector_s(packet.Data, Constants::LEN_TRANSACTION_ID, TransactionIDs);
+
+		vector<vector<unsigned char>> ResponseList;
+
+		for (int i = 0; i < (int)TransactionIDs.size(); i++)
+		{
+			TransactionContentData TCD;
+			// Apparently, we do have the TransactionID, yayy, add it to the list to be sent back.
+			if (incomingTransactionMap.GetTransactionContentData(TCD, TransactionIDs[i]))
+			{
+				ResponseList.push_back(TCD.TC.Serialize());
+			}
+		}
+
+		NetworkPacketQueueEntry npqe;
+
+		//  Set the reply address
+		npqe.PublicKey_Dest = packet.PublicKey_Src;
+		npqe.Packet.Token = packet.Token;
+		npqe.Packet.Type = TPT_CONS_RESP_TC_TX;
+		npqe.Packet.PublicKey_Src = PublicKey;
+		npqe.Packet.Data = ProtocolPackager::Pack(ResponseList);
+
+		network.SendPacket(npqe);*/
+
+	}
 
 	case TPT_LSYNC_FETCH_LAYER_INFO:
 	case TPT_LSYNC_FETCH_LAYER_DATA:

@@ -28,6 +28,10 @@ public:
 class Ledger
 {
 
+private:
+
+	vector<byte> GetRootInfo();
+
 public:
 
 	FakeNetwork network;
