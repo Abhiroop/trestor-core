@@ -12,7 +12,8 @@ int getIndex(char c)
 		if (s[i] == c)
 			return i;
 	}
-	throw exception("Bal hex char hoeche!");
+
+	return -1;
 }
 
 char getNibbleSingle(int index)

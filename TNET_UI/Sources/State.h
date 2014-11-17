@@ -9,7 +9,7 @@
 #include "Hash.h"
 #include "tbb/concurrent_vector.h"
 #include "tbb/concurrent_hash_map.h"
-#include<stdint.h>
+#include <stdint.h>
 
 using namespace tbb;
 
@@ -28,6 +28,8 @@ class State
 public:
 
 	State();
+
+	Hash PublicKey;
 
 	//Potential bokapatha warning!
 	concurrent_vector<Hash> GlobalBlacklistedValidators;

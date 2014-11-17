@@ -52,15 +52,15 @@ Node::Node(FakeNetwork _network, string _Name, int _ConnectionLimit,  long Money
 
 	ed25519_create_keypair(_PublicKey, _PrivateKey, Seed);
 
-	PublicKey = Hash(_PublicKey, _PublicKey + 32);
+	state.PublicKey = Hash(_PublicKey, _PublicKey + 32);
+	
+	ledger = Ledger(state, "LEDGER_" + _Name + ".dat", network);
 
-	ledger = Ledger("LEDGER_" + _Name + ".dat", network);
-
-	consensus = Consensus(state, PublicKey, ledger, network);
+	consensus = Consensus(state, state.PublicKey, ledger, network);
 
 	Name = _Name;
 
-	AI = AccountInfo(PublicKey, Money, _Name, 0, 0);
+	AI = AccountInfo(state.PublicKey, Money, _Name, 0, 0);
 
 	ledger.AddUserToLedger(AI);
 
@@ -142,7 +142,7 @@ void Node::CreateArbitraryTransactionAndSendToTrustedNodes()
 
 		int64_t Amount = this->Money() / 8;
 
-		TransactionEntity tsk = TransactionEntity(dest->PublicKey, Amount);
+		TransactionEntity tsk = TransactionEntity(dest->state.PublicKey, Amount);
 		tsks.push_back(tsk);
 
 		//TransactionContent tco = TransactionContent(this->PublicKey, 0, tsks, Hash() );
@@ -151,7 +151,7 @@ void Node::CreateArbitraryTransactionAndSendToTrustedNodes()
 
 		Hash token;
 		
-		network.SendPacket(NetworkPacketQueueEntry(_ts->second->PublicKey, NetworkPacket(this->PublicKey, TPT_TRANS_REQUEST, data, token)));
+		network.SendPacket(NetworkPacketQueueEntry(_ts->second->state.PublicKey, NetworkPacket(this->state.PublicKey, TPT_TRANS_REQUEST, data, token)));
 
 		//_ts->second->SendTransaction(this->PublicKey, tco);
 
@@ -182,7 +182,7 @@ void Node::InitializeValuesFromGlobalLedger()
 int64_t Node::Money()
 {
 	AccountInfo ai;
-	bool got = ledger.GetAccount(PublicKey, ai);
+	bool got = ledger.GetAccount(state.PublicKey, ai);
 
 	if (got)
 		return ai.Money;

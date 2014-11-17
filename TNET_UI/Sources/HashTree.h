@@ -144,6 +144,8 @@ public:
 
 	void getAllLeafUnderNode(TreeNodeX* Root, vector<T>& Leaves);
 
+	bool getImmediateChildren(string ID, vector<TreeNodeX*> &vec);
+
 	vector<TreeSyncData> GetDifference(vector<TreeSyncData> other, vector<TreeSyncData> me);
 
 	//returns two vector of TreeSyncData and AccountInfo
@@ -1047,7 +1049,7 @@ vector<TreeSyncData> HashTree<T, R>::GetDifference(vector<TreeSyncData> other, v
 			for (int t = i; t < other.size(); t++)
 			{
 				TreeSyncData LSD(other[t], false);
-				
+
 				// Get leaf nodes if the count is below threshold.
 				LSD.GetAll = (other[t].LeafCount <= Constants::SYNC_LEAF_COUNT_THRESHOLD);
 
@@ -1092,6 +1094,54 @@ vector<TreeSyncData> HashTree<T, R>::GetDifference(vector<TreeSyncData> other, v
 	}
 
 	return out;
+}
+
+/*given a node id return all its 16 immediate children
+*/
+template<typename T, typename R>
+bool HashTree<T, R>::getImmediateChildren(string ID, vector<TreeNodeX*> &vec)
+{
+	if (Root == nullptr)
+		return false;
+
+	TreeNodeX* temp = Root;
+
+	TreeNodeX* pta[16];
+
+	for (int j = 0; j < (int) ID.length(); j++)
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			int index = getIndex(ID[j]);
+			
+			if (index == -1)
+			{
+				return false;
+			}
+
+			if (i == index)
+			{
+				if (temp->Children[i] != nullptr)
+				{
+					temp = temp->Children[i];
+				}
+				else
+				{
+					return false;
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i < 16; i++)
+	{
+		pta[i] = temp->Children[i];
+	}
+
+	vector<TreeNodeX*> v(pta, pta + 16);
+	vec = v;
+
+	return true;
 }
 
 // This will run for the synced node.

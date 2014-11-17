@@ -89,7 +89,7 @@ void Simulator::StartSimulation()
 		//Node *n = dynamic_cast<Node*> (&n3);
 		//Nodes.push_back(*n);
 
-		Hash* pk = &NewNode->PublicKey;
+		Hash* pk = &NewNode->state.PublicKey;
 
 		//shared_ptr<Hash> pk = n->PublicKey;
 

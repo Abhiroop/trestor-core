@@ -426,7 +426,7 @@ namespace TNETVALIDATORCLR {
 
 	private: System::Void simulateToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
 
-		Ledger lgr;
+		/*Ledger lgr;
 
 		vector<AccountInfo> ais;
 
@@ -477,6 +477,15 @@ namespace TNETVALIDATORCLR {
 		PrintMessage("Good Transactions   : " + st.GoodTransactions);
 		PrintMessage("BlackLists          : " + st.BlackLists);
 		*/
+
+				 
+		
+
+
+
+
+
+
 	}
 
 	private: System::Void simulateVisualToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {

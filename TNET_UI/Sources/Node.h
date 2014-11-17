@@ -52,7 +52,7 @@ public: Hash Source;
 
 class Node
 {
-	State state;
+	
 	FakeNetwork network;
 
 	HANDLE hTimerQueue = nullptr;
@@ -61,6 +61,8 @@ class Node
 	HANDLE hTimer = NULL;
 
 public:
+
+	State state;
 	Ledger ledger;
 	Ledger getLedger();
 
@@ -83,7 +85,7 @@ public:
 	byte _PrivateKey[32];
 	byte _PublicKey[32];
 
-	Hash PublicKey;
+	//Hash PublicKey;
 
 	string Name;
 

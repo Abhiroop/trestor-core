@@ -132,13 +132,13 @@ namespace TNETVALIDATORCLR {
 		{
 			shared_ptr<Node> ND;
 			ND = _ts->second;
-			if (sim_nData.count(ND->PublicKey) == 0)
+			if (sim_nData.count(ND->state.PublicKey) == 0)
 			{
 				NodeData d;
 				Point2 s = Point2(sim_XY[i].X - 10, sim_XY[i].Y - 10);
 				d.Center = s;
 				d.Corner = sim_XY[i];
-				sim_nData[ND->PublicKey] = d;
+				sim_nData[ND->state.PublicKey] = d;
 				i++;
 			}
 		}
@@ -155,7 +155,7 @@ namespace TNETVALIDATORCLR {
 			{
 				shared_ptr<Node> Link;
 				Link = links->second;
-				NodeData* LinkData = &sim_nData[Link->PublicKey];
+				NodeData* LinkData = &sim_nData[Link->state.PublicKey];
 
 				g->DrawLine(gcnew Pen(Color::LightPink, 0.5F), Point(LinkData->Center.X, LinkData->Center.Y), Point(nd->Center.X, nd->Center.Y));
 			}
@@ -173,7 +173,7 @@ namespace TNETVALIDATORCLR {
 			{
 				shared_ptr<Node> Trusted;
 				Trusted = trusted->second;
-				NodeData* TrustedLinkData = &sim_nData[Trusted->PublicKey];
+				NodeData* TrustedLinkData = &sim_nData[Trusted->state.PublicKey];
 
 				g->DrawLine(gcnew Pen(Color::LightBlue, 0.5F), Point(TrustedLinkData->Center.X, TrustedLinkData->Center.Y+1), Point(nd->Center.X, nd->Center.Y+1));
 			}

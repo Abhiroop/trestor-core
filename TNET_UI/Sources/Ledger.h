@@ -3,6 +3,7 @@
 
 #include <hash_map>
 #include <hash_set>
+#include "State.h"
 #include "HashTree.h"
 #include "AccountInfo.h"
 #include "TransactionContent.h"
@@ -43,6 +44,8 @@ public:
 	int64_t TransactionFees;
 	int64_t CloseTime;
 
+	State state;
+
 	/// <summary>
 	/// List of public nodes which have sent bad transactions.
 	/// </summary>
@@ -50,7 +53,7 @@ public:
 
 	Ledger();
 
-	Ledger(string LedgerDB_FileName, FakeNetwork network);
+	Ledger(State _state, string LedgerDB_FileName, FakeNetwork network);
 
 	bool GetAccount(Hash userInfo, AccountInfo & ltd);
 

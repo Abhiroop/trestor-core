@@ -7,6 +7,8 @@
 */
 
 #include "Ledger.h"
+#include "TreeSyncData.h"
+#include "TreeSyncRootData.h"
 #include "ProtocolPackager.h"
 #include "Constants.h"
 
@@ -16,12 +18,14 @@ Ledger::Ledger()
 	//ledgerFileHandler = LedgerFileHandler(LedgerTree, "LedgerT.db");
 }
 
-Ledger::Ledger(string LedgerDB_FileName, FakeNetwork _network)
+Ledger::Ledger(State _state, string LedgerDB_FileName, FakeNetwork _network)
 {
 	network = _network;
 	TransactionFees = 0;
 	ledgerFileHandler = LedgerFileHandler(LedgerTree, LedgerDB_FileName);
+	state = _state;
 
+	// Load Database
 	LedgerTree = ledgerFileHandler.DBToTree();
 }
 
@@ -79,6 +83,8 @@ vector<byte> Ledger::GetRootInfo()
 }
 
 
+
+
 void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 {
 
@@ -88,43 +94,91 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 	case TPT_LSYNC_FETCH_ROOT:
 
 	{
-		/*
-		// The client is asking for the root of the ledger.
+								 // The client is asking for the root of the ledger.
+								 // RoothHash, LCL_Time, 16 Nodes(treenode), cons seq counter,
+								 //LedgerRootInfo lri= LedgerTree.GetRootInfo();
 
-		// Decode the request as a sequence of TransactionID's
-		vector<vector<unsigned char>> TransactionIDs;
-		ProtocolPackager::UnpackVectorVector_s(packet.Data, Constants::LEN_TRANSACTION_ID, TransactionIDs);
+								 vector<TreeNodeX*> x;
 
-		vector<vector<unsigned char>> ResponseList;
+								 bool ok = LedgerTree.getImmediateChildren("", x);
 
-		for (int i = 0; i < (int)TransactionIDs.size(); i++)
-		{
-			TransactionContentData TCD;
-			// Apparently, we do have the TransactionID, yayy, add it to the list to be sent back.
-			if (incomingTransactionMap.GetTransactionContentData(TCD, TransactionIDs[i]))
-			{
-				ResponseList.push_back(TCD.TC.Serialize());
-			}
-		}
+								 vector<vector<unsigned char>> ResponseList;
 
-		NetworkPacketQueueEntry npqe;
+								 if (ok)
+								 {
+									 for (int i = 0; i < 16; i++)
+									 {
+										 TreeNodeX* jj = x[i];
+										 
+										 if (jj != nullptr)
+										 {
+											 Hash h = Hash(jj->ID, jj->ID + 32);
 
-		//  Set the reply address
-		npqe.PublicKey_Dest = packet.PublicKey_Src;
-		npqe.Packet.Token = packet.Token;
-		npqe.Packet.Type = TPT_CONS_RESP_TC_TX;
-		npqe.Packet.PublicKey_Src = PublicKey;
-		npqe.Packet.Data = ProtocolPackager::Pack(ResponseList);
+											 vector<char> vc;
+											 TreeSyncData TSD = TreeSyncData(h, vc, jj->LeafCount, false);
 
-		network.SendPacket(npqe);*/
+											 ResponseList.push_back(TSD.Serialize());
+										 }
+									 }
+
+									 LedgerRootInfo ri = LedgerTree.GetRootInfo();
+
+									 TreeSyncRootData tsrd;
+									 tsrd.TSDs = ProtocolPackager::Pack(ResponseList);
+									 tsrd.LCL_Time = ri.LCLTime;
+									 tsrd.RootHash = ri.LedgerHash;
+									 tsrd.NodeCount = ri.SequenceNumber;
+
+									 NetworkPacketQueueEntry npqe;
+
+									 //  Set the reply address
+									 npqe.PublicKey_Dest = packet.PublicKey_Src;
+									 npqe.Packet.Token = packet.Token;
+									 npqe.Packet.Type = TPT_LSYNC_REPLY_ROOT;
+									 npqe.Packet.PublicKey_Src = state.PublicKey;
+									 npqe.Packet.Data = tsrd.Serialize();
+
+									 network.SendPacket(npqe);
+
+								 }
+
+
 
 	}
 
 	case TPT_LSYNC_FETCH_LAYER_INFO:
 	case TPT_LSYNC_FETCH_LAYER_DATA:
 
+		break;
+
+	case TPT_LSYNC_REPLY_ROOT:
+
+	{
+								 TreeSyncRootData tsrd;
+								 tsrd.Deserialize(packet.Data);
+
+								 vector<vector<unsigned char>> ResponseList;
+
+								 bool ok = ProtocolPackager::UnpackVectorVector(tsrd.TSDs, ResponseList);
+
+								 if (ok)
+								 {
+									 
+
+									 
+									 for (int i = 0; i < 16; i++)
+									 {
+										 TreeSyncData tsd;
+										 tsd.Deserialize(ResponseList[i]);
 
 
+
+
+									 }
+								 }
+
+
+	}
 
 		break;
 

@@ -252,6 +252,9 @@
     <ClCompile Include="..\TNET_UI\Sources\TimeSync.cpp">
       <Filter>Sources\Time</Filter>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TreeSyncRootData.cpp">
+      <Filter>Sources\HashTree</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h">
@@ -604,6 +607,9 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\TimeSync.h">
       <Filter>Sources\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TreeSyncRootData.h">
+      <Filter>Sources\HashTree</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
