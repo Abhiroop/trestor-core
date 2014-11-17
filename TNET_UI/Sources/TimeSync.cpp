@@ -3,12 +3,42 @@
 #include <random>
 
 typedef concurrent_hash_map<Hash, TimeStruct> HM;
+typedef concurrent_hash_map<int64_t, int64_t> TM;
 
 TimeSync::TimeSync(State _state)
 {
 	state = _state;
 }
 
+int64_t TimeSync::GetGlobalAvgTime()
+{
+	TM::accessor acc;
+
+	vector<int64_t> timeVector;
+
+	for (TM::iterator it = TimeMachine.begin(); it != TimeMachine.end(); ++it)
+	{
+		int64_t myTime_i = it->first;
+		int64_t otherTime_i = it->second;
+		
+		int64_t offSet = (state.system_time - myTime_i);
+		int64_t offSetBalancedOtherTime_i = offSet + otherTime_i;
+
+		timeVector.push_back(offSetBalancedOtherTime_i);
+	}
+
+	int64_t timeSum = state.system_time;
+	int total = timeVector.size();
+		
+	for (int i = 0; i < total; i++)
+	{
+		timeSum += timeVector[i];
+	}
+
+	int64_t avgTime = timeSum / (total + 1);
+	return avgTime;
+
+}
 
 void TimeSync::SendTimeRequest()
 {

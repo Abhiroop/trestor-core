@@ -148,6 +148,8 @@ public:
 
 	vector<TreeSyncData> GetDifference(vector<TreeSyncData> other, vector<TreeSyncData> me);
 
+	vector<TreeSyncData> GetDifference(vector<TreeSyncData> other);
+
 	//returns two vector of TreeSyncData and AccountInfo
 	void GetSyncNodeInfo(vector<TreeSyncData> input, vector<TreeSyncData>& internalNodes, vector<T>& leadNodes);
 
@@ -1031,6 +1033,57 @@ void HashTree<T, R>::TraverseTreeAndReturn(vector<shared_ptr<LeafDataType>> & te
 /*
 Difference
 */
+template<typename T, typename R>
+vector<TreeSyncData> HashTree<T, R>::GetDifference(vector<TreeSyncData> other)
+{
+	vector<TreeSyncData> out;
+	if (other.size() == 0 || other == nullptr)
+	{
+		return out;
+	}
+
+	for (int i = 0; i < other.size(); i++)
+	{
+		TreeSyncData TSD = other[i];
+		vector<char> address = TSD.Address;
+
+		if (address.size()>64)
+		{
+			continue;
+		}
+
+		TreeNodeX* temp = Root;
+		vector<char> addr;
+
+		for (int j = 0; i < address.size(); i++)
+		{
+			int indexPos = getImmediateChildren(address[j]);
+			if (indexPos == -1)
+			{
+				break;
+			}
+
+			for (int k = 0; k < 16; k++)
+			{
+				if (k == indexPos)
+				{
+					if (temp->Children[k] == nullptr)
+					{
+						break;
+					}
+
+					temp = temp->Children[k];
+					addr.push_back(Constants::hexChars[k]);
+				}
+			}
+		}
+
+		TreeSyncData toPacked = new TreeSyncData(temp->ID, addr, temp->LeafCount, false);
+		out.push_back(toPacked);
+
+	}
+}
+
 template<typename T, typename R>
 vector<TreeSyncData> HashTree<T, R>::GetDifference(vector<TreeSyncData> other, vector<TreeSyncData> me)
 {
