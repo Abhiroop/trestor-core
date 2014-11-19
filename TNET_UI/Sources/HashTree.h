@@ -148,7 +148,7 @@ public:
 
 	vector<TreeSyncData> GetDifference(vector<TreeSyncData> other, vector<TreeSyncData> me);
 
-	vector<TreeSyncData> GetDifference(vector<TreeSyncData> other);
+	//vector<TreeSyncData> GetDifference(vector<TreeSyncData> other);
 
 	//returns two vector of TreeSyncData and AccountInfo
 	void GetSyncNodeInfo(vector<TreeSyncData> input, vector<TreeSyncData>& internalNodes, vector<T>& leadNodes);
@@ -162,6 +162,9 @@ public:
 	bool getStack_Itr(Hash ID, stack<TreeNodeX*> &treeNodeStack);
 
 	bool DeleteData(Hash ID);
+
+	bool DeleteInternalNode(vector<char> address);
+	bool DeleteInternalNode(TreeNodeX* internalNode);
 
 
 	/// <summary>
@@ -475,6 +478,125 @@ bool HashTree<T, R>::getStack_Itr(Hash ID, stack<TreeNodeX*> &treeNodeStack)
 	cout << "not found  " << ID.ToString();
 	return false;
 }
+
+/*
+Delete a internal node including all its 
+successors
+*/
+template<typename T, typename R>
+bool HashTree<T, R>::DeleteInternalNode(vector<char> address)
+{
+	TreeNodeX* temp = Root;
+	stack<TreeNodeX*> treeNodeStack;
+
+	treeNodeStack.push(temp);
+
+	if (address.size() >= 64 || address.size() == 0 || address == NULL)
+	{
+		return false;
+	}
+
+	for (int i = 0; i < address.size(); i++)
+	{
+		int index = getIndex(i);
+		if (index == -1)
+		{
+			return false;
+		}
+
+		temp = temp->Children[index];
+		treeNodeStack.push(temp);
+	}
+
+	//remove the top as it will denote the last one
+
+	treeNodeStack.pop();
+
+	//here we have reached to the intended internal node
+
+	//kill all the successors here
+	bool flag = DeleteInternalNode(temp);
+	
+	//look back to parents
+	if (flag)
+	{
+		while (treeNodeStack.size() > 0)
+		{
+			TreeNodeX* popped = treeNodeStack.top();
+			treeNodeStack.pop();
+
+			vector<byte> hashDataArray;
+
+			bool haveBabies = false;
+			int64_t nLeaves = 0;
+
+			for (int i = 0; i < 16; i + )
+			{
+				if (popped->Children[i] != nullptr)
+				{
+					nLeaves++;
+					haveBabies = true;
+					if (!popped->IsLeaf)
+					{
+						TreeNodeX* chana = (TreeNodeX*)popped->Children[i];
+						Hash hsh = chana->ID;
+						hashDataArray.insert(hashDataArray.end(), hsh.begin(), hsh.end());
+					}
+					else
+					{
+						TreeLeafNode<T>* ai = (TreeLeafNode<T>*)retNode->Children[i];
+						Hash hsh = ai->Value.GetHash();
+						hashDataArray.insert(hashDataArray.end(), hsh.begin(), hsh.end());
+					}
+				}
+			}
+
+			if (haveBabies)
+			{
+				delete popped;
+				popped = nullptr;
+			}
+
+			else
+			{
+				byte Hout[64];
+				sha512(hashDataArray.data(), hashDataArray.size(), Hout);
+				memcpy((unsigned char*)(popped->ID), Hout, 32);
+
+				popped->LeafCount = nLeaves++;
+			}
+
+		}
+	}
+
+	return true;
+}
+
+template<typename T, typename R>
+bool HashTree<T, R>::DeleteInternalNode(TreeNodeX* internalNode)
+{
+	//base case
+	if (internalNode->IsLeaf)
+	{
+		TreeLeafNode<T>* tln = (TreeLeafNode<T>*) internalNode;
+		delete tln;
+
+		return true;
+	}
+
+	for (int i = 0; i < 16; i++)
+	{
+		if (internalNode->Children[i] != nullptr)
+		{
+			DeleteInternalNode(internalNode->Children[i]);
+			
+			delete internalNode;
+			internalNode = nullptr;
+		}
+	}
+	return true;
+}
+
 
 /*
 Delete a value from the hash tree
