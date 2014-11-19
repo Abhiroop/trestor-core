@@ -9,17 +9,18 @@
 class TreeSyncData : SerializableBase
 {
 public:
-	TreeSyncData(Hash _ID, vector<char> _Address, int64_t _LeafCount, bool _GetAll);
+	TreeSyncData(Hash _ID, vector<char> _Address, int64_t _LeafCount, int16_t _ActiveNodes, bool _GetAll);
 	TreeSyncData(TreeSyncData _LSD, bool _GetAll);
 	TreeSyncData();
 
 	Hash ID;
 	vector<char> Address;
 	int64_t LeafCount;
+	int16_t ActiveNodes;
 	bool GetAll;
-
+	
 	vector<byte> Serialize() override;
 	void Deserialize(vector<byte> Data) override;
 };
 
-#endif 
+#endif

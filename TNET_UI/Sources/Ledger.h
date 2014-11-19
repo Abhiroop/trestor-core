@@ -81,6 +81,8 @@ public:
 
 	void ProcessIncomingPacket(NetworkPacket packet);
 
+	uint16_t GetActiveNodes(TreeNodeX* node);
+
 
 };
 

@@ -2,11 +2,12 @@
 
 #include "ProtocolPackager.h"
 
-TreeSyncData::TreeSyncData(Hash _ID, vector<char> _Address, int64_t _LeafCount, bool _GetAll)
+TreeSyncData::TreeSyncData(Hash _ID, vector<char> _Address, int64_t _LeafCount, int16_t _ActiveNodes, bool _GetAll)
 {
 	ID = _ID;
 	Address = _Address; 
 	LeafCount = _LeafCount;
+	ActiveNodes = _ActiveNodes;
 	GetAll = _GetAll;
 }
 
@@ -29,7 +30,8 @@ vector<byte> TreeSyncData::Serialize()
 	PDTs.push_back(*ProtocolPackager::Pack(ID, 0));
 	PDTs.push_back(*ProtocolPackager::Pack(Address, 1));
 	PDTs.push_back(*ProtocolPackager::Pack(LeafCount, 2));
-	PDTs.push_back(*ProtocolPackager::Pack(GetAll, 3));
+	PDTs.push_back(*ProtocolPackager::Pack(ActiveNodes, 3));
+	PDTs.push_back(*ProtocolPackager::Pack(GetAll, 4));
 	return ProtocolPackager::PackRaw(PDTs);
 }
 
@@ -57,6 +59,10 @@ void TreeSyncData::Deserialize(vector<byte> Data)
 			break;
 
 		case 3:
+			ProtocolPackager::UnpackInt16(*PDT, 3, ActiveNodes);
+			break;
+
+		case 4:
 			ProtocolPackager::UnpackBool(*PDT, 3, GetAll);
 			break;
 		}

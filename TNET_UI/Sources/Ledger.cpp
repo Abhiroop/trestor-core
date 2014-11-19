@@ -74,16 +74,32 @@ Hash Ledger::GetRootHash()
 	return LedgerTree.GetRootHash();
 }
 
-
 vector<byte> Ledger::GetRootInfo()
 {
 	Hash RootHash = GetRootHash();
-
 	return RootHash;
 }
 
+// This gets the active nodes under a treenodex as an unsigned short,
+// All the LSB contains the state of Child[0] and the MSB for Child[15]
+uint16_t Ledger::GetActiveNodes(TreeNodeX* node)
+{
+	uint16_t val = 0;
 
+	if (node != nullptr)
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			bool has_Child = node->Children[i] != nullptr;
+			if (has_Child)
+			{
+				val |= (1 << i);
+			}
+		}		
+	}
 
+	return val;
+}
 
 void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 {
@@ -94,53 +110,54 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 	case TPT_LSYNC_FETCH_ROOT:
 
 	{
-								 // The client is asking for the root of the ledger.
-								 // RoothHash, LCL_Time, 16 Nodes(treenode), cons seq counter,
-								 //LedgerRootInfo lri= LedgerTree.GetRootInfo();
+		// YOU ARE THE SERVER : HAVING UPDATED LEDGER
+		// The client is asking for the root of the ledger.
+		// RoothHash, LCL_Time, 16 Nodes(treenode), cons seq counter,
+		// LedgerRootInfo lri= LedgerTree.GetRootInfo();
 
-								 vector<TreeNodeX*> x;
+		vector<TreeNodeX*> x;
 
-								 bool ok = LedgerTree.getImmediateChildren("", x);
+		bool ok = LedgerTree.getImmediateChildren("", x);
 
-								 vector<vector<unsigned char>> ResponseList;
+		vector<vector<unsigned char>> ResponseList;
 
-								 if (ok)
-								 {
-									 for (int i = 0; i < 16; i++)
-									 {
-										 TreeNodeX* jj = x[i];
-										 
-										 if (jj != nullptr)
-										 {
-											 Hash h = Hash(jj->ID, jj->ID + 32);
+		if (ok)
+		{
+			for (int i = 0; i < 16; i++)
+			{
+				TreeNodeX* jj = x[i];
 
-											 vector<char> vc;
-											 TreeSyncData TSD = TreeSyncData(h, vc, jj->LeafCount, false);
+				if (jj != nullptr)
+				{
+					Hash h = Hash(jj->ID, jj->ID + 32);
 
-											 ResponseList.push_back(TSD.Serialize());
-										 }
-									 }
+					vector<char> vc;
+					TreeSyncData TSD = TreeSyncData(h, vc, jj->LeafCount, GetActiveNodes(jj), false);
 
-									 LedgerRootInfo ri = LedgerTree.GetRootInfo();
+					ResponseList.push_back(TSD.Serialize());
+				}
+			}
 
-									 TreeSyncRootData tsrd;
-									 tsrd.TSDs = ProtocolPackager::Pack(ResponseList);
-									 tsrd.LCL_Time = ri.LCLTime;
-									 tsrd.RootHash = ri.LedgerHash;
-									 tsrd.NodeCount = ri.SequenceNumber;
+			LedgerRootInfo ri = LedgerTree.GetRootInfo();
 
-									 NetworkPacketQueueEntry npqe;
+			TreeSyncRootData tsrd;
+			tsrd.TSDs = ProtocolPackager::Pack(ResponseList);
+			tsrd.LCL_Time = ri.LCLTime;
+			tsrd.RootHash = ri.LedgerHash;
+			tsrd.NodeCount = ri.SequenceNumber;
 
-									 //  Set the reply address
-									 npqe.PublicKey_Dest = packet.PublicKey_Src;
-									 npqe.Packet.Token = packet.Token;
-									 npqe.Packet.Type = TPT_LSYNC_REPLY_ROOT;
-									 npqe.Packet.PublicKey_Src = state.PublicKey;
-									 npqe.Packet.Data = tsrd.Serialize();
+			NetworkPacketQueueEntry npqe;
 
-									 network.SendPacket(npqe);
+			//  Set the reply address
+			npqe.PublicKey_Dest = packet.PublicKey_Src;
+			npqe.Packet.Token = packet.Token;
+			npqe.Packet.Type = TPT_LSYNC_REPLY_ROOT;
+			npqe.Packet.PublicKey_Src = state.PublicKey;
+			npqe.Packet.Data = tsrd.Serialize();
 
-								 }
+			network.SendPacket(npqe);
+
+		}
 
 
 
@@ -149,33 +166,57 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 	case TPT_LSYNC_FETCH_LAYER_INFO:
 	case TPT_LSYNC_FETCH_LAYER_DATA:
 
+	{
+		// YOU ARE THE SERVER : HAVING LATEST LEDGER
+
+		// CHECK FOR LATEST
+
+	}
+
 		break;
 
 	case TPT_LSYNC_REPLY_ROOT:
 
 	{
-								 TreeSyncRootData tsrd;
-								 tsrd.Deserialize(packet.Data);
+		// YOU ARE THE CLIENT : HAVING OLD LEDGER
+		// The server has replied with the latest ledger entries. 
+		// Get the difference and request more items accordingly
 
-								 vector<vector<unsigned char>> ResponseList;
+		TreeSyncRootData tsrd;
+		tsrd.Deserialize(packet.Data);
 
-								 bool ok = ProtocolPackager::UnpackVectorVector(tsrd.TSDs, ResponseList);
+		vector<vector<unsigned char>> ResponseList;
 
-								 if (ok)
-								 {
-									 
+		bool ok = ProtocolPackager::UnpackVectorVector(tsrd.TSDs, ResponseList);
 
-									 
-									 for (int i = 0; i < 16; i++)
-									 {
-										 TreeSyncData tsd;
-										 tsd.Deserialize(ResponseList[i]);
+		if (ok)
+		{
+			vector<TreeSyncData> TSD;
+			for (int i = 0; i < (int)ResponseList.size(); i++)
+			{
+				TreeSyncData tsd;
+				tsd.Deserialize(ResponseList[i]);
+				TSD.push_back(tsd);
+			}
 
+			if (TSD.size() > 0)
+			{
+				// Have the latest ledger items in row 0, calculate difference and fetch data.
+				vector<TreeSyncData> TSD_Req = LedgerTree.GetDifference(TSD);
+				if (TSD_Req.size() > 0)
+				{
+					vector<vector<unsigned char>> ResponseList;
 
+					for (int i = 0; i < (int)TSD_Req.size(); i++)
+					{
+						ResponseList.push_back(TSD_Req[i].Serialize());
+					}
 
+					
+				}
+			}
 
-									 }
-								 }
+		}
 
 
 	}
