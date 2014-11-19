@@ -1033,6 +1033,7 @@ void HashTree<T, R>::TraverseTreeAndReturn(vector<shared_ptr<LeafDataType>> & te
 /*
 Difference
 */
+/*
 template<typename T, typename R>
 vector<TreeSyncData> HashTree<T, R>::GetDifference(vector<TreeSyncData> other)
 {
@@ -1047,9 +1048,10 @@ vector<TreeSyncData> HashTree<T, R>::GetDifference(vector<TreeSyncData> other)
 		TreeSyncData TSD = other[i];
 		vector<char> address = TSD.Address;
 
-		if (address.size()>64)
+		if (address.size()>=64)
 		{
-			continue;
+			out.clear();
+			return out;
 		}
 
 		TreeNodeX* temp = Root;
@@ -1060,7 +1062,8 @@ vector<TreeSyncData> HashTree<T, R>::GetDifference(vector<TreeSyncData> other)
 			int indexPos = getImmediateChildren(address[j]);
 			if (indexPos == -1)
 			{
-				break;
+				out.clear();
+				return out;
 			}
 
 			for (int k = 0; k < 16; k++)
@@ -1076,13 +1079,20 @@ vector<TreeSyncData> HashTree<T, R>::GetDifference(vector<TreeSyncData> other)
 					addr.push_back(Constants::hexChars[k]);
 				}
 			}
+
+			if (TSD.GetAll)
+			{
+				vector<T> getAllLeaf;
+				getAllLeafUnderNode(temp, getAllLeaf);
+			}
+
 		}
 
 		TreeSyncData toPacked = new TreeSyncData(temp->ID, addr, temp->LeafCount, false);
 		out.push_back(toPacked);
 
 	}
-}
+}*/
 
 template<typename T, typename R>
 vector<TreeSyncData> HashTree<T, R>::GetDifference(vector<TreeSyncData> other, vector<TreeSyncData> me)
