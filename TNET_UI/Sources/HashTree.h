@@ -551,7 +551,7 @@ bool HashTree<T, R>::DeleteInternalNode(vector<char> address)
 				}
 			}
 
-			if (haveBabies)
+			if (!haveBabies)
 			{
 				delete popped;
 				popped = nullptr;
