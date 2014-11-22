@@ -2,6 +2,15 @@
 
 #include "ProtocolPackager.h"
 
+TreeSyncData::TreeSyncData(Hash _ID, vector<char> _Address, int64_t _LeafCount,  bool _GetAll)
+{
+	ID = _ID;
+	Address = _Address;
+	LeafCount = _LeafCount;
+	ActiveNodes = 0;
+	GetAll = _GetAll;
+}
+
 TreeSyncData::TreeSyncData(Hash _ID, vector<char> _Address, int64_t _LeafCount, int16_t _ActiveNodes, bool _GetAll)
 {
 	ID = _ID;

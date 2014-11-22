@@ -202,7 +202,7 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 			if (TSD.size() > 0)
 			{
 				// Have the latest ledger items in row 0, calculate difference and fetch data.
-				vector<TreeSyncData> TSD_Req = LedgerTree.GetDifference(TSD);
+				vector<TreeSyncData> TSD_Req = LedgerTree.TraverseLevelOrderDepthSync(0);
 				if (TSD_Req.size() > 0)
 				{
 					vector<vector<unsigned char>> ResponseList;
