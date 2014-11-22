@@ -1231,7 +1231,7 @@ vector<TreeSyncData> HashTree<T, R>::GetDifference(vector<TreeSyncData> other, v
 		//all new
 		if (j == me.size())
 		{
-			for (int t = i; t < other.size(); t++)
+			for (int t = i; t < (int)other.size(); t++)
 			{
 				TreeSyncData LSD(other[t], false);
 
@@ -1251,7 +1251,7 @@ vector<TreeSyncData> HashTree<T, R>::GetDifference(vector<TreeSyncData> other, v
 		if (compare == 0)
 		{
 
-			if (!CompareCharString(other[i].ID, me[j].ID, 32, 32))
+			if (!CompareCharString(other[i].ID.data(), me[j].ID.data(), 32, 32))
 			{
 				out.push_back(other[i]);
 			}
