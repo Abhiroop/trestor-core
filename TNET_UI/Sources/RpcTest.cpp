@@ -29,6 +29,7 @@ void handle_get(http_request request)
 	std::vector<std::pair<utility::string_t, web::json::value> > answer;
 	for (auto const & p : dictionary)
 	{
+		//if (p.first == request.extract_string)
 		answer.push_back(make_pair(json::value(p.first).as_string(), json::value(p.second)));
 	}
 
@@ -45,6 +46,7 @@ void handle_request(http_request request)
 	if (iter == m.end())
 	{
 		// not found
+		TRACE("\n not found\n");
 	}
 
 	request.reply(status_codes::OK, (*iter->second)());
@@ -85,8 +87,14 @@ web::json::value account(void)
 	return obj;
 }
 
-int __main()
+int main()
 {
+	utility::string_t s = L"a";
+	utility::string_t s1 = L"a";
+
+	dictionary[s]= s1;
+
+
 	http_listener listener(L"http://localhost/restdemo");
 
 	listener.support(methods::GET, handle_get);
@@ -110,6 +118,8 @@ int __main()
 	{
 		wcout << e.what() << endl;
 	}
+
+	getchar();
 
 	return 0;
 }

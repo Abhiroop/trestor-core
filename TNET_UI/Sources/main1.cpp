@@ -35,7 +35,7 @@
 
 using namespace std;
 
-int main()
+int _main()
 {
 	
 	LPTIME_OF_DAY_INFO pBuf = NULL;

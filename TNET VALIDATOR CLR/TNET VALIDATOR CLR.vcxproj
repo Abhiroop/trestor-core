@@ -164,8 +164,10 @@
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\LedgerRootInfo.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\MoneyInOutFlow.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\RPCKeyExchange.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\RpcTest.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\State.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -282,6 +284,7 @@
     <ClInclude Include="..\TNET_UI\Sources\FakeSocket.h" />
     <ClInclude Include="..\TNET_UI\Sources\Hash.h" />
     <ClInclude Include="..\TNET_UI\Sources\HashTree.h" />
+    <ClInclude Include="..\TNET_UI\Sources\RPCKeyExchange.h" />
     <ClInclude Include="..\TNET_UI\Sources\IncomingTransactionMap.h" />
     <ClInclude Include="..\TNET_UI\Sources\LeafDataType.h" />
     <ClInclude Include="..\TNET_UI\Sources\Ledger.h" />
