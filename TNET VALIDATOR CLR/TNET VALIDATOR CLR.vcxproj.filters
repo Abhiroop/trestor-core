@@ -64,6 +64,9 @@
     <Filter Include="Sources\Time">
       <UniqueIdentifier>{e2b9f0f5-c712-4c5f-9f7c-146b4199ea96}</UniqueIdentifier>
     </Filter>
+    <Filter Include="RPC">
+      <UniqueIdentifier>{f6482991-d42d-42b3-8e0f-013fbf0fd46e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TNET_UI\Sources\BaseNetwork.cpp">
@@ -251,6 +254,9 @@
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\TreeSyncRootData.cpp">
       <Filter>Sources\HashTree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\RpcTest.cpp">
+      <Filter>RPC</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -618,5 +624,6 @@
     <None Include="..\TNET_UI\Sources\TBB\tbb\index.html">
       <Filter>Sources\TBB</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
