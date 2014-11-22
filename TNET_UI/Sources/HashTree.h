@@ -1262,10 +1262,10 @@ vector<TreeSyncData> HashTree<T, R>::GetDifference(vector<TreeSyncData> other, v
 		//new
 		else if (compare == -1)
 		{
-			TreeSyncData LSD(other[t], false);
+			TreeSyncData LSD(other[i], false);
 
 			// Get leaf nodes if the count is below threshold.
-			LSD.GetAll = (other[t].LeafCount <= Constants::SYNC_LEAF_COUNT_THRESHOLD);
+			LSD.GetAll = (other[i].LeafCount <= Constants::SYNC_LEAF_COUNT_THRESHOLD);
 
 			out.push_back(LSD);
 

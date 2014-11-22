@@ -258,13 +258,12 @@
     <ClCompile Include="..\TNET_UI\Sources\RpcTest.cpp">
       <Filter>RPC</Filter>
     </ClCompile>
-	  <ClCompile Include="..\TNET_UI\Sources\TreeSyncRequest.cpp">
-      <Filter>Sources\HashTree</Filter>
-    </ClCompile>
-	<ClCompile Include="..\TNET_UI\Sources\RPCKeyExchange.cpp">
+    <ClCompile Include="..\TNET_UI\Sources\RPCKeyExchange.cpp">
       <Filter>RPC</Filter>
     </ClCompile>
-
+    <ClCompile Include="..\TNET_UI\Sources\TreeSyncRequest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h">
@@ -617,6 +616,12 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\TreeSyncRootData.h">
       <Filter>Sources\HashTree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\RPCKeyExchange.h">
+      <Filter>RPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TreeSyncRequest.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
