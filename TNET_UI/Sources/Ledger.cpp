@@ -202,7 +202,9 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 			if (TSD.size() > 0)
 			{
 				// Have the latest ledger items in row 0, calculate difference and fetch data.
-				vector<TreeSyncData> TSD_Req = LedgerTree.TraverseLevelOrderDepthSync(0);
+				vector<TreeSyncData> root_level = LedgerTree.TraverseLevelOrderDepthSync(0);
+				vector<TreeSyncData> TSD_Req = LedgerTree.GetDifference(TSD, root_level);
+
 				if (TSD_Req.size() > 0)
 				{
 					vector<vector<unsigned char>> ResponseList;
@@ -211,11 +213,20 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 					{
 						ResponseList.push_back(TSD_Req[i].Serialize());
 					}
+				
 
-					
+					NetworkPacketQueueEntry npqe;
+
+					//  Set the reply address
+					npqe.PublicKey_Dest = packet.PublicKey_Src;
+					npqe.Packet.Token = packet.Token;
+					npqe.Packet.Type = TPT_LSYNC_FETCH_LAYER_DATA;
+					npqe.Packet.PublicKey_Src = state.PublicKey;
+					npqe.Packet.Data = ProtocolPackager::Pack(ResponseList);
+
+					network.SendPacket(npqe);
 				}
 			}
-
 		}
 
 
