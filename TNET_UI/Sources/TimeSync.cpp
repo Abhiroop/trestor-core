@@ -44,7 +44,7 @@ void TimeSync::SendTimeRequest()
 {
 	concurrent_vector<Hash> ConnectedValidators = state.ConnectedValidators;
 
-	for (int i = 0; i < ConnectedValidators.size(); i++)
+	for (int i = 0; i < (int) ConnectedValidators.size(); i++)
 	{
 		Hash ValidatorPK = ConnectedValidators.at(i);
 		Hash token = GenerateNewToken();
