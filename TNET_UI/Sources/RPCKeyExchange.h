@@ -40,7 +40,9 @@ public:
 
 	void generate_shared_secret(unsigned char* other_public_key);
 
-	void handleKetExchange(http_request request);
+	web::json::value handleKetExchange(http_request request);
+	web::json::value initExchange();
+
 	void updateExchangedKey(Hash publicKey);
 };
 
