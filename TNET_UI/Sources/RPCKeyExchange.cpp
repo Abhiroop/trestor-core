@@ -13,7 +13,7 @@ void RPCKeyExchange::handleKetExchange(http_request request)
 		if (jvalue.has_field(L"state"))
 		{
 			value v = jvalue[L"state"];
-			if (v.is_integer)
+			if (v.is_integer())
 			{
 				int state = v.as_integer();
 
@@ -23,17 +23,17 @@ void RPCKeyExchange::handleKetExchange(http_request request)
 					if (jvalue.has_field(L"publicKey"))
 					{
 						value pk = jvalue[L"publicKey"];
-						if (pk.is_string)
+						if (pk.is_string())
 						{
 							string publicKey;
 							publicKey.assign(pk.as_string().begin(), pk.as_string().end());
 							string decodedPK = base64_decode_2(publicKey);
-							
+
 							if (decodedPK.size() != 32)
 								break;
-							
+
 							byte b[32];
-							for (int i = 0; i < decodedPK.size(); i++)
+							for (int i = 0; i < (int)decodedPK.size(); i++)
 							{
 								b[i] = (byte)decodedPK[i];
 							}
@@ -50,12 +50,13 @@ void RPCKeyExchange::handleKetExchange(http_request request)
 							obj[L"publicKey"] = json::value::string(ws);
 						}
 					}
-					
+
+				}
+
 			}
 
+
 		}
-
-
 	}
 }
 
