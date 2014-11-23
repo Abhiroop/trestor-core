@@ -1349,7 +1349,7 @@ void HashTree<T, R>::GetSyncNodeInfo(vector<TreeSyncData> input,
 			TreeNodeX* temp = Root;
 
 			//get to node
-			for (int j = 0; j < Address.size(); j++)
+			for (int j = 0; j < (int)Address.size(); j++)
 			{
 				if (temp->Children[getIndex(Address[j])] == nullptr)
 					return;

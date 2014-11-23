@@ -9,6 +9,7 @@
 #include "Ledger.h"
 #include "TreeSyncData.h"
 #include "TreeSyncRootData.h"
+#include "TreeSyncRequest.h"
 #include "ProtocolPackager.h"
 #include "Constants.h"
 
@@ -95,7 +96,7 @@ uint16_t Ledger::GetActiveNodes(TreeNodeX* node)
 			{
 				val |= (1 << i);
 			}
-		}		
+		}
 	}
 
 	return val;
@@ -163,13 +164,42 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 
 	}
 
-	case TPT_LSYNC_FETCH_LAYER_INFO:
 	case TPT_LSYNC_FETCH_LAYER_DATA:
 
 	{
 		// YOU ARE THE SERVER : HAVING LATEST LEDGER
-
 		// CHECK FOR LATEST
+
+		vector<vector<unsigned char>> ResponseList;
+		bool ok = ProtocolPackager::UnpackVectorVector(packet.Data, ResponseList);
+
+		if (ok)
+		{
+			vector<TreeSyncData> TSD;
+			for (int i = 0; i < (int)ResponseList.size(); i++)
+			{
+				TreeSyncData tsd;
+				tsd.Deserialize(ResponseList[i]);
+				TSD.push_back(tsd);
+			}
+
+			// We have received a list of TSD's to be sent back to the client.
+			TreeSyncRequest tsr;
+			LedgerTree.GetSyncNodeInfo(TSD, tsr.internalNodes, tsr.leafNodes);
+
+			NetworkPacketQueueEntry npqe;
+
+			//  Set the reply address
+			npqe.PublicKey_Dest = packet.PublicKey_Src;
+			npqe.Packet.Token = packet.Token;
+			npqe.Packet.Type = TPT_LSYNC_REPLY_LAYER_DATA;
+			npqe.Packet.PublicKey_Src = state.PublicKey;
+			npqe.Packet.Data = tsr.Serialize();
+
+			network.SendPacket(npqe);
+
+		}
+
 
 	}
 
@@ -213,7 +243,6 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 					{
 						ResponseList.push_back(TSD_Req[i].Serialize());
 					}
-				
 
 					NetworkPacketQueueEntry npqe;
 
@@ -228,6 +257,23 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 				}
 			}
 		}
+
+
+	}
+
+		break;
+
+	case TPT_LSYNC_REPLY_LAYER_DATA:
+
+	{
+		// You are the client, have received latest hot data from the server,
+		// validate and integrate it into the live tree.
+
+		TreeSyncRequest tsr;
+		tsr.Deserialize(packet.Data);
+
+
+
 
 
 	}

@@ -72,7 +72,7 @@ void TreeSyncData::Deserialize(vector<byte> Data)
 			break;
 
 		case 4:
-			ProtocolPackager::UnpackBool(*PDT, 3, GetAll);
+			ProtocolPackager::UnpackBool(*PDT, 4, GetAll);
 			break;
 		}
 	}

@@ -166,6 +166,7 @@
     <ClCompile Include="..\TNET_UI\Sources\MoneyInOutFlow.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\RPCKeyExchange.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\RpcTest.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -174,7 +175,9 @@
     <ClCompile Include="..\TNET_UI\Sources\State.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="..\TNET_UI\Sources\TimeSync.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\TimeSync.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\TreeSyncData.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\main1.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>

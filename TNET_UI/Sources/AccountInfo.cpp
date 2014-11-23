@@ -13,6 +13,7 @@
 #include "ed25519\sha512.h"
 #include "LedgerFileHandler.h"
 #include "Conversions.h"
+#include "ProtocolPackager.h"
 
 using namespace std;
 
@@ -54,9 +55,53 @@ Hash AccountInfo::GetHash()
 	//return new Hash((new SHA256Managed()).ComputeHash(data.ToArray()));
 }
 
-
 Hash AccountInfo::GetID()
 {
 	return AccountID;
 }
 
+vector<byte> AccountInfo::Serialize()
+{
+	vector<ProtocolDataType> PDTs;
+	PDTs.push_back(*ProtocolPackager::Pack(AccountID, 0));
+	PDTs.push_back(*ProtocolPackager::Pack(Money, 1));
+	PDTs.push_back(*ProtocolPackager::Pack(Name, 2));
+	PDTs.push_back(*ProtocolPackager::Pack(IsBlocked, 3));
+	PDTs.push_back(*ProtocolPackager::Pack(LastTransactionTime, 4));
+	return ProtocolPackager::PackRaw(PDTs);
+}
+
+void AccountInfo::Deserialize(vector<byte> Data)
+{
+	vector<ProtocolDataType> PDTs = ProtocolPackager::UnPackRaw(Data);
+	int cnt = 0;
+
+	while (cnt < (int)PDTs.size())
+	{
+		ProtocolDataType* PDT = &PDTs[cnt++];
+
+		switch (PDT->NameType)
+		{
+		case 0:
+			ProtocolPackager::UnpackByteVector(*PDT, 0, AccountID);
+			break;
+
+		case 1:
+			ProtocolPackager::UnpackInt64(*PDT, 1, Money);
+			break;
+
+		case 2:
+			ProtocolPackager::UnpackString(*PDT, 2, Name);
+			break;
+
+		case 3:
+			ProtocolPackager::UnpackByte(*PDT, 3, IsBlocked);
+			break;
+
+		case 4:
+			ProtocolPackager::UnpackInt64(*PDT, 4, LastTransactionTime);
+			break;
+		}
+	}
+
+}

@@ -262,7 +262,7 @@
       <Filter>RPC</Filter>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\TreeSyncRequest.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Sources\HashTree</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -621,7 +621,7 @@
       <Filter>RPC</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\TreeSyncRequest.h">
-      <Filter>Header Files</Filter>
+      <Filter>Sources\HashTree</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

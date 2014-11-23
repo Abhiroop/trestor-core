@@ -214,8 +214,9 @@ void Node::Receive(NetworkPacket Packet)
 		break;
 
 	case TPT_LSYNC_FETCH_ROOT:
-	case TPT_LSYNC_FETCH_LAYER_INFO:
 	case TPT_LSYNC_FETCH_LAYER_DATA:
+	case TPT_LSYNC_REPLY_ROOT:
+	case TPT_LSYNC_REPLY_LAYER_DATA:
 
 		ledger.ProcessIncomingPacket(Packet);
 
