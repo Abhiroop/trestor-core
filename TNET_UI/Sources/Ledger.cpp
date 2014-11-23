@@ -257,8 +257,6 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 				}
 			}
 		}
-
-
 	}
 
 		break;
@@ -272,9 +270,7 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 		TreeSyncRequest tsr;
 		tsr.Deserialize(packet.Data);
 
-
-
-
+		
 
 	}
 
