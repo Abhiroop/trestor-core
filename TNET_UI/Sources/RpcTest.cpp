@@ -57,6 +57,7 @@ void handle_post(http_request request)
 	TRACE("\nhandle POST\n");
 	handle_request(request);
 
+	//wcout << request. << endl;
 
 	//displayed how we can iterate over a json object, the parser is already there,so finding a field is easy
 	json::value obj;
@@ -95,7 +96,7 @@ int main()
 	dictionary[s]= s1;
 
 
-	http_listener listener(L"http://localhost/restdemo");
+	http_listener listener(L"http://*:80/restdemo");
 
 	listener.support(methods::GET, handle_get);
 	listener.support(methods::POST, handle_post);

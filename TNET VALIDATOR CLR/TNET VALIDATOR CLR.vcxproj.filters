@@ -264,6 +264,9 @@
     <ClCompile Include="..\TNET_UI\Sources\TreeSyncRequest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\KeyExchangeState.cpp">
+      <Filter>RPC</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h">
@@ -622,6 +625,9 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\TreeSyncRequest.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\KeyExchangeState.h">
+      <Filter>RPC</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
