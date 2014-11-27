@@ -50,13 +50,15 @@ Node::Node(FakeNetwork _network, string _Name, int _ConnectionLimit,  long Money
 
 	ed25519_create_seed(Seed);
 
-	byte _PrivateKey[32];
+	byte _PrivateKey[64];
 	byte _PublicKey[32];
 
 	ed25519_create_keypair(_PublicKey, _PrivateKey, Seed);
 
 	state.PublicKey = Hash(_PublicKey, _PublicKey + 32);
-	//state.PrivateKey = Hash(_PrivateKey, _PrivateKey + 64);
+	state.PrivateKey = Hash(_PrivateKey, _PrivateKey + 64);
+
+	// Clear the keys from memory in some way...
 	
 	ledger = Ledger(state, "LEDGER_" + _Name + ".dat", network);
 

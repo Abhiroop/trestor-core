@@ -281,7 +281,7 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 
 			bool LevelsSame = true;
 
-			for (int i = 0; i < tsr.internalNodes.size(); i++)
+			for (int i = 0; i < (int)tsr.internalNodes.size(); i++)
 			{				
 				if (tsr.internalNodes[i].Address.size() != depth)
 				{
@@ -326,7 +326,7 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 		// before updating
 		// TODO: FIX ABOVE SECURITY HOLE (So to speak)
 
-		for (int i = 0; i < tsr.leafNodes.size(); i++)
+		for (int i = 0; i < (int)tsr.leafNodes.size(); i++)
 		{
 			AccountInfo ai = tsr.leafNodes[i];
 			LedgerTree.AddUpdate(ai);
