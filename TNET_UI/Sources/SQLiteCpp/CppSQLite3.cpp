@@ -1197,12 +1197,12 @@ CppSQLite3DB::CppSQLite3DB()
 	mnBusyTimeoutMs = 60000; // 60 seconds
 }
 
-
+/*
 CppSQLite3DB::CppSQLite3DB(const CppSQLite3DB& db)
 {
 	mpDB = db.mpDB;
 	mnBusyTimeoutMs = 60000; // 60 seconds
-}
+}*/
 
 
 CppSQLite3DB::~CppSQLite3DB()
@@ -1217,12 +1217,12 @@ CppSQLite3DB::~CppSQLite3DB()
 }
 
 
-CppSQLite3DB& CppSQLite3DB::operator=(const CppSQLite3DB& db)
+/*CppSQLite3DB& CppSQLite3DB::operator=(const CppSQLite3DB& db)
 {
 	mpDB = db.mpDB;
 	mnBusyTimeoutMs = 60000; // 60 seconds
 	return *this;
-}
+}*/
 
 
 void CppSQLite3DB::open(const char* szFile)

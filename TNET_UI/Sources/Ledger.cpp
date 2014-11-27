@@ -12,6 +12,7 @@
 #include "TreeSyncRequest.h"
 #include "ProtocolPackager.h"
 #include "Constants.h"
+#include "SQLiteCpp\CppSQLite3.h"
 
 Ledger::Ledger()
 {
@@ -23,8 +24,11 @@ Ledger::Ledger(State _state, string LedgerDB_FileName, FakeNetwork _network)
 {
 	network = _network;
 	TransactionFees = 0;
+	
 	ledgerFileHandler = LedgerFileHandler(LedgerTree, LedgerDB_FileName);
 	state = _state;
+
+	//ledgerFileHandler
 
 	// Load Database
 	LedgerTree = ledgerFileHandler.DBToTree();
