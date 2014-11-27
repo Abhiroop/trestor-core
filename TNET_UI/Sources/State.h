@@ -30,6 +30,8 @@ public:
 	State();
 
 	Hash PublicKey;
+	Hash PrivateKey;
+
 
 	//Potential bokapatha warning!
 	concurrent_vector<Hash> GlobalBlacklistedValidators;

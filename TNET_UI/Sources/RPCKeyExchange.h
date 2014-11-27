@@ -11,6 +11,7 @@
 #include "KeyExchangeState.h"
 #include"Utils.h"
 #include "Base64_2.h"
+#include "State.h"
 
 using namespace web;
 using namespace web::http;
@@ -24,26 +25,19 @@ class RPCKeyExchange
 {
 private:
 
-	unsigned char publicKey[32];
-	unsigned char privateKey[64];
-	unsigned char seed[32];
-	unsigned char sharedKey[32];
-
-	//other's session key and my extended private key
+	State state;
+	//other's salt and my extended private key
 	concurrent_hash_map<Hash, KeyExchangeState> keyExchangeStateMap;
 	//after the key exchange is done keep the other identity public key and the shared secret
 	concurrent_hash_map<Hash, Hash> exchangedKey;
 
 public:
-	RPCKeyExchange();
-	~RPCKeyExchange();
 
-	void generate_shared_secret(unsigned char* other_public_key);
+	RPCKeyExchange(State _state);
 
 	web::json::value handleKetExchange(http_request request);
 	web::json::value initExchange();
 
-	void updateExchangedKey(Hash publicKey);
 };
 
 

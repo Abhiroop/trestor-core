@@ -67,6 +67,9 @@
     <Filter Include="RPC">
       <UniqueIdentifier>{f6482991-d42d-42b3-8e0f-013fbf0fd46e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Salsa20">
+      <UniqueIdentifier>{47f1d3a3-a806-4c33-be8f-aeafb0cd160d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TNET_UI\Sources\BaseNetwork.cpp">
@@ -266,6 +269,9 @@
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\KeyExchangeState.cpp">
       <Filter>RPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Salsa20\salsa20.cpp">
+      <Filter>Sources\Salsa20</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -628,6 +634,21 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\KeyExchangeState.h">
       <Filter>RPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Salsa20\ecrypt-config.h">
+      <Filter>Sources\Salsa20</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Salsa20\ecrypt-machine.h">
+      <Filter>Sources\Salsa20</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Salsa20\ecrypt-portable.h">
+      <Filter>Sources\Salsa20</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Salsa20\ecrypt-sync.h">
+      <Filter>Sources\Salsa20</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Salsa20\salsa20.h">
+      <Filter>Sources\Salsa20</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
