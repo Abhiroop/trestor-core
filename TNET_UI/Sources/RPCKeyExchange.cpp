@@ -88,7 +88,7 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 						  unsigned char sessionToken[32];
 						  
 						  unsigned char sharedSessionKey[32];
-
+						  
 						  if (jvalue.has_field(L"token"))
 						  {
 							  value token = jvalue[L"token"];
@@ -98,7 +98,7 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 								  randomToken.assign(token.as_string().begin(), token.as_string().end());
 								  string decodedRandomToken = base64_decode_2(randomToken);
 								  
-								  for (int i = 0; i < decodedRandomToken.length(); i++)
+								  for (int i = 0; i < (int)decodedRandomToken.length(); i++)
 								  {
 									  sessionToken[i] = (byte) decodedRandomToken[i];
 								  }
@@ -112,6 +112,10 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 
 						  if (jvalue.has_field(L"sessionPublicKey") || flag)
 						  {
+							  //generate keypair
+							  ed25519_create_seed(seed);
+							  ed25519_create_keypair(ownSessionPk, ownSessionSk, seed);
+
 							  value pk = jvalue[L"sessionPublicKey"];
 							  if (pk.is_string())
 							  {
@@ -162,6 +166,22 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 
 								  jsonToSend[L"signature"] = json::value::string(wsg);
 
+								  //register all data in the hashmap
+								  concurrent_hash_map<Hash, KeyExchangeState>::accessor acc;
+								  Hash token(sessionToken, sessionToken + 8);
+
+								  if (!keyExchangeStateMap.find(acc, token))
+								  {
+									  Hash pk(ownSessionPk, ownSessionPk + 32);
+									  Hash sk(ownSessionSk, ownSessionSk + 32);
+									   
+									  KeyExchangeState KES(2, sk, pk);
+
+									  keyExchangeStateMap.insert(make_pair(token, KES));
+								  }
+								  //else it will ignore
+								  //possiblity of attack
+
 								  return jsonToSend;
 							  }
 						  }
@@ -170,6 +190,10 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 					//state 3
 				case 2:
 				{
+						  unsigned char otherPublicKey[32];
+						  unsigned char signature[64];
+						  unsigned char otherSessionPublicKey[32];
+
 						  if (jvalue.has_field(L"publicKey"))
 						  {
 							  value pk = jvalue[L"publicKey"];
@@ -184,10 +208,9 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 									  break;
 
 								  //shared secret
-								  byte b[32];
 								  for (int i = 0; i < (int)decodedPK.size(); i++)
 								  {
-									  b[i] = (byte)decodedPK[i];
+									  otherPublicKey[i] = (byte)decodedPK[i];
 								  }
 
 

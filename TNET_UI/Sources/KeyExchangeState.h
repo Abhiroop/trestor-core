@@ -13,6 +13,7 @@ public:
 	Hash sharedSecret;
 
 	KeyExchangeState(int _state, Hash _privateKey, Hash _publicKey);
+	KeyExchangeState();
 };
 
 #endif

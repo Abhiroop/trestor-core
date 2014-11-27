@@ -7,3 +7,8 @@ KeyExchangeState::KeyExchangeState(int _state, Hash _privateKey, Hash _publicKey
 	privateKey = _privateKey;
 	publicKey = _publicKey;
 }
+
+KeyExchangeState::KeyExchangeState()
+{
+
+}

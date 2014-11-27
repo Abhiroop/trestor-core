@@ -178,9 +178,11 @@
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\State.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\TimeSync.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\TreeSyncData.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\main1.cpp">
