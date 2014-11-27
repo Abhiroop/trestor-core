@@ -20,12 +20,11 @@ Consensus::Consensus()
 	
 }
 
-Consensus::Consensus(State _state, Hash _PublicKey, Ledger _ledger, FakeNetwork _network)
+Consensus::Consensus(State _state, Ledger _ledger, FakeNetwork _network)
 {
 	state = _state;
 	incomingTransactionMap = IncomingTransactionMap(_state);
 	consensusMap = ConsensusMap(_state, incomingTransactionMap, _ledger);
-	PublicKey = _PublicKey;
 	ledger = _ledger;
 	network = _network;
 }
@@ -111,7 +110,7 @@ void Consensus::ProcessIncomingPacket(NetworkPacket packet)
 		npqe.PublicKey_Dest = packet.PublicKey_Src;
 		npqe.Packet.Token = packet.Token;
 		npqe.Packet.Type = TPT_CONS_RESP_TC_TX;
-		npqe.Packet.PublicKey_Src = PublicKey;
+		npqe.Packet.PublicKey_Src = state.PublicKey;
 		npqe.Packet.Data = ProtocolPackager::Pack(ResponseList);
 		
 		network.SendPacket(npqe);

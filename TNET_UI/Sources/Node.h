@@ -82,8 +82,7 @@ public:
 
 	AccountInfo AI;	
 
-	byte _PrivateKey[32];
-	byte _PublicKey[32];
+	
 
 	//Hash PublicKey;
 
