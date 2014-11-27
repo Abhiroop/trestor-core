@@ -235,6 +235,7 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 				vector<TreeSyncData> root_level = LedgerTree.TraverseLevelOrderDepthSync(0);
 				vector<TreeSyncData> TSD_Req = LedgerTree.GetDifference(TSD, root_level);
 
+				// Same code used below !! fix
 				if (TSD_Req.size() > 0)
 				{
 					vector<vector<unsigned char>> ResponseList;
@@ -267,11 +268,70 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 		// You are the client, have received latest hot data from the server,
 		// validate and integrate it into the live tree.
 
+		// TODO: VALIDATION FOR CORRECTNESS !!!
+
 		TreeSyncRequest tsr;
 		tsr.Deserialize(packet.Data);
 
-		
+		vector<TreeSyncData> TSD_New_Requests;
 
+		if (tsr.internalNodes.size() > 0)
+		{
+			int depth = tsr.internalNodes[0].Address.size();  // This is the depth of the tree.
+
+			bool LevelsSame = true;
+
+			for (int i = 0; i < tsr.internalNodes.size(); i++)
+			{				
+				if (tsr.internalNodes[i].Address.size() != depth)
+				{
+					LevelsSame = false;
+				}
+			}
+			
+			if (LevelsSame)  // Perfect
+			{
+				vector<TreeSyncData> root_level = LedgerTree.TraverseLevelOrderDepthSync(depth);
+				vector<TreeSyncData> TSD_Req = LedgerTree.GetDifference(tsr.internalNodes, root_level);
+
+				if (TSD_Req.size() > 0)
+				{
+					vector<vector<unsigned char>> ResponseList;
+
+					for (int i = 0; i < (int)TSD_Req.size(); i++)
+					{
+						ResponseList.push_back(TSD_Req[i].Serialize());
+					}
+
+					NetworkPacketQueueEntry npqe;
+
+					//  Set the reply address
+					npqe.PublicKey_Dest = packet.PublicKey_Src;
+					npqe.Packet.Token = packet.Token;
+					npqe.Packet.Type = TPT_LSYNC_FETCH_LAYER_DATA;
+					npqe.Packet.PublicKey_Src = state.PublicKey;
+					npqe.Packet.Data = ProtocolPackager::Pack(ResponseList);
+
+					network.SendPacket(npqe);
+				}
+
+			}
+			else // BAD State: We don't want. Multiple level TreeSyncData
+			{
+
+			}
+		}
+
+		// It is very critical to verify this against other nodes for correctness,
+		// before updating
+		// TODO: FIX ABOVE SECURITY HOLE (So to speak)
+
+		for (int i = 0; i < tsr.leafNodes.size(); i++)
+		{
+			AccountInfo ai = tsr.leafNodes[i];
+			LedgerTree.AddUpdate(ai);
+		}
+		
 	}
 
 		break;

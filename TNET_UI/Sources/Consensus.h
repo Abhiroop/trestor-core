@@ -34,8 +34,6 @@ class Consensus
 	IncomingTransactionMap incomingTransactionMap;
 	Ledger ledger;
 
-	Hash PublicKey;
-
 	// A list of transactions which we don't have, but others in the public
 	// set have.
 	concurrent_queue<Hash> TransactionsToBeFetched;
@@ -50,7 +48,7 @@ class Consensus
 public:
 
 	Consensus();
-	Consensus(State _state, Hash _PublicKey, Ledger _ledger, FakeNetwork _network);
+	Consensus(State _state, Ledger _ledger, FakeNetwork _network);
 
 	void ProcessIncomingPacket(NetworkPacket packet);
 
