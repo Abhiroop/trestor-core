@@ -163,3 +163,8 @@ bool Salsa20::Process(vector<unsigned char> Data, vector<unsigned char> Key, vec
 		return false;
 	}
 }
+
+Salsa20::Salsa20()
+{
+
+}

@@ -366,7 +366,115 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 					//wrap up all the data structures
 				case 3:
 				{
+						  unsigned char otherPublicKey[32];
+						  unsigned char signature[64];
+						  unsigned char otherSessionPublicKey[32];
+						  unsigned char token[8];
+						  string randomToken;
 
+
+						  if (jvalue.has_field(L"token"))
+						  {
+							  value tk = jvalue[L"token"];
+
+							  if (tk.is_string())
+							  {
+
+								  randomToken.assign(tk.as_string().begin(), tk.as_string().end());
+								  string decodedTK = base64_decode_2(randomToken);
+
+								  if (decodedTK.size() != 8)
+									  break;
+
+								  //other's public key
+								  for (int i = 0; i < (int)decodedTK.size(); i++)
+								  {
+									  token[i] = (byte)decodedTK[i];
+								  }
+							  }
+						  }
+
+						  if (jvalue.has_field(L"publicKey"))
+						  {
+							  value pk = jvalue[L"publicKey"];
+
+							  if (pk.is_string())
+							  {
+								  string publicKey;
+								  publicKey.assign(pk.as_string().begin(), pk.as_string().end());
+								  string decodedPK = base64_decode_2(publicKey);
+
+								  if (decodedPK.size() != 32)
+									  break;
+
+								  //other's public key
+								  for (int i = 0; i < (int)decodedPK.size(); i++)
+								  {
+									  otherPublicKey[i] = (byte)decodedPK[i];
+								  }
+							  }
+						  }
+
+						  if (jvalue.has_field(L"signature"))
+						  {
+							  value sig = jvalue[L"signature"];
+
+							  if (sig.is_string())
+							  {
+								  string signature;
+								  signature.assign(sig.as_string().begin(), sig.as_string().end());
+								  string decodedSIG = base64_decode_2(signature);
+
+								  if (decodedSIG.size() != 64)
+									  break;
+
+								  //other's session public key
+								  for (int i = 0; i < (int)decodedSIG.size(); i++)
+								  {
+									  signature[i] = (byte)decodedSIG[i];
+								  }
+							  }
+							  //verify the signature
+
+							  int ver = ed25519_verify(signature, otherSessionPublicKey, 32, otherPublicKey);
+
+							  if (ver == 0)
+								  break;
+						  }
+
+
+						  //get own key from the token
+						  concurrent_hash_map<Hash, KeyExchangeState>::accessor acc;
+						  KeyExchangeState KES;
+
+						  Hash tokenHash(token, token + 8);
+						  if (keyExchangeStateMap.find(acc, tokenHash))
+						  {
+							  KES = acc->second;
+						  }
+
+						  else
+						  {
+							  break;
+						  }
+
+						  //make the json object and send own identity public key along withh a signature
+						  //also do a wrap up
+						  //delete
+						  keyExchangeStateMap.erase(tokenHash);
+						  Hash otherPublicKeyHash(otherPublicKey, otherPublicKey + 32);
+
+						  concurrent_hash_map<Hash, Hash>::accessor acc1;
+						  //entry
+						  if (!exchangedKey.find(acc1, tokenHash))
+						  {
+							  exchangedKey.insert(make_pair(otherPublicKeyHash, KES.sharedSecret));
+						  }
+						  //else ignore
+
+
+						  value jsonToSend;
+						  return jsonToSend;
 				}
 
 					
