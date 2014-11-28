@@ -135,26 +135,24 @@ void ECRYPT_keystream_bytes(ECRYPT_ctx *x,u8 *stream,u32 bytes)
 
 bool Salsa20::Process(vector<unsigned char> Data, vector<unsigned char> Key, vector<unsigned char> IV, vector<unsigned char> & ProcessedData)
 {
-	if (Key.size() == 32 && IV.size() == 8)
+	if ((Key.size() == 32) && (IV.size() == 8))
 	{
-		ECRYPT_ctx* ctx;
+		ECRYPT_ctx ctx[1];
 
 		ECRYPT_keysetup(ctx, Key.data(), 256);
 		ECRYPT_ivsetup(ctx, IV.data());
 
 		ProcessedData.clear();
 
-		unsigned char * data__ = (unsigned char *)malloc(Data.size());
+		unsigned char * pData = (unsigned char *)malloc(Data.size());
 
-		ECRYPT_encrypt_bytes(ctx, Data.data(), data__, Data.size());
+		ECRYPT_encrypt_bytes(ctx, Data.data(), pData, Data.size());
 
-		vector<unsigned char> vv(data__, data__ + Data.size());
+		vector<unsigned char> vv(pData, pData + Data.size());
 
 		ProcessedData.insert(ProcessedData.end(), vv.begin(), vv.end());
 
-		free(data__);
-
-		//ProcessedData = vv;
+		free(pData);
 
 		return true;
 	}

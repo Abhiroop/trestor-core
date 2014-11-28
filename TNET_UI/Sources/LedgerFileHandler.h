@@ -15,7 +15,7 @@
 
 class LedgerFileHandler
 {
-	CppSQLite3DB  ledger_db;
+	CppSQLite3DB ledger_db;
 
 public:
 

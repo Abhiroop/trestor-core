@@ -80,7 +80,7 @@ void Simulator::StartSimulation()
 
 	for (int i = 0; i < 8; i++)
 	{
-		string CN = "NAME_" + to_string(i) + "_";
+		string CN = "NAME_" + to_string(i) + "";
 
 		//Node n3 = Node(CN, 4, lgr, 100 * i, 100);
 

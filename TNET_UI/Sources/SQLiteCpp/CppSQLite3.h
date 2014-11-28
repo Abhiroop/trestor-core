@@ -314,12 +314,12 @@ public:
 
 	bool IsAutoCommitOn();
 
-	CppSQLite3DB(const CppSQLite3DB& db);
-	CppSQLite3DB& operator=(const CppSQLite3DB& db);
+
 
 private:
 
-    
+	//CppSQLite3DB(const CppSQLite3DB& db);
+	//CppSQLite3DB& operator=(const CppSQLite3DB& db);
 
     sqlite3_stmt* compile(const char* szSQL);
 

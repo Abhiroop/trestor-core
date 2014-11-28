@@ -18,10 +18,19 @@ LedgerFileHandler::LedgerFileHandler()
 
 LedgerFileHandler::LedgerFileHandler(HashTree< AccountInfo, LedgerRootInfo > accountTree, string LedgerDB_FileName)
 {
-	AccountTree = accountTree;
+	AccountTree = accountTree;	
+
+	
+
+	//ledger_db = LedgerDB;
+
 	ledger_db.open(LedgerDB_FileName.data());
 
-	VerifyDatabase();
+	VerifyDatabase();	
+
+	//AccountTree = DBToTree();
+
+	//CppSQLite3Statement stmt = ledger_db.compileStatement("select * from LedgerInfo");
 }
 
 int LedgerFileHandler::VerifyDatabase()
@@ -88,7 +97,6 @@ int LedgerFileHandler::UpdateLedgerInfo(Hash LedgerHash, Hash LastLedgerHash, in
 int LedgerFileHandler::SaveToDB()
 {
 	VerifyDatabase();
-
 
 	//bind(&Node::Receive, *NewNode, _1));
 

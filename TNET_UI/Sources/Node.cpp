@@ -46,8 +46,6 @@ Node::Node(FakeNetwork _network, string _Name, int _ConnectionLimit,  long Money
 	ConnectionLimit = ConnectionLimit;
 	byte Seed[32];
 
-	//RandomFillBytes(Seed, 32);
-
 	ed25519_create_seed(Seed);
 
 	byte _PrivateKey[64];
