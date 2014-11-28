@@ -98,6 +98,11 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 								  randomToken.assign(token.as_string().begin(), token.as_string().end());
 								  string decodedRandomToken = base64_decode_2(randomToken);
 								  
+
+								  if (decodedRandomToken.size() != 8)
+								  {
+									  throw exception("Decoded token size is not 8 in JSON : state expected = 1");
+								  }
 								  for (int i = 0; i < (int)decodedRandomToken.length(); i++)
 								  {
 									  sessionToken[i] = (byte) decodedRandomToken[i];
@@ -108,7 +113,10 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 						  }
 
 						  if (!flag)
+						  {
+							  throw exception("No toke included in JSON: state expected = 1");
 							  break;
+						  }
 
 						  if (jvalue.has_field(L"sessionPublicKey") || flag)
 						  {
@@ -124,7 +132,10 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 								  string decodedPK = base64_decode_2(publicKey);
 
 								  if (decodedPK.size() != 32)
+								  {
+									  throw exception("decoded public key size is not 32 in JSON : state expected = 1");
 									  break;
+								  }
 
 								  //shared secret
 								  byte otherPK[32];
@@ -214,7 +225,10 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 								  string decodedTK = base64_decode_2(randomToken);
 
 								  if (decodedTK.size() != 8)
+								  {
+									  throw exception("Decoded toke size is not 8 in JSON : state expected = 2");
 									  break;
+								  }
 
 								  //other's public key
 								  for (int i = 0; i < (int)decodedTK.size(); i++)
@@ -235,7 +249,10 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 								  string decodedPK = base64_decode_2(publicKey);
 
 								  if (decodedPK.size() != 32)
+								  {
+									  throw exception("Decoded public key size is not 32 in JSON : state expected = 2");
 									  break;
+								  }
 
 								  //other's public key
 								  for (int i = 0; i < (int)decodedPK.size(); i++)
@@ -256,7 +273,10 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 								  string decodedSPK = base64_decode_2(sessionPublicKey);
 
 								  if (decodedSPK.size() != 32)
+								  {
+									  throw exception("Decoded session public key size is not 32 in JSON : state expected = 2");
 									  break;
+								  }
 
 								  //other's session public key
 								  for (int i = 0; i < (int)decodedSPK.size(); i++)
@@ -277,7 +297,10 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 								  string decodedSIG = base64_decode_2(signature);
 
 								  if (decodedSIG.size() != 64)
+								  {
+									  throw exception("Decoded signature size is not 64 in JSON : state expected = 2");
 									  break;
+								  }
 
 								  //other's session public key
 								  for (int i = 0; i < (int)decodedSIG.size(); i++)
@@ -290,7 +313,10 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 							  int ver = ed25519_verify(signature, otherSessionPublicKey, 32, otherPublicKey);
 							  
 							  if (ver == 0)
+							  {
+								  throw exception("Signature is not verified : state expected = 2");
 								  break;
+							  }
 						  }
 
 						  //get own key from the token
@@ -305,6 +331,7 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 
 						  else
 						  {
+							  throw exception("Token not found in the hash map : state expected");
 							  break;
 						  }
 						  
@@ -384,7 +411,10 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 								  string decodedTK = base64_decode_2(randomToken);
 
 								  if (decodedTK.size() != 8)
+								  {
+									  throw exception("Decoded toke size is not 8 in JSON : state expected = 3");
 									  break;
+								  }
 
 								  //other's public key
 								  for (int i = 0; i < (int)decodedTK.size(); i++)
@@ -405,7 +435,10 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 								  string decodedPK = base64_decode_2(publicKey);
 
 								  if (decodedPK.size() != 32)
+								  {
+									  throw exception("Decoded public key size is not 32 in JSON : state expected = 3");
 									  break;
+								  }
 
 								  //other's public key
 								  for (int i = 0; i < (int)decodedPK.size(); i++)
@@ -426,7 +459,10 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 								  string decodedSIG = base64_decode_2(signature);
 
 								  if (decodedSIG.size() != 64)
+								  {
+									  throw exception("Decoded signature size is not 64 in JSON : state expected = 3");
 									  break;
+								  }
 
 								  //other's session public key
 								  for (int i = 0; i < (int)decodedSIG.size(); i++)
@@ -439,7 +475,10 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 							  int ver = ed25519_verify(signature, otherSessionPublicKey, 32, otherPublicKey);
 
 							  if (ver == 0)
+							  {
+								  throw exception("Signature is not veerified : state expected = 3");
 								  break;
+							  }
 						  }
 
 
@@ -455,6 +494,7 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 
 						  else
 						  {
+							  throw  exception("Token not found in the database");
 							  break;
 						  }
 
@@ -480,7 +520,7 @@ web::json::value RPCKeyExchange::handleKetExchange(http_request request)
 					
 				default:
 				{
-						   throw exception("Die bitch die!!!");
+						   throw exception("Violation happen in the keyexchange");
 				}
 
 				}
