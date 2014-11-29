@@ -168,6 +168,9 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\RPCPacketHandler.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\RpcTest.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
@@ -308,6 +311,7 @@
     <ClInclude Include="..\TNET_UI\Sources\MoneyInOutFlow.h" />
     <ClInclude Include="..\TNET_UI\Sources\NetworkCommand.h" />
     <ClInclude Include="..\TNET_UI\Sources\NetworkManager.h" />
+    <ClInclude Include="..\TNET_UI\Sources\RPCPacketHandler.h" />
     <ClInclude Include="..\TNET_UI\Sources\Salsa20\ecrypt-config.h" />
     <ClInclude Include="..\TNET_UI\Sources\Salsa20\ecrypt-machine.h" />
     <ClInclude Include="..\TNET_UI\Sources\Salsa20\ecrypt-portable.h" />

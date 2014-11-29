@@ -24,7 +24,6 @@ using namespace std;
 class RPCKeyExchange
 {
 private:
-
 	State state;
 	//other's salt and my extended private key
 	concurrent_hash_map<Hash, KeyExchangeState> keyExchangeStateMap;
@@ -35,7 +34,7 @@ public:
 
 	RPCKeyExchange(State _state);
 
-	web::json::value handleKetExchange(http_request request);
+	web::json::value handleKetExchange(value jvalue);
 	web::json::value initExchange();
 
 };

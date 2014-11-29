@@ -276,6 +276,9 @@
     <ClCompile Include="..\TNET_UI\Sources\SQLiteCpp\sqlite3.c">
       <Filter>Sources\SQLLiteCpp</Filter>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\RPCPacketHandler.cpp">
+      <Filter>RPC</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h">
@@ -652,6 +655,9 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\Salsa20\salsa20.h">
       <Filter>Sources\Salsa20</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\RPCPacketHandler.h">
+      <Filter>RPC</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
