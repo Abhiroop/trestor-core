@@ -4,6 +4,8 @@
 #define TRACE(msg)            wcout << msg
 #define TRACE_ACTION(a, k, v) wcout << a << L" (" << k << L", " << v << L")\n"
 
+//void handle_post1(http_request request);
+
 enum PACKET_TYPE
 {
 	VALIDATOR_KEY_EXCHANGE = 0x20,
@@ -15,34 +17,9 @@ enum PACKET_TYPE
 	USER_BALANCE_UPDATE = 0x51
 };
 
-RPCPackerHandler::RPCPackerHandler()
-{
+State __state;
 
-}
-
-RPCPackerHandler::RPCPackerHandler(State _state)
-{
-	http_listener listener(L"http://*:80/restdemo");
-	listener.support(methods::POST, postListner);
-
-	state = _state;
-
-	try
-	{
-		listener
-			.open()
-			.then([&listener](){TRACE(L"\nstarting to listen\n"); })
-			.wait();
-
-		while (true);
-	}
-	catch (exception const & e)
-	{
-		wcout << e.what() << endl;
-	}
-}
-
-void RPCPackerHandler::postListner(http_request request)
+void handle_post(http_request request)
 {
 	value jvalue = request.extract_json().get();
 	string packetType;
@@ -63,7 +40,7 @@ void RPCPackerHandler::postListner(http_request request)
 					{
 					case VALIDATOR_KEY_EXCHANGE:
 					{
-												   RPCKeyExchange RPCKE(state);
+												   RPCKeyExchange RPCKE(__state);
 												   RPCKE.handleKetExchange(jvalue);
 
 												   break;
@@ -112,5 +89,35 @@ void RPCPackerHandler::postListner(http_request request)
 	catch (exception& e)
 	{
 		cout << e.what() << endl;
+	}
+}
+
+RPCPackerHandler::RPCPackerHandler()
+{
+
+}
+
+
+RPCPackerHandler::RPCPackerHandler(State _state)
+{
+
+	http_listener listener(L"http://*:80/restdemo");
+	listener.support(methods::POST, handle_post);
+
+	state = _state;
+	__state = _state;
+
+	try
+	{
+		listener
+			.open()
+			.then([&listener](){TRACE(L"\nlistening for incoming JSON\n"); })
+			.wait();
+
+		while (true);
+	}
+	catch (exception& e)
+	{
+		wcout << e.what() << endl;
 	}
 }
