@@ -28,6 +28,8 @@ web::json::value RPCKeyExchange::initExchange()
 	string encoeToken = base64_encode_2((const char*)Token, 8);
 	std::wstring wt;
 	wt.assign(encoeToken.begin(), encoeToken.end());
+	
+	jsonToSend[L"packetType"] = json::value::number(0x20);
 	jsonToSend[L"token"] = json::value::string(wt);
 
 	string encodedOwnPK = base64_encode_2((const char*)publicKey, 32);
@@ -160,6 +162,9 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 									  // make a new jason object to send own public key
 
 									  value jsonToSend;
+
+									  jsonToSend[L"packetType"] = json::value::number(0x20);
+
 									  jsonToSend[L"state"] = json::value::number(2);
 
 									  string encodedOwnPK = base64_encode_2((const char*)ownSessionPk, 32);
@@ -368,6 +373,8 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 							  //json object
 							  value jsonToSend;
 
+							  jsonToSend[L"packetType"] = json::value::number(0x20);
+
 							  jsonToSend[L"state"] = json::value::number(3);
 
 							  std::wstring wrt;
@@ -517,6 +524,7 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 
 
 							  value jsonToSend;
+							  jsonToSend[L"packetType"] = json::value::number(0x20);
 							  return jsonToSend;
 					}
 
@@ -533,7 +541,7 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 
 			else
 			{
-				throw exception("State attribute not exists in the JSOn object");
+				cout << "KEY EXCHANGE COMPLETE";
 			}
 		}
 
