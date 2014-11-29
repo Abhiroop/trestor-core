@@ -1,9 +1,9 @@
 #include "RPCPacketHandler.h"
 #include "RPCKeyExchange.h"
 
-/*
-The constructors will take care of all the packet types
-*/
+#define TRACE(msg)            wcout << msg
+#define TRACE_ACTION(a, k, v) wcout << a << L" (" << k << L", " << v << L")\n"
+
 enum PACKET_TYPE
 {
 	VALIDATOR_KEY_EXCHANGE = 0x20,
@@ -20,10 +20,30 @@ RPCPackerHandler::RPCPackerHandler()
 
 }
 
-RPCPackerHandler::RPCPackerHandler(http_request request, State _state)
+RPCPackerHandler::RPCPackerHandler(State _state)
 {
+	http_listener listener(L"http://*:80/restdemo");
+	listener.support(methods::POST, postListner);
+
 	state = _state;
 
+	try
+	{
+		listener
+			.open()
+			.then([&listener](){TRACE(L"\nstarting to listen\n"); })
+			.wait();
+
+		while (true);
+	}
+	catch (exception const & e)
+	{
+		wcout << e.what() << endl;
+	}
+}
+
+void RPCPackerHandler::postListner(http_request request)
+{
 	value jvalue = request.extract_json().get();
 	string packetType;
 
@@ -38,7 +58,7 @@ RPCPackerHandler::RPCPackerHandler(http_request request, State _state)
 				if (v.is_integer())
 				{
 					int PT = v.as_integer();
-					
+
 					switch (PT)
 					{
 					case VALIDATOR_KEY_EXCHANGE:

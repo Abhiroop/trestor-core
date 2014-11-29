@@ -16,9 +16,11 @@ using namespace std;
 class RPCPackerHandler
 {
 	State state;
+	void postListner(http_request request);
+
 public:
 	RPCPackerHandler();
-	RPCPackerHandler(http_request request, State _state);
+	RPCPackerHandler(State _state);
 };
 
 #endif
