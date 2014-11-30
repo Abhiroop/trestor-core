@@ -1,8 +1,34 @@
 //@Author : Aritra Dhar + Arpan Jati
 
 #include <ctime>
+#include<iostream>
+#include<Windows.h>
+#include <io.h>
+#include <fcntl.h>
 #include "Utils.h"
 #include "Base64.h"
+
+std::string ws2s(std::wstring ws)
+{
+	int len;
+	int slength = (int)ws.length() + 1;
+	len = WideCharToMultiByte(CP_ACP, 0, ws.c_str(), slength, 0, 0, 0, 0);
+	char* buf = new char[len];
+	WideCharToMultiByte(CP_ACP, 0, ws.c_str(), slength, buf, len, 0, 0);
+	std::string r(buf);
+	delete[] buf;
+	return r;
+}
+
+std::wstring s2ws(const std::string& s)
+{
+	int len;
+	int slength = (int)s.length() + 1;
+	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+	std::wstring r(len, L'\0');
+	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, &r[0], len);
+	return r;
+}
 
 char* s = "0123456789ABCDEF";
 int getIndex(char c)
@@ -186,9 +212,14 @@ std::wstring StringUtils::stows(std::string s)
 
 std::string StringUtils::wstos(std::wstring ws)
 {
-	std::string s;
-	s.assign(ws.begin(), ws.end());
-	return s;
+	int len;
+	int slength = (int)ws.length() + 1;
+	len = WideCharToMultiByte(CP_ACP, 0, ws.c_str(), slength, 0, 0, 0, 0);
+	char* buf = new char[len];
+	WideCharToMultiByte(CP_ACP, 0, ws.c_str(), slength, buf, len, 0, 0);
+	std::string r(buf);
+	delete[] buf;
+	return r;
 }
 
 System::String ^StringUtils::stops(std::string s)

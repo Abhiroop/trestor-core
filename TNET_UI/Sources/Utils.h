@@ -27,6 +27,9 @@
 
 using namespace std;
 
+string ws2s(std::wstring ws);
+wstring s2ws(const std::string& s);
+
 bool ByteArrayEquals(vector<byte> x, int xOffset, vector<byte> y, int yOffset, int length);
 
 bool CompareCharString(unsigned char* i, unsigned char* j, int len1, int len2);

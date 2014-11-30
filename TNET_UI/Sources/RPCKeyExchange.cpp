@@ -1,3 +1,5 @@
+#include<iostream>
+#include "Utils.h"
 #include"RPCKeyExchange.h"
 
 #define TRACE(msg)            wcout << msg
@@ -27,14 +29,18 @@ web::json::value RPCKeyExchange::initExchange()
 
 	string encoeToken = base64_encode_2((const char*)Token, 8);
 	std::wstring wt;
-	wt.assign(encoeToken.begin(), encoeToken.end());
-	
+	//wt.assign(encoeToken.begin(), encoeToken.end());
+	wt = s2ws(encoeToken);
+
+
 	jsonToSend[L"packetType"] = json::value::number(0x20);
 	jsonToSend[L"token"] = json::value::string(wt);
 
 	string encodedOwnPK = base64_encode_2((const char*)publicKey, 32);
 	std::wstring ws;
-	ws.assign(encodedOwnPK.begin(), encodedOwnPK.end());
+	//ws.assign(encodedOwnPK.begin(), encodedOwnPK.end());
+	ws = s2ws(encodedOwnPK);
+	
 	jsonToSend[L"sessionPublicKey"] = json::value::string(ws);
 
 	concurrent_hash_map<Hash, KeyExchangeState>::accessor acc;
@@ -92,7 +98,6 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 							  unsigned char ownSessionSk[32];
 							  unsigned char sessionToken[8];
 							  string randomToken;
-
 							  unsigned char sharedSessionKey[32];
 
 							  if (jvalue.has_field(L"token"))
@@ -100,7 +105,11 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 								  value token = jvalue[L"token"];
 								  if (token.is_string())
 								  {
-									  randomToken.assign(token.as_string().begin(), token.as_string().end());
+									  wstring ws = token.as_string();
+									 // randomToken.assign(token.as_string().begin(), token.as_string().end());
+								
+									  randomToken = ws2s(ws);
+
 									  string decodedRandomToken = base64_decode_2(randomToken);
 
 
@@ -119,7 +128,8 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 
 							  if (!flag)
 							  {
-								  throw exception("No toke included in JSON: state expected = 1");
+								  throw exception("No token included in JSON: state expected = 1");
+								  
 								  break;
 							  }
 
@@ -133,7 +143,9 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 								  if (pk.is_string())
 								  {
 									  string publicKey;
-									  publicKey.assign(pk.as_string().begin(), pk.as_string().end());
+									  //publicKey.assign(pk.as_string().begin(), pk.as_string().end());
+									  publicKey = ws2s(pk.as_string());
+
 									  string decodedPK = base64_decode_2(publicKey);
 
 									  if (decodedPK.size() != 32)
@@ -169,7 +181,9 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 
 									  string encodedOwnPK = base64_encode_2((const char*)ownSessionPk, 32);
 									  std::wstring ws;
-									  ws.assign(encodedOwnPK.begin(), encodedOwnPK.end());
+									  //ws.assign(encodedOwnPK.begin(), encodedOwnPK.end());
+									  ws = s2ws(encodedOwnPK);
+
 									  jsonToSend[L"sessionPublicKey"] = json::value::string(ws);
 
 									  unsigned char signedSessionPk[64];
@@ -177,16 +191,22 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 
 									  string encodedSignature = base64_encode_2((const char*)signedSessionPk, 64);
 									  std::wstring wsg;
-									  wsg.assign(encodedSignature.begin(), encodedSignature.end());
+									  //wsg.assign(encodedSignature.begin(), encodedSignature.end());
+									  wsg = s2ws(encodedSignature);
+									  
 									  jsonToSend[L"signature"] = json::value::string(wsg);
 
 									  string encodedOwnIdentityPK = base64_encode_2((const char*)state.PublicKey.data(), 32);
 									  std::wstring woipk;
-									  woipk.assign(encodedOwnIdentityPK.begin(), encodedOwnIdentityPK.end());
+									  //woipk.assign(encodedOwnIdentityPK.begin(), encodedOwnIdentityPK.end());
+									  woipk = s2ws(encodedOwnIdentityPK);
+									  
 									  jsonToSend[L"publicKey"] = json::value::string(woipk);
 
 									  std::wstring wrt;
-									  wrt.assign(randomToken.begin(), randomToken.end());
+									  //wrt.assign(randomToken.begin(), randomToken.end());
+									  wrt = s2ws(randomToken);
+									  
 									  jsonToSend[L"token"] = json::value::string(wrt);
 
 									  //register all data in the hashmap
@@ -229,7 +249,9 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 								  if (tk.is_string())
 								  {
 
-									  randomToken.assign(tk.as_string().begin(), tk.as_string().end());
+									  //randomToken.assign(tk.as_string().begin(), tk.as_string().end());
+									  randomToken = ws2s(tk.as_string());
+									  
 									  string decodedTK = base64_decode_2(randomToken);
 
 									  if (decodedTK.size() != 8)
@@ -253,7 +275,9 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 								  if (pk.is_string())
 								  {
 									  string publicKey;
-									  publicKey.assign(pk.as_string().begin(), pk.as_string().end());
+									  //publicKey.assign(pk.as_string().begin(), pk.as_string().end());
+									  publicKey = ws2s(pk.as_string());
+									  
 									  string decodedPK = base64_decode_2(publicKey);
 
 									  if (decodedPK.size() != 32)
@@ -277,7 +301,9 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 								  if (spk.is_string())
 								  {
 									  string sessionPublicKey;
-									  sessionPublicKey.assign(spk.as_string().begin(), spk.as_string().end());
+									  //sessionPublicKey.assign(spk.as_string().begin(), spk.as_string().end());
+									  sessionPublicKey = ws2s(spk.as_string());
+
 									  string decodedSPK = base64_decode_2(sessionPublicKey);
 
 									  if (decodedSPK.size() != 32)
@@ -301,7 +327,9 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 								  if (sig.is_string())
 								  {
 									  string signature;
-									  signature.assign(sig.as_string().begin(), sig.as_string().end());
+									  //signature.assign(sig.as_string().begin(), sig.as_string().end());
+									  signature = ws2s(sig.as_string());
+									  
 									  string decodedSIG = base64_decode_2(signature);
 
 									  if (decodedSIG.size() != 64)
@@ -378,12 +406,16 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 							  jsonToSend[L"state"] = json::value::number(3);
 
 							  std::wstring wrt;
-							  wrt.assign(randomToken.begin(), randomToken.end());
+							  //wrt.assign(randomToken.begin(), randomToken.end());
+							  wrt = s2ws(randomToken);
+							  
 							  jsonToSend[L"token"] = json::value::string(wrt);
 
 							  std::wstring woipk;
 							  string encodedOwnIdentityPublicKey = base64_encode_2((const char*)state.PublicKey.data(), 32);
-							  woipk.assign(encodedOwnIdentityPublicKey.begin(), encodedOwnIdentityPublicKey.end());
+							  //woipk.assign(encodedOwnIdentityPublicKey.begin(), encodedOwnIdentityPublicKey.end());
+							  woipk = s2ws(encodedOwnIdentityPublicKey);
+							  
 							  jsonToSend[L"publicKey"] = json::value::string(woipk);
 
 
@@ -392,7 +424,9 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 
 							  string encodedSignature = base64_encode_2((const char*)signedSessionPk, 64);
 							  std::wstring wsg;
-							  wsg.assign(encodedSignature.begin(), encodedSignature.end());
+							  //wsg.assign(encodedSignature.begin(), encodedSignature.end());
+							  wsg = s2ws(encodedSignature);
+							  
 							  jsonToSend[L"signature"] = json::value::string(wsg);
 
 							  return jsonToSend;
@@ -418,7 +452,9 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 								  if (tk.is_string())
 								  {
 
-									  randomToken.assign(tk.as_string().begin(), tk.as_string().end());
+									  //randomToken.assign(tk.as_string().begin(), tk.as_string().end());
+									  randomToken = ws2s(tk.as_string());
+									  
 									  string decodedTK = base64_decode_2(randomToken);
 
 									  if (decodedTK.size() != 8)
@@ -442,7 +478,9 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 								  if (pk.is_string())
 								  {
 									  string publicKey;
-									  publicKey.assign(pk.as_string().begin(), pk.as_string().end());
+									  //publicKey.assign(pk.as_string().begin(), pk.as_string().end());
+									  publicKey = ws2s(pk.as_string());
+									  
 									  string decodedPK = base64_decode_2(publicKey);
 
 									  if (decodedPK.size() != 32)
@@ -466,7 +504,9 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 								  if (sig.is_string())
 								  {
 									  string signature;
-									  signature.assign(sig.as_string().begin(), sig.as_string().end());
+									  //signature.assign(sig.as_string().begin(), sig.as_string().end());
+									  signature = ws2s(sig.as_string());
+									  
 									  string decodedSIG = base64_decode_2(signature);
 
 									  if (decodedSIG.size() != 64)
