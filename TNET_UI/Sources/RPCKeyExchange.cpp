@@ -133,7 +133,7 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 								  break;
 							  }
 
-							  if (jvalue.has_field(L"sessionPublicKey") || flag)
+							  if (jvalue.has_field(L"sessionPublicKey") && flag)
 							  {
 								  //generate keypair
 								  ed25519_create_seed(seed);
@@ -229,6 +229,10 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 
 									  return jsonToSend;
 								  }
+							  }
+							  else
+							  {
+								  throw exception("No session public key passed in the JSON : state expected = 1");
 							  }
 					}
 
