@@ -403,6 +403,7 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 						//wrap up all the data structures
 					case 3:
 					{
+							  
 							  unsigned char otherPublicKey[32];
 							  unsigned char signature[64];
 							  unsigned char otherSessionPublicKey[32];
@@ -555,6 +556,7 @@ web::json::value RPCKeyExchange::handleKetExchange(value jvalue)
 	catch (exception &e)
 	{
 		cout << "Exception : " << e.what() << endl;
+		return NULL;
 	}
 }
 

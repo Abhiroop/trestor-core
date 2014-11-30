@@ -8,41 +8,50 @@
 
 enum PACKET_TYPE
 {
-	VALIDATOR_KEY_EXCHANGE = 0x20,
-	VALIDATOR_LEDGER_UPDATE = 0x21,
-	VALIDATOR_CONSENSUS_PACKET = 0x22,
-	VALIDATOR_VOTE_PACKET = 0x23,
+	VALIDATOR_KEY_EXCHANGE = 20,
+	VALIDATOR_LEDGER_UPDATE = 21,
+	VALIDATOR_CONSENSUS_PACKET = 22,
+	VALIDATOR_VOTE_PACKET = 23,
 
-	USER_REGISTRATION_REQUEST = 0x50,
-	USER_BALANCE_UPDATE = 0x51
+	USER_REGISTRATION_REQUEST = 50,
+	USER_BALANCE_UPDATE = 51
 };
 
 State __state;
 
 void handle_post(http_request request)
 {
+	TRACE("\nhandle_post\n");
+
 	value jvalue = request.extract_json().get();
 	string packetType;
 
+	// the JSON object which is to be sent 
+	value toSend;
+
 	try
 	{
+
 		if (!jvalue.is_null())
 		{
 			if (jvalue.has_field(L"packetType"))
 			{
 				value v = jvalue[L"packetType"];
-
+	
 				if (v.is_integer())
 				{
 					int PT = v.as_integer();
+					cout << PT;
 
 					switch (PT)
 					{
 					case VALIDATOR_KEY_EXCHANGE:
 					{
 												   RPCKeyExchange RPCKE(__state);
-												   RPCKE.handleKetExchange(jvalue);
+												   value toSend = RPCKE.handleKetExchange(jvalue);
 
+												   if (toSend == NULL)
+													   cout << "Invalid JSON" << endl;
 												   break;
 					}
 					case VALIDATOR_LEDGER_UPDATE:
@@ -71,7 +80,7 @@ void handle_post(http_request request)
 				}
 				else
 				{
-					throw exception("BAD packet type in the JSON field");
+					throw exception("packetType is not integer");
 				}
 
 			}
@@ -82,14 +91,17 @@ void handle_post(http_request request)
 		}
 		else
 		{
-			throw exception("null json value");
+			TRACE("\nNull JSON\n");
 		}
 	}
 
 	catch (exception& e)
 	{
 		cout << e.what() << endl;
+		request.reply(status_codes::OK);
 	}
+
+	request.reply(status_codes::OK, toSend);
 }
 
 RPCPackerHandler::RPCPackerHandler()
@@ -103,6 +115,8 @@ RPCPackerHandler::RPCPackerHandler(State _state)
 
 	http_listener listener(L"http://*:80/restdemo");
 	listener.support(methods::POST, handle_post);
+
+	cout << "started" << endl;
 
 	state = _state;
 	__state = _state;
