@@ -130,6 +130,14 @@ Hash Base64ToHash(string data)
 	return h;
 }
 
+Hash Base64ToHash(const char* data)
+{
+	size_t lens;
+	byte* decoded = Base_64::decode(data, strlen(data), &lens);
+	Hash h(decoded, decoded + lens);
+
+	return h;
+}
 
 /// <summary>
 /// Generates Non-Repeating sequence of Random Numbers

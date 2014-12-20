@@ -93,7 +93,9 @@
     <ClCompile Include="..\TNET_UI\Sources\Base64.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="..\TNET_UI\Sources\Base64_2.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\Base64_2.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\BaseNetwork.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -114,7 +116,12 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="..\TNET_UI\Sources\Conversions.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\Conversions.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ConvertUTF.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\CreditDebitData.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -162,6 +169,7 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LedgerFileHandler_LevelDB.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\LedgerRootInfo.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\builder.cc" />
     <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\dbformat.cc" />
@@ -310,7 +318,9 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="..\TNET_UI\Sources\Utils.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\Utils.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\Varint2.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
@@ -332,6 +342,7 @@
     <ClInclude Include="..\TNET_UI\Sources\ConsensusMap.h" />
     <ClInclude Include="..\TNET_UI\Sources\Constants.h" />
     <ClInclude Include="..\TNET_UI\Sources\Conversions.h" />
+    <ClInclude Include="..\TNET_UI\Sources\ConvertUTF.h" />
     <ClInclude Include="..\TNET_UI\Sources\CreditDebitData.h" />
     <ClInclude Include="..\TNET_UI\Sources\ed25519\ed25519.h" />
     <ClInclude Include="..\TNET_UI\Sources\ed25519\fe.h" />
@@ -345,6 +356,7 @@
     <ClInclude Include="..\TNET_UI\Sources\Hash.h" />
     <ClInclude Include="..\TNET_UI\Sources\HashTree.h" />
     <ClInclude Include="..\TNET_UI\Sources\KeyExchangeState.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LedgerFileHandler_LevelDB.h" />
     <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\builder.h" />
     <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\dbformat.h" />
     <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\db_impl.h" />
@@ -412,6 +424,7 @@
     <ClInclude Include="..\TNET_UI\Sources\Salsa20\ecrypt-portable.h" />
     <ClInclude Include="..\TNET_UI\Sources\Salsa20\ecrypt-sync.h" />
     <ClInclude Include="..\TNET_UI\Sources\Salsa20\salsa20.h" />
+    <ClInclude Include="..\TNET_UI\Sources\SimpleIni.h" />
     <ClInclude Include="..\TNET_UI\Sources\State.h" />
     <ClInclude Include="..\TNET_UI\Sources\TimeSync.h" />
     <ClInclude Include="..\TNET_UI\Sources\TreeSyncData.h" />

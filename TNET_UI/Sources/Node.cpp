@@ -58,7 +58,7 @@ Node::Node(FakeNetwork _network, string _Name, int _ConnectionLimit,  long Money
 
 	// Clear the keys from memory in some way...
 	
-	ledger = Ledger(state, "LEDGER_" + _Name + ".dat", network);
+	ledger = Ledger(state, "LEDGER_" + _Name + ".level", network);
 
 	consensus = Consensus(state, ledger, network);
 

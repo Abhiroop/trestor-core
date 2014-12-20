@@ -405,6 +405,12 @@
     <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\env_windows.cc">
       <Filter>Sources\LevelDB</Filter>
     </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LedgerFileHandler_LevelDB.cpp">
+      <Filter>Sources\Ledger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ConvertUTF.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h">
@@ -940,6 +946,15 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\LevelDB\port\port_windows.h">
       <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LedgerFileHandler_LevelDB.h">
+      <Filter>Sources\Ledger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ConvertUTF.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\SimpleIni.h">
+      <Filter>Sources\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

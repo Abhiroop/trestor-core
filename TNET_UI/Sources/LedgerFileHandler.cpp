@@ -10,7 +10,6 @@
 #include "Constants.h"
 #include "LedgerRootInfo.h"
 
-
 LedgerFileHandler::LedgerFileHandler()
 {
 

@@ -1,6 +1,5 @@
 
 /*
-*
 *  @Author: Arpan Jati + Aritra Dhar
 *  @Version: 1.0
 *  @Date: August 2014
@@ -24,8 +23,8 @@ Ledger::Ledger(State _state, string LedgerDB_FileName, FakeNetwork _network)
 {
 	network = _network;
 	TransactionFees = 0;
-	
-	ledgerFileHandler = LedgerFileHandler(LedgerTree, LedgerDB_FileName);
+
+	ledgerFileHandler = LedgerFileHandler_LevelDB(LedgerTree, LedgerDB_FileName);
 	state = _state;
 
 	//ledgerFileHandler
@@ -286,13 +285,13 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 			bool LevelsSame = true;
 
 			for (int i = 0; i < (int)tsr.internalNodes.size(); i++)
-			{				
+			{
 				if (tsr.internalNodes[i].Address.size() != depth)
 				{
 					LevelsSame = false;
 				}
 			}
-			
+
 			if (LevelsSame)  // Perfect
 			{
 				vector<TreeSyncData> root_level = LedgerTree.TraverseLevelOrderDepthSync(depth);
@@ -335,7 +334,7 @@ void Ledger::ProcessIncomingPacket(NetworkPacket packet)
 			AccountInfo ai = tsr.leafNodes[i];
 			LedgerTree.AddUpdate(ai);
 		}
-		
+
 	}
 
 		break;
