@@ -92,7 +92,7 @@ web::json::value account(void)
 
 
 
-int main()
+int main__()
 {
 	//
 	//utility::string_t s = L"a";

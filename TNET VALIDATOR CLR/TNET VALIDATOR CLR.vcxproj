@@ -45,7 +45,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\TNET_UI\Sources;..\TNET_UI\Sources\ed25519;..\TNET_UI\Sources\SQLiteCpp;..\TNET_UI\Sources\TBB\;$(IncludePath)</IncludePath>
+    <IncludePath>..\TNET_UI\Sources;..\TNET_UI\Sources\ed25519;..\TNET_UI\Sources\SQLiteCpp;..\TNET_UI\Sources\TBB\;..\TNET_UI\Sources\LevelDB\;..\TNET_UI\Sources\LevelDB\include;..\TNET_UI\Sources\LevelDB\util;..\TNET_UI\Sources\LevelDB\port;..\TNET_UI\Sources\LevelDB\table;$(IncludePath)</IncludePath>
     <LibraryPath>..\TNET_UI\Sources\TBB\lib\ia32\vc12;..\TNET_UI\Sources\SQLiteCpp;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -163,6 +163,49 @@
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\LedgerRootInfo.cpp" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\builder.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\dbformat.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\db_impl.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\db_iter.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\dumpfile.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\filename.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\log_reader.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\log_writer.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\memtable.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\repair.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\table_cache.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\version_edit.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\version_set.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\write_batch.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\helpers\memenv\memenv.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\port\port_windows.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\block.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\block_builder.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\filter_block.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\format.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\iterator.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\merger.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\table.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\table_builder.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\two_level_iterator.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\arena.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\bloom.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\cache.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\coding.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\comparator.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\crc32c.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\env.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\env_windows.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\filter_policy.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\hash.cc">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)\identity\</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\histogram.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\logging.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\options.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\status.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\testharness.cc" />
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\testutil.cc" />
     <ClCompile Include="..\TNET_UI\Sources\MoneyInOutFlow.cpp" />
     <ClCompile Include="..\TNET_UI\Sources\RPCKeyExchange.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
@@ -302,6 +345,58 @@
     <ClInclude Include="..\TNET_UI\Sources\Hash.h" />
     <ClInclude Include="..\TNET_UI\Sources\HashTree.h" />
     <ClInclude Include="..\TNET_UI\Sources\KeyExchangeState.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\builder.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\dbformat.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\db_impl.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\db_iter.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\filename.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\log_format.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\log_reader.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\log_writer.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\memtable.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\skiplist.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\snapshot.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\table_cache.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\version_edit.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\version_set.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\write_batch_internal.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\helpers\memenv\memenv.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\cache.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\comparator.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\db.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\dumpfile.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\env.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\filter_policy.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\iterator.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\options.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\slice.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\status.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\table.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\table_builder.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\write_batch.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\port\atomic_pointer.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\port\port.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\port\port_windows.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\port\thread_annotations.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\port\win\stdint.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\block.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\block_builder.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\filter_block.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\format.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\iterator_wrapper.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\merger.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\two_level_iterator.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\arena.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\coding.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\crc32c.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\hash.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\histogram.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\logging.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\mutexlock.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\posix_logger.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\random.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\testharness.h" />
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\testutil.h" />
     <ClInclude Include="..\TNET_UI\Sources\RPCKeyExchange.h" />
     <ClInclude Include="..\TNET_UI\Sources\IncomingTransactionMap.h" />
     <ClInclude Include="..\TNET_UI\Sources\LeafDataType.h" />

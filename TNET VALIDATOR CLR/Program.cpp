@@ -5,7 +5,7 @@
 using namespace TNETVALIDATORCLR;
 
 [STAThreadAttribute]
-int _main(cli::array<System::String ^> ^args)
+int main(cli::array<System::String ^> ^args)
 {
 	// Enabling Windows XP visual effects before any controls are created
 	Application::EnableVisualStyles();

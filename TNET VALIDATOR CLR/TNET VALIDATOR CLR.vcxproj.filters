@@ -70,6 +70,9 @@
     <Filter Include="Sources\Salsa20">
       <UniqueIdentifier>{47f1d3a3-a806-4c33-be8f-aeafb0cd160d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\LevelDB">
+      <UniqueIdentifier>{adf407c7-776b-48c6-9d88-c74da59f752c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TNET_UI\Sources\BaseNetwork.cpp">
@@ -278,6 +281,129 @@
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\RPCPacketHandler.cpp">
       <Filter>RPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\builder.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\dbformat.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\db_impl.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\db_iter.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\dumpfile.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\filename.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\log_reader.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\log_writer.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\memtable.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\repair.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\table_cache.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\version_edit.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\version_set.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\write_batch.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\helpers\memenv\memenv.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\block.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\block_builder.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\filter_block.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\format.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\iterator.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\merger.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\table.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\table_builder.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\two_level_iterator.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\arena.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\bloom.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\cache.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\coding.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\comparator.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\crc32c.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\env.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\filter_policy.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\hash.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\histogram.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\logging.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\options.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\status.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\testharness.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\testutil.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\port\port_windows.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\env_windows.cc">
+      <Filter>Sources\LevelDB</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -658,6 +784,162 @@
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\RPCPacketHandler.h">
       <Filter>RPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\builder.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\dbformat.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\db_impl.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\db_iter.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\filename.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\log_format.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\log_reader.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\log_writer.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\memtable.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\skiplist.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\snapshot.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\table_cache.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\version_edit.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\version_set.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\write_batch_internal.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\helpers\memenv\memenv.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\cache.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\comparator.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\db.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\dumpfile.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\env.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\filter_policy.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\iterator.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\options.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\slice.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\status.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\table.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\table_builder.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\write_batch.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\port\atomic_pointer.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\port\port.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\port\thread_annotations.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\port\win\stdint.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\block.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\block_builder.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\filter_block.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\format.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\iterator_wrapper.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\merger.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\two_level_iterator.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\arena.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\coding.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\crc32c.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\hash.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\histogram.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\logging.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\mutexlock.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\posix_logger.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\random.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\testharness.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\testutil.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\port\port_windows.h">
+      <Filter>Sources\LevelDB</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
