@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C432E226-42A1-499B-8034-DA76ED578E2A}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TNetD</RootNamespace>
+    <AssemblyName>tnetd</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="Transactions\AccountInfo.cs" />
+    <Compile Include="Consensus\CandidateSet.cs" />
+    <Compile Include="Utils\Constants.cs" />
+    <Compile Include="Crypto\Curve25519.cs" />
+    <Compile Include="Crypto\NaCl\BigInteger.cs" />
+    <Compile Include="Crypto\NaCl\CryptoBytes.cs" />
+    <Compile Include="Crypto\NaCl\Ed25519.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Array16.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Array8.cs" />
+    <Compile Include="Crypto\NaCl\Internal\ByteIntegerConverter.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\base.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\base2.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\d.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\d2.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_0.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_1.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_add.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_cmov.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_cswap.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_frombytes.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_invert.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_isnegative.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_isnonzero.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_mul.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_mul121666.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_neg.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_pow22523.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_sq.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_sq2.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_sub.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\fe_tobytes.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\FieldElement.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_add.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_double_scalarmult.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_frombytes.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_madd.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_msub.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_p1p1_to_p2.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_p1p1_to_p3.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_p2_0.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_p2_dbl.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_p3_0.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_p3_dbl.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_p3_tobytes.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_p3_to_cached.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_p3_to_p2.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_precomp_0.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_scalarmult_base.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_sub.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\ge_tobytes.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\GroupElement.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\Helpers.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\keypair.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\open.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\scalarmult.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\sc_mul_add.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\sc_reduce.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\sign.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Ed25519Ref10\sqrtm1.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Poly1305Donna.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Salsa\Salsa20.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Salsa\SalsaCore.cs" />
+    <Compile Include="Crypto\NaCl\Internal\Sha512BclWrapper.cs" />
+    <Compile Include="Crypto\NaCl\MontgomeryCurve25519.cs" />
+    <Compile Include="Crypto\NaCl\SHA512Managed.cs" />
+    <Compile Include="Crypto\NaCl\XSalsa20Poly1305.cs" />
+    <Compile Include="Utils\DisplayUtils.cs" />
+    <Compile Include="Utils\Hash.cs" />
+    <Compile Include="Tree\LeafDataType.cs" />
+    <Compile Include="Ledgers\Ledger.cs" />
+    <Compile Include="Node\Node.cs" />
+    <Compile Include="Protocol\SerializableBase.cs" />
+    <Compile Include="Utils\Structs.cs" />
+    <Compile Include="Transactions\TransactionContent.cs" />
+    <Compile Include="Tree\HashTree.cs" />
+    <Compile Include="Tree\TreeNode.cs" />
+    <Compile Include="Utils\Utils.cs" />
+    <Page Include="UI\MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Crypto\NaCl\Internal\Salsa\replace regex.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Sources\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
