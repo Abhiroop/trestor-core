@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Windows.Threading;
 using System.Threading;
-using TNetCommon.Protocol;
+using TNetD.Protocol;
 using System.Windows;
 
 namespace TNetWallet.WalletOperations

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 // REFERENCE: http://bimalesh.blogspot.in/2006/11/c-class-for-hex-encoding.html
 
-namespace TNetCommon
+namespace TNetD
 {
 
     /// <summary>

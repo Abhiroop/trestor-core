@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TNetCommon.Protocol;
+using TNetD.Protocol;
 
-namespace TNetCommon.Transaction
+namespace TNetD.Transaction
 {
     public class TransactionContent
     {

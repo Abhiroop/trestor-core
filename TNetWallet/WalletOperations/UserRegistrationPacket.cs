@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TNetCommon;
-using TNetCommon.Protocol;
-using TNetCommon.Address;
+using TNetD;
+using TNetD.Protocol;
+using TNetD.Address;
 
 namespace TNetWallet.WalletOperations
 {

@@ -32,6 +32,7 @@ namespace TNetD
         public byte[] Hex
         {
             get { return HashValue; }
+            set { HashValue = value; }
         }
 
         public byte GetNibble(int NibbleIndex)

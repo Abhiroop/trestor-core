@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TNetCommon.Protocol
+namespace TNetD.Protocol
 {
     public enum PDataType { PD_BYTE_VECTOR, PD_BYTE, PD_INT16, PD_INT32, PD_INT64, PD_FLOAT, PD_DOUBLE, PD_BOOL, PD_STRING, PD_VARINT };
 
@@ -216,6 +216,12 @@ namespace TNetCommon.Protocol
             return packets;
         }
 
+        public static ProtocolDataType Pack(Hash hashValue, byte nameType)
+        {
+            ProtocolDataType PDType = GenericPack(PDataType.PD_BYTE_VECTOR, nameType);
+            PDType.Data = hashValue.Hex;
+            return PDType;
+        }
 
 
         public static ProtocolDataType Pack(byte[] vectorValue, byte nameType)
@@ -294,6 +300,16 @@ namespace TNetCommon.Protocol
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
+
+        public static bool UnpackHash(ProtocolDataType packedData, byte nameType, ref Hash Data)
+        {
+            if ((nameType == packedData.NameType) && (packedData.DataType == PDataType.PD_BYTE_VECTOR))
+            {
+                Data.Hex = packedData.Data;
+                return true;
+            }
+            else return false;
+        }
 
         public static bool UnpackByteVector(ProtocolDataType packedData, byte nameType, ref byte[] Data)
         {

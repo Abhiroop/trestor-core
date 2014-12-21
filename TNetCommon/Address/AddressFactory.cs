@@ -12,16 +12,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 
-namespace TNetCommon.Address
-{
-
-    public struct AddressData
-    {
-        byte[] PublicKey;
-
-
-
-    }
+namespace TNetD.Address
+{  
 
     /// <summary>
     /// Generates addresses from PublicKey, UserName and NetworkType

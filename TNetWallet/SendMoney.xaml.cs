@@ -12,9 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using TNetCommon;
-using TNetCommon.Protocol;
-using TNetCommon.Transaction;
+using TNetD;
+using TNetD.Protocol;
+using TNetD.Transaction;
 using TNetWallet.WalletOperations;
 
 namespace TNetWallet

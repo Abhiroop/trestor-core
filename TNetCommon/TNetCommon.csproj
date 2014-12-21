@@ -7,9 +7,9 @@
     <ProjectGuid>{66391146-98D7-4258-85F5-D8BE99E632FD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TNetCommon</RootNamespace>
+    <RootNamespace>TNetD</RootNamespace>
     <AssemblyName>TNetCommon</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -22,7 +22,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -105,9 +106,11 @@
     <Compile Include="Chaos.NaCl\MontgomeryCurve25519.cs" />
     <Compile Include="Chaos.NaCl\Sha512.cs" />
     <Compile Include="Chaos.NaCl\XSalsa20Poly1305.cs" />
+    <Compile Include="Curve25519.cs" />
+    <Compile Include="Hash.cs" />
     <Compile Include="HexUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Protocol\Conversions.cs" />
+    <Compile Include="Conversions.cs" />
     <Compile Include="Protocol\ProtocolPackager.cs" />
     <Compile Include="Protocol\Varint2.cs" />
     <Compile Include="Transaction\TransactionContent.cs" />
