@@ -13,29 +13,38 @@ namespace TNetD
 
         public static Random random = new Random();
 
-        public static int GlobalNodes = 100;
+        public static readonly int GlobalNodes = 100;
 
-        public static int Connections_PerNode_Max = 20;
-        public static int Connections_PerNode_Min = 5;
+        public static readonly int Connections_PerNode_Max = 20;
+        public static readonly int Connections_PerNode_Min = 5;
 
         /// <summary>
         /// This value is the minimum percentage of positive packets needed for a transaction.
         /// </summary>
-        public static int Consensus_MinLimit = 90;
+        public static readonly int Consensus_MinLimit = 90;
 
         /// <summary>
         /// This is the percentage at which the node begins to vote for a packet.
         /// </summary>
-        public static int Consensus_BeginForwarding = 50;
+        public static readonly int Consensus_BeginForwarding = 50;
 
 
-        public static int PacketLimitPerSecond = 10;
-        public static int DataLimitPerSecond = 512 * 1024; // Bytes per second.
+        public static readonly int PacketLimitPerSecond = 10;
+        public static readonly int DataLimitPerSecond = 512 * 1024; // Bytes per second.
 
         public static List<Node> GlobalNodeList = new List<Node>();
-        
-        
+     
+        /// ////////////////////////
+       
+        public static readonly long FIN_MIN_BALANCE = 1500;
+        public static readonly int VALIDATOR_COUNT = 5;
+        public static readonly int SIM_REFRESH_MS = 50;
+        public static readonly int SIM_REFRESH_MS_SIM = 50;
 
+        public static readonly int CONS_TRUSTED_VALIDATOR_THRESHOLD_PERC = 50;
+        public static readonly int CONS_VOTING_ACCEPTANCE_THRESHOLD_PERC = 75;
+
+        public static readonly int SYNC_LEAF_COUNT_THRESHOLD = 200;
 
 
     }

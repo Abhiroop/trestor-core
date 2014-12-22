@@ -111,21 +111,21 @@ namespace TNetD
 
         void CreateArbitraryTransactionAndSendToTrustedNodes()
         {
-            List<TransactionSink> tsks = new List<TransactionSink>();
+            //List<TransactionSink> tsks = new List<TransactionSink>();
 
-            Node destNode = Constants.GlobalNodeList[Constants.random.Next(0, Constants.GlobalNodeList.Count)];
+            //Node destNode = Constants.GlobalNodeList[Constants.random.Next(0, Constants.GlobalNodeList.Count)];
 
-            if (destNode.PublicKey != PublicKey)
-            {
-                int Amount = Constants.random.Next(0, (int)(Money / 2));
+            //if (destNode.PublicKey != PublicKey)
+            //{
+            //    int Amount = Constants.random.Next(0, (int)(Money / 2));
 
-                TransactionSink tsk = new TransactionSink(destNode.PublicKey, Amount);
-                tsks.Add(tsk);
+            //    TransactionSink tsk = new TransactionSink(destNode.PublicKey, Amount);
+            //    tsks.Add(tsk);
 
-                TransactionContent tco = new TransactionContent(PublicKey, 0, tsks.ToArray(), new byte[0]);
+            //    TransactionContent tco = new TransactionContent(PublicKey, 0, tsks.ToArray(), new byte[0]);
 
-                OutTransactionCount++;
-            }
+            //    OutTransactionCount++;
+            //}
         }
 
         void InitializeValuesFromGlobalLedger()

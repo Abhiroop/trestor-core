@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TNetD.Protocol
 {
-    abstract class SerializableBase
+    public abstract class SerializableBase
     {
         public abstract byte[] Serialize();
         public abstract void Deserialize(byte[] Data);

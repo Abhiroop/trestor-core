@@ -30,22 +30,22 @@ namespace TNetD.Protocol
 
     public class ProtocolPackager
     {
-        static byte[] IntToBytes(int paramInt)
-        {
-            byte[] arrayOfByte = new byte[3];
-            arrayOfByte[0] = (byte)(paramInt);
-            arrayOfByte[1] = (byte)(paramInt >> 8);
-            arrayOfByte[2] = (byte)(paramInt >> 16);
-            return arrayOfByte;
-        }
+        //static byte[] IntToBytes(int paramInt)
+        //{
+        //    byte[] arrayOfByte = new byte[3];
+        //    arrayOfByte[0] = (byte)(paramInt);
+        //    arrayOfByte[1] = (byte)(paramInt >> 8);
+        //    arrayOfByte[2] = (byte)(paramInt >> 16);
+        //    return arrayOfByte;
+        //}
 
-        static int BytesToInt(List<byte> paramInt)
-        {
-            int val = (int)paramInt[0];
-            val |= ((int)paramInt[1]) << 8;
-            val |= ((int)paramInt[2]) << 16;
-            return val;
-        }
+        //static int BytesToInt(List<byte> paramInt)
+        //{
+        //    int val = (int)paramInt[0];
+        //    val |= ((int)paramInt[1]) << 8;
+        //    val |= ((int)paramInt[2]) << 16;
+        //    return val;
+        //}
 
         static ProtocolDataType GenericPack(PDataType DataType, byte nameType)
         {
@@ -68,6 +68,17 @@ namespace TNetD.Protocol
             return pack.ToArray();
         }
 
+        public static byte[] PackRaw(ProtocolDataType [] packets)
+        {
+            List<byte> pack = new List<byte>();
+            foreach (ProtocolDataType packet in packets)
+            {
+                byte[] F = PackSingle(packet);
+                pack.AddRange(F);
+            }
+            return pack.ToArray();
+        }
+
         public static byte[] PackRaw(List<ProtocolDataType> packets)
         {
             List<byte> pack = new List<byte>();
@@ -79,6 +90,12 @@ namespace TNetD.Protocol
             return pack.ToArray();
         }
 
+        /// <summary>
+        /// Unpacks a packed set of data packets. 
+        /// TODO: Modify the format to support decoding with pre-allocation for faster decoding and less allocations.
+        /// </summary>
+        /// <param name="packedData"></param>
+        /// <returns></returns>
         public static List<ProtocolDataType> UnPackRaw(byte[] packedData)
         {
             List<ProtocolDataType> packets = new List<ProtocolDataType>();
@@ -168,53 +185,53 @@ namespace TNetD.Protocol
             Console.WriteLine("\nVarint Test Complete ...");
         }
 
-        public static List<ProtocolDataType> UnPackRaw_Old(byte[] packedData)
-        {
-            List<ProtocolDataType> packets = new List<ProtocolDataType>();
+        //public static List<ProtocolDataType> UnPackRaw_Old(byte[] packedData)
+        //{
+        //    List<ProtocolDataType> packets = new List<ProtocolDataType>();
 
-            int index = 0;
-            while (true)
-            {
-                if (packedData.Length - index >= 5)
-                {
-                    List<byte> L_Bytes = new List<byte>();
-                    byte NameType = packedData[index + 0];
-                    byte DataType = packedData[index + 1];
-                    L_Bytes.Add(packedData[index + 2]);
-                    L_Bytes.Add(packedData[index + 3]);
-                    L_Bytes.Add(packedData[index + 4]);
+        //    int index = 0;
+        //    while (true)
+        //    {
+        //        if (packedData.Length - index >= 5)
+        //        {
+        //            List<byte> L_Bytes = new List<byte>();
+        //            byte NameType = packedData[index + 0];
+        //            byte DataType = packedData[index + 1];
+        //            L_Bytes.Add(packedData[index + 2]);
+        //            L_Bytes.Add(packedData[index + 3]);
+        //            L_Bytes.Add(packedData[index + 4]);
 
-                    int Length = BytesToInt(L_Bytes);
+        //            int Length = BytesToInt(L_Bytes);
 
-                    if (packedData.Length - index - Length >= 5)
-                    {
-                        byte[] Data = new byte[Length];
-                        for (int i = 0; i < Length; i++)
-                        {
-                            Data[i] = packedData[index + 5 + i];
-                        }
+        //            if (packedData.Length - index - Length >= 5)
+        //            {
+        //                byte[] Data = new byte[Length];
+        //                for (int i = 0; i < Length; i++)
+        //                {
+        //                    Data[i] = packedData[index + 5 + i];
+        //                }
 
-                        ProtocolDataType packet = new ProtocolDataType();
-                        packet.NameType = NameType;
-                        packet.DataType = (PDataType)DataType;
-                        packet.Data = Data;
-                        packets.Add(packet);
-                    }
-                    else
-                    {
-                        break;
-                    }
+        //                ProtocolDataType packet = new ProtocolDataType();
+        //                packet.NameType = NameType;
+        //                packet.DataType = (PDataType)DataType;
+        //                packet.Data = Data;
+        //                packets.Add(packet);
+        //            }
+        //            else
+        //            {
+        //                break;
+        //            }
 
-                    index += (Length + 5);
-                }
-                else
-                {
-                    break;
-                }
-            }
+        //            index += (Length + 5);
+        //        }
+        //        else
+        //        {
+        //            break;
+        //        }
+        //    }
 
-            return packets;
-        }
+        //    return packets;
+        //}
 
         public static ProtocolDataType Pack(Hash hashValue, byte nameType)
         {

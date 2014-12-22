@@ -108,6 +108,17 @@ namespace TNetD
             return a.Equals((object)b);
         }
 
+        /*public static bool operator ==(byte[] a, Hash b)
+        {
+            if (Object.ReferenceEquals(a, b.HashValue))
+                return true;
+
+            if (Object.ReferenceEquals(a, null))
+                return false;
+
+            return a.Equals((object)b.HashValue);
+        }*/
+
         public static bool operator !=(Hash a, Hash b)
         {
             return !(a == b);

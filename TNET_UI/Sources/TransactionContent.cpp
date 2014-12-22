@@ -220,6 +220,8 @@ Hash TransactionContent::GetTransactionDataAndSignature()
 	Hash tranData = GetTransactionData();
 	_data.insert(_data.end(), tranData.begin(), tranData.end());
 	_data.insert(_data.end(), Signatures.begin(), Signatures.end());
+	// MAJOR F*up, fix. 
+	throw new exception("f*up");
 	return _data;
 }
 
