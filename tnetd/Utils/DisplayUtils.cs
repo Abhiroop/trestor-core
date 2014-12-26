@@ -12,7 +12,7 @@ namespace TNetD
 
     static class DisplayUtils
     {
-        public delegate void DisplayHandler(string Text, Color color);
+        public delegate void DisplayHandler(string Text, Color color, DisplayType type);
         public static event DisplayHandler DisplayText;
 
         public static void Display(String Message, DisplayType type)
@@ -31,17 +31,17 @@ namespace TNetD
             {
                 case DisplayType.Info:
                     //Console.ForegroundColor = ConsoleColor.Green;
-                    DisplayText((WriteHeader ? " INFO: " : "") + Message, Colors.LawnGreen);
+                    DisplayText((WriteHeader ? " INFO: " : "") + Message, Colors.LawnGreen, type);
                     break;
 
                 case DisplayType.Warning:
                     //Console.ForegroundColor = ConsoleColor.Yellow;
-                    DisplayText((WriteHeader ? " WARNING: " : "") + Message, Colors.Yellow);
+                    DisplayText((WriteHeader ? " WARNING: " : "") + Message, Colors.Yellow, type);
                     break;
 
                 case DisplayType.Exception:
                     //Console.ForegroundColor = ConsoleColor.Red;
-                    DisplayText((WriteHeader ? " Exception: " : "") + Message, Colors.Red);
+                    DisplayText((WriteHeader ? " Exception: " : "") + Message, Colors.Red, type);
                     break;
             }
         }

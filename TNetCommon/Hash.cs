@@ -3,7 +3,7 @@
  @Author: Arpan Jati
  @Version: 1.2
  @Description: Originally used in DirectShare
-* 
+* @ TODO: IMPROVE, by, performing equality and comparison in one step.
 */
 
 using System;
@@ -15,13 +15,13 @@ using System.Threading.Tasks;
 namespace TNetD
 {
     [Serializable]
-    public class Hash : IEquatable<Hash>
+    public class Hash : IEquatable<Hash>, IComparable<Hash>
     {
         private byte[] HashValue;
 
         public Hash(byte[] Value)
         {
-            HashValue = Value;
+            HashValue = (byte[])Value.Clone();
         }
 
         public Hash()
@@ -108,23 +108,74 @@ namespace TNetD
             return a.Equals((object)b);
         }
 
-        /*public static bool operator ==(byte[] a, Hash b)
+        public int CompareTo(Hash other)
         {
-            if (Object.ReferenceEquals(a, b.HashValue))
-                return true;
+            if (Object.ReferenceEquals(this, other))
+                return 0;
 
-            if (Object.ReferenceEquals(a, null))
-                return false;
+            if (other == null)
+            {
+                throw new ArgumentException("Argument is NULL");
+            }
 
-            return a.Equals((object)b.HashValue);
-        }*/
+            if (this.Equals(other))
+                return 0;
+
+            if (this < other)
+                return -1;
+            else
+                return 1;
+        }
+
+        public int Compare(Hash x, Hash y)
+        {
+            if (Object.ReferenceEquals(x, y))
+                return 0;
+
+            if (x == null || y == null)
+            {
+                throw new ArgumentException("Arguments NULL");
+            }
+
+            return 0;
+        }
+
+        public static bool operator <(Hash a, Hash b)
+        {
+            if (a.Hex.Length == b.Hex.Length)
+            {
+                for (int i = 0; i < a.Hex.Length; i++)
+                {
+                    if (a.Hex[i] < b.Hex[i])
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+        
+        public static bool operator >(Hash a, Hash b)
+        {
+            if (a.Hex.Length == b.Hex.Length)
+            {
+                for (int i = 0; i < a.Hex.Length; i++)
+                {
+                    if (a.Hex[i] > b.Hex[i])
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
 
         public static bool operator !=(Hash a, Hash b)
         {
             return !(a == b);
         }
-
-
 
     }
 }

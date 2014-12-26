@@ -27,7 +27,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -66,7 +66,7 @@
     <Compile Include="Transactions\AccountInfo.cs" />
     <Compile Include="Consensus\CandidateSet.cs" />
     <Compile Include="Tree\FlatNodeStore.cs" />
-    <Compile Include="Tree\HashListTree.cs" />
+    <Compile Include="Tree\ListHashTree.cs" />
     <Compile Include="Tree\ListTreeLeafNode.cs" />
     <Compile Include="Tree\ListTreeNode.cs" />
     <Compile Include="Utils\Constants.cs" />

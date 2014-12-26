@@ -91,14 +91,7 @@ namespace TNetD.Ledgers
             //newCandidates = GetValidatedTransactions(newCandidates);
         }
 
-        public bool ApplyNewCandidates()
-        {
-
-
-
-
-            return false;
-        }
+     
 
         public AccountInfo this[Hash account]
         {

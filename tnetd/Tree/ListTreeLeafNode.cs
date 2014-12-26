@@ -17,12 +17,12 @@ namespace TNetD.Tree
 
         //public T Value { get; set; }
 
-        public ListTreeLeafNode(Dictionary<Hash, LeafDataType> Values)
+        public ListTreeLeafNode(Dictionary<Hash, LeafDataType> NewValues)
             : base()
         {
-            foreach (KeyValuePair<Hash, LeafDataType> val in Values)
+            foreach (KeyValuePair<Hash, LeafDataType> val in NewValues)
             {
-                Values.Add(val.Key, val.Value);
+                this.Values.Add(val.Key, val.Value);
             }
 
             _IsLeaf = true;

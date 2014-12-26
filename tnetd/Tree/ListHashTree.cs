@@ -15,21 +15,22 @@ namespace TNetD.Tree
     /// This represents a Merkle Hash tree, each node has 16 child nodes.
     /// The depth is defined by the length of the Hash in Nibbles.
     /// Insertion / Updation is non-recursive and constant time.
+    /// The leaf nodes are sorted lists of elements.
     /// </summary>
-    class HashListTree
+    class ListHashTree
     {
-        long _TotalNodes = 0;
+        long _TraversedNodes = 0;
 
         public long TotalMoney = 0;
 
-        public long TotalNodes
+        public long TraversedNodes
         {
-            get { return _TotalNodes; }
+            get { return _TraversedNodes; }
         }
 
         ListTreeNode Root;
 
-        public HashListTree()
+        public ListHashTree()
         {
             Root = new ListTreeNode();
         }
@@ -89,7 +90,7 @@ namespace TNetD.Tree
                 if ((TempRoot.Children[Nibble] == null) && (i < (LeafDepth - 1)))
                 {
                     TempRoot.Children[Nibble] = new ListTreeNode();
-                    _TotalNodes++;
+                    _TraversedNodes++;
                 }
 
                 // Make child as curent
@@ -108,7 +109,7 @@ namespace TNetD.Tree
                         Dictionary<Hash, LeafDataType> _Values = new Dictionary<Hash, LeafDataType>();
                         _Values.Add(Value.GetID(), Value);
                         TempRoot.Children[Nibble] = new ListTreeLeafNode(_Values);
-                        _TotalNodes++;
+                        _TraversedNodes++;
 
                         Good = true;
                     } // Add to current leaf node
@@ -175,16 +176,17 @@ namespace TNetD.Tree
         {
             int nodes = 0;
             int depth = 0;
+            _TraversedNodes = 0;
             TotalMoney = 0;
             TraverseTree(Root, ref nodes, depth);
-
+            _TraversedNodes = nodes;
             //TraverseLevelOrder(Root, ref nodes);
             return nodes;
         }
 
-        private List<LeafDataType> TraverseTree(ListTreeNode Root, ref int FoundNodes, int _depth)
+        private List<LeafDataType> TraverseTree(ListTreeNode Root, ref int FoundElementCount, int _depth)
         {
-            List<LeafDataType> foundNodes = new List<LeafDataType>();
+            List<LeafDataType> foundElements = new List<LeafDataType>();
 
             int depth = _depth + 1;
 
@@ -193,10 +195,10 @@ namespace TNetD.Tree
                 if (Root.Children[i] != null)
                 {
                     /////////////////////////////////////
-                    /*
-                    if (Root.ID != null)
+                    
+                    /*if (Root.Hash != null)
                     {
-                        DisplayUtils.Display("ID : " + HexUtil.ToString(Root.ID.Hex) + " : " + depth);
+                        DisplayUtils.Display("ID : " + HexUtil.ToString(Root.Hash.Hex) + " : " + depth);
                     }
                     else
                     {
@@ -207,25 +209,33 @@ namespace TNetD.Tree
 
                     if (!Root.Children[i].IsLeaf)
                     {
-                        TraverseTree(Root.Children[i], ref FoundNodes, depth);
+                        TraverseTree(Root.Children[i], ref FoundElementCount, depth);
                     }
+
                     if (Root.Children[i].IsLeaf)
                     {
                         ListTreeLeafNode Leaf = (ListTreeLeafNode)Root.Children[i];
 
                         LeafDataType[] ldts = Leaf.GetAllItems();
 
-                        foundNodes.AddRange(ldts);
+                        foundElements.AddRange(ldts);
 
                         //TotalMoney += ((AccountInfo)Leaf.Value).Money;
-                        //DisplayUtils.Display("Node Traversed: " + HexUtil.ToString(Leaf.ID.Hex) +" - "+ ((AccountInfo)Leaf.Value).Money);
+                        //DisplayUtils.Display("\nNode Traversed: " + HexUtil.ToString(Leaf.GetHash().Hex) + " - " +
+                          //  AccountInfo.CalculateTotalMoney(ldts) );
 
-                        FoundNodes += ldts.Length;
+                        foreach(LeafDataType ld in ldts)
+                        {
+                            //DisplayUtils.Display("          --- ID: " + HexUtil.ToString(ld.GetID().Hex) + " - Money " + ((AccountInfo)ld).Money);
+                            TotalMoney +=((AccountInfo)ld).Money;
+                        }
+
+                        FoundElementCount += ldts.Length;
                     }
                 }
             }
 
-            return foundNodes;
+            return foundElements;
         }
 
         /// <summary>

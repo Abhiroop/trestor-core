@@ -21,7 +21,7 @@
                 <MenuItem Header="Stop"/>
                 <MenuItem Header="Restart" />
                 <Separator/>
-                <MenuItem Header="Resync"/>                
+                <MenuItem Header="Resync"/>
             </MenuItem>
             <MenuItem Header="SIMULATION">
                 <MenuItem Name="menuItem_Simulation_Start" Header="Start" Click="menuItem_Simulation_Start_Click"/>
@@ -38,7 +38,22 @@
         </Menu>
 
         <TabControl Grid.Row="1">
-            <TabItem Header="Status"/>
+            <TabItem Header="Status">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="100*"/>
+                        <RowDefinition Height="10"/>
+                    </Grid.RowDefinitions>
+                    <Label>Simulation Status:</Label>
+                    
+                    <ScrollViewer Grid.Row="1">
+                        <TextBlock x:Name="textBlock_StatusLog" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas"/>
+                    </ScrollViewer>
+
+                </Grid>
+
+            </TabItem>
             <TabItem Header="Transactions"/>
             <TabItem Header="History"/>
             <TabItem Header="Settings"/>

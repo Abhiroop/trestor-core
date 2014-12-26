@@ -107,6 +107,19 @@ namespace TNetD.Transactions
                 }
             }
         }
+
+        public static long CalculateTotalMoney(LeafDataType[] ais)
+        {
+            long _money = 0;
+            foreach (LeafDataType ai in ais)
+            {
+                _money += ((AccountInfo)ai).Money;
+            }
+
+            return _money;
+        }
+
+
     }
 }
 
