@@ -13,7 +13,7 @@ namespace TNetD.Tree
     /// <typeparam name="T"></typeparam>
     class ListTreeLeafNode : ListTreeNode
     {
-        SortedDictionary<Hash, LeafDataType> Values;
+        SortedDictionary<Hash, LeafDataType> Values = new SortedDictionary<Hash,LeafDataType>();
 
         //public T Value { get; set; }
 
@@ -35,6 +35,25 @@ namespace TNetD.Tree
                 if (Values.ContainsKey(hash)) return Values[hash];
                 else throw new Exception("Key does not exist..."); // Think of better ways to do this...
             }
+        }
+
+        public bool ContainsElement(Hash ID)
+        {
+            return Values.ContainsKey(ID);
+        }
+
+        public LeafDataType [] GetAllItems()
+        {
+            LeafDataType[] listItems = new LeafDataType[Values.Count];
+            int elems = 0;
+            foreach (KeyValuePair<Hash, LeafDataType> val in Values)
+            {
+                listItems[elems++] = val.Value;             
+            }
+
+            if (elems != Values.Count) new InvalidOperationException("Addition or removal during fetch, thread-unsafe-operation");
+
+            return listItems;
         }
 
         /// <summary>

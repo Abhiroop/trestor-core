@@ -134,15 +134,15 @@ namespace TNetD.Tree
 
                 if (!LeafDone)
                 {
+                    // Do the hashing for the leaf.
                     List<byte> hashDataArray = new List<byte>();
                     for (int i = 0; i < 16; i++)
                     {
                         if (val.Children[i] != null)
                         {
-                            var ai = (TreeLeafNode<LeafDataType>)val.Children[i];
-                            Hash hsh = ai.Value.GetHash();
+                            var ai = (ListTreeLeafNode)val.Children[i];
+                            Hash hsh = ai.GetHash();
                             hashDataArray.AddRange(hsh.Hex);
-
                             // DisplayUtils.Display("CH : - " + i.ToString("X") + " : " + HexUtil.ToString(hsh.Hex));
                         }
                     }
@@ -151,21 +151,21 @@ namespace TNetD.Tree
                 }
                 else
                 {
-                    List<byte> hashDataArray = new List<byte>();
+                    // Perform hashing for node.
+                    List<byte> _tempHash = new List<byte>();
                     for (int i = 0; i < 16; i++)
                     {
                         if (val.Children[i] != null)
                         {
-                            var ai = (TreeNode<LeafDataType>)val.Children[i];
-                            hashDataArray.AddRange(ai.ID.Hex);
-
+                            var ai = (ListTreeNode)val.Children[i];
+                            _tempHash.AddRange(ai.Hash.Hex);
                             // DisplayUtils.Display("- " + i.ToString("X") + " : " + HexUtil.ToString(ai.ID.Hex) );
                         }
                     }
-                    NodeHash = new Hash((new SHA512Managed()).ComputeHash(hashDataArray.ToArray()).Take(32).ToArray());
+                    NodeHash = new Hash((new SHA512Managed()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
                 }
 
-                val.ID = NodeHash;
+                val.Hash = NodeHash;
             }
 
             return Good;
@@ -182,7 +182,7 @@ namespace TNetD.Tree
             return nodes;
         }
 
-        private List<LeafDataType> TraverseTree(TreeNode<LeafDataType> Root, ref int FoundNodes, int _depth)
+        private List<LeafDataType> TraverseTree(ListTreeNode Root, ref int FoundNodes, int _depth)
         {
             List<LeafDataType> foundNodes = new List<LeafDataType>();
 
@@ -211,14 +211,16 @@ namespace TNetD.Tree
                     }
                     if (Root.Children[i].IsLeaf)
                     {
-                        TreeLeafNode<LeafDataType> Leaf = (TreeLeafNode<LeafDataType>)Root.Children[i];
+                        ListTreeLeafNode Leaf = (ListTreeLeafNode)Root.Children[i];
 
-                        foundNodes.Add(Leaf.Value);
+                        LeafDataType[] ldts = Leaf.GetAllItems();
 
-                        TotalMoney += ((AccountInfo)Leaf.Value).Money;
+                        foundNodes.AddRange(ldts);
 
-                        //DisplayUtils.Display("Node Traversed: " + HexUtil.ToString(Leaf.ID.Hex) +" - "+ ((AccountInfo)Leaf.Value).Money);      
-                        FoundNodes++;
+                        //TotalMoney += ((AccountInfo)Leaf.Value).Money;
+                        //DisplayUtils.Display("Node Traversed: " + HexUtil.ToString(Leaf.ID.Hex) +" - "+ ((AccountInfo)Leaf.Value).Money);
+
+                        FoundNodes += ldts.Length;
                     }
                 }
             }
@@ -233,31 +235,40 @@ namespace TNetD.Tree
         /// <returns></returns>
         public LeafDataType GetNodeData(Hash ID)
         {
-            TreeNode<LeafDataType> TempRoot = Root;
+            ListTreeNode TempRoot = Root;
 
-            int HLEN = ID.Hex.Length << 1; // Multiply by 2
+            int LeafDepth = Constants.HashTree_NodeListDepth; //ID.Hex.Length << 1; // Multiply by 2
 
-            for (int i = 0; i < HLEN; i++)
+            for (int i = 0; i < LeafDepth; i++)
             {
                 byte Nibble = ID.GetNibble(i);
 
-                if ((i < (HLEN - 1)))
+                if ((i < (LeafDepth - 1)))
                 {
                     if (TempRoot.Children[Nibble] == null) throw new Exception("Node does not exist. Midway Break");
 
                     TempRoot = TempRoot.Children[Nibble];
                 }
 
-                if (i == (HLEN - 1))
+                // Reached the leaf node. Now look for the actual node.
+                if (i == (LeafDepth - 1))
                 {
                     if ((TempRoot.Children[Nibble] != null) && TempRoot.Children[Nibble].IsLeaf)
                     {
-                        TreeLeafNode<LeafDataType> TLN = (TreeLeafNode<LeafDataType>)TempRoot.Children[Nibble];
-                        return TLN.Value;
+                        ListTreeLeafNode TLN = (ListTreeLeafNode)TempRoot.Children[Nibble];
+                        
+                        if(TLN.ContainsElement(ID))
+                        {
+                            return TLN[ID];
+                        }
+                        else
+                        {
+                            throw new Exception("Leaf Node does not exist in List.");
+                        }                        
                     }
                     else
                     {
-                        throw new Exception("Node does not exist.");
+                        throw new Exception("Leaf Node does not exist.");
                     }
                 }
             }
@@ -272,15 +283,15 @@ namespace TNetD.Tree
         /// <returns></returns>
         public bool NodeExists(Hash ID)
         {
-            TreeNode<LeafDataType> TempRoot = Root;
+            ListTreeNode TempRoot = Root;
 
-            int HLEN = ID.Hex.Length << 1; // Multiply by 2
+            int LeafDepth = Constants.HashTree_NodeListDepth;
 
-            for (int i = 0; i < HLEN; i++)
+            for (int i = 0; i < LeafDepth; i++)
             {
                 byte Nibble = ID.GetNibble(i);
 
-                if ((i < (HLEN - 1)))
+                if ((i < (LeafDepth - 1)))
                 {
                     if (TempRoot.Children[Nibble] == null)
                     {
@@ -290,11 +301,20 @@ namespace TNetD.Tree
                     TempRoot = TempRoot.Children[Nibble];
                 }
 
-                if (i == (HLEN - 1))
+                if (i == (LeafDepth - 1))
                 {
                     if ((TempRoot.Children[Nibble] != null) && TempRoot.Children[Nibble].IsLeaf)
                     {
-                        return true;
+                        ListTreeLeafNode TLN = (ListTreeLeafNode)TempRoot.Children[Nibble];
+
+                        if (TLN.ContainsElement(ID))
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        } 
                     }
                     else
                     {

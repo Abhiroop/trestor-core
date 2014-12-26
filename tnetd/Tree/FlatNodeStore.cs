@@ -11,7 +11,7 @@ namespace TNetD.Tree
     /// </summary>
     class FlatNodeStore
     {
-        SortedDictionary<Hash, LeafDataType> Values;
+        SortedDictionary<Hash, LeafDataType> Values = new SortedDictionary<Hash,LeafDataType>();
 
         public LeafDataType this[Hash hash]
         {
