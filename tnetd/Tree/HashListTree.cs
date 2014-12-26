@@ -27,11 +27,11 @@ namespace TNetD.Tree
             get { return _TotalNodes; }
         }
 
-        TreeNode<LeafDataType> Root;
+        ListTreeNode Root;
 
         public HashListTree()
         {
-            Root = new TreeNode<LeafDataType>();
+            Root = new ListTreeNode();
         }
 
         public LeafDataType this[Hash index]
@@ -47,9 +47,9 @@ namespace TNetD.Tree
         {
             if (Root != null)
             {
-                if (Root.ID != null)
+                if (Root.Hash != null)
                 {
-                    return Root.ID;
+                    return Root.Hash;
                 }
                 else
                 {
@@ -73,59 +73,53 @@ namespace TNetD.Tree
 
             Hash ID = Value.GetID();
 
-            TreeNode<LeafDataType> TempRoot = Root;
+            ListTreeNode TempRoot = Root;
 
-            Stack<TreeNode<LeafDataType>> PathStack = new Stack<TreeNode<LeafDataType>>();
+            Stack<ListTreeNode> PathStack = new Stack<ListTreeNode>();
 
             PathStack.Push(TempRoot);
 
-            int HLEN = ID.Hex.Length << 1; // Multiply by 2
+            int LeafDepth = Constants.HashTree_NodeListDepth; //ID.Hex.Length << 1; // Multiply by 2
 
-            for (int i = 0; i < HLEN; i++)
+            for (int i = 0; i < LeafDepth; i++)
             {
                 byte Nibble = ID.GetNibble(i);
 
                 // Insert new node
-                if ((TempRoot.Children[Nibble] == null) && (i < (HLEN - 1)))
+                if ((TempRoot.Children[Nibble] == null) && (i < (LeafDepth - 1)))
                 {
-                    TempRoot.Children[Nibble] = new TreeNode<LeafDataType>();
+                    TempRoot.Children[Nibble] = new ListTreeNode();
                     _TotalNodes++;
                 }
 
                 // Make child as curent
-                if ((i < (HLEN - 1)))
+                if ((i < (LeafDepth - 1)))
                 {
                     TempRoot = TempRoot.Children[Nibble];
                     PathStack.Push(TempRoot);
                 }
 
                 // Insert leaf
-                if (i == (HLEN - 1))
+                if (i == (LeafDepth - 1))
                 {
+                    // Add new leaf node
                     if (TempRoot.Children[Nibble] == null)
                     {
-                        TempRoot.Children[Nibble] = new TreeLeafNode<LeafDataType>(ID, Value);
+                        Dictionary<Hash, LeafDataType> _Values = new Dictionary<Hash, LeafDataType>();
+                        _Values.Add(Value.GetID(), Value);
+                        TempRoot.Children[Nibble] = new ListTreeLeafNode(_Values);
                         _TotalNodes++;
 
-                        // DisplayUtils.Display("Node Added: " + HexUtil.ToString(ID.Hex));
                         Good = true;
-                    }
-                    else if (TempRoot.Children[Nibble].GetType() == typeof(TreeLeafNode<LeafDataType>))
+                    } // Add to current leaf node
+                    else if (TempRoot.Children[Nibble].GetType() == typeof(ListTreeLeafNode))
                     {
-                        if (TempRoot.Children[Nibble].ID == ID)
-                        {
-                            ((TreeLeafNode<LeafDataType>)TempRoot.Children[Nibble]).Value = Value;
-
-                            Good = true;
-                        }
-                        else
-                        {
-                            throw new Exception("Node ID Mismatch, Bad Mess !!!");
-                        }
+                        ((ListTreeLeafNode)TempRoot.Children[Nibble]).Add(Value.GetID(), Value);
+                        Good = true;
                     }
                     else
                     {
-                        throw new Exception("Node Already Exists");
+                        throw new Exception("Bad Mess !!!");
                     }
                 }
             }
@@ -135,7 +129,7 @@ namespace TNetD.Tree
 
             while (PathStack.Count > 0)
             {
-                TreeNode<LeafDataType> val = PathStack.Pop();
+                ListTreeNode val = PathStack.Pop();
                 Hash NodeHash = null;
 
                 if (!LeafDone)

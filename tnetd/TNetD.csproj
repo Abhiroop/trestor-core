@@ -65,7 +65,10 @@
     <Compile Include="Network\NetworkPacketQueueEntry.cs" />
     <Compile Include="Transactions\AccountInfo.cs" />
     <Compile Include="Consensus\CandidateSet.cs" />
+    <Compile Include="Tree\FlatNodeStore.cs" />
     <Compile Include="Tree\HashListTree.cs" />
+    <Compile Include="Tree\ListTreeLeafNode.cs" />
+    <Compile Include="Tree\ListTreeNode.cs" />
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Utils\DisplayUtils.cs" />
     <Compile Include="Ledgers\Ledger.cs" />

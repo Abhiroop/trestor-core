@@ -12,6 +12,13 @@ namespace TNetD
         public static  RNGCryptoServiceProvider rngCsp = new RNGCryptoServiceProvider();
 
         public static Random random = new Random();
+        
+        /// <summary>
+        /// Depth at which hash tree leaves are stored.
+        /// Its highly critical to tree hash generation and synchronisation.
+        /// Cannot be changed once the network starts working.
+        /// </summary>
+        public static readonly int HashTree_NodeListDepth = 8;
 
         public static readonly int GlobalNodes = 100;
 
