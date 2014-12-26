@@ -14,8 +14,22 @@ namespace TNetD.Tree
     /// <typeparam name="LeafDataType"></typeparam>
     class ListTreeNode
     {
+        protected long leafCount;
         protected Hash hash;
-        protected bool _IsLeaf;
+        protected bool isLeaf;
+
+        public long LeafCount
+        {
+            get
+            {
+                return leafCount;
+            }
+
+            /*set
+            {
+                leafCount = value;
+            }*/
+        }
 
         public Hash Hash
         {
@@ -24,31 +38,41 @@ namespace TNetD.Tree
                 return hash;
             }
 
-            set
+           /* set
             {
                 hash = value;
-            }
+            }*/
         }
 
         public bool IsLeaf
         {
             get
             {
-                return _IsLeaf;
+                return isLeaf;
             }
 
-            set
+            /*set
             {
-                _IsLeaf = value;
-            }
+                isLeaf = value;
+            }*/
         }
 
         public ListTreeNode[] Children;
 
+        /// <summary>
+        /// Sets a new hash for the node, typically as the result of a change in the tree.
+        /// </summary>
+        /// <param name="hash"></param>
+        public void SetHash(Hash hash)
+        {
+            this.hash = hash;
+        }
+
         public ListTreeNode()
         {
             Children = new ListTreeNode[16];
-            _IsLeaf = false;
+            isLeaf = false;
+            leafCount = 0;
         }
     }
 

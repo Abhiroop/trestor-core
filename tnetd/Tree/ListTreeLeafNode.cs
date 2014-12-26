@@ -14,9 +14,7 @@ namespace TNetD.Tree
     class ListTreeLeafNode : ListTreeNode
     {
         SortedDictionary<Hash, LeafDataType> Values = new SortedDictionary<Hash,LeafDataType>();
-
-        //public T Value { get; set; }
-
+                
         public ListTreeLeafNode(Dictionary<Hash, LeafDataType> NewValues)
             : base()
         {
@@ -25,7 +23,7 @@ namespace TNetD.Tree
                 this.Values.Add(val.Key, val.Value);
             }
 
-            _IsLeaf = true;
+            isLeaf = true;
         }
 
         public LeafDataType this[Hash hash]

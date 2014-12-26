@@ -37,11 +37,24 @@ namespace TNetD.Tree
 
         public LeafDataType this[Hash index]
         {
-            get { return GetNodeData(index); }
+            get
+            {
+                LeafDataType ltd;
+
+                TraverseResult tr = GetNodeData(index, out ltd);
+                if (tr == TraverseResult.Success)
+                {
+                    return ltd;
+                }
+                else
+                {
+                    throw new ArgumentException("Could not fetch Element: " + tr);
+                }
+            }
         }
 
         /// <summary>
-        /// Get the RootHash of the Merkle Tree
+        /// Get the RootHash of the Merkle Tree.
         /// </summary>
         /// <returns></returns>
         public Hash GetRootHash()
@@ -166,7 +179,7 @@ namespace TNetD.Tree
                     NodeHash = new Hash((new SHA512Managed()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
                 }
 
-                val.Hash = NodeHash;
+                val.SetHash(NodeHash);
             }
 
             return Good;
@@ -195,7 +208,7 @@ namespace TNetD.Tree
                 if (Root.Children[i] != null)
                 {
                     /////////////////////////////////////
-                    
+
                     /*if (Root.Hash != null)
                     {
                         DisplayUtils.Display("ID : " + HexUtil.ToString(Root.Hash.Hex) + " : " + depth);
@@ -220,14 +233,14 @@ namespace TNetD.Tree
 
                         foundElements.AddRange(ldts);
 
-                        //TotalMoney += ((AccountInfo)Leaf.Value).Money;
-                        //DisplayUtils.Display("\nNode Traversed: " + HexUtil.ToString(Leaf.GetHash().Hex) + " - " +
-                          //  AccountInfo.CalculateTotalMoney(ldts) );
+                        // TotalMoney += ((AccountInfo)Leaf.Value).Money;
+                        // DisplayUtils.Display("\nNode Traversed: " + HexUtil.ToString(Leaf.GetHash().Hex) + " - " +
+                        // AccountInfo.CalculateTotalMoney(ldts) );
 
-                        foreach(LeafDataType ld in ldts)
+                        foreach (LeafDataType ld in ldts)
                         {
-                            //DisplayUtils.Display("          --- ID: " + HexUtil.ToString(ld.GetID().Hex) + " - Money " + ((AccountInfo)ld).Money);
-                            TotalMoney +=((AccountInfo)ld).Money;
+                            // DisplayUtils.Display("          --- ID: " + HexUtil.ToString(ld.GetID().Hex) + " - Money " + ((AccountInfo)ld).Money);
+                            TotalMoney += ((AccountInfo)ld).Money;
                         }
 
                         FoundElementCount += ldts.Length;
@@ -238,16 +251,24 @@ namespace TNetD.Tree
             return foundElements;
         }
 
+        public enum TraverseResult { Success, MidwayBreak, NodeDoesNotExist, LeafDoesNotExist, ElementDoesNotExistInLeaf }
+
         /// <summary>
-        /// Gets the element at the position specified by the ID.
+        /// Traverses to a leaf node and returns the stack while traversing.
         /// </summary>
         /// <param name="ID"></param>
+        /// <param name="Leaf"></param>
+        /// <param name="PathStack"></param>
         /// <returns></returns>
-        public LeafDataType GetNodeData(Hash ID)
+        ///
+        private TraverseResult TraverseToLeaf(Hash ID, out ListTreeLeafNode Leaf, out Stack<ListTreeNode> PathStack)
         {
+            PathStack = new Stack<ListTreeNode>();
+            
             ListTreeNode TempRoot = Root;
+            PathStack.Push(TempRoot);
 
-            int LeafDepth = Constants.HashTree_NodeListDepth; //ID.Hex.Length << 1; // Multiply by 2
+            int LeafDepth = Constants.HashTree_NodeListDepth;
 
             for (int i = 0; i < LeafDepth; i++)
             {
@@ -255,43 +276,42 @@ namespace TNetD.Tree
 
                 if ((i < (LeafDepth - 1)))
                 {
-                    if (TempRoot.Children[Nibble] == null) throw new Exception("Node does not exist. Midway Break");
+                    if (TempRoot.Children[Nibble] == null)
+                    {
+                        Leaf = default(ListTreeLeafNode);
+                        return TraverseResult.MidwayBreak;
+                    }
 
                     TempRoot = TempRoot.Children[Nibble];
+                    PathStack.Push(TempRoot);
                 }
 
-                // Reached the leaf node. Now look for the actual node.
                 if (i == (LeafDepth - 1))
                 {
                     if ((TempRoot.Children[Nibble] != null) && TempRoot.Children[Nibble].IsLeaf)
                     {
-                        ListTreeLeafNode TLN = (ListTreeLeafNode)TempRoot.Children[Nibble];
-                        
-                        if(TLN.ContainsElement(ID))
-                        {
-                            return TLN[ID];
-                        }
-                        else
-                        {
-                            throw new Exception("Leaf Node does not exist in List.");
-                        }                        
+                        Leaf = (ListTreeLeafNode)TempRoot.Children[Nibble];
+                        return TraverseResult.Success;
                     }
                     else
                     {
-                        throw new Exception("Leaf Node does not exist.");
+                        Leaf = default(ListTreeLeafNode);
+                        return TraverseResult.LeafDoesNotExist;
                     }
                 }
             }
 
-            throw new Exception("Node does not exist.");
+            Leaf = default(ListTreeLeafNode);
+            return TraverseResult.NodeDoesNotExist;
         }
 
         /// <summary>
-        /// Traverse down tree to see the availability of given leaf node.
+        /// Traverses to a leaf node.
         /// </summary>
         /// <param name="ID"></param>
+        /// <param name="Leaf"></param>
         /// <returns></returns>
-        public bool NodeExists(Hash ID)
+        private TraverseResult TraverseToLeaf(Hash ID, out ListTreeLeafNode Leaf)
         {
             ListTreeNode TempRoot = Root;
 
@@ -305,7 +325,8 @@ namespace TNetD.Tree
                 {
                     if (TempRoot.Children[Nibble] == null)
                     {
-                        return false;
+                        Leaf = default(ListTreeLeafNode);
+                        return TraverseResult.MidwayBreak;
                     }
 
                     TempRoot = TempRoot.Children[Nibble];
@@ -315,26 +336,84 @@ namespace TNetD.Tree
                 {
                     if ((TempRoot.Children[Nibble] != null) && TempRoot.Children[Nibble].IsLeaf)
                     {
-                        ListTreeLeafNode TLN = (ListTreeLeafNode)TempRoot.Children[Nibble];
-
-                        if (TLN.ContainsElement(ID))
-                        {
-                            return true;
-                        }
-                        else
-                        {
-                            return false;
-                        } 
+                        Leaf = (ListTreeLeafNode)TempRoot.Children[Nibble];
+                        return TraverseResult.Success;
                     }
                     else
                     {
-                        return false;
+                        Leaf = default(ListTreeLeafNode);
+                        return TraverseResult.LeafDoesNotExist;
                     }
                 }
             }
 
+            Leaf = default(ListTreeLeafNode);
+            return TraverseResult.NodeDoesNotExist;
+        }
+
+        /// <summary>
+        /// Gets the element at the position specified by the ID.
+        /// </summary>
+        /// <param name="ID"></param>
+        /// <param name="Leaf"></param>
+        /// <returns></returns>
+        public TraverseResult GetNodeData(Hash ID, out LeafDataType Leaf)
+        {
+            ListTreeLeafNode LN;
+            TraverseResult tr = TraverseToLeaf(ID, out LN);
+
+            if (tr == TraverseResult.Success)
+            {
+                if (LN.ContainsElement(ID))
+                {
+                    Leaf = LN[ID];
+                    return TraverseResult.Success;
+                }
+                else
+                {
+                    Leaf = default(LeafDataType);
+                    return TraverseResult.ElementDoesNotExistInLeaf;
+                }
+            }
+            else
+            {
+                Leaf = default(LeafDataType);
+                return tr;
+            }
+        }
+
+
+        /// <summary>
+        /// Traverse down tree to see the availability of given leaf node.
+        /// This is equivalent to trying to fetch the element, in terms of complexity.
+        /// </summary>
+        /// <param name="ID"></param>
+        /// <returns></returns>
+        public bool Exists(Hash ID)
+        {
+            LeafDataType Temp;
+
+            return GetNodeData(ID, out Temp) == TraverseResult.Success;
+        }
+        
+        public bool DeleteNode(Hash ID)
+        {
+            Stack<ListTreeNode> PathStack;
+            ListTreeLeafNode LTLN;
+
+            TraverseResult tr = TraverseToLeaf(ID, out LTLN, out PathStack);
+
+            if(tr == TraverseResult.Success)
+            {
+
+
+
+
+            }
+
             return false;
         }
+
 
     }
 }
