@@ -59,16 +59,22 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Ledgers\SQLiteLedgerFileHandler.cs" />
+    <Compile Include="Network\FakeNetwork.cs" />
+    <Compile Include="Network\NetworkPacket.cs" />
+    <Compile Include="Network\NetworkPacketQueueEntry.cs" />
     <Compile Include="Transactions\AccountInfo.cs" />
     <Compile Include="Consensus\CandidateSet.cs" />
+    <Compile Include="Tree\HashListTree.cs" />
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Utils\DisplayUtils.cs" />
     <Compile Include="Ledgers\Ledger.cs" />
     <Compile Include="Node\Node.cs" />
+    <Compile Include="Utils\INIFile.cs" />
     <Compile Include="Utils\Structs.cs" />
     <Compile Include="Tree\HashTree.cs" />
     <Compile Include="Tree\TreeNode.cs" />
-    <Compile Include="Utils\Utils.cs" />
+    <Compile Include="Utils\TNetUtils.cs" />
     <Page Include="UI\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

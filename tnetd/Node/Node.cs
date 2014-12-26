@@ -46,7 +46,7 @@ namespace TNetD
 
 
         int ConnectionLimit = 0;
-        public int OutTransactionCount;
+        public int OutTransactionCount=0;
         public int InCandidatesCount;
         public int InTransactionCount;
 

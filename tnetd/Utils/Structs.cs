@@ -22,7 +22,7 @@ namespace TNetD
         }
     }
 
-    struct TransactionSink
+    /*struct TransactionSink
     {
         public Hash PublicKey_Sink;
         public long Amount;
@@ -31,6 +31,11 @@ namespace TNetD
             this.PublicKey_Sink = PublicKey_Sink;
             this.Amount = Amount;
         }
-    }
+    }*/
+
+    
+
+   
+
 
 }

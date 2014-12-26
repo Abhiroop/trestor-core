@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace TNetD
 {
-    class Utils
-    {
+    class TNetUtils
+    { 
         /// <summary>
         /// Generates nRandom Numbers
         /// </summary>
@@ -26,7 +26,7 @@ namespace TNetD
             {
                 int Rand = Constants.random.Next(0, maxNumber);
 
-                if (!ints.Contains(Rand) && (self!= Rand))
+                if (!ints.Contains(Rand) && (self != Rand))
                 {
                     ints.Add(Rand);
                 }
@@ -34,5 +34,6 @@ namespace TNetD
 
             return ints.ToArray();
         }
+        
     }
 }

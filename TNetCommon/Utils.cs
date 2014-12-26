@@ -41,6 +41,8 @@ namespace TNetD
 
         public static Encoding Encoding88591 = Encoding.GetEncoding(28591);
 
+       
+
 
     }
 }
