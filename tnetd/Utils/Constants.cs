@@ -18,7 +18,7 @@ namespace TNetD
         /// Its highly critical to tree hash generation and synchronisation.
         /// Cannot be changed once the network starts working.
         /// </summary>
-        public static readonly int HashTree_NodeListDepth = 5;
+        public static readonly int HashTree_NodeListDepth = 4;
 
         public static readonly int GlobalNodes = 100;
 

@@ -13,8 +13,8 @@ namespace TNetD.Tree
     /// <typeparam name="T"></typeparam>
     class ListTreeLeafNode : ListTreeNode
     {
-        SortedDictionary<Hash, LeafDataType> Values = new SortedDictionary<Hash,LeafDataType>();
-                
+        SortedDictionary<Hash, LeafDataType> Values = new SortedDictionary<Hash, LeafDataType>();
+
         public ListTreeLeafNode(Dictionary<Hash, LeafDataType> NewValues)
             : base()
         {
@@ -37,7 +37,31 @@ namespace TNetD.Tree
 
         public bool ContainsElement(Hash ID)
         {
-            return Values.ContainsKey(ID);
+            bool CE = Values.ContainsKey(ID);
+
+            /*if (!CE)
+            {
+                CE = Values.ContainsKey(ID);
+
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine(" ----------- Delete Error\n To Delete:\n" + HexUtil.ToString(ID.Hex) + "\n---------------\n");
+                foreach (Hash hd in Values.Keys)
+                {
+                    sb.AppendLine("" + HexUtil.ToString(hd.Hex) + "  --  ");
+
+                    for(int i=0;i<32;i++)
+                    {
+                        sb.Append("" + (hd.Hex[i] ^ ID.Hex[i]).ToString("X2") + "");
+                    }
+                    sb.AppendLine();
+
+                }
+                sb.AppendLine("---------------");
+
+                DisplayUtils.Display(sb.ToString());
+            }*/
+
+            return CE;
         }
 
         /// <summary>
@@ -55,21 +79,16 @@ namespace TNetD.Tree
         /// <returns></returns>
         public bool DeleteElement(Hash ID)
         {
-            if (ContainsElement(ID))
-            {
-                Values.Remove(ID);
-                return true;
-            }
-            else return false;
+            return Values.Remove(ID);       
         }
 
-        public LeafDataType [] GetAllItems()
+        public LeafDataType[] GetAllItems()
         {
             LeafDataType[] listItems = new LeafDataType[Values.Count];
             int elems = 0;
             foreach (KeyValuePair<Hash, LeafDataType> val in Values)
             {
-                listItems[elems++] = val.Value;             
+                listItems[elems++] = val.Value;
             }
 
             if (elems != Values.Count) new InvalidOperationException("Addition or removal during fetch, thread-unsafe-operation");

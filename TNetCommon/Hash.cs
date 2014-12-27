@@ -1,7 +1,7 @@
 ﻿/*
 *
  @Author: Arpan Jati
- @Version: 1.2
+ @Version: 1.3
  @Description: Originally used in DirectShare
 * @ TODO: IMPROVE, by, performing equality and comparison in one step.
 */
@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace TNetD
 {
     [Serializable]
-    public class Hash : IEquatable<Hash>, IComparable<Hash>
+    public class Hash : IEquatable<Hash>, IComparer<Hash>, IComparable<Hash>
     {
         private byte[] HashValue;
 
@@ -108,6 +108,50 @@ namespace TNetD
             return a.Equals((object)b);
         }
 
+        //
+        // Simple comparer from http://stackoverflow.com/questions/10658709/linq-orderbybyte-values
+        // Too simple to write one !!!
+        public int Compare(byte[] x, byte[] y)
+        {
+            // Shortcuts: If both are null, they are the same.
+            if (x == null && y == null) return 0;
+
+            // If one is null and the other isn't, then the
+            // one that is null is "lesser".
+            if (x == null && y != null) return -1;
+            if (x != null && y == null) return 1;
+
+            // Both arrays are non-null.  Find the shorter
+            // of the two lengths.
+            int bytesToCompare = Math.Min(x.Length, y.Length);
+
+            // Compare the bytes.
+            for (int index = 0; index < bytesToCompare; ++index)
+            {
+                // The x and y bytes.
+                byte xByte = x[index];
+                byte yByte = y[index];
+
+                // Compare result.
+                int compareResult = Comparer<byte>.Default.Compare(xByte, yByte);
+
+                // If not the same, then return the result of the
+                // comparison of the bytes, as they were the same
+                // up until now.
+                if (compareResult != 0) return compareResult;
+
+                // They are the same, continue.
+            }
+
+            // The first n bytes are the same.  Compare lengths.
+            // If the lengths are the same, the arrays
+            // are the same.
+            if (x.Length == y.Length) return 0;
+
+            // Compare lengths.
+            return x.Length < y.Length ? -1 : 1;
+        }
+
         public int CompareTo(Hash other)
         {
             if (Object.ReferenceEquals(this, other))
@@ -118,13 +162,7 @@ namespace TNetD
                 throw new ArgumentException("Argument is NULL");
             }
 
-            if (this.Equals(other))
-                return 0;
-
-            if (this < other)
-                return -1;
-            else
-                return 1;
+            return Compare(HashValue, other.Hex);
         }
 
         public int Compare(Hash x, Hash y)
@@ -137,39 +175,7 @@ namespace TNetD
                 throw new ArgumentException("Arguments NULL");
             }
 
-            return 0;
-        }
-
-        public static bool operator <(Hash a, Hash b)
-        {
-            if (a.Hex.Length == b.Hex.Length)
-            {
-                for (int i = 0; i < a.Hex.Length; i++)
-                {
-                    if (a.Hex[i] < b.Hex[i])
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-        
-        public static bool operator >(Hash a, Hash b)
-        {
-            if (a.Hex.Length == b.Hex.Length)
-            {
-                for (int i = 0; i < a.Hex.Length; i++)
-                {
-                    if (a.Hex[i] > b.Hex[i])
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
+            return Compare(x.Hex, y.Hex);
         }
 
         public static bool operator !=(Hash a, Hash b)
