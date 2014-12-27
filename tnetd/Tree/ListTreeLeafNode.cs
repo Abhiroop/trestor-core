@@ -37,31 +37,7 @@ namespace TNetD.Tree
 
         public bool ContainsElement(Hash ID)
         {
-            bool CE = Values.ContainsKey(ID);
-
-            /*if (!CE)
-            {
-                CE = Values.ContainsKey(ID);
-
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine(" ----------- Delete Error\n To Delete:\n" + HexUtil.ToString(ID.Hex) + "\n---------------\n");
-                foreach (Hash hd in Values.Keys)
-                {
-                    sb.AppendLine("" + HexUtil.ToString(hd.Hex) + "  --  ");
-
-                    for(int i=0;i<32;i++)
-                    {
-                        sb.Append("" + (hd.Hex[i] ^ ID.Hex[i]).ToString("X2") + "");
-                    }
-                    sb.AppendLine();
-
-                }
-                sb.AppendLine("---------------");
-
-                DisplayUtils.Display(sb.ToString());
-            }*/
-
-            return CE;
+            return Values.ContainsKey(ID);
         }
 
         /// <summary>
