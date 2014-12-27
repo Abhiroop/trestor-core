@@ -40,6 +40,29 @@ namespace TNetD.Tree
             return Values.ContainsKey(ID);
         }
 
+        /// <summary>
+        /// Gets the numebr of Elements in the leaf.
+        /// </summary>
+        public int Count
+        {
+            get { return Values.Count; }
+        }
+
+        /// <summary>
+        /// Deletes the element if it exists in the Dictionary.
+        /// </summary>
+        /// <param name="ID"></param>
+        /// <returns></returns>
+        public bool DeleteElement(Hash ID)
+        {
+            if (ContainsElement(ID))
+            {
+                Values.Remove(ID);
+                return true;
+            }
+            else return false;
+        }
+
         public LeafDataType [] GetAllItems()
         {
             LeafDataType[] listItems = new LeafDataType[Values.Count];

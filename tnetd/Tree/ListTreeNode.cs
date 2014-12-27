@@ -38,10 +38,10 @@ namespace TNetD.Tree
                 return hash;
             }
 
-           /* set
-            {
-                hash = value;
-            }*/
+            /* set
+             {
+                 hash = value;
+             }*/
         }
 
         public bool IsLeaf
@@ -60,6 +60,25 @@ namespace TNetD.Tree
         public ListTreeNode[] Children;
 
         /// <summary>
+        /// Get the number of child nodes for the current node.
+        /// </summary>
+        /// <returns></returns>
+        public int ChildCount()
+        {
+            if (Children != null)
+            {
+                int count = 0;
+                for (int i = 0; i < 16; i++)
+                {
+                    if (Children[i] != null)
+                        count++;
+                }
+                return count;
+            }
+            return 0;
+        }
+
+        /// <summary>
         /// Sets a new hash for the node, typically as the result of a change in the tree.
         /// </summary>
         /// <param name="hash"></param>
@@ -76,7 +95,7 @@ namespace TNetD.Tree
         }
     }
 
-    
+
 
 }
 

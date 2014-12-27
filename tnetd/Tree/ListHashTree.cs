@@ -20,12 +20,17 @@ namespace TNetD.Tree
     class ListHashTree
     {
         long _TraversedNodes = 0;
-
+        long _TraversedElements = 0;
         public long TotalMoney = 0;
 
         public long TraversedNodes
         {
             get { return _TraversedNodes; }
+        }
+
+        public long TraversedElements
+        {
+            get { return _TraversedElements; }
         }
 
         ListTreeNode Root;
@@ -149,18 +154,18 @@ namespace TNetD.Tree
                 if (!LeafDone)
                 {
                     // Do the hashing for the leaf.
-                    List<byte> hashDataArray = new List<byte>();
+                    List<byte> _tempHash = new List<byte>();
                     for (int i = 0; i < 16; i++)
                     {
                         if (val.Children[i] != null)
                         {
                             var ai = (ListTreeLeafNode)val.Children[i];
                             Hash hsh = ai.GetHash();
-                            hashDataArray.AddRange(hsh.Hex);
+                            _tempHash.AddRange(hsh.Hex);
                             // DisplayUtils.Display("CH : - " + i.ToString("X") + " : " + HexUtil.ToString(hsh.Hex));
                         }
                     }
-                    NodeHash = new Hash((new SHA512Managed()).ComputeHash(hashDataArray.ToArray()).Take(32).ToArray());
+                    NodeHash = new Hash((new SHA512Managed()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
                     LeafDone = true;
                 }
                 else
@@ -188,16 +193,18 @@ namespace TNetD.Tree
         public int TraverseNodes()
         {
             int nodes = 0;
+            int elements = 0;
             int depth = 0;
             _TraversedNodes = 0;
             TotalMoney = 0;
-            TraverseTree(Root, ref nodes, depth);
+            TraverseTree(Root, ref elements, ref nodes, depth);
             _TraversedNodes = nodes;
+            _TraversedElements = elements;
             //TraverseLevelOrder(Root, ref nodes);
             return nodes;
         }
 
-        private List<LeafDataType> TraverseTree(ListTreeNode Root, ref int FoundElementCount, int _depth)
+        private List<LeafDataType> TraverseTree(ListTreeNode Root, ref int FoundElementCount, ref int FoundNodesCount, int _depth)
         {
             List<LeafDataType> foundElements = new List<LeafDataType>();
 
@@ -209,20 +216,21 @@ namespace TNetD.Tree
                 {
                     /////////////////////////////////////
 
-                    /*if (Root.Hash != null)
+                    if (Root.Hash != null)
                     {
                         DisplayUtils.Display("ID : " + HexUtil.ToString(Root.Hash.Hex) + " : " + depth);
+                        FoundNodesCount++;
                     }
                     else
                     {
                         DisplayUtils.Display("ID: NULL --------------- =============== ------------- :");
-                    }*/
+                    }
 
                     ////////////////////////////////
 
                     if (!Root.Children[i].IsLeaf)
                     {
-                        TraverseTree(Root.Children[i], ref FoundElementCount, depth);
+                        TraverseTree(Root.Children[i], ref FoundElementCount, ref FoundNodesCount, depth);
                     }
 
                     if (Root.Children[i].IsLeaf)
@@ -233,13 +241,13 @@ namespace TNetD.Tree
 
                         foundElements.AddRange(ldts);
 
-                        // TotalMoney += ((AccountInfo)Leaf.Value).Money;
-                        // DisplayUtils.Display("\nNode Traversed: " + HexUtil.ToString(Leaf.GetHash().Hex) + " - " +
-                        // AccountInfo.CalculateTotalMoney(ldts) );
+                        // TotalMoney += ((AccountInfo)Leaf.).Money;
+                        DisplayUtils.Display("\nNode Traversed: " + HexUtil.ToString(Leaf.GetHash().Hex) + " - " +
+                        AccountInfo.CalculateTotalMoney(ldts));
 
                         foreach (LeafDataType ld in ldts)
                         {
-                            // DisplayUtils.Display("          --- ID: " + HexUtil.ToString(ld.GetID().Hex) + " - Money " + ((AccountInfo)ld).Money);
+                            DisplayUtils.Display("          --- ID: " + HexUtil.ToString(ld.GetID().Hex) + " - Money " + ((AccountInfo)ld).Money);
                             TotalMoney += ((AccountInfo)ld).Money;
                         }
 
@@ -264,7 +272,7 @@ namespace TNetD.Tree
         private TraverseResult TraverseToLeaf(Hash ID, out ListTreeLeafNode Leaf, out Stack<ListTreeNode> PathStack)
         {
             PathStack = new Stack<ListTreeNode>();
-            
+
             ListTreeNode TempRoot = Root;
             PathStack.Push(TempRoot);
 
@@ -395,23 +403,104 @@ namespace TNetD.Tree
 
             return GetNodeData(ID, out Temp) == TraverseResult.Success;
         }
-        
+
         public bool DeleteNode(Hash ID)
         {
             Stack<ListTreeNode> PathStack;
             ListTreeLeafNode LTLN;
 
+            bool result = false;
+
             TraverseResult tr = TraverseToLeaf(ID, out LTLN, out PathStack);
 
-            if(tr == TraverseResult.Success)
+            if (tr == TraverseResult.Success)
             {
+                // Delete the node in the leaf.
 
+                result = LTLN.DeleteElement(ID);
 
+                // Fix the tree.
+                ////////////////////////////
 
+                bool LeafDone = false;
 
+                while (PathStack.Count > 0)
+                {
+                    ListTreeNode val = PathStack.Pop();
+
+                    // Process the leaf [actual leafs are the clilds if this node]
+                    if (!LeafDone)
+                    {
+                        // Do the hashing for the node.
+                        List<byte> _tempHash = new List<byte>();
+                        int c_count = 0;
+                        for (int i = 0; i < 16; i++)
+                        {
+                            if (val.Children[i] != null)
+                            {
+                                ListTreeLeafNode leaf = (ListTreeLeafNode)val.Children[i];
+
+                                if (leaf.Count == 0) // No Elements in the Leaf
+                                {
+                                    val.Children[i] = null; // Delete the Leaf.
+                                }
+                                else
+                                {
+                                    Hash hsh = leaf.GetHash();
+                                    _tempHash.AddRange(hsh.Hex);
+                                    c_count++;
+                                }
+                            }
+                        }
+
+                        if (c_count > 0) // Update the value of the Leaf node hash.
+                        {
+                            Hash NodeHash = new Hash((new SHA512Managed()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
+                            val.SetHash(NodeHash);
+                        }
+                        else // No children: Node should be deleted.
+                        {
+                            //val = null;
+                        }
+
+                        LeafDone = true;
+                    }
+                    else // Process the intermediate nodes
+                    {
+                        // Perform hashing for node.
+                        List<byte> _tempHash = new List<byte>();
+                        int c_count = 0;
+                        for (int i = 0; i < 16; i++)
+                        {
+                            if (val.Children[i] != null)
+                            {
+                                if (val.Children[i].ChildCount() == 0)
+                                {
+                                    val.Children[i] = null;
+                                }
+                                else
+                                {
+                                    var ai = (ListTreeNode)val.Children[i];
+                                    _tempHash.AddRange(ai.Hash.Hex);
+                                    c_count++;
+                                }
+                            }
+                        }
+
+                        if (c_count > 0)
+                        {
+                            Hash NodeHash = new Hash((new SHA512Managed()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
+                            val.SetHash(NodeHash);
+                        }
+                        else // No children: Node should be deleted.
+                        {
+                            //val = null;
+                        }
+                    }
+                }
             }
 
-            return false;
+            return result;
         }
 
 

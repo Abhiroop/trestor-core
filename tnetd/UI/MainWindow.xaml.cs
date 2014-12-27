@@ -38,17 +38,20 @@ namespace TNetD
         {
             ListHashTree lht = new ListHashTree();
 
-            int ACCOUNTS = 20000;
+            int ACCOUNTS = 20;
 
             long taka = 0;
 
             DisplayUtils.Display("Adding ... ");
 
+             byte[] N_H = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
+
+
             for (int i = 0; i < ACCOUNTS; i++)
             {
-                byte[] N_H = { (byte)(i * 3), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
-
-                Constants.rngCsp.GetBytes(N_H);
+                N_H[5] = (byte)(i*3);
+               
+                //Constants.rngCsp.GetBytes(N_H);
 
                 long _taks = Constants.random.Next(0, 1000000000);
 
@@ -73,11 +76,26 @@ namespace TNetD
 
             DisplayUtils.Display("Initial Money : " + taka);
 
-            DisplayUtils.Display("Traversing ... ");
+            DisplayUtils.Display("\nTraversing ... ");
             lht.TraverseNodes();
 
             DisplayUtils.Display("Traversed Money : " + lht.TotalMoney);
             DisplayUtils.Display("Traversed Nodes : " + lht.TraversedNodes);
+            DisplayUtils.Display("Traversed Elements : " + lht.TraversedElements);
+
+            for (int i = 0; i < ACCOUNTS; i++)
+            {
+                N_H[5] = (byte)(i * 3);
+
+                lht.DeleteNode(new Hash(N_H));
+            }
+
+            DisplayUtils.Display("\nTraversing After Delete ... ");
+            lht.TraverseNodes();
+
+            DisplayUtils.Display("Traversed Money : " + lht.TotalMoney);
+            DisplayUtils.Display("Traversed Nodes : " + lht.TraversedNodes);
+            DisplayUtils.Display("Traversed Elements : " + lht.TraversedElements);
         }
 
         private void menuItem_File_Exit_Click(object sender, RoutedEventArgs e)
