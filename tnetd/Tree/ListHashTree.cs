@@ -508,7 +508,39 @@ namespace TNetD.Tree
         }
 
 
+        /// <summary>
+        /// This method will give all the leaves under a node
+        /// Recursive
+        /// </summary>
+        /// <param name="Node"></param>
+        /// <param name="Leaves"></param>
+        /// <returns></returns>
+        public void getAllLeafUnderNode(ListTreeNode Node, out List<ListTreeLeafNode> Leaves)
+        {
+            List<ListTreeLeafNode> leaves = new List<ListTreeLeafNode>();
+           
+            for (int i = 0; i < 16; i++)
+            {
+                //base condition of the recursion
+                if (Node.Children[i].IsLeaf)
+                {
+                    ListTreeLeafNode leafNode = (ListTreeLeafNode) Node.Children[i];
+                    leaves.Add(leafNode);
+                    Leaves = leaves;
 
+                    return;
+                }
+
+                //recusion steps
+                else
+                {
+                    getAllLeafUnderNode(Node.Children[i], out leaves);
+                }
+
+            }
+
+            Leaves = leaves;
+        }
 
 
 

@@ -155,12 +155,12 @@ namespace TNetD.Tree
                     for (int i = 0; i < 16; i++)
                     {
                         if (val.Children[i] != null)
-                        {                           
+                        {
                             var ai = (TreeLeafNode<LeafDataType>)val.Children[i];
                             Hash hsh = ai.Value.GetHash();
                             hashDataArray.AddRange(hsh.Hex);
 
-                           // DisplayUtils.Display("CH : - " + i.ToString("X") + " : " + HexUtil.ToString(hsh.Hex));
+                            // DisplayUtils.Display("CH : - " + i.ToString("X") + " : " + HexUtil.ToString(hsh.Hex));
                         }
                     }
                     NodeHash = new Hash((new SHA512Managed()).ComputeHash(hashDataArray.ToArray()).Take(32).ToArray());
@@ -176,12 +176,12 @@ namespace TNetD.Tree
                             var ai = (TreeNode<LeafDataType>)val.Children[i];
                             hashDataArray.AddRange(ai.ID.Hex);
 
-                           // DisplayUtils.Display("- " + i.ToString("X") + " : " + HexUtil.ToString(ai.ID.Hex) );
+                            // DisplayUtils.Display("- " + i.ToString("X") + " : " + HexUtil.ToString(ai.ID.Hex) );
                         }
                     }
                     NodeHash = new Hash((new SHA512Managed()).ComputeHash(hashDataArray.ToArray()).Take(32).ToArray());
                 }
-                
+
                 val.ID = NodeHash;
             }
 
@@ -376,8 +376,5 @@ namespace TNetD.Tree
 
             return false;
         }
-
-
-
     }
 }
