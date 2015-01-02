@@ -508,9 +508,80 @@ namespace TNetD.Tree
         }
 
 
+        /// <summary>
+        /// This method will give all the leaves under a node
+        /// Recursive
+        /// </summary>
+        /// <param name="Node"></param>
+        /// <param name="Leaves"></param>
+        /// <returns></returns>
+        public void getAllLeafUnderNode(ListTreeNode Node, out List<ListTreeLeafNode> Leaves)
+        {
+            List<ListTreeLeafNode> leaves = new List<ListTreeLeafNode>();
+           
+            for (int i = 0; i < 16; i++)
+            {
+                if (Node.Children[i] != null)
+                {
+                    //base condition of the recursion
+                    if (Node.Children[i].IsLeaf)
+                    {
+                        ListTreeLeafNode leafNode = (ListTreeLeafNode)Node.Children[i];
+                        leaves.Add(leafNode);
+                        Leaves = leaves;
+
+                        return;
+                    }
+
+                    //recusion steps
+                    else
+                    {
+                        getAllLeafUnderNode(Node.Children[i], out leaves);
+                    }
+                }
+            }
+            Leaves = leaves;
+        }
 
 
+        public List<ListTreeNode> depthOrderTraversal(int depth)
+        {
+            List<ListTreeNode> listToReturn = new List<ListTreeNode>();
+            ListTreeNode tempRoot = Root;
 
+            List<ListTreeNode> list1 = new List<ListTreeNode>();
+            List<ListTreeNode> list2 = new List<ListTreeNode>();
+
+            list1.Add(tempRoot);
+
+            int currentDepth = 0;
+
+            while (currentDepth < depth)
+            {
+                currentDepth++;
+
+                for (int item = 0; item < list1.Count; item++)
+                {
+                    for (int i = 0; i < 16; i++)
+                    {
+                        ListTreeNode currentNode = list1[item];
+                        if (currentNode.Children[i] != null)
+                        {
+                            list2.Add(currentNode.Children[i]);
+                        }
+                    }
+                }
+
+                list1.Clear();
+                list1.AddRange(list2);
+                list2.Clear();
+            }
+
+            listToReturn = list1;
+
+            return listToReturn;
+
+        }
 
     }
 }
