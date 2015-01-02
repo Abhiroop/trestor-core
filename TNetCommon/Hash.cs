@@ -32,7 +32,7 @@ namespace TNetD
         public byte[] Hex
         {
             get { return HashValue; }
-            set { HashValue = value; }
+            //set { HashValue = value; }
         }
 
         public byte GetNibble(int NibbleIndex)
@@ -181,7 +181,7 @@ namespace TNetD
         public static bool operator !=(Hash a, Hash b)
         {
             return !(a == b);
-        }
+        }             
 
     }
 }

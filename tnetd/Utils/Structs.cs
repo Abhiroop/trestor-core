@@ -22,6 +22,28 @@ namespace TNetD
         }
     }
 
+    struct CandidateStatus
+    {
+        public bool Vote;
+        public bool Forwarded;
+        public CandidateStatus(bool Vote, bool Forwarded)
+        {
+            this.Vote = Vote;
+            this.Forwarded = Forwarded;
+        }
+    }
+
+    struct TransactionContentPack
+    {
+        public Hash Source;
+        public TransactionContent Transacation;
+        public TransactionContentPack(Hash Source, TransactionContent Transacation)
+        {
+            this.Source = Source;
+            this.Transacation = Transacation;
+        }
+    }
+
     /*struct TransactionSink
     {
         public Hash PublicKey_Sink;

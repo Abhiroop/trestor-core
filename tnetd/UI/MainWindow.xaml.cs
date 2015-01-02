@@ -12,27 +12,39 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TNetD.Network.Networking;
+using TNetD.Nodes;
 using TNetD.Transactions;
 using TNetD.Tree;
 
 namespace TNetD
 {
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
+        List<Node> nodes = new List<Node>();
+        GlobalConfiguration globalConfiguration;
+
         public MainWindow()
         {
             InitializeComponent();
 
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
+            globalConfiguration = new GlobalConfiguration();
+
+            nodes.Add(new Node(0, globalConfiguration));
+            nodes.Add(new Node(1, globalConfiguration));
         }
 
         void DisplayUtils_DisplayText(string Text, Color color, DisplayType type)
         {
-            textBlock_StatusLog.Text += Text + "\n";
+            try
+            {
+                this.Dispatcher.Invoke(new Action(() => { textBlock_StatusLog.Text += Text + "\n"; }));
+            }
+            catch { }
         }
 
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
@@ -41,7 +53,7 @@ namespace TNetD
             SortedDictionary<Hash, int> hh = new SortedDictionary<Hash, int>();
 
             byte[] N_H = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
-            
+
             ListHashTree lht = new ListHashTree();
 
             int ACCOUNTS = 2000;
@@ -87,7 +99,7 @@ namespace TNetD
             DisplayUtils.Display("Traversed Money : " + lht.TotalMoney);
             DisplayUtils.Display("Traversed Nodes : " + lht.TraversedNodes);
             DisplayUtils.Display("Traversed Elements : " + lht.TraversedElements);
-            
+
             int cnt = 0;
             foreach (Hash h in accounts)
             {
@@ -109,6 +121,19 @@ namespace TNetD
         private void menuItem_File_Exit_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            foreach(Node nd in nodes)
+            {
+                nd.StopNode();
+            }            
+        }
+
+        private void menuItem_Server_Start_Click(object sender, RoutedEventArgs e)
+        {
+                
         }
 
     }

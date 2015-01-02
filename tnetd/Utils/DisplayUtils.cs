@@ -7,7 +7,7 @@ using System.Windows.Media;
 
 namespace TNetD
 {
-    public enum DisplayType { Info, Warning, Exception };
+    public enum DisplayType { Info, Warning, Exception, AuthFailure };
 
     static class DisplayUtils
     {
@@ -39,6 +39,11 @@ namespace TNetD
                     break;
 
                 case DisplayType.Exception:
+                    //Console.ForegroundColor = ConsoleColor.Orange;
+                    DisplayText((WriteHeader ? " Exception: " : "") + Message, Colors.Orange, type);
+                    break;
+
+                case DisplayType.AuthFailure:
                     //Console.ForegroundColor = ConsoleColor.Red;
                     DisplayText((WriteHeader ? " Exception: " : "") + Message, Colors.Red, type);
                     break;

@@ -127,6 +127,9 @@
     <Compile Include="Chaos.NaCl\Sha512.cs" />
     <Compile Include="Chaos.NaCl\XSalsa20Poly1305.cs" />
     <Compile Include="CommonConstants.cs" />
+    <Compile Include="Crypto\ISymmCipher.cs" />
+    <Compile Include="Crypto\RC4.cs" />
+    <Compile Include="Crypto\Salsa20.cs" />
     <Compile Include="Curve25519.cs" />
     <Compile Include="Hash.cs" />
     <Compile Include="HexUtil.cs" />

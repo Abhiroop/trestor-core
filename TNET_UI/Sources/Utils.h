@@ -63,7 +63,8 @@ Hash GenerateNewToken(int len);
 vector<int> GenerateNonRepeatingDistribution(int maxNumber, int Count, int self);
 
 enum PacketTypes {
-	TPT_HELLO = 0x00, TPT_DISCONNECT = 0x01, TPT_KEEPALIVE = 0x02,
+	TPT_NOTHING = 0x00,
+	TPT_HELLO = 0x01, TPT_DISCONNECT = 0x02, TPT_KEEPALIVE = 0x03,
 	TPT_KEY_EXCHANGE_1 = 0x10, TPT_KEY_EXCHANGE_2 = 0x11, TPT_KEY_EXCHANGE_DONE = 0x12,
 		
 	// TPT_TRANS_REQUEST : DATA [TransactionContent] or a single TransactionContent request.

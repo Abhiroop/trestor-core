@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TNetD
 {
+    public enum Verbosity { NoDisplay, Errors, Warning, Info, ExtraInfo };
+
     class TNetUtils
     { 
         /// <summary>
@@ -34,6 +37,25 @@ namespace TNetD
 
             return ints.ToArray();
         }
+
+
+        public static void WaitForExit()
+        {
+            bool exit = false;
+            do
+            {
+                ConsoleKeyInfo cki = Console.ReadKey(true);
+                if (cki.Key == ConsoleKey.X && cki.Modifiers == ConsoleModifiers.Control)
+                {
+                    exit = true;
+                }
+                Thread.Sleep(100);
+            }
+            while (!exit);
+        }
         
+
+
+
     }
 }

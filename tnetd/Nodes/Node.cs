@@ -7,50 +7,36 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using TNetD.Ledgers;
+using TNetD.Network;
+using TNetD.Network.Networking;
+using TNetD.PersistentStore;
 using TNetD.Transactions;
 
-namespace TNetD
+namespace TNetD.Nodes
 {
-    struct CandidateStatus
-    {
-        public bool Vote;
-        public bool Forwarded;
-        public CandidateStatus(bool Vote, bool Forwarded)
-        {
-            this.Vote = Vote;
-            this.Forwarded = Forwarded;
-        }
-    }
-
-    struct TransactionContentPack
-    {
-        public Hash Source;
-        public TransactionContent Transacation;
-        public TransactionContentPack(Hash Source, TransactionContent Transacation)
-        {
-            this.Source = Source;
-            this.Transacation = Transacation;
-        }
-    }
-
     internal class Node
     {
-        public Dictionary<Hash, Node> Connections = new Dictionary<Hash, Node>();
+        SecureNetwork network = default(SecureNetwork);
 
-        public Dictionary<Hash, Node> TrustedNodes = new Dictionary<Hash, Node>();
+        //public Dictionary<Hash, Node> TrustedNodes = new Dictionary<Hash, Node>();
 
         /// <summary>
         /// Outer Dict is TransactionID, inner is Voter node.
         /// </summary>
         public Dictionary<Hash, Dictionary<Hash, CandidateStatus>> ReceivedCandidates = new Dictionary<Hash, Dictionary<Hash, CandidateStatus>>();
 
+        /// <summary>
+        /// A dictionary of Trusted nodes, stored by PublicKey
+        /// </summary>
+        public Dictionary<Hash, NodeSocketData> TrustedNodes;
 
-        int ConnectionLimit = 0;
-        public int OutTransactionCount=0;
+        public int OutTransactionCount = 0;
         public int InCandidatesCount;
         public int InTransactionCount;
 
         public AccountInfo AI;
+
+        IPersistentAccountStore persistentAccountStore;
 
         Ledger ledger;
 
@@ -59,40 +45,82 @@ namespace TNetD
             get { return ledger; }
         }
 
-        byte[] _PrivateKey;
-        byte[] _PublicKey;
-
         public Hash PublicKey
         {
             get
             {
-                return new Hash(_PublicKey);
+                return nodeConfig.PublicKey;
             }
         }
 
         Timer Tmr;
 
-        public Node(int ConnectionLimit, Ledger ledger, long Money, int TimerRate)
+        NodeConfig nodeConfig = default(NodeConfig);
+
+        /// <summary>
+        /// Initializes a node. Node ID is 0 for most cases.
+        /// Only other use is hosting multiple validators from an IP (bad-idea) and simulation.
+        /// </summary>
+        /// <param name="ID"></param>
+        public Node(int ID, GlobalConfiguration globalConfiguration)
         {
-            this.ConnectionLimit = ConnectionLimit;
-            byte[] Seed = new byte[32];
-            Constants.rngCsp.GetBytes(Seed);
-            Ed25519.KeyPairFromSeed(out _PublicKey, out _PrivateKey, Seed);
-            this.ledger = ledger;
+            nodeConfig = new NodeConfig(ID, globalConfiguration);
+
+            network = new SecureNetwork(nodeConfig);
+
+            TrustedNodes = globalConfiguration.TrustedNodes;
+
+            network.Initialize();
+
+            persistentAccountStore = new SQLiteAccountStore(nodeConfig);
 
             AI = new AccountInfo(PublicKey, Money);
+
+            ledger = new Ledger(persistentAccountStore);
 
             ledger.AddUserToLedger(AI);
 
             Tmr = new Timer();
             Tmr.Elapsed += Tmr_Elapsed;
             Tmr.Enabled = true;
-            Tmr.Interval = TimerRate;
+            Tmr.Interval = nodeConfig.UpdateFrequencyMS;
             Tmr.Start();
         }
 
-        void Tmr_Elapsed(object sender, ElapsedEventArgs e)
+        public void StopNode()
         {
+            Constants.ApplicationRunning = false;
+            network.Stop();
+        }
+
+        async Task SendInitialize(Hash publicKey)
+        {
+            await Task.Delay(Constants.random.Next(100, 1000)); // Wait a random delay before connecting.
+
+            NetworkPacketQueueEntry npqe = new NetworkPacketQueueEntry(publicKey, new NetworkPacket(PublicKey, PacketType.TPT_HELLO, new byte[0]));
+
+            network.AddToQueue(npqe);
+        }
+
+        private async void Tmr_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            // Connect to TrustedNodes
+
+            //List<Task> tasks = new List<Task>();
+
+            foreach (KeyValuePair<Hash, NodeSocketData> kvp in TrustedNodes)
+            {
+                if (kvp.Key != PublicKey) // Make sure we are not connecting to self !!
+                {
+                    if (!network.IsConnected(kvp.Key))
+                    {
+                        await SendInitialize(kvp.Key);
+                    }
+                }
+            }
+
+            //await Task.WhenAll(tasks.ToArray());
+
             while (PendingIncomingCandidates.Count > 0)
             {
 
@@ -108,6 +136,7 @@ namespace TNetD
                 // ReceivedCandidates
             }
         }
+
 
         void CreateArbitraryTransactionAndSendToTrustedNodes()
         {
@@ -137,9 +166,12 @@ namespace TNetD
         {
             get
             {
-                if (ledger.AccountExists(PublicKey))
-                    return ledger[PublicKey].Money;
-                else return -1;
+                if (ledger != null)
+                    if (ledger.AccountExists(PublicKey))
+                        return ledger[PublicKey].Money;
+                    else return -1;
+
+                return -1;
             }
         }
 

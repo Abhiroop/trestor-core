@@ -18,7 +18,7 @@ namespace TNetD.Transactions
     /// It is important that all the signees agree to all the transactions in the request.
     /// Summation of Amount in sources and destinations must be a non-zero exact match.
     /// </summary>
-    public class TransactionContent : SerializableBase
+    public class TransactionContent : ISerializableBase
     {
         Hash intHash;
 
@@ -228,7 +228,7 @@ namespace TNetD.Transactions
 
         ///////////////////////////////////////////////////////////
 
-        public override byte[] Serialize()
+        public byte[] Serialize()
         {
             ProtocolDataType[] PDTs = new ProtocolDataType[1 + Sources.Count + Destinations.Count + Signatures.Count];
 
@@ -258,7 +258,7 @@ namespace TNetD.Transactions
 
         /////////////////////////
 
-        public override void Deserialize(byte[] Data)
+        public void Deserialize(byte[] Data)
         {
             Init();
 
@@ -307,8 +307,8 @@ namespace TNetD.Transactions
 
                     case 3:
                         {
-                            Hash hsh = new Hash();
-                            ProtocolPackager.UnpackHash(PDT, 3, ref hsh);
+                            Hash hsh;
+                            ProtocolPackager.UnpackHash(PDT, 3, out hsh);
                             if (hsh.Hex.Length > 0)
                             {
                                 Signatures.Add(hsh);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TNetD.PersistentStore;
 using TNetD.Transactions;
 using TNetD.Tree;
 
@@ -10,6 +11,8 @@ namespace TNetD.Ledgers
 {
     class Ledger
     {
+        IPersistentAccountStore persistentStore;
+
         public HashTree LedgerTree = null;
         public long TransactionFees;
         public long TotalAmount;
@@ -22,9 +25,10 @@ namespace TNetD.Ledgers
         /// </summary>
         public HashSet<Hash> BlackList = new HashSet<Hash>();
 
-        public Ledger()
+        public Ledger(IPersistentAccountStore persistentStore)
         {
             this.LedgerTree = new HashTree();
+            this.persistentStore = persistentStore;
             this.TransactionFees = 0;
             this.TotalAmount = 0;
             //this.CloseTime = 0;
@@ -41,7 +45,7 @@ namespace TNetD.Ledgers
         public bool AddUserToLedger(AccountInfo userInfo)
         {
             // MAKE sure account does not exist
-            bool contains = LedgerTree.NodeExists(userInfo.AccountID);
+            bool contains = LedgerTree.NodeExists(userInfo.PublicKey);
 
             if (!contains)
             {

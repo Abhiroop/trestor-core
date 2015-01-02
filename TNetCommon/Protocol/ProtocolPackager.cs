@@ -318,14 +318,18 @@ namespace TNetD.Protocol
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
-        public static bool UnpackHash(ProtocolDataType packedData, byte nameType, ref Hash Data)
+        public static bool UnpackHash(ProtocolDataType packedData, byte nameType, out Hash Data)
         {
             if ((nameType == packedData.NameType) && (packedData.DataType == PDataType.PD_BYTE_VECTOR))
             {
-                Data.Hex = packedData.Data;
+                Data = new Hash(packedData.Data);
                 return true;
             }
-            else return false;
+            else
+            {
+                Data = new Hash();
+                return false;
+            }
         }
 
         public static bool UnpackByteVector(ProtocolDataType packedData, byte nameType, ref byte[] Data)

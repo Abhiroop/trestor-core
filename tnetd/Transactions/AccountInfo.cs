@@ -1,6 +1,6 @@
 ﻿//
 // @Author: Arpan Jati
-// @Date: Dec 22, 2014
+// @Date: Dec 22, 2014 | 1 Jan, 2015 
 //
 
 using System;
@@ -17,62 +17,82 @@ namespace TNetD.Transactions
     public enum AcountState { NORMAL, BLOCKED, DISABLED, PERMANENT_BLOCK, DELETED };
 
     /// <summary>
-    /// Holds the data for an account, for the time being AccountID is the public key.
+    /// Holds the data for an account.
     /// </summary>
-    class AccountInfo : LeafDataType
+    public class AccountInfo : LeafDataType, ISerializableBase
     {
-        public Hash AccountID;
+        /// <summary>
+        /// 32 bytes long public key
+        /// </summary>
+        public Hash PublicKey;
+
+        /// <summary>
+        /// Amount of money in 10^6 Trests
+        /// </summary>
         public long Money;
+
+        /// <summary>
+        /// User Name [Optional]
+        /// </summary>
         public string Name;
-        public AcountState accountState;
+
+        /// <summary>
+        /// Current state of the account
+        /// </summary>
+        public AcountState AccountState;
+
+        /// <summary>
+        /// Last Transaction Time in UTC / FileTime
+        /// </summary>
         public long LastTransactionTime;
 
-        public AccountInfo(Hash _AccountID, long _Money)
+        public AccountInfo(Hash publicKey, long money)
         {
-            AccountID = _AccountID;
-            Money = _Money;
+            PublicKey = publicKey;
+            Money = money;
             Name = "";
-            accountState = 0;
+            AccountState = 0;
             LastTransactionTime = 0;
         }
 
-        public AccountInfo(Hash _AccountID, long _Money, string _Name, AcountState accountState, long _LastTransactionTime)
+        public AccountInfo(Hash publicKey, long money, string name, AcountState accountState, long lastTransactionTime)
         {
-            AccountID = _AccountID;
-            Money = _Money;
-            Name = _Name;
-            this.accountState = accountState;
-            LastTransactionTime = _LastTransactionTime;
+            PublicKey = publicKey;
+            Money = money;
+            Name = name;
+            AccountState = accountState;
+            LastTransactionTime = lastTransactionTime;
         }
 
         override public Hash GetHash()
         {
             List<byte> data = new List<byte>();
-            data.AddRange(AccountID.Hex);
+            data.AddRange(PublicKey.Hex);
             data.AddRange(Conversions.Int64ToVector(Money));
+            data.AddRange(Encoding.GetEncoding(28591).GetBytes(Name));
             data.AddRange(Conversions.Int64ToVector(LastTransactionTime));
-            data.Add((byte)accountState);
+            data.Add((byte)AccountState);
             Hash h = new Hash(((new SHA512Managed()).ComputeHash(data.ToArray())).Take(32).ToArray());
             return h;
         }
 
         override public Hash GetID()
         {
-            return AccountID;
+            return PublicKey;
         }
 
-        public override byte[] Serialize()
+        public byte[] Serialize()
         {
             List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
-            PDTs.Add(ProtocolPackager.Pack(AccountID, 0));
+            PDTs.Add(ProtocolPackager.Pack(PublicKey, 0));
             PDTs.Add(ProtocolPackager.Pack(Money, 1));
             PDTs.Add(ProtocolPackager.Pack(Name, 2));
-            PDTs.Add(ProtocolPackager.Pack((byte)accountState, 3));
+            PDTs.Add(ProtocolPackager.Pack((byte)AccountState, 3));
             PDTs.Add(ProtocolPackager.Pack(LastTransactionTime, 4));
             return ProtocolPackager.PackRaw(PDTs);
         }
 
-        public override void Deserialize(byte[] Data)
+        public void Deserialize(byte[] Data)
         {
             List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
             int cnt = 0;
@@ -84,7 +104,7 @@ namespace TNetD.Transactions
                 switch (PDT.NameType)
                 {
                     case 0:
-                        ProtocolPackager.UnpackHash(PDT, 0, ref AccountID);
+                        ProtocolPackager.UnpackHash(PDT, 0, out PublicKey);
                         break;
 
                     case 1:
@@ -96,9 +116,9 @@ namespace TNetD.Transactions
                         break;
 
                     case 3:
-                        byte account_state = 0;
-                        ProtocolPackager.UnpackByte(PDT, 3, ref account_state);
-                        accountState = (AcountState)account_state;
+                        byte accountState = 0;
+                        ProtocolPackager.UnpackByte(PDT, 3, ref accountState);
+                        AccountState = (AcountState) accountState;
                         break;
 
                     case 4:

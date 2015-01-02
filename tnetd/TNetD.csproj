@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TNetD</RootNamespace>
     <AssemblyName>tnetd</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -25,6 +25,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -34,10 +35,15 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.SQLite, Version=1.0.93.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Libs\System.Data.SQLite.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -57,8 +63,16 @@
     </ApplicationDefinition>
     <Compile Include="Ledgers\SQLiteLedgerFileHandler.cs" />
     <Compile Include="Network\FakeNetwork.cs" />
+    <Compile Include="Network\Networking\PacketSender.cs" />
+    <Compile Include="Network\Networking\SecureNetwork.cs" />
     <Compile Include="Network\NetworkPacket.cs" />
     <Compile Include="Network\NetworkPacketQueueEntry.cs" />
+    <Compile Include="Network\Networking\OutgoingConnection.cs" />
+    <Compile Include="Network\Networking\IncomingClient.cs" />
+    <Compile Include="Nodes\GlobalConfiguration.cs" />
+    <Compile Include="Nodes\NodeConfig.cs" />
+    <Compile Include="PersistentStore\IAccountStore.cs" />
+    <Compile Include="PersistentStore\SQLiteAccountStore.cs" />
     <Compile Include="Transactions\AccountInfo.cs" />
     <Compile Include="Consensus\CandidateSet.cs" />
     <Compile Include="Tree\FlatNodeStore.cs" />
@@ -68,12 +82,16 @@
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Utils\DisplayUtils.cs" />
     <Compile Include="Ledgers\Ledger.cs" />
-    <Compile Include="Node\Node.cs" />
+    <Compile Include="Nodes\Node.cs" />
     <Compile Include="Utils\INIFile.cs" />
+    <Compile Include="Network\Networking\PacketCodec.cs" />
+    <Compile Include="Network\Networking\IncomingConnectionHander.cs" />
     <Compile Include="Utils\Structs.cs" />
     <Compile Include="Tree\HashTree.cs" />
     <Compile Include="Tree\TreeNode.cs" />
+    <Compile Include="Network\Networking\StructsAndEnums.cs" />
     <Compile Include="Utils\TNetUtils.cs" />
+    <Compile Include="Network\Networking\WorkProof.cs" />
     <Page Include="UI\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

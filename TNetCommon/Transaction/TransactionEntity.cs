@@ -12,7 +12,7 @@ using TNetD;
 
 namespace TNetD.Transactions
 {
-    public class TransactionEntity : SerializableBase
+    public class TransactionEntity : ISerializableBase
     {
         public byte[] PublicKey;
         public long Amount;
@@ -29,7 +29,7 @@ namespace TNetD.Transactions
             this.Amount = Amount;
         }
 
-        public override byte[] Serialize()
+        public byte[] Serialize()
         {
             ProtocolDataType [] PDTs = new ProtocolDataType[2];
             PDTs[0] = (ProtocolPackager.Pack(PublicKey, 0));
@@ -37,7 +37,7 @@ namespace TNetD.Transactions
             return ProtocolPackager.PackRaw(PDTs);
         }
 
-        public override void Deserialize(byte[] Data)
+        public void Deserialize(byte[] Data)
         {
             List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
             int cnt = 0;

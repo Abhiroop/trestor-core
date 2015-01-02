@@ -7,7 +7,7 @@ using TNetD.Protocol;
 
 namespace TNetD.Tree
 {
-    public abstract class LeafDataType : SerializableBase
+    public abstract class LeafDataType
     {
         public abstract Hash GetHash();
         public abstract Hash GetID();

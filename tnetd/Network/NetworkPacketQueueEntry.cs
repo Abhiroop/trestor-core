@@ -14,10 +14,13 @@ namespace TNetD.Network
     {
         public Hash PublicKey_Dest;
         public NetworkPacket Packet;
-        NetworkPacketQueueEntry(Hash publicKey_Dest, NetworkPacket packet)
+        public int TransmitAttempts;
+
+        public NetworkPacketQueueEntry(Hash publicKey_Dest, NetworkPacket packet)
         {
             PublicKey_Dest = publicKey_Dest;
             Packet = packet;
+            TransmitAttempts = 0;
         }
     };
 }
