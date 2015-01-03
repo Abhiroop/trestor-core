@@ -20,6 +20,15 @@ namespace TNetD.Network
         public PacketType Type;
         public byte[] Data;
         public Hash Token;
+
+        public NetworkPacket()
+        {
+            PublicKey_Src = new Hash();
+            Type = PacketType.TPT_NOTHING;
+            Data = new byte[0];
+            Token = new Hash();
+        }
+
         public NetworkPacket(Hash publicKey_Src, PacketType type, byte[] Data, Hash token)
         {
             PublicKey_Src = publicKey_Src;

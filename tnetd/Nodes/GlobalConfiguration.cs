@@ -41,7 +41,7 @@ namespace TNetD.Nodes
 
         public static string GetString(NodeSocketData nsd)
         {
-            return "Node : " + nsd.Name + " | " + nsd.PublicKey;
+            return "Node : " + nsd.Name + " | " + nsd.PublicKey.ToString();//.Substring(0,8);
         }
     }
 

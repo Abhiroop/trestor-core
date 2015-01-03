@@ -33,6 +33,8 @@ namespace TNetD.Network.Networking
         {
             incomingConnectionHander = new IncomingConnectionHander(nodeConfig.NetworkConfig.ListenPort, nodeConfig);
 
+            incomingConnectionHander.PacketReceived += process_PacketReceived;
+
             updateTimer = new Timer(TimerCallback, null, 0, nodeConfig.NetworkConfig.UpdateFrequencyMS);
         }
 
@@ -82,7 +84,7 @@ namespace TNetD.Network.Networking
                                 var socketInfo = nodeConfig.GlobalConfiguration.TrustedNodes[npqe.PublicKey_Dest];
 
                                 OutgoingConnection oc = new OutgoingConnection(socketInfo, nodeConfig);
-                                oc.PacketReceived += oc_PacketReceived;
+                                oc.PacketReceived += process_PacketReceived;
 
                                 oc.EnqueuePacket(npqe.Packet);
 
@@ -123,10 +125,10 @@ namespace TNetD.Network.Networking
             }
         }
 
-        void oc_PacketReceived(Hash PublicKey, byte[] Data)
+        void process_PacketReceived(Hash PublicKey, NetworkPacket packet)
         {
             if (PacketReceived != null) // Relay the packet to the outer event.
-                PacketReceived(PublicKey, Data);
+                PacketReceived(PublicKey, packet);
         }
 
         public NetworkResult AddToQueue(NetworkPacketQueueEntry npqe)

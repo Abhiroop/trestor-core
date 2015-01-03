@@ -13,25 +13,45 @@ namespace TNetD.Network.Networking
         public Thread thread;
         public TcpClient client = default(TcpClient);
         public string UserName = "";
+
+        /// <summary>
+        /// Remote PublicKey | Verified using ECDSA.
+        /// </summary>
+        public Hash PublicKey = new Hash();
+
         public byte[] WorkTask = new byte[24];
         public byte[] WorkProof = new byte[4];
 
+        /// <summary>
+        /// Identifier for internal book-keeping
+        /// </summary>
         public Hash Identifier = new Hash();
 
         public bool WorkProven = false; // Step 1
+
+        /// <summary>
+        /// True if key-exchange process is complete. 
+        /// Also means that the remote authentication also went well.
+        /// </summary>
         public bool KeyExchanged = false; // Step 2
-        public bool IsAuthenticated = false; // Step 3
+        //public bool IsAuthenticated = false;
 
         public long ConnTimeStart = 0;
 
         public UInt32 PacketCounter = 0;
 
-        public byte[] serverPublicKey;
-        public byte[] serverPrivateKey;
-        //public byte[] serverSymmKey;
+        public byte[] DHRandomBytes;
+        public byte[] DHPublicKey;
+        public byte[] DHPrivateKey;        
 
-        public byte[] serverRandomBytes;
+        /// <summary>
+        /// Key using which all the data is encrypted.
+        /// </summary>
         public byte[] TransportKey;
+
+        /// <summary>
+        /// HMAC Signing key for all the data.
+        /// </summary>
         public byte[] AuthenticationKey;
 
         public IncomingClient()
@@ -41,19 +61,13 @@ namespace TNetD.Network.Networking
 
             Constants.rngCsp.GetBytes(workRand);
 
-            Buffer.BlockCopy(workRand, 0, WorkTask, 0, 16);
-            Buffer.BlockCopy(time, 0, WorkTask, 16, 8);
+            Array.Copy(workRand, 0, WorkTask, 0, 16);
+            Array.Copy(time, 0, WorkTask, 16, 8);
 
-            // This rng part should be moved to, after work proof.
-
-            serverRandomBytes = new byte[32];
             TransportKey = new byte[32];
             AuthenticationKey = new byte[32];
-
-            Constants.rngCsp.GetBytes(serverRandomBytes);
-
-            //Constants.rngCsp.GetBytes(TransportKey);
-            //Constants.rngCsp.GetBytes(AuthenticationKey);
+                        
+            DHRandomBytes = new byte[32];            
         }
     }
 }

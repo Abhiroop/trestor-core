@@ -13,10 +13,11 @@ using System.Threading;
 using System.Collections.Concurrent;
 using TNetD.Crypto;
 using TNetD.Nodes;
+using System.Threading.Tasks;
 
 namespace TNetD.Network.Networking
 {
-    public delegate void PacketReceivedHandler(Hash PublicKey, byte[] Data);
+    public delegate void PacketReceivedHandler(Hash PublicKey, NetworkPacket Data);
 
     class OutgoingConnection
     {
@@ -26,19 +27,16 @@ namespace TNetD.Network.Networking
         NodeConfig nodeConfig;
 
         NodeSocketData nodeSocketData = default(NodeSocketData);
-        //bool Stopall = false;
-
+       
         ConcurrentQueue<NetworkPacket> outgoingQueue = new ConcurrentQueue<NetworkPacket>();
 
         public event PacketReceivedHandler PacketReceived;
 
         public delegate void KeepAlivesHandler(uint Count);
         public event KeepAlivesHandler KeepAlives;
-        //Timer timer;
+
         Random rnd = new Random();
-
-        //string userIndex = "_USER_NAME_PLACEHOLDER_";
-
+        
         Timer updateTimer;
 
         public OutgoingConnection(NodeSocketData nodeSocketData, NodeConfig nodeConfig)
@@ -125,8 +123,7 @@ namespace TNetD.Network.Networking
                 tcpClient.SendTimeout = 30000;
 
                 tcpClient.Connect(nodeSocketData.IP, nodeSocketData.ListenPort);
-
-
+                
                 Thread thr = new Thread(() => { ConnectAndProcess(tcpClient); });
                 thr.Start();
 
@@ -138,7 +135,7 @@ namespace TNetD.Network.Networking
             }
         }
 
-        void ConnectAndProcess(TcpClient client)
+        async Task ConnectAndProcess(TcpClient client)
         {
             bool ConnectionDone = false;
 
@@ -146,13 +143,11 @@ namespace TNetD.Network.Networking
             {
                 NetworkStream nsRead = client.GetStream();
                 NetworkStream nsWrite = client.GetStream();
-                BinaryWriter writer = new BinaryWriter(client.GetStream());
 
-                PacketSender.SendTransportPacket(writer, TransportPacketType.Initialize, new byte[0], ref PacketCounter);
+                await PacketSender.SendTransportPacket(nsWrite, TransportPacketType.Initialize, new byte[0]);
 
                 if ((client.Connected && (client != null)))
                 {
-
                     MemoryStream messageStream = new MemoryStream();
                     byte[] inbuffer = new byte[Constants.PREFS_APP_TCP_BUFFER_SIZE];
 
@@ -176,7 +171,6 @@ namespace TNetD.Network.Networking
                                         break;
                                     }
 
-
                                     if (bytesRead > 0)
                                     {
                                         long SuccessPosition = 0;
@@ -189,7 +183,7 @@ namespace TNetD.Network.Networking
                                             {
                                                 try
                                                 {
-                                                    ProcessOutgoingConnectionInternal(tcpClient, p);
+                                                    await ProcessOutgoingConnectionInternal(tcpClient, p);
                                                 }
                                                 catch (Exception ex)
                                                 {
@@ -219,7 +213,8 @@ namespace TNetD.Network.Networking
 
                         Thread.Sleep(75);
                     }
-                    writer.Close();
+
+                    nsWrite.Close();
                     //reader.Close();
 
 
@@ -290,7 +285,6 @@ namespace TNetD.Network.Networking
                 {
                     if (Constants.NetworkVerbosity >= Verbosity.Errors)
                         DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : --- Process Outgoing, Not Connect", ex);
-
                 }
                 else
                 {
@@ -322,7 +316,7 @@ namespace TNetD.Network.Networking
             return sb.ToString();
         }
 
-        void SendData(byte[] Data)
+        async void SendData(byte[] Data)
         {
             try
             {
@@ -336,21 +330,17 @@ namespace TNetD.Network.Networking
                 byte[] HMAC = (new HMACSHA256(AuthenticationKey)).ComputeHash(CryptedCounterSenderData).Take(16).ToArray();
 
                 byte[] NONCE_MAC_DATA = nonce.Concat(HMAC).Concat(CryptedCounterSenderData).ToArray();
-
-                BinaryWriter writer = new BinaryWriter(tcpClient.GetStream());
-
-                PacketSender.SendTransportPacket(writer, TransportPacketType.DataCrypted, NONCE_MAC_DATA, ref PacketCounter);
-
-                writer.Flush();
+                               
+                await PacketSender.SendTransportPacket(tcpClient.GetStream(), TransportPacketType.DataCrypted, NONCE_MAC_DATA);
 
             }
             catch { }
         }
 
-        private void ProcessOutgoingConnectionInternal(TcpClient client, TransportPacket p)
+        async private Task ProcessOutgoingConnectionInternal(TcpClient client, TransportPacket p)
         {
             BinaryReader reader = new BinaryReader(client.GetStream());
-            BinaryWriter writer = new BinaryWriter(client.GetStream());
+            NetworkStream writer = client.GetStream();
 
             switch (p.Type) // Decode received messages from Server.
             {
@@ -361,23 +351,19 @@ namespace TNetD.Network.Networking
                     // OUTPUT : 4 bytes Proof, 32 Bytes of KeypairPublic, 16 Bytes Random => 52 bytes
                     if (p.Data.Length == 24)
                     {
-                        DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : WorkProofRequest Received : " + p.Data.Length, DisplayType.Info);
+                        //DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : WorkProofRequest Received : " + p.Data.Length, DisplayType.Info);
 
                         byte[] Proof = WorkProof.CalculateProof(p.Data, Constants.Difficulty);
 
                         WorkTask = p.Data;
-
-                        // Sign the work using 
-                        // byte [] Sig_WorkTask = nodeConfig.SignDataWithPrivateKey(p.Data);
 
                         byte[] rv = new byte[Proof.Length + DH_PublicKey.Length + AuthRandom.Length /*+ Sig_WorkTask.Length*/];
 
                         Buffer.BlockCopy(Proof, 0, rv, 0, Proof.Length);
                         Buffer.BlockCopy(DH_PublicKey, 0, rv, Proof.Length, DH_PublicKey.Length);
                         Buffer.BlockCopy(AuthRandom, 0, rv, Proof.Length + DH_PublicKey.Length, AuthRandom.Length);
-                        //Buffer.BlockCopy(Sig_WorkTask, 0, rv, Proof.Length + DH_PublicKey.Length + AuthRandom.Length, Sig_WorkTask.Length);
 
-                        PacketSender.SendTransportPacket(writer, TransportPacketType.WorkProofKeyResponse, rv, ref PacketCounter);
+                        await PacketSender.SendTransportPacket(writer, TransportPacketType.WorkProofKeyResponse, rv);
                     }
 
                     break;
@@ -438,7 +424,7 @@ namespace TNetD.Network.Networking
                                 Array.Copy(cryptedSigPK_MAC, macSigPK, 32);
                                 Array.Copy(cryptedSigPK, 0, macSigPK, 32, 96);
 
-                                PacketSender.SendTransportPacket(writer, TransportPacketType.KeyExComplete_1, macSigPK, ref PacketCounter);
+                                await PacketSender.SendTransportPacket(writer, TransportPacketType.KeyExComplete_1, macSigPK);
 
                                 KeyExchanged = true;
                             }
@@ -447,7 +433,6 @@ namespace TNetD.Network.Networking
                                 if (Constants.NetworkVerbosity >= Verbosity.Errors)
                                     DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : Remote Authentication Failed : Remote Node Could not authenticate itself", DisplayType.AuthFailure);
                             }
-
                         }
                         else
                         {
@@ -470,7 +455,6 @@ namespace TNetD.Network.Networking
                     }
 
                     break;
-
 
                 case TransportPacketType.KeepAlive:
 
@@ -510,9 +494,12 @@ namespace TNetD.Network.Networking
                                 Array.Copy(DeCryptedData, 0, counter, 0, 4);
                                 Array.Copy(DeCryptedData, 4, rec_data, 0, rec_data.Length);
 
-                                if (PacketReceived != null)
-                                    PacketReceived(nodeSocketData.PublicKey, rec_data);
+                                NetworkPacket np = new NetworkPacket();
 
+                                np.Deserialize(rec_data);
+
+                                if (PacketReceived != null)
+                                    PacketReceived(nodeSocketData.PublicKey, np);
                             }
                             else
                             {
@@ -532,6 +519,5 @@ namespace TNetD.Network.Networking
                     break;
             }
         }
-
     }
 }

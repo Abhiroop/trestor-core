@@ -1,9 +1,8 @@
 ﻿/*
-*
- @Author: Arpan Jati
- @Version: 1.3
- @Description: Originally used in DirectShare
-* @ TODO: IMPROVE, by, performing equality and comparison in one step.
+  @Author: Arpan Jati
+  @Version: 1.3
+  @Description: Originally used in DirectShare
+  @ TODO: IMPROVE, by, performing equality and comparison in one step.
 */
 
 using System;
@@ -83,7 +82,7 @@ namespace TNetD
         }
 
         /// <summary>
-        /// Well, looks ok, should work, : Punisher
+        /// Well, looks ok, should work !! [Punisher]
         /// </summary>
         /// <returns></returns>
         public override int GetHashCode()
@@ -107,10 +106,9 @@ namespace TNetD
 
             return a.Equals((object)b);
         }
-
-        //
+                
         // Simple comparer from http://stackoverflow.com/questions/10658709/linq-orderbybyte-values
-        // Too simple to write one !!!
+        // Too simple to write one :)
         public int Compare(byte[] x, byte[] y)
         {
             // Shortcuts: If both are null, they are the same.

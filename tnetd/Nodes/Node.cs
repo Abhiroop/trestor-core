@@ -67,6 +67,7 @@ namespace TNetD.Nodes
             nodeConfig = new NodeConfig(ID, globalConfiguration);
 
             network = new SecureNetwork(nodeConfig);
+            network.PacketReceived += network_PacketReceived;
 
             TrustedNodes = globalConfiguration.TrustedNodes;
 
@@ -85,25 +86,9 @@ namespace TNetD.Nodes
             Tmr.Enabled = true;
             Tmr.Interval = nodeConfig.UpdateFrequencyMS;
             Tmr.Start();
-        }
 
-        public void StopNode()
-        {
-            Constants.ApplicationRunning = false;
-            network.Stop();
-        }
+            // ////////////////////
 
-        async Task SendInitialize(Hash publicKey)
-        {
-            await Task.Delay(Constants.random.Next(100, 1000)); // Wait a random delay before connecting.
-
-            NetworkPacketQueueEntry npqe = new NetworkPacketQueueEntry(publicKey, new NetworkPacket(PublicKey, PacketType.TPT_HELLO, new byte[0]));
-
-            network.AddToQueue(npqe);
-        }
-
-        private async void Tmr_Elapsed(object sender, ElapsedEventArgs e)
-        {
             // Connect to TrustedNodes
 
             //List<Task> tasks = new List<Task>();
@@ -114,12 +99,39 @@ namespace TNetD.Nodes
                 {
                     if (!network.IsConnected(kvp.Key))
                     {
-                        await SendInitialize(kvp.Key);
+                        SendInitialize(kvp.Key);
                     }
                 }
             }
+        }
 
+        void network_PacketReceived(Hash publicKey, NetworkPacket packet)
+        {
+            DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + publicKey + " | Data Length : " + packet.Data.Length );
+
+            //throw new NotImplementedException();
+        }
+
+        public void StopNode()
+        {
+            Constants.ApplicationRunning = false;
+            network.Stop();
+        }
+
+        void SendInitialize(Hash publicKey)
+        {
+            //await Task.Delay(Constants.random.Next(500, 1000)); // Wait a random delay before connecting.
+
+            NetworkPacketQueueEntry npqe = new NetworkPacketQueueEntry(publicKey, new NetworkPacket(PublicKey, PacketType.TPT_HELLO, new byte[0]));
+
+            network.AddToQueue(npqe);
+        }
+
+        private void Tmr_Elapsed(object sender, ElapsedEventArgs e)
+        {
             //await Task.WhenAll(tasks.ToArray());
+
+            
 
             while (PendingIncomingCandidates.Count > 0)
             {
