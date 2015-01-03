@@ -20,6 +20,11 @@ namespace TNetD.Network.Networking
 
     class OutgoingConnection
     {
+        /// <summary>
+        /// Stores the configuration information for the local Node
+        /// </summary>
+        NodeConfig nodeConfig;
+
         NodeSocketData nodeSocketData = default(NodeSocketData);
         //bool Stopall = false;
 
@@ -36,8 +41,9 @@ namespace TNetD.Network.Networking
 
         Timer updateTimer;
 
-        public OutgoingConnection(NodeSocketData nodeSocketData)
+        public OutgoingConnection(NodeSocketData nodeSocketData, NodeConfig nodeConfig)
         {
+            this.nodeConfig = nodeConfig;
             this.nodeSocketData = nodeSocketData;
             updateTimer = new Timer(TimerCallback, null, 0, Constants.Network_UpdateFrequencyMS);
 
@@ -73,12 +79,14 @@ namespace TNetD.Network.Networking
 
         UInt32 PacketCounter = 0;
 
-        public byte[] AuthRandom = new byte[16];
+        public byte[] AuthRandom = new byte[24];
 
         public byte[] DH_PublicKey;
         public byte[] DH_PrivateKey;
 
         byte[] ClientIdentifier = new byte[8];
+
+        public byte[] WorkTask;
 
         byte[] TransportKey = new byte[32];
         byte[] AuthenticationKey = new byte[32];
@@ -349,7 +357,7 @@ namespace TNetD.Network.Networking
 
                 case TransportPacketType.WorkProofRequest:
 
-                    // INPUT : 24 Bytes of (random + timestamp)
+                    // INPUT : 24 Bytes of (random[16] + timestamp[8])
                     // OUTPUT : 4 bytes Proof, 32 Bytes of KeypairPublic, 16 Bytes Random => 52 bytes
                     if (p.Data.Length == 24)
                     {
@@ -357,10 +365,17 @@ namespace TNetD.Network.Networking
 
                         byte[] Proof = WorkProof.CalculateProof(p.Data, Constants.Difficulty);
 
-                        byte[] rv = new byte[Proof.Length + DH_PublicKey.Length + AuthRandom.Length];
+                        WorkTask = p.Data;
+
+                        // Sign the work using 
+                        // byte [] Sig_WorkTask = nodeConfig.SignDataWithPrivateKey(p.Data);
+
+                        byte[] rv = new byte[Proof.Length + DH_PublicKey.Length + AuthRandom.Length /*+ Sig_WorkTask.Length*/];
+
                         Buffer.BlockCopy(Proof, 0, rv, 0, Proof.Length);
                         Buffer.BlockCopy(DH_PublicKey, 0, rv, Proof.Length, DH_PublicKey.Length);
                         Buffer.BlockCopy(AuthRandom, 0, rv, Proof.Length + DH_PublicKey.Length, AuthRandom.Length);
+                        //Buffer.BlockCopy(Sig_WorkTask, 0, rv, Proof.Length + DH_PublicKey.Length + AuthRandom.Length, Sig_WorkTask.Length);
 
                         PacketSender.SendTransportPacket(writer, TransportPacketType.WorkProofKeyResponse, rv, ref PacketCounter);
                     }
@@ -398,16 +413,34 @@ namespace TNetD.Network.Networking
                             {
                                 if (Constants.NetworkVerbosity >= Verbosity.Info)
                                 {
-                                    DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : Key Exchanged: Shared KEY [TransportKey] : {" +
+                                    DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : Key Exchanged 1: Shared KEY [TransportKey] : {" +
                                         (HexUtil.ToString(TransportKey)) + "}", DisplayType.Info);
 
-                                    DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : Server Authenticated", DisplayType.Info);
+                                    DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : Server Authenticated 1", DisplayType.Info);
                                 }
 
-                                PacketSender.SendTransportPacket(writer, TransportPacketType.KeyExComplete, new byte[0], ref PacketCounter);
+                                // workSignPK[96]  = workSign[64] || nodeConfig.PublicKey[32]
+
+                                // Sign the WorkTask with private key.
+                                byte[] workSign = nodeConfig.SignDataWithPrivateKey(WorkTask);
+
+                                byte[] workSignPK = new byte[96]; // 64 + 32
+
+                                Array.Copy(workSign, workSignPK, 64);
+                                Array.Copy(nodeConfig.PublicKey.Hex, 0, workSignPK, 64, 32);
+
+                                // cryptedSigPK_MAC[32] || cryptedSigPK[96]
+
+                                byte[] cryptedSigPK = Salsa20.ProcessSalsa20(workSignPK, TransportKey, new byte[8], 0);
+                                byte[] cryptedSigPK_MAC = (new HMACSHA256(AuthenticationKey)).ComputeHash(cryptedSigPK);
+
+                                byte[] macSigPK = new byte[128]; // 32 + 96
+                                Array.Copy(cryptedSigPK_MAC, macSigPK, 32);
+                                Array.Copy(cryptedSigPK, 0, macSigPK, 32, 96);
+
+                                PacketSender.SendTransportPacket(writer, TransportPacketType.KeyExComplete_1, macSigPK, ref PacketCounter);
 
                                 KeyExchanged = true;
-
                             }
                             else
                             {
@@ -424,6 +457,20 @@ namespace TNetD.Network.Networking
                     }
 
                     break;
+
+                case TransportPacketType.KeyExComplete_2:
+                    
+                    if (KeyExchanged)
+                    {
+                        if (Constants.NetworkVerbosity >= Verbosity.Info)
+                        {
+                            DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : Key Exchanged 3 (Sync)", DisplayType.Info);
+
+                        }
+                    }
+
+                    break;
+
 
                 case TransportPacketType.KeepAlive:
 

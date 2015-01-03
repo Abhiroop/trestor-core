@@ -8,8 +8,9 @@ namespace TNetD.Network.Networking
 {
     public enum TransportPacketType
     {
-        Initialize = 0, Control = 1, WorkProofRequest = 2, WorkProofKeyResponse = 3, ServerPublicTransfer = 4, KeyExComplete = 5,
-        Data = 6, DataCrypted = 7, Stream = 8, StreamCrypted = 9, InvalidAuthDisconnect = 10, KeepAlive = 11
+        Initialize = 0, Control = 1, WorkProofRequest = 2, WorkProofKeyResponse = 3, ServerPublicTransfer = 4, 
+        KeyExComplete_1 = 5, KeyExComplete_2 = 6,  DataCrypted = 7, Stream = 8, StreamCrypted = 9, 
+        InvalidAuthDisconnect = 10, KeepAlive = 11
     };
 
     public struct TransportPacket

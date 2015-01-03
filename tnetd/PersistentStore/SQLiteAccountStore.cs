@@ -1,7 +1,7 @@
 ﻿
 //
 // @Author: Arpan Jati
-// @Date: Jan 1-2, 2015
+// @Date: Jan 1-2-3, 2015
 //
 
 using System;
@@ -80,7 +80,7 @@ namespace TNetD.PersistentStore
                     long lastTransactionTime = (long)reader[4];
 
                     if (_publicKey == publicKey)
-                    {                        
+                    {
                         accountInfo = new AccountInfo(_publicKey, balance, userName, (TNetD.Transactions.AcountState)accountState, lastTransactionTime);
                         response = DBResponse.FetchSuccess;
                     }
@@ -186,16 +186,18 @@ namespace TNetD.PersistentStore
         {
             SQLiteCommand cmd = new SQLiteCommand("DELETE FROM Ledger WHERE (PublicKey = @publicKey)", sqliteConnection);
             cmd.Parameters.Add(new SQLiteParameter("@publicKey", publicKey.Hex));
-
+            DBResponse response = DBResponse.DeleteFailed;
+            
             if (cmd.ExecuteNonQuery() == 1) // There should be a single entry for a PublicKey.
             {
-                return DBResponse.DeleteSuccess;
+                response = DBResponse.DeleteSuccess;
             }
 
-            return DBResponse.DeleteFailed;
+            cmd.Dispose();
+            return response;
         }
 
-        
+
 
     }
 }

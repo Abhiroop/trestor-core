@@ -282,17 +282,17 @@ namespace TNetD.Network.Networking
 
                     if ((!iClient.WorkProven) && (!iClient.KeyExchanged))
                     {
-                        if (p.Data.Length == 52)
+                        if (p.Data.Length == 60)
                         {
                             Constants.SERVER_GLOBAL_AUTH_PACKETS++;
 
                             byte[] Proof = new byte[4];
                             byte[] ClientPublic = new byte[32];
-                            byte[] AuthRandom = new byte[16];
+                            byte[] AuthRandom = new byte[24];
 
                             Array.Copy(p.Data, 0, Proof, 0, 4);
                             Array.Copy(p.Data, 4, ClientPublic, 0, 32);
-                            Array.Copy(p.Data, 36, AuthRandom, 0, 16);
+                            Array.Copy(p.Data, 36, AuthRandom, 0, 24);
 
                             iClient.WorkProven = WorkProof.VerifyProof(iClient.WorkTask, Proof, Constants.Difficulty);
 
@@ -315,12 +315,12 @@ namespace TNetD.Network.Networking
 
                                 // 64 bytes Signature
                                 byte[] signPlain = Client_ServerAuthSignature;
-                                
+
                                 if (signPlain.Length != 64) throw new Exception("Improbable Assertion failed : 1");
-                                
+
                                 // Encrypt the Signature and Identifier using Salsa20
                                 byte[] signCrypted = Salsa20.ProcessSalsa20(signPlain, iClient.TransportKey, new byte[8], 0);
-                                
+
                                 // EtM -> Encrypt then MAC
                                 byte[] signMAC = (new HMACSHA256(iClient.AuthenticationKey)).ComputeHash(signCrypted);
 
@@ -344,19 +344,67 @@ namespace TNetD.Network.Networking
 
                     break;
 
-                case TransportPacketType.KeyExComplete:
+                case TransportPacketType.KeyExComplete_1:
 
-                    iClient.KeyExchanged = true;
+                    if ((iClient.WorkProven) && (!iClient.KeyExchanged))
+                    {
+                        if (p.Data.Length == 128)
+                        {
+                            // cryptedSigPK_MAC[32] || cryptedSigPK[96] = 128 bytes
 
-                    DisplayUtils.Display("Exchange Complete, Shared KEY [TransportKey] : " + HexUtil.ToString(iClient.TransportKey), DisplayType.Info);
-                    DisplayUtils.Display("Exchange Complete", DisplayType.Info);
-                    long tend = DateTime.UtcNow.Ticks;
+                            byte[] cryptedSigPK_MAC = new byte[32];
+                            byte[] cryptedSigPK = new byte[96];
 
-                    //PacketSender.SendTransportPacket(writer, TransportPacketType.KeyExComplete, new byte[0], ref iClient.PacketCounter);
+                            Array.Copy(p.Data, 0, cryptedSigPK_MAC, 0, 32);
+                            Array.Copy(p.Data, 32, cryptedSigPK, 0, 96);
 
-                    TimeSpan tsp = new TimeSpan(tend - iClient.ConnTimeStart);
+                            byte[] cryptedSigPK_MAC_Expected = (new HMACSHA256(iClient.AuthenticationKey)).ComputeHash(cryptedSigPK);
 
-                    double ms = tsp.TotalMilliseconds;
+                            if (CryptoBytes.ConstantTimeEquals(cryptedSigPK_MAC_Expected, cryptedSigPK_MAC))
+                            {
+                                byte[] workSignPK = Salsa20.ProcessSalsa20(cryptedSigPK, iClient.TransportKey, new byte[8], 0);
+
+                                // workSignPK[96]  = workSign[64] || nodeConfig.PublicKey[32]
+
+                                byte[] workSign = new byte[64];
+                                byte[] remotePK = new byte[32];
+
+                                Array.Copy(workSignPK, 0, workSign, 0, 64);
+                                Array.Copy(workSignPK, 64, remotePK, 0, 32);
+
+                                bool serverVerified = Ed25519.Verify(workSign, iClient.WorkTask, remotePK);
+
+                                 if (serverVerified)
+                                 {
+                                     Hash remotePublicKey = new Hash(remotePK);
+
+                                     if (Constants.NetworkVerbosity >= Verbosity.Info)
+                                     {
+                                         /*DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : Key Exchanged 1: Shared KEY [TransportKey] : {" +
+                                             (HexUtil.ToString(TransportKey)) + "}", DisplayType.Info);*/
+
+                                         DisplayUtils.Display(remotePublicKey.ToString() + " Client Authenticated", DisplayType.Info);
+                                     }
+
+                                     PacketSender.SendTransportPacket(writer, TransportPacketType.KeyExComplete_2, new byte[0], ref iClient.PacketCounter);
+
+                                     iClient.KeyExchanged = true;
+
+                                     DisplayUtils.Display("Exchange Complete 2, Shared KEY [TransportKey] : " + HexUtil.ToString(iClient.TransportKey), DisplayType.Info);
+                                     
+                                     long tend = DateTime.UtcNow.Ticks;
+
+                                     TimeSpan tsp = new TimeSpan(tend - iClient.ConnTimeStart);
+
+                                     double ms = tsp.TotalMilliseconds;                                     
+
+                                 }
+                                
+                            }
+
+
+                        }
+                    }
 
                     break;
 
@@ -464,7 +512,7 @@ namespace TNetD.Network.Networking
             }
             catch { }
         }
-        
+
         public void StartListeningInternal()
         {
             try

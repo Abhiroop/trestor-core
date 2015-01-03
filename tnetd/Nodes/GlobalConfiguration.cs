@@ -14,9 +14,21 @@ namespace TNetD.Nodes
 {
     struct NodeSocketData
     {
+        /// <summary>
+        /// Public key of the destination node.
+        /// </summary>
         public Hash PublicKey;
+
+        /// <summary>
+        /// Listen Port of the destination node.
+        /// </summary>
         public int ListenPort;
+
+        /// <summary>
+        /// IP of the destination node.
+        /// </summary>
         public string IP;
+
         public string Name;
 
         public NodeSocketData(Hash PublicKey, int ListenPort, string IP, string Name)

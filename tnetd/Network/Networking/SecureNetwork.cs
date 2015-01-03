@@ -81,7 +81,7 @@ namespace TNetD.Network.Networking
                             {
                                 var socketInfo = nodeConfig.GlobalConfiguration.TrustedNodes[npqe.PublicKey_Dest];
 
-                                OutgoingConnection oc = new OutgoingConnection(socketInfo);
+                                OutgoingConnection oc = new OutgoingConnection(socketInfo, nodeConfig);
                                 oc.PacketReceived += oc_PacketReceived;
 
                                 oc.EnqueuePacket(npqe.Packet);
