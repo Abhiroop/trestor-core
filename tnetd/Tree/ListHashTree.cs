@@ -515,9 +515,9 @@ namespace TNetD.Tree
         /// <param name="Node"></param>
         /// <param name="Leaves"></param>
         /// <returns></returns>
-        public void getAllLeafUnderNode(ListTreeNode Node, out List<ListTreeLeafNode> Leaves)
+        public void getAllLeafUnderNode(ListTreeNode Node, out List<LeafDataType> Leaves)
         {
-            List<ListTreeLeafNode> leaves = new List<ListTreeLeafNode>();
+            List<LeafDataType> leaves = new List<LeafDataType>();
            
             for (int i = 0; i < 16; i++)
             {
@@ -527,7 +527,11 @@ namespace TNetD.Tree
                     if (Node.Children[i].IsLeaf)
                     {
                         ListTreeLeafNode leafNode = (ListTreeLeafNode)Node.Children[i];
-                        leaves.Add(leafNode);
+                        SortedDictionary<Hash, LeafDataType> val = leafNode.Values;
+                        foreach (KeyValuePair<Hash, LeafDataType> v in val)
+                        {
+                            leaves.Add(v.Value);
+                        }
                         Leaves = leaves;
 
                         return;

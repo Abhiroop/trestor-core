@@ -13,7 +13,7 @@ namespace TNetD.Tree
     /// <typeparam name="T"></typeparam>
     class ListTreeLeafNode : ListTreeNode
     {
-        SortedDictionary<Hash, LeafDataType> Values = new SortedDictionary<Hash, LeafDataType>();
+        public SortedDictionary<Hash, LeafDataType> Values = new SortedDictionary<Hash, LeafDataType>();
 
         public ListTreeLeafNode(Dictionary<Hash, LeafDataType> NewValues)
             : base()
