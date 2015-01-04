@@ -569,9 +569,28 @@ namespace TNetD.Tree
          *Most important one
         */
 
-        public List<ListTreeNode> getDifference(List<ListTreeNode> mine, List<ListTreeNode> other)
+        public List<ListTreeNode> getDifference(List<ListTreeNode> other, List<ListTreeNode> me)
         {
             List<ListTreeNode> difference = new List<ListTreeNode>();
+
+            int i, j = 0;
+
+            while(true)
+            {
+                if (i == other.Count)
+			        break;
+
+		        //all new
+		        if (j == me.Count)
+		        {
+			        for (int t = i; t < other.Count; t++)
+			        {
+				        
+			        }
+			        break;
+		        
+                }
+            }
 
             return difference;
         }
