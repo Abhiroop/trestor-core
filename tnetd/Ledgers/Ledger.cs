@@ -13,7 +13,7 @@ namespace TNetD.Ledgers
     {
         IPersistentAccountStore persistentStore;
 
-        public HashTree LedgerTree = null;
+        public ListHashTree LedgerTree = null;
         public long TransactionFees;
         public long TotalAmount;
        // public DateTime CloseTime;
@@ -27,7 +27,7 @@ namespace TNetD.Ledgers
 
         public Ledger(IPersistentAccountStore persistentStore)
         {
-            this.LedgerTree = new HashTree();
+            this.LedgerTree = new ListHashTree();
             this.persistentStore = persistentStore;
             this.TransactionFees = 0;
             this.TotalAmount = 0;

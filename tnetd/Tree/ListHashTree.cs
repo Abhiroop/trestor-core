@@ -360,6 +360,24 @@ namespace TNetD.Tree
         }
 
         /// <summary>
+        /// True if the node exists.
+        /// This traverses the tree to get the info, so is slightly expensive. Still pretty fast.
+        /// </summary>
+        /// <param name="ID"></param>
+        /// <returns></returns>
+        public bool NodeExists(Hash ID)
+        {
+            ListTreeLeafNode ltln;
+
+            if(TraverseToLeaf(ID, out ltln) == TraverseResult.Success)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Gets the element at the position specified by the ID.
         /// </summary>
         /// <param name="ID"></param>
