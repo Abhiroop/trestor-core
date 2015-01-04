@@ -179,7 +179,35 @@ namespace TNetD
         public static bool operator !=(Hash a, Hash b)
         {
             return !(a == b);
-        }             
+        }        
+     
+        //old school style
+        public int compareHash(Hash h)
+        {
+            byte[] thisHash = this.Hex;
+            byte[] otherHash = h.Hex;
+
+            if (thisHash.Length > otherHash.Length)
+                return 1;
+
+            else if (thisHash.Length < otherHash.Length)
+                return -1;
+
+            else
+            {
+                //start from MSB
+                for(int i = thisHash.Length - 1 ; i >= 0; i--)
+                {
+                    if (thisHash[i] > otherHash[i])
+                        return 1;
+                    else if (thisHash[i] < otherHash[i])
+                        return -1;
+                }
+
+                return 0;
+            }
+
+        }
 
     }
 }

@@ -565,6 +565,18 @@ namespace TNetD.Tree
             Leaves = leaves;
         }
 
+        /*
+         *Most important one
+        */
+
+        public List<ListTreeNode> getDifference(List<ListTreeNode> mine, List<ListTreeNode> other)
+        {
+            List<ListTreeNode> difference = new List<ListTreeNode>();
+
+            return difference;
+        }
+
+        //gives back immediate children
         public bool getImmediateChildren(Hash hash, out List<ListTreeNode> nodes)
         {
             List<ListTreeNode> nd = new List<ListTreeNode>();
