@@ -565,6 +565,74 @@ namespace TNetD.Tree
             Leaves = leaves;
         }
 
+        /*
+         *Most important one
+        */
+
+        public List<ListTreeNode> getDifference(List<ListTreeNode> other, List<ListTreeNode> me)
+        {
+            List<ListTreeNode> difference = new List<ListTreeNode>();
+
+            int i, j = 0;
+
+            while(true)
+            {
+                if (i == other.Count)
+			        break;
+
+		        //all new
+		        if (j == me.Count)
+		        {
+			        for (int t = i; t < other.Count; t++)
+			        {
+				        
+			        }
+			        break;
+		        
+                }
+            }
+
+            return difference;
+        }
+
+        //gives back immediate children
+        public bool getImmediateChildren(Hash hash, out List<ListTreeNode> nodes)
+        {
+            List<ListTreeNode> nd = new List<ListTreeNode>();
+
+            ListTreeNode TempRoot = Root;
+            int depth = Constants.HashTree_NodeListDepth;
+
+            for (int i = 0; i < depth; i++)
+            {
+                byte Nibble = hash.GetNibble(i);
+
+                if ((i < (depth - 1)))
+                {
+                    if (TempRoot.Children[Nibble] == null)
+                    {
+                        nodes = nd;
+                        return false;
+                    }
+
+                    TempRoot = TempRoot.Children[Nibble];
+                }
+
+                if (i == (depth - 1))
+                {
+                    nodes = nd;
+                    return false;
+                }
+            }
+
+            for(int i = 0; i< 16; i++)
+            {
+                if (TempRoot.Children[i] != null)
+                    nodes.Add(TempRoot.Children[i]);
+            }
+            nodes = nd;
+            return true;
+        }
 
         public List<ListTreeNode> depthOrderTraversal(int depth)
         {
