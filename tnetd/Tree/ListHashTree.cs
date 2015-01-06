@@ -573,7 +573,7 @@ namespace TNetD.Tree
         {
             List<ListTreeNode> difference = new List<ListTreeNode>();
 
-            int i, j = 0;
+            int i=0, j = 0;
 
             while(true)
             {
@@ -598,6 +598,8 @@ namespace TNetD.Tree
         //gives back immediate children
         public bool getImmediateChildren(Hash hash, out List<ListTreeNode> nodes)
         {
+            nodes = new List<ListTreeNode>();
+
             List<ListTreeNode> nd = new List<ListTreeNode>();
 
             ListTreeNode TempRoot = Root;
