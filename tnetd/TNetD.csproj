@@ -71,8 +71,11 @@
     <Compile Include="Network\Networking\IncomingClient.cs" />
     <Compile Include="Nodes\GlobalConfiguration.cs" />
     <Compile Include="Nodes\NodeConfig.cs" />
+    <Compile Include="PersistentStore\DBUtils.cs" />
     <Compile Include="PersistentStore\IAccountStore.cs" />
+    <Compile Include="PersistentStore\ITransactionStore.cs" />
     <Compile Include="PersistentStore\SQLiteAccountStore.cs" />
+    <Compile Include="PersistentStore\SQLiteTransactionStore.cs" />
     <Compile Include="Transactions\AccountInfo.cs" />
     <Compile Include="Consensus\CandidateSet.cs" />
     <Compile Include="Tree\FlatNodeStore.cs" />
@@ -132,10 +135,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Protocol\" />
-    <Folder Include="Sources\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\TNetCommon\TNetCommon.csproj">
       <Project>{66391146-98d7-4258-85f5-d8be99e632fd}</Project>

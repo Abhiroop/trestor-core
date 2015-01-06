@@ -20,7 +20,9 @@ namespace TNetD.Nodes
 
         public Hash PublicKey;
                
-        public string DBPath;
+        public string Path_AccountDB;
+
+        public string Path_TransactionDB;
 
         public NetworkConfig NetworkConfig = new NetworkConfig();
 
@@ -61,9 +63,13 @@ namespace TNetD.Nodes
 
             DisplayUtils.Display(" Node " + NodeID + " | Listen Port   : " + ListenPort);
 
-            DBPath = GetDBPath();
+            Path_AccountDB = GetAccountDBPath();
 
-            DisplayUtils.Display(" Node " + NodeID + " | Database Path : " + DBPath);
+            DisplayUtils.Display(" Node " + NodeID + " | Acct DB Path  : " + Path_AccountDB);
+
+            Path_TransactionDB = GetTransactionDBPath();
+
+            DisplayUtils.Display(" Node " + NodeID + " | Trxn DB Path  : " + Path_TransactionDB);
             
             // // // // // // // // //  Class Initializations // // // // // // // // // // // //
 
@@ -178,51 +184,73 @@ namespace TNetD.Nodes
             }
         }
 
-        string GetDBPath()
+        string GetAccountDBPath()
         {
-            string _DB_Path = "";
+            string _AC_DB_Path = "";
 
-            _DB_Path = iniFile.IniReadValue("PersistentDatabase", "DBPath");
+            _AC_DB_Path = iniFile.IniReadValue("PersistentDatabase", "AccountDBPath");
 
-            if (_DB_Path != "")
-            {
-                //if (File.Exists(_DB_Path))
-                // {
-                return _DB_Path;
-                // }
+            if (_AC_DB_Path != "")
+            {                
+                return _AC_DB_Path;           
             }
 
             // Get new port
 
-            _DB_Path = WorkDirectory + "\\AccountStore.sqlite3";
+            _AC_DB_Path = WorkDirectory + "\\AccountStore.sqlite3";
 
-            _DB_Path = _DB_Path.Replace("\\\\", "\\");
+            _AC_DB_Path = _AC_DB_Path.Replace("\\\\", "\\");
 
-            iniFile.IniWriteValue("PersistentDatabase", "DBPath", _DB_Path);
+            iniFile.IniWriteValue("PersistentDatabase", "AccountDBPath", _AC_DB_Path);
 
-            _DB_Path = "";
+            _AC_DB_Path = "";
 
-            _DB_Path = iniFile.IniReadValue("PersistentDatabase", "DBPath");
+            _AC_DB_Path = iniFile.IniReadValue("PersistentDatabase", "AccountDBPath");
 
-            if (_DB_Path != "")
-            {
-                //if (File.Exists(_DB_Path))
-                // {
-                return _DB_Path;
-                // }
-                // else
-                //{
-                //throw new Exception("PersistentDatabase/DBPath invalid | I/O | Directory permission error.");
-                // }
+            if (_AC_DB_Path != "")
+            {               
+                return _AC_DB_Path;               
             }
             else
             {
-                throw new Exception("Cannot write PersistentDatabase/DBPath to config file.");
+                throw new Exception("Cannot write PersistentDatabase/AccountDBPath to config file.");
             }
 
         }
 
+        string GetTransactionDBPath()
+        {
+            string _TX_DB_Path = "";
 
+            _TX_DB_Path = iniFile.IniReadValue("PersistentDatabase", "TransactionDBPath");
+
+            if (_TX_DB_Path != "")
+            {                
+                return _TX_DB_Path;          
+            }
+
+            // Get new port
+
+            _TX_DB_Path = WorkDirectory + "\\TransactionStore.sqlite3";
+
+            _TX_DB_Path = _TX_DB_Path.Replace("\\\\", "\\");
+
+            iniFile.IniWriteValue("PersistentDatabase", "TransactionDBPath", _TX_DB_Path);
+
+            _TX_DB_Path = "";
+
+            _TX_DB_Path = iniFile.IniReadValue("PersistentDatabase", "TransactionDBPath");
+
+            if (_TX_DB_Path != "")
+            {               
+                return _TX_DB_Path;                
+            }
+            else
+            {
+                throw new Exception("Cannot write PersistentDatabase/TransactionDBPath to config file.");
+            }
+
+        }
 
 
     }

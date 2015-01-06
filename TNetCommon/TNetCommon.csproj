@@ -138,8 +138,8 @@
     <Compile Include="Protocol\ProtocolPackager.cs" />
     <Compile Include="Protocol\SerializableBase.cs" />
     <Compile Include="Protocol\Varint2.cs" />
-    <Compile Include="Transaction\TransactionContent.cs" />
-    <Compile Include="Transaction\TransactionEntity.cs" />
+    <Compile Include="Transactions\TransactionContent.cs" />
+    <Compile Include="Transactions\TransactionEntity.cs" />
     <Compile Include="Types\LeafDataType.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>

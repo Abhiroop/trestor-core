@@ -23,32 +23,16 @@ namespace TNetD.PersistentStore
 
         public SQLiteAccountStore(NodeConfig config)
         {
-            sqliteConnection = new SQLiteConnection("Data Source=" + config.DBPath + ";Version=3;");
+            sqliteConnection = new SQLiteConnection("Data Source=" + config.Path_AccountDB + ";Version=3;");
             sqliteConnection.Open();
 
             VerifyTables();
-        }
-
-        bool TableExists(string tableName)
-        {
-            bool exists = false;
-            SQLiteCommand cmd = new SQLiteCommand("select name from sqlite_master where type='table' and name=@name", sqliteConnection);
-            cmd.Parameters.Add(new SQLiteParameter("@name", tableName));
-            SQLiteDataReader reader = cmd.ExecuteReader();
-
-            if (reader.HasRows)
-            {
-                exists = true;
-            }
-
-            cmd.Dispose();
-            return exists;
-        }
+        }      
 
         public bool AccountExists(Hash publicKey)
         {
             SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE PublicKey = @publicKey", sqliteConnection);
-            cmd.Parameters.Add(new SQLiteParameter("@publicKey", publicKey));
+            cmd.Parameters.Add(new SQLiteParameter("@publicKey", publicKey.Hex));
             SQLiteDataReader reader = cmd.ExecuteReader();
             if (reader.HasRows)
             {
@@ -62,7 +46,7 @@ namespace TNetD.PersistentStore
         public DBResponse FetchAccount(Hash publicKey, out AccountInfo accountInfo)
         {
             SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE PublicKey = @publicKey", sqliteConnection);
-            cmd.Parameters.Add(new SQLiteParameter("@publicKey", publicKey));
+            cmd.Parameters.Add(new SQLiteParameter("@publicKey", publicKey.Hex));
             SQLiteDataReader reader = cmd.ExecuteReader();
 
             DBResponse response = DBResponse.FetchFailed;
@@ -157,27 +141,20 @@ namespace TNetD.PersistentStore
             return response;
         }
 
-        int ExecuteNonQuery(string Query)
-        {
-            int reply = -1;
-            SQLiteCommand cmd = new SQLiteCommand(Query, sqliteConnection);
-            reply = cmd.ExecuteNonQuery();
-            cmd.Dispose();
-            return reply;
-        }
+        
 
         private void VerifyTables()
         {
             if (sqliteConnection.State == System.Data.ConnectionState.Open)
             {
-                if (!TableExists("Ledger"))
+                if (!DBUtils.TableExists("Ledger", sqliteConnection))
                 {
-                    ExecuteNonQuery("CREATE TABLE Ledger (PublicKey BLOB PRIMARY KEY, UserName TEXT, Balance INTEGER, AccountState INTEGER, LastTransaction INTEGER);");
+                    DBUtils.ExecuteNonQuery("CREATE TABLE Ledger (PublicKey BLOB PRIMARY KEY, UserName TEXT, Balance INTEGER, AccountState INTEGER, LastTransaction INTEGER);", sqliteConnection);
                 }
 
-                if (!TableExists("LedgerInfo"))
+                if (!DBUtils.TableExists("LedgerInfo", sqliteConnection))
                 {
-                    ExecuteNonQuery("CREATE TABLE LedgerInfo (LedgerHash BLOB PRIMARY KEY, LastLedgerHash BLOB, LCLTime INTEGER, SequenceNumber INTEGER);");
+                    DBUtils.ExecuteNonQuery("CREATE TABLE LedgerInfo (LedgerHash BLOB PRIMARY KEY, LastLedgerHash BLOB, LCLTime INTEGER, SequenceNumber INTEGER);", sqliteConnection);
                 }
             }
         }

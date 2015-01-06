@@ -1,6 +1,6 @@
 ﻿//
 // @Author: Arpan Jati
-// @Date: Jan 1, 2015
+// @Date: Jan 1-5 , 2015
 //
 
 using System;
@@ -10,9 +10,7 @@ using System.Text;
 using TNetD.Transactions;
 
 namespace TNetD.PersistentStore
-{
-    public enum DBResponse { InsertSuccess, UpdateSuccess, DeleteSuccess, InsertFailed, UpdateFailed, DeleteFailed, FetchSuccess, FetchFailed, Exception }
-
+{    
     /// <summary>
     /// This is an interface to implement all the PersistentStorage techniques.
     /// Plans to support SQLite, LevelDB/RocksDB

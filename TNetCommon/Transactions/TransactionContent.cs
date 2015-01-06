@@ -34,6 +34,8 @@ namespace TNetD.Transactions
             Destinations = new List<TransactionEntity>();
             Signatures = new List<Hash>();
             Timestamp = 0;
+
+            intHash = new Hash();
         }
 
         public TransactionContent(TransactionEntity[] Sources, long Timestamp, TransactionEntity[] Destinations, Hash[] Signatures)
@@ -44,6 +46,11 @@ namespace TNetD.Transactions
             this.Signatures = Signatures.ToList();
 
             UpdateIntHash();
+        }
+
+        public TransactionContent()
+        {
+            Init();
         }
 
         byte[] ConfigData = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -118,7 +125,6 @@ namespace TNetD.Transactions
             return false;
         }
 
-
         /// <summary>
         /// Checks the general integrity of the transaction. 
         /// Does not gurantee that the signatures are valid.
@@ -170,7 +176,6 @@ namespace TNetD.Transactions
             }
 
             byte[] transactionData = GetTransactionData();
-
 
             // Adding Sources
 
@@ -318,6 +323,9 @@ namespace TNetD.Transactions
                         break;
                 }
             }
+
+            // Update the internal Hash of the object.
+            UpdateIntHash();
         }
 
         /// <summary>
