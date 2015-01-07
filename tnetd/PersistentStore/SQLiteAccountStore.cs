@@ -31,65 +31,68 @@ namespace TNetD.PersistentStore
 
         public bool AccountExists(Hash publicKey)
         {
-            SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE PublicKey = @publicKey", sqliteConnection);
-            cmd.Parameters.Add(new SQLiteParameter("@publicKey", publicKey.Hex));
-            SQLiteDataReader reader = cmd.ExecuteReader();
-            if (reader.HasRows)
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE PublicKey = @publicKey", sqliteConnection))
             {
-                cmd.Dispose();
-                return true;
+                cmd.Parameters.Add(new SQLiteParameter("@publicKey", publicKey.Hex));
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        return true;
+                    }
+                }                
+                return false;
             }
-            cmd.Dispose();
-            return false;
         }
 
         public DBResponse FetchAccount(Hash publicKey, out AccountInfo accountInfo)
         {
-            SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE PublicKey = @publicKey", sqliteConnection);
-            cmd.Parameters.Add(new SQLiteParameter("@publicKey", publicKey.Hex));
-            SQLiteDataReader reader = cmd.ExecuteReader();
-
             DBResponse response = DBResponse.FetchFailed;
 
-            accountInfo = default(AccountInfo);
-
-            if (reader.HasRows)
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE PublicKey = @publicKey", sqliteConnection))
             {
-                if (reader.Read())
-                {
-                    Hash _publicKey = new Hash((byte[])reader[0]);
-                    string userName = (string)reader[1];
-                    long balance = (long)reader[2];
-                    byte accountState = (byte)reader[3];
-                    long lastTransactionTime = (long)reader[4];
+                cmd.Parameters.Add(new SQLiteParameter("@publicKey", publicKey.Hex));
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
+                {                    
+                    accountInfo = default(AccountInfo);
 
-                    if (_publicKey == publicKey)
+                    if (reader.HasRows)
                     {
-                        accountInfo = new AccountInfo(_publicKey, balance, userName, (TNetD.Transactions.AcountState)accountState, lastTransactionTime);
-                        response = DBResponse.FetchSuccess;
+                        if (reader.Read())
+                        {
+                            Hash _publicKey = new Hash((byte[])reader[0]);
+                            string userName = (string)reader[1];
+                            long balance = (long)reader[2];
+                            byte accountState = (byte)reader[3];
+                            long lastTransactionTime = (long)reader[4];
+
+                            if (_publicKey == publicKey)
+                            {
+                                accountInfo = new AccountInfo(_publicKey, balance, userName, (TNetD.Transactions.AcountState)accountState, lastTransactionTime);
+                                response = DBResponse.FetchSuccess;
+                            }
+                        }
                     }
                 }
             }
-
-            cmd.Dispose();
 
             return response;
         }
 
         public DBResponse AddUpdate(AccountInfo accountInfo)
         {
-            SQLiteCommand cmd = new SQLiteCommand("SELECT PublicKey FROM Ledger WHERE PublicKey = @publicKey", sqliteConnection);
-            cmd.Parameters.Add(new SQLiteParameter("@publicKey", accountInfo.PublicKey.Hex));
-            SQLiteDataReader reader = cmd.ExecuteReader();
-
             bool doUpdate = false;
 
-            if (reader.HasRows)
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT PublicKey FROM Ledger WHERE PublicKey = @publicKey", sqliteConnection))
             {
-                doUpdate = true; // Perform update as the entry already exists.
-            }
+                cmd.Parameters.Add(new SQLiteParameter("@publicKey", accountInfo.PublicKey.Hex));
+                SQLiteDataReader reader = cmd.ExecuteReader();
 
-            cmd.Dispose();
+                if (reader.HasRows)
+                {
+                    doUpdate = true; // Perform update as the entry already exists.
+                }
+            }
 
             DBResponse response = DBResponse.Exception;
 
@@ -97,47 +100,47 @@ namespace TNetD.PersistentStore
             {
                 // /////////////  Perform the UPDATE  ///////////////
 
-                cmd = new SQLiteCommand("UPDATE Ledger SET UserName = @userName, Balance = @balance, AccountState = @accountState, LastTransaction = @transactionTime WHERE PublicKey = @publicKey; ", sqliteConnection);
-
-                cmd.Parameters.Add(new SQLiteParameter("@publicKey", accountInfo.PublicKey.Hex));
-                cmd.Parameters.Add(new SQLiteParameter("@userName", accountInfo.Name));
-                cmd.Parameters.Add(new SQLiteParameter("@balance", accountInfo.Money));
-                cmd.Parameters.Add(new SQLiteParameter("@accountState", accountInfo.AccountState));
-                cmd.Parameters.Add(new SQLiteParameter("@transactionTime", accountInfo.LastTransactionTime));
-
-                if (cmd.ExecuteNonQuery() != 1)
+                using (SQLiteCommand cmd = new SQLiteCommand("UPDATE Ledger SET UserName = @userName, Balance = @balance, AccountState = @accountState, LastTransaction = @transactionTime WHERE PublicKey = @publicKey; ", sqliteConnection))
                 {
-                    response = DBResponse.UpdateFailed;
-                }
-                else
-                {
-                    response = DBResponse.UpdateSuccess;
+                    cmd.Parameters.Add(new SQLiteParameter("@publicKey", accountInfo.PublicKey.Hex));
+                    cmd.Parameters.Add(new SQLiteParameter("@userName", accountInfo.Name));
+                    cmd.Parameters.Add(new SQLiteParameter("@balance", accountInfo.Money));
+                    cmd.Parameters.Add(new SQLiteParameter("@accountState", accountInfo.AccountState));
+                    cmd.Parameters.Add(new SQLiteParameter("@transactionTime", accountInfo.LastTransactionTime));
+
+                    if (cmd.ExecuteNonQuery() != 1)
+                    {
+                        response = DBResponse.UpdateFailed;
+                    }
+                    else
+                    {
+                        response = DBResponse.UpdateSuccess;
+                    }
                 }
             }
             else
             {
                 // /////////////  Perform the INSERT  ///////////////
 
-                cmd = new SQLiteCommand("INSERT INTO Ledger VALUES(@publicKey, @userName, @balance, @accountState, @transactionTime);", sqliteConnection);
-
-                cmd.Parameters.Add(new SQLiteParameter("@publicKey", accountInfo.PublicKey.Hex));
-                cmd.Parameters.Add(new SQLiteParameter("@userName", accountInfo.Name));
-                cmd.Parameters.Add(new SQLiteParameter("@balance", accountInfo.Money));
-                cmd.Parameters.Add(new SQLiteParameter("@accountState", accountInfo.AccountState));
-                cmd.Parameters.Add(new SQLiteParameter("@transactionTime", accountInfo.LastTransactionTime));
-
-                if (cmd.ExecuteNonQuery() != 1)
+                using (SQLiteCommand cmd = new SQLiteCommand("INSERT INTO Ledger VALUES(@publicKey, @userName, @balance, @accountState, @transactionTime);", sqliteConnection))
                 {
-                    response = DBResponse.InsertFailed;
-                }
-                else
-                {
-                    response = DBResponse.InsertSuccess;
+                    cmd.Parameters.Add(new SQLiteParameter("@publicKey", accountInfo.PublicKey.Hex));
+                    cmd.Parameters.Add(new SQLiteParameter("@userName", accountInfo.Name));
+                    cmd.Parameters.Add(new SQLiteParameter("@balance", accountInfo.Money));
+                    cmd.Parameters.Add(new SQLiteParameter("@accountState", accountInfo.AccountState));
+                    cmd.Parameters.Add(new SQLiteParameter("@transactionTime", accountInfo.LastTransactionTime));
+
+                    if (cmd.ExecuteNonQuery() != 1)
+                    {
+                        response = DBResponse.InsertFailed;
+                    }
+                    else
+                    {
+                        response = DBResponse.InsertSuccess;
+                    }
                 }
             }
-
-            cmd.Dispose();
-
+            
             return response;
         }
 
@@ -158,23 +161,23 @@ namespace TNetD.PersistentStore
                 }
             }
         }
-
+                
         public DBResponse Delete(Hash publicKey)
         {
-            SQLiteCommand cmd = new SQLiteCommand("DELETE FROM Ledger WHERE (PublicKey = @publicKey)", sqliteConnection);
-            cmd.Parameters.Add(new SQLiteParameter("@publicKey", publicKey.Hex));
             DBResponse response = DBResponse.DeleteFailed;
-            
-            if (cmd.ExecuteNonQuery() == 1) // There should be a single entry for a PublicKey.
-            {
-                response = DBResponse.DeleteSuccess;
-            }
 
-            cmd.Dispose();
+            using (SQLiteCommand cmd = new SQLiteCommand("DELETE FROM Ledger WHERE (PublicKey = @publicKey)", sqliteConnection))
+            {
+                cmd.Parameters.Add(new SQLiteParameter("@publicKey", publicKey.Hex));                
+
+                if (cmd.ExecuteNonQuery() == 1) // There should be a single entry for a PublicKey.
+                {
+                    response = DBResponse.DeleteSuccess;
+                }
+            }
+            
             return response;
         }
-
-
 
     }
 }
