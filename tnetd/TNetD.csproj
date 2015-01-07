@@ -82,6 +82,11 @@
     <Compile Include="Tree\ListHashTree.cs" />
     <Compile Include="Tree\ListTreeLeafNode.cs" />
     <Compile Include="Tree\ListTreeNode.cs" />
+    <Compile Include="UI\ColoredTB.xaml.cs">
+      <DependentUpon>ColoredTB.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Converters.cs" />
+    <Compile Include="UI\TransactionDataCollection.cs" />
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Utils\DisplayUtils.cs" />
     <Compile Include="Ledgers\Ledger.cs" />
@@ -95,6 +100,10 @@
     <Compile Include="Network\Networking\StructsAndEnums.cs" />
     <Compile Include="Utils\TNetUtils.cs" />
     <Compile Include="Network\Networking\WorkProof.cs" />
+    <Page Include="UI\ColoredTB.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UI\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

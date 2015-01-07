@@ -1,7 +1,36 @@
 ﻿<Window x:Class="TNetD.MainWindow"
+        xmlns:local="clr-namespace:TNetD.UI"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Trestor Network - Validator - v0.1 devel - 12/2014" Height="460" Width="780" Closing="Window_Closing">
+
+    <Window.Resources>
+        <local:StatusToColor x:Key="ColorConverter"/>
+
+        <Style x:Key="DarkRoomListViewStyle" TargetType="{x:Type ListView}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListView">
+                        <Border Name="Border" Background="Black" BorderBrush="LightGray" BorderThickness="1" CornerRadius="2">
+                            <ScrollViewer Style="{DynamicResource {x:Static GridView.GridViewScrollViewerStyleKey}}">
+                                <ItemsPresenter />
+                            </ScrollViewer>
+
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="true">
+                                <Setter TargetName="Border" Property="Background" Value="Black" />
+                                <Setter TargetName="Border" Property="BorderBrush" Value="Gray" />
+                                <Setter Property="Foreground" Value="Gray" />
+                            </Trigger>                           
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -18,7 +47,7 @@
             </MenuItem>
             <MenuItem Header="SERVER">
                 <MenuItem Header="Start" Click="menuItem_Server_Start_Click"/>
-                <MenuItem Header="Stop"/>
+                <MenuItem Header="Stop" Click="menuItem_Server_Stop_Click" />
                 <MenuItem Header="Restart" />
                 <Separator/>
                 <MenuItem Header="Resync"/>
@@ -39,23 +68,120 @@
 
         <TabControl Grid.Row="1">
             <TabItem Header="Status">
-                <Grid>
+                <Grid Name="grid_Main">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30"/>
                         <RowDefinition Height="100*"/>
                         <RowDefinition Height="10"/>
                     </Grid.RowDefinitions>
                     <Label>Simulation Status:</Label>
-                    
                     <ScrollViewer Grid.Row="1">
                         <TextBlock x:Name="textBlock_StatusLog" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
                     </ScrollViewer>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Transactions" >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="100*"/>
+                    </Grid.RowDefinitions>
+                    <Label>Transactions:</Label>
 
+                    <Label Name="ting"></Label>
+
+                    <ListView Name="lv_TX" Grid.Row="1" Background="#FF1E1E1E" >
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="20"/>
+                                        <RowDefinition Height="20"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="60"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="{Binding Path=TransactionID}" FontFamily="Consolas" FontSize="14"  FontWeight="Bold" Margin="5,0,5,1" Foreground="#FF54AAE6"></TextBlock>
+                                    <TextBlock Grid.Row="1" Text="{Binding Path=TimeStamp}"  FontFamily="Consolas" Margin="5,0" FontSize="12" Foreground="#FF54AAE6" FontWeight="Bold"/>
+
+                                    <TextBlock Text="{Binding Path=Amount}" Grid.Column="1" FontFamily="Consolas" FontSize="14"  FontWeight="Bold" Margin="5,0,5,1" Foreground="#FF96E654"></TextBlock>
+
+                                    <ListView Grid.Row="2" ItemsSource="{Binding Path=Entity}"  Background="Transparent" BorderThickness="0"  >
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="583*"/>
+                                                        <ColumnDefinition  Width="123"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Path=PublicKey}" Foreground="{Binding Path=IsSource, Converter={StaticResource ColorConverter}}" FontFamily="Consolas"  Margin="5,0,5,1"  HorizontalAlignment="Left"/>                                                      
+                                                    
+                                                    <TextBlock Text="{Binding Path=Amount}" Grid.Column="1" FontFamily="Consolas"  Margin="5,0,5,1" Foreground="#FFC0A2FF" HorizontalAlignment="Right"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                                     
+                                    </ListView>
+
+                                    <Grid.Background>
+                                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                            <GradientStop Color="#FF36444D" Offset="0.013"/>
+                                            <GradientStop Color="#FF113163" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Grid.Background>
+
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                        
+                        
+                        
+                        
+                        
+                    </ListView>
+                </Grid>
+            </TabItem>
+            <TabItem Header="History">
+                <Grid Background="#FF1E1E1E" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="9*"/>
+                            <RowDefinition Height="7*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="600"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Name="sp_sources" Grid.RowSpan="2">
+                            <StackPanel.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FF79A5C3" Offset="0"/>
+                                    <GradientStop Color="#FF3F6CAE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </StackPanel.Background>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="583*"/>
+                                    <ColumnDefinition Width="123"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Canzone Popolare (Francia, 1500 ca.)" FontSize="14" FontWeight="Bold" Margin="5,0,5,1" Foreground="#FFA2D5FF"></TextBlock>
+                                <TextBlock Grid.Column="1" Text="8465 Trests" FontWeight="Bold" Margin="5,0,5,1" Foreground="#FFC0A2FF"/>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>                
                 </Grid>
 
             </TabItem>
-            <TabItem Header="Transactions"/>
-            <TabItem Header="History"/>
             <TabItem Header="Settings"/>
             <TabItem Header="Log"/>
         </TabControl>
@@ -65,3 +191,14 @@
         </StatusBar>
     </Grid>
 </Window>
+
+
+<!--TextBlock.Style>
+    <Style TargetType="TextBlock">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IsSource, Converter={StaticResource MyConverter}}" Value="False">
+                <Setter Property="Foreground" Value="Green" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+</TextBlock.Style-->

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
+//using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -17,6 +18,7 @@ using TNetD.Nodes;
 using TNetD.PersistentStore;
 using TNetD.Transactions;
 using TNetD.Tree;
+using TNetD.UI;
 
 namespace TNetD
 {
@@ -25,6 +27,13 @@ namespace TNetD
     /// </summary>
     public partial class MainWindow : Window
     {
+        ObservableCollection<TransactionData> _tranxData = new ObservableCollection<TransactionData>();
+
+        /*public ObservableCollection<TransactionData> TXD
+        {
+            get { return _tranxData; }
+        }*/
+
         List<Node> nodes = new List<Node>();
         GlobalConfiguration globalConfiguration;
 
@@ -37,6 +46,9 @@ namespace TNetD
 
             nodes.Add(new Node(0, globalConfiguration));
             nodes.Add(new Node(1, globalConfiguration));
+
+            lv_TX.ItemsSource = _tranxData;
+            //listView_List.DataSource = _tranxData;
         }
 
         void DisplayUtils_DisplayText(string Text, Color color, DisplayType type)
@@ -132,15 +144,17 @@ namespace TNetD
             }
         }
 
+        /// ///////
+
         private void menuItem_Server_Start_Click(object sender, RoutedEventArgs e)
         {
-            //nodes[0]
             GlobalConfiguration gc = new GlobalConfiguration();
             NodeConfig nc = new NodeConfig(0, gc);
+            NodeConfig nc1 = new NodeConfig(1, gc);
 
             ITransactionStore transactionStore = new SQLiteTransactionStore(nc);
 
-            SingleTransactionFactory stf = new SingleTransactionFactory(nc.PublicKey, nc.PublicKey, 458);
+            SingleTransactionFactory stf = new SingleTransactionFactory(nc.PublicKey, nc1.PublicKey, Constants.random.Next(10, 150000));
 
             byte[] tranxData = stf.GetTransactionData();
 
@@ -148,9 +162,9 @@ namespace TNetD
 
             TransactionContent transactionContent;
 
-            bool TransOk =  stf.Create(signature, out transactionContent);
+            bool TransOk = stf.Create(signature, out transactionContent);
 
-            if(TransOk)
+            if (TransOk)
             {
                 DisplayUtils.Display("Transaction Valid: ");
 
@@ -158,11 +172,26 @@ namespace TNetD
 
                 DisplayUtils.Display("dBResponse: " + dBResponse);
 
+                _tranxData.Add(new TransactionData(transactionContent));
             }
 
+        }
 
+
+        private void menuItem_Server_Stop_Click(object sender, RoutedEventArgs e)
+        {
+            GlobalConfiguration gc = new GlobalConfiguration();
+            NodeConfig nc = new NodeConfig(0, gc);
+            NodeConfig nc1 = new NodeConfig(1, gc);
+
+            ITransactionStore transactionStore = new SQLiteTransactionStore(nc);
+            
+            //TransactionContent transactionContent;         
+            //    _tranxData.Add(new TransactionData(transactionContent));
 
         }
 
     }
+
+
 }

@@ -86,11 +86,12 @@ namespace TNetD.PersistentStore
             using (SQLiteCommand cmd = new SQLiteCommand("SELECT PublicKey FROM Ledger WHERE PublicKey = @publicKey", sqliteConnection))
             {
                 cmd.Parameters.Add(new SQLiteParameter("@publicKey", accountInfo.PublicKey.Hex));
-                SQLiteDataReader reader = cmd.ExecuteReader();
-
-                if (reader.HasRows)
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
                 {
-                    doUpdate = true; // Perform update as the entry already exists.
+                    if (reader.HasRows)
+                    {
+                        doUpdate = true; // Perform update as the entry already exists.
+                    }
                 }
             }
 
