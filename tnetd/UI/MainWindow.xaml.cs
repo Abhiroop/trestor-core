@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TNetD.Network.Networking;
 using TNetD.Nodes;
+using TNetD.PersistentStore;
 using TNetD.Transactions;
 using TNetD.Tree;
 
@@ -125,15 +126,42 @@ namespace TNetD
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            foreach(Node nd in nodes)
+            foreach (Node nd in nodes)
             {
                 nd.StopNode();
-            }            
+            }
         }
 
         private void menuItem_Server_Start_Click(object sender, RoutedEventArgs e)
         {
-                
+            //nodes[0]
+            GlobalConfiguration gc = new GlobalConfiguration();
+            NodeConfig nc = new NodeConfig(0, gc);
+
+            ITransactionStore transactionStore = new SQLiteTransactionStore(nc);
+
+            SingleTransactionFactory stf = new SingleTransactionFactory(nc.PublicKey, nc.PublicKey, 458);
+
+            byte[] tranxData = stf.GetTransactionData();
+
+            byte[] signature = nc.SignDataWithPrivateKey(tranxData);
+
+            TransactionContent transactionContent;
+
+            bool TransOk =  stf.Create(signature, out transactionContent);
+
+            if(TransOk)
+            {
+                DisplayUtils.Display("Transaction Valid: ");
+
+                DBResponse dBResponse = transactionStore.AddUpdate(transactionContent);
+
+                DisplayUtils.Display("dBResponse: " + dBResponse);
+
+            }
+
+
+
         }
 
     }

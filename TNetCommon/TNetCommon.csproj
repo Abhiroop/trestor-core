@@ -140,6 +140,7 @@
     <Compile Include="Protocol\Varint2.cs" />
     <Compile Include="Transactions\TransactionContent.cs" />
     <Compile Include="Transactions\TransactionEntity.cs" />
+    <Compile Include="Transactions\TransactionFactory.cs" />
     <Compile Include="Types\LeafDataType.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>

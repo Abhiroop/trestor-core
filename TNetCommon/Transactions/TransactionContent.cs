@@ -20,30 +20,48 @@ namespace TNetD.Transactions
     /// </summary>
     public class TransactionContent : ISerializableBase
     {
-        Hash intHash;
+        Hash intTransactionID;
 
         // TODO: Make these PROPERTIES
         public List<TransactionEntity> Sources;
         public List<TransactionEntity> Destinations;
-        public List<Hash> Signatures;
+        public List<byte[]> Signatures;
         public long Timestamp;
 
         void Init()
         {
             Sources = new List<TransactionEntity>();
             Destinations = new List<TransactionEntity>();
-            Signatures = new List<Hash>();
+            Signatures = new List<byte[]>();
             Timestamp = 0;
 
-            intHash = new Hash();
+            intTransactionID = new Hash();
         }
 
-        public TransactionContent(TransactionEntity[] Sources, long Timestamp, TransactionEntity[] Destinations, Hash[] Signatures)
+        public TransactionContent(TransactionEntity[] Sources, long Timestamp, TransactionEntity[] Destinations, List<byte[]> Signatures)
         {
             this.Destinations = Destinations.ToList();
             this.Timestamp = Timestamp;
             this.Sources = Sources.ToList();
-            this.Signatures = Signatures.ToList();
+            this.Signatures = Signatures;
+
+            UpdateIntHash();
+        }
+
+        public TransactionContent(TransactionEntity[] Sources, long Timestamp, TransactionEntity[] Destinations)
+        {
+            this.Destinations = Destinations.ToList();
+            this.Timestamp = Timestamp;
+            this.Sources = Sources.ToList();
+        }
+
+        /// <summary>
+        /// Manually set the signatures. This also updates the TransactionID after hashing.
+        /// </summary>
+        /// <param name="Signatures"></param>
+        public void SetSignatures(List<byte[]> Signatures)
+        {
+            this.Signatures = Signatures;
 
             UpdateIntHash();
         }
@@ -55,7 +73,12 @@ namespace TNetD.Transactions
 
         byte[] ConfigData = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-        byte[] GetTransactionData()
+        /// <summary>
+        /// Returns the transaction data which needs to be signed by
+        /// all the individual sources.
+        /// </summary>
+        /// <returns></returns>
+        public byte[] GetTransactionData()
         {
             List<byte> _data = new List<byte>();
 
@@ -130,7 +153,7 @@ namespace TNetD.Transactions
         /// Does not gurantee that the signatures are valid.
         /// </summary>
         /// <returns></returns>
-        bool IntegrityCheck()
+        public bool IntegrityCheck()
         {
             long incoming = 0;
             long outgoing = 0;
@@ -168,7 +191,7 @@ namespace TNetD.Transactions
         /// Verifies all the signatures for all the sources.
         /// </summary>
         /// <returns></returns>
-        bool VerifySignature()
+        public bool VerifySignature()
         {
             if (!IntegrityCheck())
             {
@@ -185,7 +208,7 @@ namespace TNetD.Transactions
             {
                 TransactionEntity ts = Sources[i];
 
-                bool good = Ed25519.Verify(Signatures[i].Hex, transactionData, Sources[i].PublicKey);
+                bool good = Ed25519.Verify(Signatures[i], transactionData, Sources[i].PublicKey);
 
                 if (good)
                 {
@@ -215,20 +238,20 @@ namespace TNetD.Transactions
             byte[] tranData = GetTransactionData();
             _data.AddRange(tranData);
 
-            foreach (Hash sig in Signatures)
+            foreach (byte[] sig in Signatures)
             {
-                _data.AddRange(sig.Hex);
+                _data.AddRange(sig);
             }
 
             return _data.ToArray();
         }
 
-        void UpdateIntHash()
+        private void UpdateIntHash()
         {
             byte[] tranDataSig = GetTransactionDataAndSignature();
             byte[] output = (new SHA512Managed()).ComputeHash(tranDataSig).Take(32).ToArray();
 
-            intHash = new Hash(output);
+            intTransactionID = new Hash(output);
         }
 
         ///////////////////////////////////////////////////////////
@@ -251,7 +274,7 @@ namespace TNetD.Transactions
                 PDTs[cnt++] = (ProtocolPackager.Pack(td.Serialize(), 2));
             }
 
-            foreach (Hash te in Signatures)
+            foreach (byte[] te in Signatures)
             {
                 PDTs[cnt++] = (ProtocolPackager.Pack(te, 3));
             }
@@ -312,11 +335,11 @@ namespace TNetD.Transactions
 
                     case 3:
                         {
-                            Hash hsh;
-                            ProtocolPackager.UnpackHash(PDT, 3, out hsh);
-                            if (hsh.Hex.Length > 0)
+                            byte[] tempVector = new byte[0];
+                            ProtocolPackager.UnpackByteVector(PDT, 3, ref tempVector);
+                            if (tempVector.Length > 0)
                             {
-                                Signatures.Add(hsh);
+                                Signatures.Add(tempVector);
                             }
                         }
 
@@ -334,7 +357,7 @@ namespace TNetD.Transactions
         /// <returns></returns>
         public Hash TransactionID
         {
-            get { return intHash; }
+            get { return intTransactionID; }
         }
 
 

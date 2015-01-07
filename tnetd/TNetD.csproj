@@ -72,7 +72,7 @@
     <Compile Include="Nodes\GlobalConfiguration.cs" />
     <Compile Include="Nodes\NodeConfig.cs" />
     <Compile Include="PersistentStore\DBUtils.cs" />
-    <Compile Include="PersistentStore\IAccountStore.cs" />
+    <Compile Include="PersistentStore\IPersistentAccountStore.cs" />
     <Compile Include="PersistentStore\ITransactionStore.cs" />
     <Compile Include="PersistentStore\SQLiteAccountStore.cs" />
     <Compile Include="PersistentStore\SQLiteTransactionStore.cs" />

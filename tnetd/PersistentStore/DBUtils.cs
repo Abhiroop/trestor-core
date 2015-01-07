@@ -14,25 +14,27 @@ namespace TNetD.PersistentStore
         public static bool TableExists(string tableName, SQLiteConnection sqliteConnection)
         {
             bool exists = false;
-            SQLiteCommand cmd = new SQLiteCommand("SELECT name FROM sqlite_master WHERE type='table' AND name=@name", sqliteConnection);
-            cmd.Parameters.Add(new SQLiteParameter("@name", tableName));
-            SQLiteDataReader reader = cmd.ExecuteReader();
-
-            if (reader.HasRows)
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT name FROM sqlite_master WHERE type='table' AND name=@name", sqliteConnection))
             {
-                exists = true;
+                cmd.Parameters.Add(new SQLiteParameter("@name", tableName));
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        exists = true;
+                    }
+                }
             }
-
-            cmd.Dispose();
             return exists;
         }
 
         public static int ExecuteNonQuery(string Query, SQLiteConnection sqliteConnection)
         {
             int reply = -1;
-            SQLiteCommand cmd = new SQLiteCommand(Query, sqliteConnection);
-            reply = cmd.ExecuteNonQuery();
-            cmd.Dispose();
+            using (SQLiteCommand cmd = new SQLiteCommand(Query, sqliteConnection))
+            {
+                reply = cmd.ExecuteNonQuery();
+            }
             return reply;
         }
     }
