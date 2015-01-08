@@ -12,7 +12,9 @@ namespace TNetD.Nodes
     {
         public int UpdateFrequencyMS;
 
-        public int ListenPort;
+        public int ListenPortProtocol;
+
+        public int ListenPortRPC;
 
         public int NodeID;
 
@@ -24,6 +26,8 @@ namespace TNetD.Nodes
 
         public string Path_TransactionDB;
 
+        public string Name;
+
         public NetworkConfig NetworkConfig = new NetworkConfig();
 
         public GlobalConfiguration GlobalConfiguration;
@@ -33,9 +37,16 @@ namespace TNetD.Nodes
 
         INIFile iniFile = default(INIFile);
 
+       // RPCRequestHandler RpcRequestHandler;
+
         public NodeConfig(int NodeID, GlobalConfiguration GlobalConfiguration)
         {
+            //this.RpcRequestHandler = rpcRequestHandler;
+
             WorkDirectory = /*AppDomain.CurrentDomain.BaseDirectory +*/ "NODE_" + NodeID;
+
+            // TODO: FIX THIS, TAKE THIS FROM, DB
+            Name = WorkDirectory;
 
             this.NodeID = NodeID;
             this.GlobalConfiguration = GlobalConfiguration;
@@ -49,7 +60,7 @@ namespace TNetD.Nodes
             
             masterNodeRandom = GetNodePrivateRandom(iniFile);
 
-            DisplayUtils.Display(" Node " + NodeID + " | Private Key   : " + HexUtil.ToString(masterNodeRandom));
+            DisplayUtils.Display(" Node " + NodeID + " | Private Key     : " + HexUtil.ToString(masterNodeRandom));
 
             byte[] _PublicKey;
 
@@ -57,23 +68,27 @@ namespace TNetD.Nodes
 
             PublicKey = new Hash(_PublicKey);
 
-            DisplayUtils.Display(" Node " + NodeID + " | Public Key    : " + PublicKey);
+            DisplayUtils.Display(" Node " + NodeID + " | Public Key      : " + PublicKey);
 
-            ListenPort = GetListenPort();
+            ListenPortProtocol = GetListenPortProtocol();
 
-            DisplayUtils.Display(" Node " + NodeID + " | Listen Port   : " + ListenPort);
+            DisplayUtils.Display(" Node " + NodeID + " | Listen Protocol : " + ListenPortProtocol);
+
+            ListenPortRPC = GetListenPortRPC();
+
+            DisplayUtils.Display(" Node " + NodeID + " | Listen RPC      : " + ListenPortRPC);
 
             Path_AccountDB = GetAccountDBPath();
 
-            DisplayUtils.Display(" Node " + NodeID + " | Acct DB Path  : " + Path_AccountDB);
+            DisplayUtils.Display(" Node " + NodeID + " | Acct DB Path    : " + Path_AccountDB);
 
             Path_TransactionDB = GetTransactionDBPath();
 
-            DisplayUtils.Display(" Node " + NodeID + " | Trxn DB Path  : " + Path_TransactionDB);
+            DisplayUtils.Display(" Node " + NodeID + " | Trxn DB Path    : " + Path_TransactionDB);
             
             // // // // // // // // //  Class Initializations // // // // // // // // // // // //
 
-            NetworkConfig = new NetworkConfig(ListenPort);
+            NetworkConfig = new NetworkConfig(ListenPortProtocol);
 
             // // // // // // // // // // // // // // // // // // // // // // // // // // //
 
@@ -90,47 +105,90 @@ namespace TNetD.Nodes
             return Ed25519.Sign(data, masterPrivateKeyExpanded);
         }
         
-        int GetListenPort()
+        int GetListenPortProtocol()
         {
-            int _ListenPort = -1;
+            int _ListenPortProtocol = -1;
 
             try
             {
-                string __ListenPort = iniFile.IniReadValue("Network", "ListenPort");
-                _ListenPort = int.Parse(__ListenPort);
+                string __ListenPort = iniFile.IniReadValue("Network", "ListenPortProtocol");
+                _ListenPortProtocol = int.Parse(__ListenPort);
             }
             catch { }
 
-            if (_ListenPort != -1)
+            if (_ListenPortProtocol != -1)
             {
-                return _ListenPort;
+                return _ListenPortProtocol;
             }
 
             // Get new port
 
-            _ListenPort = Constants.random.Next(32768, 65000);
+            _ListenPortProtocol = Constants.random.Next(32768, 65000);
 
-            iniFile.IniWriteValue("Network", "ListenPort", _ListenPort.ToString());
+            iniFile.IniWriteValue("Network", "ListenPortProtocol", _ListenPortProtocol.ToString());
 
-            _ListenPort = -1;
+            _ListenPortProtocol = -1;
 
             try
             {
-                string __ListenPort = iniFile.IniReadValue("Network", "ListenPort");
-                _ListenPort = int.Parse(__ListenPort);
-                
+                string __ListenPort = iniFile.IniReadValue("Network", "ListenPortProtocol");
+                _ListenPortProtocol = int.Parse(__ListenPort);
 
-                DisplayUtils.Display(" Node " + NodeID + " | Using randomly generated ListenPort : " + _ListenPort);
+                DisplayUtils.Display(" Node " + NodeID + " | Using randomly generated ListenPortProtocol : " + _ListenPortProtocol);
             }
             catch { }
 
-            if (_ListenPort != -1)
+            if (_ListenPortProtocol != -1)
             {
-                return _ListenPort;
+                return _ListenPortProtocol;
             }
             else
             {
-                throw new Exception("Cannot write Network/ListenPort to config file.");
+                throw new Exception("Cannot write Network/ListenPortProtocol to config file.");
+            }
+        }
+
+
+        int GetListenPortRPC()
+        {
+            int _ListenPortRPC = -1;
+
+            try
+            {
+                string __ListenPort = iniFile.IniReadValue("Network", "ListenPortRPC");
+                _ListenPortRPC = int.Parse(__ListenPort);
+            }
+            catch { }
+
+            if (_ListenPortRPC != -1)
+            {
+                return _ListenPortRPC;
+            }
+
+            // Get new port
+
+            _ListenPortRPC = Constants.random.Next(32768, 65000);
+
+            iniFile.IniWriteValue("Network", "ListenPortRPC", _ListenPortRPC.ToString());
+
+            _ListenPortRPC = -1;
+
+            try
+            {
+                string __ListenPortRPC = iniFile.IniReadValue("Network", "ListenPortRPC");
+                _ListenPortRPC = int.Parse(__ListenPortRPC);
+
+                DisplayUtils.Display(" Node " + NodeID + " | Using randomly generated ListenPortRPC : " + _ListenPortRPC);
+            }
+            catch { }
+
+            if (_ListenPortRPC != -1)
+            {
+                return _ListenPortRPC;
+            }
+            else
+            {
+                throw new Exception("Cannot write Network/ListenPortRPC to config file.");
             }
         }
 

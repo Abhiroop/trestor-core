@@ -1,7 +1,10 @@
 ﻿using Chaos.NaCl;
+using Grapevine;
+using Grapevine.Server;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,9 +17,13 @@ using TNetD.Transactions;
 
 namespace TNetD.Nodes
 {
-    internal class Node
+    public delegate bool RPCRequestHandler(HttpListenerContext context);
+
+    internal class Node : Responder
     {
         SecureNetwork network = default(SecureNetwork);
+
+        RESTServer restServer = default(RESTServer);
 
         //public Dictionary<Hash, Node> TrustedNodes = new Dictionary<Hash, Node>();
 
@@ -103,11 +110,57 @@ namespace TNetD.Nodes
                     }
                 }
             }
+
+            ////////////////////////
+
+            restServer = new RESTServer("localhost", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
+
+            restServer.Start();
+        }
+
+
+        class JS_Resp
+        {
+            public string Status;
+            public int ID;
+        }
+        
+        class JS_Info
+        {
+            public Hash PublicKey;
+            public string Name;
+        }
+
+        // RPCRequestHandler rpcRequestHandler;
+        bool RPCRequestHandler(HttpListenerContext context)
+        {
+            if (context.Request.RawUrl.Matches(@"^/q")) // ProcessQueries
+            {
+                JS_Resp gj = new JS_Resp();
+                gj.Status = "OK";
+                gj.ID = 0;
+
+                this.SendJsonResponse(context, gj);
+
+                return true;
+            }
+            else if (context.Request.RawUrl.Matches(@"^/info")) // ProcessInfo 
+            {
+                JS_Info info = new JS_Info();
+                info.PublicKey = PublicKey;
+                info.Name = nodeConfig.Name;
+
+                this.SendJsonResponse(context, info);
+
+                return true;
+            }
+
+            return false;
         }
 
         void network_PacketReceived(Hash publicKey, NetworkPacket packet)
         {
-            DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + publicKey + " | Data Length : " + packet.Data.Length );
+            DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + publicKey + " | Data Length : " + packet.Data.Length);
 
             //throw new NotImplementedException();
         }
@@ -116,6 +169,8 @@ namespace TNetD.Nodes
         {
             Constants.ApplicationRunning = false;
             network.Stop();
+            
+            restServer.Stop();
         }
 
         void SendInitialize(Hash publicKey)
@@ -131,7 +186,7 @@ namespace TNetD.Nodes
         {
             //await Task.WhenAll(tasks.ToArray());
 
-            
+
 
             while (PendingIncomingCandidates.Count > 0)
             {

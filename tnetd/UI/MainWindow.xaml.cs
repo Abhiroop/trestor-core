@@ -1,7 +1,11 @@
-﻿using System;
+﻿using Grapevine;
+using Grapevine.Server;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -28,12 +32,7 @@ namespace TNetD
     public partial class MainWindow : Window
     {
         ObservableCollection<TransactionData> _tranxData = new ObservableCollection<TransactionData>();
-
-        /*public ObservableCollection<TransactionData> TXD
-        {
-            get { return _tranxData; }
-        }*/
-
+        
         List<Node> nodes = new List<Node>();
         GlobalConfiguration globalConfiguration;
 
@@ -48,14 +47,16 @@ namespace TNetD
             nodes.Add(new Node(1, globalConfiguration));
 
             lv_TX.ItemsSource = _tranxData;
-            //listView_List.DataSource = _tranxData;
         }
 
         void DisplayUtils_DisplayText(string Text, Color color, DisplayType type)
         {
             try
             {
-                this.Dispatcher.Invoke(new Action(() => { textBlock_StatusLog.Text += Text + "\n"; }));
+                this.Dispatcher.Invoke(new Action(() =>
+                {
+                    textBlock_StatusLog.Inlines.Add(new Run(Text + "\n") { Foreground = new SolidColorBrush(color) });
+                }));
             }
             catch { }
         }
@@ -157,7 +158,6 @@ namespace TNetD
             SingleTransactionFactory stf = new SingleTransactionFactory(nc.PublicKey, nc1.PublicKey, Constants.random.Next(10, 150000));
 
             byte[] tranxData = stf.GetTransactionData();
-
             byte[] signature = nc.SignDataWithPrivateKey(tranxData);
 
             TransactionContent transactionContent;
@@ -174,9 +174,7 @@ namespace TNetD
 
                 _tranxData.Add(new TransactionData(transactionContent));
             }
-
         }
-
 
         private void menuItem_Server_Stop_Click(object sender, RoutedEventArgs e)
         {
@@ -185,13 +183,7 @@ namespace TNetD
             NodeConfig nc1 = new NodeConfig(1, gc);
 
             ITransactionStore transactionStore = new SQLiteTransactionStore(nc);
-            
-            //TransactionContent transactionContent;         
-            //    _tranxData.Add(new TransactionData(transactionContent));
-
         }
 
     }
-
-
 }

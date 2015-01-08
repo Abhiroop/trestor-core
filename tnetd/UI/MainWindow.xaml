@@ -80,7 +80,7 @@
                     </ScrollViewer>
                 </Grid>
             </TabItem>
-            <TabItem Header="Transactions" >
+            <TabItem Header="Transactions">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30"/>
@@ -93,54 +93,82 @@
                     <ListView Name="lv_TX" Grid.Row="1" Background="#FF1E1E1E" >
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Grid>
+                                <Grid HorizontalAlignment="Stretch">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="20"/>
                                         <RowDefinition Height="20"/>
                                         <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="580"/>
+                                        <ColumnDefinition Width="120"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Text="{Binding Path=TransactionID}" FontFamily="Consolas" FontSize="14"  FontWeight="Bold" Margin="5,0,5,1" Foreground="#FF54AAE6"></TextBlock>
-                                    <TextBlock Grid.Row="1" Text="{Binding Path=TimeStamp}"  FontFamily="Consolas" Margin="5,0" FontSize="12" Foreground="#FF54AAE6" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Path=TransactionID}" FontFamily="Consolas" FontSize="14" 
+                                               FontWeight="Bold" Margin="5,0,5,1" Foreground="#FF54AAE6"></TextBlock>
+                                    <TextBlock Grid.Row="1" Text="{Binding Path=TimeStamp}"  FontFamily="Consolas"
+                                               Margin="5,0" FontSize="12" Foreground="#FF54AAE6" FontWeight="Bold"/>
 
-                                    <TextBlock Text="{Binding Path=Amount}" Grid.Column="1" FontFamily="Consolas" FontSize="14"  FontWeight="Bold" Margin="5,0,5,1" Foreground="#FF96E654"></TextBlock>
+                                    <TextBlock Text="{Binding Path=Amount}" HorizontalAlignment="Right" Grid.Column="1"
+                                               FontFamily="Consolas" FontSize="14"  FontWeight="Bold" Margin="5,0,5,1"
+                                               Foreground="#FF96E654"></TextBlock>
 
-                                    <ListView Grid.Row="2" ItemsSource="{Binding Path=Entity}"  Background="Transparent" BorderThickness="0"  >
+                                    <ListView Grid.Row="2" ItemsSource="{Binding Path=Entity}"  Background="Transparent" BorderThickness="0" >
                                         <ListView.ItemTemplate>
                                             <DataTemplate>
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="583*"/>
-                                                        <ColumnDefinition  Width="123"/>
+                                                        <ColumnDefinition Width="360"/>
+                                                        <ColumnDefinition  Width="120"/>
                                                     </Grid.ColumnDefinitions>
-                                                    <TextBlock Text="{Binding Path=PublicKey}" Foreground="{Binding Path=IsSource, Converter={StaticResource ColorConverter}}" FontFamily="Consolas"  Margin="5,0,5,1"  HorizontalAlignment="Left"/>                                                      
                                                     
-                                                    <TextBlock Text="{Binding Path=Amount}" Grid.Column="1" FontFamily="Consolas"  Margin="5,0,5,1" Foreground="#FFC0A2FF" HorizontalAlignment="Right"/>
+                                                    <TextBlock Text="{Binding Path=PublicKey}" FontFamily="Consolas"  Margin="5,0,5,1" 
+                                                               Foreground="{Binding Path=IsSource, Converter={StaticResource ColorConverter}}" 
+                                                                 HorizontalAlignment="Left"/>                                             
+                                                    
+                                                    <TextBlock Text="{Binding Path=Amount}" Grid.Column="1" FontFamily="Consolas"  
+                                                               Margin="5,0,5,1" Foreground="#FFC0A2FF" HorizontalAlignment="Right"/>
                                                 </Grid>
                                             </DataTemplate>
                                         </ListView.ItemTemplate>
-                                                     
+                                        
+                                        <ListView.Style>
+                                            <Style>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Path=IsSelected,
+                                                        RelativeSource={RelativeSource Mode=FindAncestor,
+                                                            AncestorType={x:Type ListBoxItem}}}" 
+                                                        Value="False">
+                                                        <Setter Property="ListView.Visibility" Value="Collapsed" />                                                        
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListView.Style>
                                     </ListView>
-
+                                    
                                     <Grid.Background>
                                         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                                            <GradientStop Color="#FF36444D" Offset="0.013"/>
+                                            <GradientStop Color="#FF36444D" Offset="0"/>
                                             <GradientStop Color="#FF113163" Offset="1"/>
                                         </LinearGradientBrush>
                                     </Grid.Background>
 
+                                    <Grid.Style>
+                                        <Style>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=IsSelected,
+                                                        RelativeSource={RelativeSource Mode=FindAncestor,
+                                                            AncestorType={x:Type ListBoxItem}}}" 
+                                                        Value="False">
+                                                    <Setter Property="Grid.Opacity" Value="0.7" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Grid.Style>
+
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
-                        
-                        
-                        
-                        
-                        
                     </ListView>
                 </Grid>
             </TabItem>
