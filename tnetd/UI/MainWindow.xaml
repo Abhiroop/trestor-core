@@ -28,6 +28,31 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        
+        <Style x:Key="ListView_DependencyCollapsedStyle" TargetType="{x:Type ListView}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}, Mode=FindAncestor}}" 
+        			Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        
+        <DataTemplate x:Key="DataTemplate_TransactionDataEntity">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="360"/>
+                    <ColumnDefinition  Width="120"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding PublicKey}" FontFamily="Consolas"  Margin="5,0,5,1" 
+        			Foreground="{Binding IsSource, Converter={StaticResource ColorConverter}}" 
+        			HorizontalAlignment="Left"/>
+
+                <TextBlock Text="{Binding Amount}" Grid.Column="1" FontFamily="Consolas"  
+        			Margin="5,0,5,1" Foreground="#FFC0A2FF" HorizontalAlignment="Right"/>
+            </Grid>
+        </DataTemplate>
 
     </Window.Resources>
 
@@ -117,38 +142,9 @@
                                                FontFamily="Consolas" FontSize="14"  FontWeight="Bold" Margin="5,0,5,1"
                                                Foreground="#FF96E654"></TextBlock>
 
-                                        <ListView Grid.Row="2" ItemsSource="{Binding Path=Entity}"  Background="Transparent" BorderThickness="0" >
-                                            <ListView.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="360"/>
-                                                            <ColumnDefinition  Width="120"/>
-                                                        </Grid.ColumnDefinitions>
-
-                                                        <TextBlock Text="{Binding Path=PublicKey}" FontFamily="Consolas"  Margin="5,0,5,1" 
-                                                               Foreground="{Binding Path=IsSource, Converter={StaticResource ColorConverter}}" 
-                                                                 HorizontalAlignment="Left"/>
-
-                                                        <TextBlock Text="{Binding Path=Amount}" Grid.Column="1" FontFamily="Consolas"  
-                                                               Margin="5,0,5,1" Foreground="#FFC0A2FF" HorizontalAlignment="Right"/>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </ListView.ItemTemplate>
-
-                                            <ListView.Style>
-                                                <Style>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Path=IsSelected,
-                                                        RelativeSource={RelativeSource Mode=FindAncestor,
-                                                            AncestorType={x:Type ListBoxItem}}}" 
-                                                        Value="False">
-                                                            <Setter Property="ListView.Visibility" Value="Collapsed" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </ListView.Style>
-                                        </ListView>
+                                        <ListView Grid.Row="2" ItemsSource="{Binding Path=Entity}"  Background="Transparent" BorderThickness="0"
+                                                  Style="{DynamicResource ListView_DependencyCollapsedStyle}" 
+                                                  ItemTemplate="{DynamicResource DataTemplate_TransactionDataEntity}" />
 
                                         <Grid.Background>
                                             <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
@@ -174,7 +170,7 @@
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
-                        
+
                         <Grid Grid.Column="1" Background="{DynamicResource DarkBackgroundBrush}">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="25"/>
@@ -191,7 +187,7 @@
 
                             <TextBlock Grid.Column="1" Grid.Row="1" Foreground="White">Transaction ID</TextBlock>
                             <TextBox Grid.Column="1"  Grid.Row="2" Name="tb_Tx_txid" Foreground="White" IsReadOnly="True" TextWrapping="Wrap" IsReadOnlyCaretVisible="True" Background="{DynamicResource DarkBackgroundBrush}"></TextBox>
-                            
+
                         </Grid>
 
                     </Grid>

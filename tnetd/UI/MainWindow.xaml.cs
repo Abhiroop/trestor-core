@@ -52,9 +52,7 @@ namespace TNetD
 
             nodes.Add(new Node(0, globalConfiguration));
             nodes.Add(new Node(1, globalConfiguration));
-
-
-
+            
             lv_TX.ItemsSource = _tranxData;
         }
 
