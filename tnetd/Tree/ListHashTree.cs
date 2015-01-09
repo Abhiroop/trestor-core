@@ -369,7 +369,7 @@ namespace TNetD.Tree
         {
             ListTreeLeafNode ltln;
 
-            if(TraverseToLeaf(ID, out ltln) == TraverseResult.Success)
+            if (TraverseToLeaf(ID, out ltln) == TraverseResult.Success)
             {
                 return true;
             }
@@ -536,7 +536,7 @@ namespace TNetD.Tree
         public void getAllLeafUnderNode(ListTreeNode Node, out List<LeafDataType> Leaves)
         {
             List<LeafDataType> leaves = new List<LeafDataType>();
-           
+
             for (int i = 0; i < 16; i++)
             {
                 if (Node.Children[i] != null)
@@ -569,26 +569,54 @@ namespace TNetD.Tree
          *Most important one
         */
 
-        public List<ListTreeNode> getDifference(List<ListTreeNode> other, List<ListTreeNode> me)
+        public List<TreeSyncData> getDifference(List<ListTreeNode> other, List<ListTreeNode> me)
         {
-            List<ListTreeNode> difference = new List<ListTreeNode>();
+            List<TreeSyncData> difference = new List<TreeSyncData>();
 
-            int i=0, j = 0;
+            int i = 0, j = 0;
 
-            while(true)
+            while (true)
             {
                 if (i == other.Count)
-			        break;
+                    break;
 
-		        //all new
-		        if (j == me.Count)
-		        {
-			        for (int t = i; t < other.Count; t++)
-			        {
-				        
-			        }
-			        break;
-		        
+                //all new
+                if (j == me.Count)
+                {
+                    for (int t = i; t < other.Count; t++)
+                    {
+                        TreeSyncData TSD = new TreeSyncData(other[t], false);
+                        TSD.setGetAll(other[t].LeafCount <= Constants.SYNC_LEAF_COUNT_THRESHOLD);
+                    }
+                    break;
+                }
+
+                if (other[i].address.Hex.Length != me[j].address.Hex.Length)
+                {
+                    return new List<TreeSyncData>();
+                }
+
+                int compare = other[i].address.CompareTo(me[j].address);
+
+                if (compare == 0)
+                {
+                    i++;
+                    j++;
+                }
+                //new
+                else if (compare == -1)
+                {
+                    TreeSyncData LSD = new TreeSyncData(other[i], false);
+                    // Get leaf nodes if the count is below threshold.
+                    LSD.setGetAll(other[i].LeafCount <= Constants.SYNC_LEAF_COUNT_THRESHOLD);
+                    difference.Add(LSD);
+                    i++;
+                }
+                else
+                {
+                    // thenga i have you dont
+                    //pretty much fucked up i guess :P
+                    j++;
                 }
             }
 
@@ -627,7 +655,7 @@ namespace TNetD.Tree
                 }
             }
 
-            for(int i = 0; i< 16; i++)
+            for (int i = 0; i < 16; i++)
             {
                 if (TempRoot.Children[i] != null)
                     nodes.Add(TempRoot.Children[i]);

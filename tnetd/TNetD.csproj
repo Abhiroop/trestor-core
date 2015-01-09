@@ -104,6 +104,7 @@
     <Compile Include="Tree\ListHashTree.cs" />
     <Compile Include="Tree\ListTreeLeafNode.cs" />
     <Compile Include="Tree\ListTreeNode.cs" />
+    <Compile Include="Tree\TreeSyncData.cs" />
     <Compile Include="UI\ColoredTB.xaml.cs">
       <DependentUpon>ColoredTB.xaml</DependentUpon>
     </Compile>
