@@ -14,6 +14,7 @@ namespace TNetD.Tree
     /// <typeparam name="LeafDataType"></typeparam>
     class ListTreeNode
     {
+        public Hash address;
         protected long leafCount;
         protected Hash hash;
         protected bool isLeaf;
