@@ -10,7 +10,7 @@ namespace TNetD
     public static class Utils
     {
         public static Encoding Encoding88591 = Encoding.GetEncoding(28591);
-        
+
         public static DateTime FromUnixTime(this long unixTime)
         {
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -23,6 +23,8 @@ namespace TNetD
             return Convert.ToInt64((date - epoch).TotalSeconds);
         }
 
+
+
         public static bool ByteArrayEquals(byte[] x, int xOffset, byte[] y, int yOffset, int length)
         {
             if (x == null) new Exception("x is NULL");
@@ -34,7 +36,7 @@ namespace TNetD
 
             int DiffBytes = 0;
 
-            for (int i = 0; i < length; i++ )
+            for (int i = 0; i < length; i++)
             {
                 DiffBytes += (x[i + xOffset] != y[i + yOffset]) ? 1 : 0;
             }
@@ -42,7 +44,12 @@ namespace TNetD
             return (DiffBytes == 0);
         }
 
-       
+        public static bool ByteArrayEquals(this byte[] x, byte[] y)
+        {
+            return ByteArrayEquals(x, 0, y, 0, x.Length);
+        }
+
+
         public static byte[] GetLengthAsBytes(int length)
         {
             byte[] len = new byte[4];

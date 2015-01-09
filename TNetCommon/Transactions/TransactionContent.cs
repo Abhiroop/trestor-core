@@ -37,7 +37,7 @@ namespace TNetD.Transactions
 
             intTransactionID = new Hash();
         }
-
+        
         public TransactionContent(TransactionEntity[] Sources, long Timestamp, TransactionEntity[] Destinations, List<byte[]> Signatures)
         {
             this.Destinations = Destinations.ToList();
@@ -53,6 +53,15 @@ namespace TNetD.Transactions
             this.Destinations = Destinations.ToList();
             this.Timestamp = Timestamp;
             this.Sources = Sources.ToList();
+        }
+
+        /// <summary>
+        /// This is the Transaction ID. Unique identifier for a transaction.
+        /// </summary>
+        /// <returns></returns>
+        public Hash TransactionID
+        {
+            get { return intTransactionID; }
         }
 
         /// <summary>
@@ -351,14 +360,7 @@ namespace TNetD.Transactions
             UpdateIntHash();
         }
 
-        /// <summary>
-        /// This is the Transaction ID. Unique identifier for a transaction.
-        /// </summary>
-        /// <returns></returns>
-        public Hash TransactionID
-        {
-            get { return intTransactionID; }
-        }
+        
 
 
        

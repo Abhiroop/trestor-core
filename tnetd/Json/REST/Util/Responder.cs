@@ -6,6 +6,8 @@ using System.Net;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using TNetD.Json.REST;
+using TNetD;
 
 namespace Grapevine
 {
@@ -107,13 +109,13 @@ namespace Grapevine
             context.Response.ContentEncoding = encoding;
             FlushResponse(context, buffer, length);
         }
-
+        
         /// <summary>
         /// Respond to a request by searlizing an object to JSON
         /// </summary>
         protected void SendJsonResponse(HttpListenerContext context, object obj)
         {
-            var json = JsonConvert.SerializeObject(obj, Formatting.Indented);
+            var json = JsonConvert.SerializeObject(obj, Constants.jss);
             var buffer = context.Request.ContentEncoding.GetBytes(json);
             var length = buffer.Length;
 

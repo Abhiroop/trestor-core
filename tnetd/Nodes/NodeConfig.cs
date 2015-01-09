@@ -1,32 +1,37 @@
-﻿using Chaos.NaCl;
+﻿/*
+ @Author: Arpan Jati
+ @Date: Jan 2015
+ */
+
+using Chaos.NaCl;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using TNetD.Json.JS_Structs;
 using TNetD.Network.Networking;
 
 namespace TNetD.Nodes
 {
     class NodeConfig
     {
+        #region Locals
+
         public int UpdateFrequencyMS;
-
         public int ListenPortProtocol;
-
         public int ListenPortRPC;
-
         public int NodeID;
-
         public string WorkDirectory;
-
-        public Hash PublicKey;
-               
-        public string Path_AccountDB;
-
-        public string Path_TransactionDB;
-
         public string Name;
+        public string Email;
+        public string Organisation;
+        public string Platform;       
+
+        public Hash PublicKey;              
+ 
+        public string Path_AccountDB;
+        public string Path_TransactionDB;        
 
         public NetworkConfig NetworkConfig = new NetworkConfig();
 
@@ -37,7 +42,9 @@ namespace TNetD.Nodes
 
         INIFile iniFile = default(INIFile);
 
-       // RPCRequestHandler RpcRequestHandler;
+        //////////////
+        
+        #endregion
 
         public NodeConfig(int NodeID, GlobalConfiguration GlobalConfiguration)
         {
@@ -93,6 +100,12 @@ namespace TNetD.Nodes
             // // // // // // // // // // // // // // // // // // // // // // // // // // //
 
             UpdateFrequencyMS = Constants.Node_UpdateFrequencyMS;
+
+            // /////////////////////
+
+            Organisation = GetInitString("Info", "Organisation", "_unspecified_");
+            Email = GetInitString("Info", "Email", "_unspecified_");
+            Platform = GetInitString("Info", "Platform", "_unspecified_");
         }
 
         /// <summary>
@@ -104,7 +117,9 @@ namespace TNetD.Nodes
         {
             return Ed25519.Sign(data, masterPrivateKeyExpanded);
         }
-        
+
+        #region INI Methods
+
         int GetListenPortProtocol()
         {
             int _ListenPortProtocol = -1;
@@ -147,8 +162,7 @@ namespace TNetD.Nodes
                 throw new Exception("Cannot write Network/ListenPortProtocol to config file.");
             }
         }
-
-
+        
         int GetListenPortRPC()
         {
             int _ListenPortRPC = -1;
@@ -241,6 +255,37 @@ namespace TNetD.Nodes
                 return _RAND;
             }
         }
+        
+        string GetInitString(string Section, string Key, string Default)
+        {
+            string _Temp_String = "";
+
+            _Temp_String = iniFile.IniReadValue(Section, Key);
+
+            if (_Temp_String != "")
+            {
+                return _Temp_String;
+            }
+
+            _Temp_String = Default;
+
+            _Temp_String = _Temp_String.Replace("\\\\", "\\");
+
+            iniFile.IniWriteValue(Section, Key, _Temp_String);
+
+            _Temp_String = "";
+
+            _Temp_String = iniFile.IniReadValue(Section, Key);
+
+            if (_Temp_String != "")
+            {
+                return _Temp_String;
+            }
+            else
+            {
+                throw new Exception("Cannot write " + Section + "/" + Key + " to config file.");
+            }
+        }
 
         string GetAccountDBPath()
         {
@@ -310,6 +355,22 @@ namespace TNetD.Nodes
 
         }
 
+        #endregion
 
+
+        public JS_Info Get_JS_Info()
+        {
+            JS_Info info = new JS_Info();
+
+            info.Name = Name;
+            info.Address = Address.AddressFactory.GetAddress(PublicKey.Hex, Name);
+            info.Email = Email;
+            info.Organisation = Organisation;
+            info.Platform = Platform;
+            info.PublicKey = PublicKey.Hex;
+            info.time = DateTime.UtcNow;
+
+            return info;
+        }
     }
 }

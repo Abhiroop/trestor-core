@@ -67,21 +67,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Json\GrapevinePlus\Client\RESTClient.cs" />
-    <Compile Include="Json\GrapevinePlus\Client\RESTRequest.cs" />
-    <Compile Include="Json\GrapevinePlus\Client\RESTResponse.cs" />
-    <Compile Include="Json\GrapevinePlus\Server\Config.cs" />
-    <Compile Include="Json\GrapevinePlus\Server\RESTAttributes.cs" />
-    <Compile Include="Json\GrapevinePlus\Server\RESTCluster.cs" />
-    <Compile Include="Json\GrapevinePlus\Server\RESTResource.cs" />
-    <Compile Include="Json\GrapevinePlus\Server\RESTServer.cs" />
-    <Compile Include="Json\GrapevinePlus\Server\Rest_ReserverX.cs" />
-    <Compile Include="Json\GrapevinePlus\Util\ContentType.cs" />
-    <Compile Include="Json\GrapevinePlus\Util\EventLogger.cs" />
-    <Compile Include="Json\GrapevinePlus\Util\Exceptions.cs" />
-    <Compile Include="Json\GrapevinePlus\Util\Extensions.cs" />
-    <Compile Include="Json\GrapevinePlus\Util\HttpMethod.cs" />
-    <Compile Include="Json\GrapevinePlus\Util\Responder.cs" />
+    <Compile Include="Json\REST\BytesToHexConverter.cs" />
+    <Compile Include="Json\REST\Client\RESTClient.cs" />
+    <Compile Include="Json\REST\Client\RESTRequest.cs" />
+    <Compile Include="Json\REST\Client\RESTResponse.cs" />
+    <Compile Include="Json\REST\JS_Structs.cs" />
+    <Compile Include="Json\REST\Server\Config.cs" />
+    <Compile Include="Json\REST\Server\RESTServer.cs" />
+    <Compile Include="Json\REST\Util\ContentType.cs" />
+    <Compile Include="Json\REST\Util\EventLogger.cs" />
+    <Compile Include="Json\REST\Util\Exceptions.cs" />
+    <Compile Include="Json\REST\Util\Extensions.cs" />
+    <Compile Include="Json\REST\Util\HttpMethod.cs" />
+    <Compile Include="Json\REST\Util\Responder.cs" />
     <Compile Include="Json\JsonService.cs" />
     <Compile Include="Ledgers\SQLiteLedgerFileHandler.cs" />
     <Compile Include="Network\FakeNetwork.cs" />
@@ -108,7 +106,7 @@
       <DependentUpon>ColoredTB.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\Converters.cs" />
-    <Compile Include="UI\TransactionDataCollection.cs" />
+    <Compile Include="UI\TransactionData.cs" />
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Utils\DisplayUtils.cs" />
     <Compile Include="Ledgers\Ledger.cs" />

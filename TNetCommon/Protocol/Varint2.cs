@@ -1,4 +1,12 @@
-﻿using System;
+﻿
+/*
+ *  @Author: Arpan Jati
+ *  @Version: 1.0
+ *  @Date: Aug 2014
+ *  @Description: Varint2
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

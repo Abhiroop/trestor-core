@@ -1,4 +1,9 @@
-﻿using System;
+﻿/*
+ @Author: Arpan Jati
+ @Date: Jan 2015
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;

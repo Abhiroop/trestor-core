@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using TNetD.Json.REST;
 
 namespace TNetD
 {
@@ -76,21 +78,6 @@ namespace TNetD
         public static int GlobalSentPackets = 0;
         public static int GlobalSentBytes = 0;
         
-        /////////////////   Server Constants
-
-        internal static byte[] Auth_NodePublic = HexUtil.GetBytes("55C28B6F43C8CEAA905546843F803581D39F95B0227C5AED1704B2A8A592E827");
-
-        /// <summary>
-        /// Server Private !! Keep this secret at all cost.
-        /// </summary>
-        internal static byte[] Auth_NodePrivateExpanded = HexUtil.GetBytes("95BDC35192B65B3E8873F9A0E13185AE255059AE32405C9488766E523206B73055C28B6F43C8CEAA905546843F803581D39F95B0227C5AED1704B2A8A592E827");
-
-        /// <summary>
-        /// Server Private !! Keep this secret at all cost.
-        /// </summary>
-        internal static byte[] Auth_NodeRandom_Private = HexUtil.GetBytes("95BDC35192B65B3E8873F9A0E13185AE255059AE32405C9488766E523206B730");
-
-        //////////////////////////
 
         public static long SERVER_GLOBAL_PACKETS = 0;
         public static long SERVER_GLOBAL_DATA_PACKETS = 0;
@@ -108,6 +95,16 @@ namespace TNetD
 
         public static readonly string File_TrustedNodes = "TrustedNodes.ini";
 
+        public static JsonSerializerSettings jss = new JsonSerializerSettings();
+
+        /// <summary>
+        ///  TODO: BAD/ REMOVE STATIC METHOD
+        /// </summary>
+        public static void Initialize()
+        {
+            jss.Converters.Add(new BytesToHexConverter());
+            jss.Formatting = Formatting.Indented;
+        }   
         
     }
 }

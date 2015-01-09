@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+ @Author: Arpan Jati
+ @Date: 9 Jan 2015
+ @Description: Holds transaction data for UI
+ */
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;

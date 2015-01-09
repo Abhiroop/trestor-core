@@ -1,4 +1,11 @@
-﻿using System;
+﻿/*
+ *  @Author: Arpan Jati
+ *  @Version: 1.0
+ *  @Date: Jan 5 2015
+ *  @Description: SingleTransactionFactory to create new transactions having single inputs and outputs.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

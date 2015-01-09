@@ -1,7 +1,15 @@
-﻿using Chaos.NaCl;
+﻿/*
+ *  @Author: Arpan Jati
+ *  @Version: 1.0
+ *  @Date: Oct 2015 | Jan 2015
+ *  @Description: Node: It represents a full fledged transaction processor / validator / the complete thing.
+ */
+
+using Chaos.NaCl;
 using Grapevine;
 using Grapevine.Server;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -9,6 +17,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using TNetD.Json.JS_Structs;
 using TNetD.Ledgers;
 using TNetD.Network;
 using TNetD.Network.Networking;
@@ -43,7 +52,8 @@ namespace TNetD.Nodes
 
         public AccountInfo AI;
 
-        IPersistentAccountStore persistentAccountStore;
+        public IPersistentAccountStore PersistentAccountStore;
+        public ITransactionStore TransactionStore;
 
         Ledger ledger;
 
@@ -62,7 +72,8 @@ namespace TNetD.Nodes
 
         Timer Tmr;
 
-        NodeConfig nodeConfig = default(NodeConfig);
+        // TODO: MAKE PRIVATE : AND FAST
+        public NodeConfig nodeConfig = default(NodeConfig);
 
         /// <summary>
         /// Initializes a node. Node ID is 0 for most cases.
@@ -80,11 +91,12 @@ namespace TNetD.Nodes
 
             network.Initialize();
 
-            persistentAccountStore = new SQLiteAccountStore(nodeConfig);
+            PersistentAccountStore = new SQLiteAccountStore(nodeConfig);
+            TransactionStore = new SQLiteTransactionStore(nodeConfig);
 
             AI = new AccountInfo(PublicKey, Money);
 
-            ledger = new Ledger(persistentAccountStore);
+            ledger = new Ledger(PersistentAccountStore);
 
             ledger.AddUserToLedger(AI);
 
@@ -97,8 +109,7 @@ namespace TNetD.Nodes
             // ////////////////////
 
             // Connect to TrustedNodes
-
-            //List<Task> tasks = new List<Task>();
+            // List<Task> tasks = new List<Task>();
 
             foreach (KeyValuePair<Hash, NodeSocketData> kvp in TrustedNodes)
             {
@@ -117,40 +128,109 @@ namespace TNetD.Nodes
 
             restServer.Start();
         }
-
-
-        class JS_Resp
-        {
-            public string Status;
-            public int ID;
-        }
         
-        class JS_Info
-        {
-            public Hash PublicKey;
-            public string Name;
-        }
-
         // RPCRequestHandler rpcRequestHandler;
         bool RPCRequestHandler(HttpListenerContext context)
         {
             if (context.Request.RawUrl.Matches(@"^/q")) // ProcessQueries
             {
-                JS_Resp gj = new JS_Resp();
-                gj.Status = "OK";
-                gj.ID = 0;
+                //RPCStatus status = RPCStatus.Failure;
 
-                this.SendJsonResponse(context, gj);
+                //JS_Transaction_Reply trnx = new JS_Transaction_Reply();
+
+                if (context.Request.RawUrl.StartsWith("/q"))
+                {
+                    foreach (string key in context.Request.QueryString.AllKeys)
+                    {
+                        switch (key)
+                        {
+                            case "address":
+                                
+
+                                break;
+
+
+                            default:
+
+                                break;
+                        }
+                    }
+                }
+
+                this.SendJsonResponse(context, new JS_Resp());
 
                 return true;
             }
             else if (context.Request.RawUrl.Matches(@"^/info")) // ProcessInfo 
             {
-                JS_Info info = new JS_Info();
-                info.PublicKey = PublicKey;
-                info.Name = nodeConfig.Name;
+                this.SendJsonResponse(context, nodeConfig.Get_JS_Info().GetResponse());
 
-                this.SendJsonResponse(context, info);
+                return true;
+            }
+            else if (context.Request.RawUrl.Matches(@"^/transactions")) // Propose Transactions
+            {
+                List<JS_TransactionReply> txidReply = new List<JS_TransactionReply>();
+
+                bool txidprocessed = false;
+                int txidProcCnt = 0;
+
+                if (context.Request.RawUrl.StartsWith("/transactions"))
+                {
+                    foreach (string key in context.Request.QueryString.AllKeys)
+                    {
+                        switch (key)
+                        {
+                            case "txid":
+
+                                txidprocessed = true;
+                                
+                                string txid = context.Request.QueryString["txid"];
+                                byte[] _txid = new byte[0];
+
+                                try
+                                {
+                                    _txid = HexUtil.GetBytes(txid);
+                                }
+                                catch { }
+
+                                if (_txid.Length == 32)
+                                {
+                                    TransactionContent tcxo;
+                                    if(TransactionStore.FetchTransaction(new Hash(_txid), out tcxo) == DBResponse.FetchSuccess)
+                                    {
+                                        txidReply.Add(new JS_TransactionReply(tcxo));
+                                        txidProcCnt++;
+                                    }
+                                }
+
+                                break;
+
+                            default:
+
+                                break;
+                        }
+                    }
+
+                    // // /////////////////////////////////////////////////////////////////////
+
+                    if (txidReply.Count == 1)
+                    {
+                        this.SendJsonResponse(context, txidReply[0].GetResponse());
+                        return true;
+                    }
+                    if (txidReply.Count > 0)
+                    {
+                        JS_TransactionReplies replies = new JS_TransactionReplies(txidReply);
+                        this.SendJsonResponse(context, replies);
+                        return true;
+                    }
+                    else
+                    {
+                        JS_Resp resp = new JS_Resp();
+                        this.SendJsonResponse(context, resp);
+                        return true;
+                    }
+                }               
 
                 return true;
             }
@@ -169,7 +249,7 @@ namespace TNetD.Nodes
         {
             Constants.ApplicationRunning = false;
             network.Stop();
-            
+
             restServer.Stop();
         }
 
