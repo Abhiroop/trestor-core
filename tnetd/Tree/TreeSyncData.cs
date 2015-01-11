@@ -8,8 +8,13 @@ namespace TNetD.Tree
 {
     class TreeSyncData
     {
-        private ListTreeNode LTN;
-        private bool getAll;
+        // this address needs tto be filled from the listtreenode object
+        //which requires to store the address also in the listtreenode
+        //objects
+        //needs to be done
+        public Hash address;
+        public ListTreeNode LTN;
+        public bool getAll;
 
         public TreeSyncData(ListTreeNode LTN, bool getAll)
         {

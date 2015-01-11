@@ -623,6 +623,38 @@ namespace TNetD.Tree
             return difference;
         }
 
+        public void sendTreeSyncData(List<TreeSyncData> incoming, out List<ListTreeNode> internalNodes, out List<LeafDataType> leaves)
+        {
+            List<ListTreeNode> outInternal = new List<ListTreeNode>();
+            List<LeafDataType> outLeaves = new List<LeafDataType>();
+            for(int i = 0; i < incoming.Count; i++)
+            {
+                TreeSyncData TSD = incoming[i];
+                if(TSD.getAll)
+                {
+                    ListTreeNode LTN = TSD.LTN;
+                    List<LeafDataType> temp = new List<LeafDataType>();
+                    this.getAllLeafUnderNode(LTN, out temp);
+                    outLeaves.AddRange(temp);
+                }
+                else
+                {
+                    Hash address = TSD.address;
+                    List<ListTreeNode> temp = new List<ListTreeNode>();
+                    this.getImmediateChildren(address, out temp);
+                    outInternal.AddRange(temp);
+                }
+            }
+            internalNodes = outInternal;
+            leaves = outLeaves;
+
+        }
+
+        private void getAllLeafUnderNode()
+        {
+            throw new NotImplementedException();
+        }
+
         //gives back immediate children
         public bool getImmediateChildren(Hash hash, out List<ListTreeNode> nodes)
         {
