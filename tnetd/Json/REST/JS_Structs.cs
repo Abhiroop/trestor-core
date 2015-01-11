@@ -1,7 +1,7 @@
 ﻿/*
  *  @Author: Arpan Jati
  *  @Version: 1.0
- *  @Date: 9 Jan 2015
+ *  @Date: 9 Jan 2015 | 10 Jan 2015
  *  @Description: Json Structs for serialization
  */
 
@@ -56,18 +56,22 @@ namespace TNetD.Json.JS_Structs
     class JS_TransactionReply : JS_Response
     {
         public byte[] TransactionID;
+        public long Timestamp;
+        public long Value;
+        public long TransactionFee;
         public List<TransactionEntity> Sources;
         public List<TransactionEntity> Destinations;
-        public List<byte[]> Signatures;
-        public long Timestamp;
+        public List<byte[]> Signatures; 
 
         public JS_TransactionReply(TransactionContent content)
         {
             Sources = content.Sources;
             Destinations = content.Destinations;
-            Signatures = content.Signatures;
+            Signatures = (from sig in content.Signatures select sig.Hex).ToList();
             Timestamp = content.Timestamp;
             TransactionID = content.TransactionID.Hex;
+            TransactionFee = content.TransactionFee;
+            Value = content.Value;
         }
 
         public JS_Resp GetResponse()
@@ -78,11 +82,11 @@ namespace TNetD.Json.JS_Structs
 
     class JS_TransactionReplies : JS_Response
     {        
-        public List<JS_TransactionReply> transactions;
+        public List<JS_TransactionReply> Transactions;
 
         public JS_TransactionReplies(List<JS_TransactionReply> transactions)
         {
-            this.transactions = transactions;
+            this.Transactions = transactions;
         }
 
         public JS_Resp GetResponse()

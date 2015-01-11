@@ -107,7 +107,6 @@
       <DependentUpon>ColoredTB.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\Converters.cs" />
-    <Compile Include="UI\TransactionData.cs" />
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Utils\DisplayUtils.cs" />
     <Compile Include="Ledgers\Ledger.cs" />

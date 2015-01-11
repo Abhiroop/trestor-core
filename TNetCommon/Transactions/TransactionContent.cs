@@ -1,6 +1,6 @@
 ﻿
 // @Author : Arpan Jati
-// @Date: 23th Dec 2014
+// @Date: 23th Dec 2014 | 12th Jan 2015
 
 using Chaos.NaCl;
 using System;
@@ -17,43 +17,27 @@ namespace TNetD.Transactions
     /// A single transaction, contains all the sources and destinations.
     /// It is important that all the signees agree to all the transactions in the request.
     /// Summation of Amount in sources and destinations must be a non-zero exact match.
+    /// 
+    /// [SOURCES = DEST + FEES]
+    /// 
     /// </summary>
     public class TransactionContent : ISerializableBase
     {
         Hash intTransactionID;
 
         // TODO: Make these PROPERTIES
-        public List<TransactionEntity> Sources;
-        public List<TransactionEntity> Destinations;
-        public List<byte[]> Signatures;
-        public long Timestamp;
+        public List<TransactionEntity> Sources { get; set; }
 
-        void Init()
-        {
-            Sources = new List<TransactionEntity>();
-            Destinations = new List<TransactionEntity>();
-            Signatures = new List<byte[]>();
-            Timestamp = 0;
+        public List<TransactionEntity> Destinations { get; set; }
 
-            intTransactionID = new Hash();
-        }
-        
-        public TransactionContent(TransactionEntity[] Sources, long Timestamp, TransactionEntity[] Destinations, List<byte[]> Signatures)
-        {
-            this.Destinations = Destinations.ToList();
-            this.Timestamp = Timestamp;
-            this.Sources = Sources.ToList();
-            this.Signatures = Signatures;
+        private long timestamp;
 
-            UpdateIntHash();
-        }
+        public List<Hash> Signatures { get; set; }
 
-        public TransactionContent(TransactionEntity[] Sources, long Timestamp, TransactionEntity[] Destinations)
-        {
-            this.Destinations = Destinations.ToList();
-            this.Timestamp = Timestamp;
-            this.Sources = Sources.ToList();
-        }
+        /// <summary>
+        /// Transaction Fees.
+        /// </summary>
+        private long transactionFee;
 
         /// <summary>
         /// This is the Transaction ID. Unique identifier for a transaction.
@@ -64,11 +48,69 @@ namespace TNetD.Transactions
             get { return intTransactionID; }
         }
 
+        public DateTime DateTime
+        {
+            get { return DateTime.FromFileTimeUtc(timestamp); }
+        }
+
+        public long Timestamp
+        {
+            get { return timestamp; }
+        }
+
+        public long TransactionFee
+        {
+            get { return transactionFee; }
+        }
+
+        public long Value
+        {
+            get 
+            {
+                long val = 0;
+                foreach(TransactionEntity te in Sources)
+                {
+                    val += te.Value;
+                }
+                return val;
+            }
+        }
+              
+        void Init()
+        {
+            Sources = new List<TransactionEntity>();
+            Destinations = new List<TransactionEntity>();
+            Signatures = new List<Hash>();
+            timestamp = 0;
+            transactionFee = 0;
+
+            intTransactionID = new Hash();
+        }
+
+        public TransactionContent(TransactionEntity[] Sources, TransactionEntity[] Destinations, long TransactionFee, List<Hash> Signatures, long Timestamp)
+        {
+            this.Destinations = Destinations.ToList();
+            this.timestamp = Timestamp;
+            this.Sources = Sources.ToList();
+            this.Signatures = Signatures;
+            this.transactionFee = TransactionFee;
+
+            UpdateIntHash();
+        }
+
+        public TransactionContent(TransactionEntity[] Sources, TransactionEntity[] Destinations, long TransactionFee, long Timestamp)
+        {
+            this.Destinations = Destinations.ToList();            
+            this.Sources = Sources.ToList();
+            this.transactionFee = TransactionFee;
+            this.timestamp = Timestamp;
+        }
+        
         /// <summary>
         /// Manually set the signatures. This also updates the TransactionID after hashing.
         /// </summary>
         /// <param name="Signatures"></param>
-        public void SetSignatures(List<byte[]> Signatures)
+        public void SetSignatures(List<Hash> Signatures)
         {
             this.Signatures = Signatures;
 
@@ -80,6 +122,11 @@ namespace TNetD.Transactions
             Init();
         }
 
+        /// <summary>
+        /// First byte is transaction Version. 0 for initial version
+        /// Second byte is transaction Type. 0 for initial version.
+        /// Rest 6 bytes are reserved. 0 for initial version.
+        /// </summary>
         byte[] ConfigData = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
         /// <summary>
@@ -89,73 +136,36 @@ namespace TNetD.Transactions
         /// <returns></returns>
         public byte[] GetTransactionData()
         {
-            List<byte> _data = new List<byte>();
+            List<byte> transactionData = new List<byte>();
 
             // Adding configuration Data
-
-            _data.AddRange(ConfigData);
+            transactionData.AddRange(ConfigData);
 
             // Adding Sources
             for (int i = 0; i < (int)Sources.Count; i++)
             {
                 TransactionEntity ts = Sources[i];
-                _data.AddRange(ts.PublicKey);
-                _data.AddRange(Conversions.Int64ToVector(ts.Amount));
+                transactionData.AddRange(ts.PublicKey);
+                transactionData.AddRange(Conversions.Int64ToVector(ts.Value));
             }
 
             // Adding Destinations
             for (int i = 0; i < (int)Destinations.Count; i++)
             {
                 TransactionEntity td = Destinations[i];
-                _data.AddRange(td.PublicKey);
-                _data.AddRange(Conversions.Int64ToVector(td.Amount));
+                transactionData.AddRange(td.PublicKey);
+                transactionData.AddRange(Conversions.Int64ToVector(td.Value));
             }
+
+            // Adding Fee
+            transactionData.AddRange(Conversions.Int64ToVector(transactionFee));
 
             // Adding Timestamp
-            _data.AddRange(Conversions.Int64ToVector(Timestamp));
+            transactionData.AddRange(Conversions.Int64ToVector(timestamp));
 
-            return _data.ToArray();
+            return transactionData.ToArray();
         }
-
-        /*void TransactionContent.UpdateAndSignContent(vector<TransactionEntity> _Sources, int64_t _Timestamp, vector<TransactionEntity> _Destinations, vector<Hash> _ExpandedPrivateKeys)
-        {
-        Destinations = _Destinations;
-        Timestamp = _Timestamp;
-        Sources = _Sources;
-
-        byte temp_signature[64];
-        Hash getTranData = GetTransactionData();
-        ed25519_sign(temp_signature, getTranData.data(), getTranData.size(), PublicKey_Source.data(), _ExpandedPrivateKeys.data());
-        Signature = Hash(temp_signature, temp_signature + 64);
-
-        UpdateIntHash();
-        }*/
-
-        bool IsSource(Hash SourcePublicKey)
-        {
-            for (int i = 0; i < (int)Sources.Count; i++)
-            {
-                TransactionEntity TE = Sources[i];
-
-                if (TE.PublicKey == SourcePublicKey.Hex)
-                    return true;
-            }
-
-            return false;
-        }
-
-        bool IsDestination(Hash DestinationPublicKey)
-        {
-            for (int i = 0; i < (int)Destinations.Count; i++)
-            {
-                TransactionEntity TE = Destinations[i];
-
-                if (TE.PublicKey == DestinationPublicKey.Hex)
-                    return true;
-            }
-
-            return false;
-        }
+               
 
         /// <summary>
         /// Checks the general integrity of the transaction. 
@@ -172,19 +182,21 @@ namespace TNetD.Transactions
 
             for (int i = 0; i < (int)Sources.Count; i++)
             {
-                if (Sources[i].Amount <= 0)
+                if (Sources[i].Value <= 0)
                     return false;
 
-                incoming += Sources[i].Amount;
+                incoming += Sources[i].Value;
             }
 
             for (int i = 0; i < (int)Destinations.Count; i++)
             {
-                if (Destinations[i].Amount <= 0)
+                if (Destinations[i].Value <= 0)
                     return false;
 
-                outgoing += Destinations[i].Amount;
+                outgoing += Destinations[i].Value;
             }
+
+            outgoing += transactionFee;
 
             if ((incoming == outgoing) &&
                 (Sources.Count > 0) &&
@@ -217,7 +229,7 @@ namespace TNetD.Transactions
             {
                 TransactionEntity ts = Sources[i];
 
-                bool good = Ed25519.Verify(Signatures[i], transactionData, Sources[i].PublicKey);
+                bool good = Ed25519.Verify(Signatures[i].Hex, transactionData, Sources[i].PublicKey);
 
                 if (good)
                 {
@@ -234,7 +246,6 @@ namespace TNetD.Transactions
                 return true;
             }
 
-
             return false;
         }
 
@@ -242,17 +253,17 @@ namespace TNetD.Transactions
         {
             // Data Hash Format : [Config Data][Sources][Destinations][Timestamp][Signatures]
 
-            List<byte> _data = new List<byte>();
+            List<byte> tranDataSig = new List<byte>();
 
             byte[] tranData = GetTransactionData();
-            _data.AddRange(tranData);
+            tranDataSig.AddRange(tranData);
 
-            foreach (byte[] sig in Signatures)
+            foreach (Hash sig in Signatures)
             {
-                _data.AddRange(sig);
+                tranDataSig.AddRange(sig.Hex);
             }
 
-            return _data.ToArray();
+            return tranDataSig.ToArray();
         }
 
         private void UpdateIntHash()
@@ -263,30 +274,61 @@ namespace TNetD.Transactions
             intTransactionID = new Hash(output);
         }
 
+        
+        bool IsSource(Hash SourcePublicKey)
+        {
+            for (int i = 0; i < (int)Sources.Count; i++)
+            {
+                TransactionEntity TE = Sources[i];
+
+                if (TE.PublicKey == SourcePublicKey.Hex)
+                    return true;
+            }
+
+            return false;
+        }
+
+        bool IsDestination(Hash DestinationPublicKey)
+        {
+            for (int i = 0; i < (int)Destinations.Count; i++)
+            {
+                TransactionEntity TE = Destinations[i];
+
+                if (TE.PublicKey == DestinationPublicKey.Hex)
+                    return true;
+            }
+
+            return false;
+        }
+
         ///////////////////////////////////////////////////////////
 
         public byte[] Serialize()
         {
-            ProtocolDataType[] PDTs = new ProtocolDataType[1 + Sources.Count + Destinations.Count + Signatures.Count];
+            ProtocolDataType[] PDTs = new ProtocolDataType[3 + Sources.Count + Destinations.Count + Signatures.Count];
 
             int cnt = 0;
 
-            PDTs[cnt++] = (ProtocolPackager.Pack(Timestamp, 0));
+            PDTs[cnt++] = (ProtocolPackager.Pack(ConfigData, 0));
+
+            PDTs[cnt++] = (ProtocolPackager.Pack(timestamp, 1));
 
             foreach (TransactionEntity ts in Sources)
             {
-                PDTs[cnt++] = (ProtocolPackager.Pack(ts.Serialize(), 1));
+                PDTs[cnt++] = (ProtocolPackager.Pack(ts.Serialize(), 2));
             }
 
             foreach (TransactionEntity td in Destinations)
             {
-                PDTs[cnt++] = (ProtocolPackager.Pack(td.Serialize(), 2));
+                PDTs[cnt++] = (ProtocolPackager.Pack(td.Serialize(), 3));
             }
 
-            foreach (byte[] te in Signatures)
+            PDTs[cnt++] = (ProtocolPackager.Pack(transactionFee, 4));
+
+            foreach (Hash te in Signatures)
             {
-                PDTs[cnt++] = (ProtocolPackager.Pack(te, 3));
-            }
+                PDTs[cnt++] = (ProtocolPackager.Pack(te, 5));
+            }            
 
             if (cnt != PDTs.Length) throw new Exception("Invalid pack entries");
 
@@ -309,23 +351,15 @@ namespace TNetD.Transactions
                 switch (PDT.NameType)
                 {
                     case 0:
-
-                        ProtocolPackager.UnpackInt64(PDT, 0, ref Timestamp);
-
+                        {
+                            ProtocolPackager.UnpackByteVector(PDT, 0, ref ConfigData);
+                        }
                         break;
 
                     case 1:
                         {
-                            byte[] tempVector = new byte[0];
-                            ProtocolPackager.UnpackByteVector(PDT, 1, ref tempVector);
-                            if (tempVector.Length > 0)
-                            {
-                                TransactionEntity tsk = new TransactionEntity();
-                                tsk.Deserialize(tempVector);
-                                Sources.Add(tsk);
-                            }
+                            ProtocolPackager.UnpackInt64(PDT, 1, ref timestamp);
                         }
-
                         break;
 
                     case 2:
@@ -336,10 +370,9 @@ namespace TNetD.Transactions
                             {
                                 TransactionEntity tsk = new TransactionEntity();
                                 tsk.Deserialize(tempVector);
-                                Destinations.Add(tsk);
+                                Sources.Add(tsk);
                             }
                         }
-
                         break;
 
                     case 3:
@@ -348,11 +381,30 @@ namespace TNetD.Transactions
                             ProtocolPackager.UnpackByteVector(PDT, 3, ref tempVector);
                             if (tempVector.Length > 0)
                             {
-                                Signatures.Add(tempVector);
+                                TransactionEntity tsk = new TransactionEntity();
+                                tsk.Deserialize(tempVector);
+                                Destinations.Add(tsk);
                             }
                         }
-
                         break;
+
+                    case 4:
+                        {
+                            ProtocolPackager.UnpackInt64(PDT, 4, ref transactionFee);
+                        }
+                        break;
+
+                    case 5:
+                        {
+                            Hash _sig;
+                            ProtocolPackager.UnpackHash(PDT, 5, out _sig);
+                            if (_sig.Hex.Length > 0)
+                            {
+                                Signatures.Add(_sig);
+                            }
+                        }
+                        break;
+                                   
                 }
             }
 
@@ -360,10 +412,6 @@ namespace TNetD.Transactions
             UpdateIntHash();
         }
 
-        
-
-
-       
-
     }
 }
+

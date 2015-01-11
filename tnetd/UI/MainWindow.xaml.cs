@@ -36,8 +36,8 @@ namespace TNetD
     /// </summary>
     public partial class MainWindow : Window
     {
-        ObservableCollection<TransactionData> _tranxData = new ObservableCollection<TransactionData>();
-        
+        ObservableCollection<TransactionContent> _tranxData = new ObservableCollection<TransactionContent>();
+
         List<Node> nodes = new List<Node>();
         GlobalConfiguration globalConfiguration;
 
@@ -52,7 +52,7 @@ namespace TNetD
 
             nodes.Add(new Node(0, globalConfiguration));
             nodes.Add(new Node(1, globalConfiguration));
-            
+
             lv_TX.ItemsSource = _tranxData;
         }
 
@@ -156,28 +156,24 @@ namespace TNetD
 
         private void menuItem_Server_Start_Click(object sender, RoutedEventArgs e)
         {
-           /* GlobalConfiguration gc = new GlobalConfiguration();
-            NodeConfig nc = new NodeConfig(0, gc);
-            NodeConfig nc1 = new NodeConfig(1, gc);*/
-            
-            SingleTransactionFactory stf = new SingleTransactionFactory(nodes[0].PublicKey, nodes[1].PublicKey, Constants.random.Next(10, 150000));
+            SingleTransactionFactory stf = new SingleTransactionFactory(nodes[0].PublicKey, nodes[1].PublicKey, Constants.random.Next(100, 1000), Constants.random.Next(10, 150000));
 
             byte[] tranxData = stf.GetTransactionData();
             byte[] signature = nodes[0].nodeConfig.SignDataWithPrivateKey(tranxData);
 
             TransactionContent transactionContent;
 
-            bool TransOk = stf.Create(signature, out transactionContent);
+            bool TransOk = stf.Create(new Hash(signature), out transactionContent);
 
             if (TransOk)
             {
                 DisplayUtils.Display("Transaction Valid: ");
 
-                DBResponse dBResponse =  nodes[0].TransactionStore.AddUpdate(transactionContent);
+                DBResponse dBResponse = nodes[0].TransactionStore.AddUpdate(transactionContent);
 
                 DisplayUtils.Display("dBResponse: " + dBResponse);
 
-                _tranxData.Add(new TransactionData(transactionContent));
+                _tranxData.Add(transactionContent);
             }
         }
 
@@ -192,9 +188,9 @@ namespace TNetD
 
         private void lv_TX_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            TransactionData var = (TransactionData)lv_TX.SelectedItem;
+            TransactionContent var = (TransactionContent)lv_TX.SelectedItem;
 
-            tb_Tx_txid.Text = var.TransactionID;
+            tb_Tx_txid.Text = var.TransactionID.ToString();
         }
 
     }

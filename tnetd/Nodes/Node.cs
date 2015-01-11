@@ -171,7 +171,7 @@ namespace TNetD.Nodes
             {
                 List<JS_TransactionReply> txidReply = new List<JS_TransactionReply>();
 
-                bool txidprocessed = false;
+                //bool txidprocessed = false;
                 int txidProcCnt = 0;
 
                 if (context.Request.RawUrl.StartsWith("/transactions"))
@@ -182,24 +182,28 @@ namespace TNetD.Nodes
                         {
                             case "txid":
 
-                                txidprocessed = true;
+                                //txidprocessed = true;
                                 
-                                string txid = context.Request.QueryString["txid"];
-                                byte[] _txid = new byte[0];
+                                string[] txids = context.Request.QueryString["txid"].Split(',');
 
-                                try
+                                foreach (string txid in txids)
                                 {
-                                    _txid = HexUtil.GetBytes(txid);
-                                }
-                                catch { }
+                                    byte[] _txid = new byte[0];
 
-                                if (_txid.Length == 32)
-                                {
-                                    TransactionContent tcxo;
-                                    if(TransactionStore.FetchTransaction(new Hash(_txid), out tcxo) == DBResponse.FetchSuccess)
+                                    try
                                     {
-                                        txidReply.Add(new JS_TransactionReply(tcxo));
-                                        txidProcCnt++;
+                                        _txid = HexUtil.GetBytes(txid);
+                                    }
+                                    catch { }
+
+                                    if (_txid.Length == 32)
+                                    {
+                                        TransactionContent tcxo;
+                                        if (TransactionStore.FetchTransaction(new Hash(_txid), out tcxo) == DBResponse.FetchSuccess)
+                                        {
+                                            txidReply.Add(new JS_TransactionReply(tcxo));
+                                            txidProcCnt++;
+                                        }
                                     }
                                 }
 
@@ -218,10 +222,10 @@ namespace TNetD.Nodes
                         this.SendJsonResponse(context, txidReply[0].GetResponse());
                         return true;
                     }
-                    if (txidReply.Count > 0)
+                    else if (txidReply.Count > 1)
                     {
                         JS_TransactionReplies replies = new JS_TransactionReplies(txidReply);
-                        this.SendJsonResponse(context, replies);
+                        this.SendJsonResponse(context, replies.GetResponse());
                         return true;
                     }
                     else
