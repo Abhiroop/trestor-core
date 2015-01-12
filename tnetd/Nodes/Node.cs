@@ -11,6 +11,7 @@ using Grapevine.Server;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
@@ -128,7 +129,7 @@ namespace TNetD.Nodes
 
             restServer.Start();
         }
-        
+
         // RPCRequestHandler rpcRequestHandler;
         bool RPCRequestHandler(HttpListenerContext context)
         {
@@ -145,7 +146,7 @@ namespace TNetD.Nodes
                         switch (key)
                         {
                             case "address":
-                                
+
 
                                 break;
 
@@ -167,7 +168,45 @@ namespace TNetD.Nodes
 
                 return true;
             }
-            else if (context.Request.RawUrl.Matches(@"^/transactions")) // Propose Transactions
+            else if (context.Request.RawUrl.Matches(@"^/propagate")) // Propagate Transactions 
+            {
+                JS_Msg msg;
+
+                if (context.Request.HttpMethod.ToUpper().Equals("POST") && context.Request.HasEntityBody && 
+                    context.Request.ContentLength64 < Constants.PREFS_MAX_RPC_POST_CONTENT_LENGTH)
+                {
+                    StreamReader sr = new StreamReader(context.Request.InputStream);
+
+                    try
+                    {
+                        byte[] data = HexUtil.GetBytes(sr.ReadToEnd());
+                        TransactionContent tco = new TransactionContent();
+                        tco.Deserialize(data);                        
+
+                        if (tco.VerifySignature())
+                        {
+                            msg = new JS_Msg("Transaction Added to propagation queue.", RPCStatus.Success);
+                        }
+                        else
+                        {
+                            msg = new JS_Msg("Signature Verification Failed.", RPCStatus.Failure);
+                        }
+                    }
+                    catch
+                    {
+                        msg = new JS_Msg("Malformed Transaction.", RPCStatus.Failure);
+                    }                    
+                }
+                else
+                {
+                    msg = new JS_Msg("Improper usage. Need to use POST and Transaction Proposal as Content.", RPCStatus.InvalidAPIUsage);                    
+                }
+
+                this.SendJsonResponse(context, msg.GetResponse());
+
+                return true;
+            }
+            else if (context.Request.RawUrl.Matches(@"^/transactions")) // Fetch Transactions
             {
                 List<JS_TransactionReply> txidReply = new List<JS_TransactionReply>();
 
@@ -183,7 +222,7 @@ namespace TNetD.Nodes
                             case "txid":
 
                                 //txidprocessed = true;
-                                
+
                                 string[] txids = context.Request.QueryString["txid"].Split(',');
 
                                 foreach (string txid in txids)
@@ -234,7 +273,7 @@ namespace TNetD.Nodes
                         this.SendJsonResponse(context, resp);
                         return true;
                     }
-                }               
+                }
 
                 return true;
             }

@@ -193,5 +193,17 @@ namespace TNetD
             tb_Tx_txid.Text = var.TransactionID.ToString();
         }
 
+        private void menu_CreateTransaction_Click(object sender, RoutedEventArgs e)
+        {
+            CreateTransaction ct = new CreateTransaction();
+            ct.Show();
+        }
+
+        private void menu_CreateAccount_Click(object sender, RoutedEventArgs e)
+        {
+            CreateAccount ca = new CreateAccount();
+            ca.Show();
+        }
+
     }
 }

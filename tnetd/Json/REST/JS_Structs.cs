@@ -37,6 +37,23 @@ namespace TNetD.Json.JS_Structs
         JS_Resp GetResponse();
     }
 
+    class JS_Msg : JS_Response
+    {
+        public string Message;
+        private RPCStatus status = RPCStatus.Failure;
+
+        public JS_Msg(string Message, RPCStatus status)
+        {
+            this.Message = Message;
+            this.status = status;
+        }
+
+        public JS_Resp GetResponse()
+        {
+            return new JS_Resp(status, this);
+        }
+    }
+
     class JS_Info : JS_Response
     {
         public byte[] PublicKey;
@@ -46,7 +63,7 @@ namespace TNetD.Json.JS_Structs
         public string Organisation;
         public string Platform;
         public string Email;
-                
+
         public JS_Resp GetResponse()
         {
             return new JS_Resp(RPCStatus.Success, this);
@@ -61,7 +78,7 @@ namespace TNetD.Json.JS_Structs
         public long TransactionFee;
         public List<TransactionEntity> Sources;
         public List<TransactionEntity> Destinations;
-        public List<byte[]> Signatures; 
+        public List<byte[]> Signatures;
 
         public JS_TransactionReply(TransactionContent content)
         {
@@ -81,7 +98,7 @@ namespace TNetD.Json.JS_Structs
     }
 
     class JS_TransactionReplies : JS_Response
-    {        
+    {
         public List<JS_TransactionReply> Transactions;
 
         public JS_TransactionReplies(List<JS_TransactionReply> transactions)

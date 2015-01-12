@@ -65,6 +65,8 @@ namespace TNetD
         public static bool ApplicationRunning = true;
 
         public static int PREFS_APP_TCP_BUFFER_SIZE = 4096;// 512 * 1024;
+
+        public static long PREFS_MAX_RPC_POST_CONTENT_LENGTH = 1024*1024; 
                 
         public static byte TransportVersion = 1;
         public static byte ProtocolVersion = 1;

@@ -103,7 +103,10 @@
                 <Separator/>
                 <MenuItem Name="menuItem_Simulation_Resync" Header="Resync"/>
             </MenuItem>
-            <MenuItem Header="EDIT"/>
+            <MenuItem Header="TOOLS">
+                <MenuItem Name="menu_CreateTransaction" Click="menu_CreateTransaction_Click" Header="Create Transaction"/>
+                <MenuItem Name="menu_CreateAccount" Click="menu_CreateAccount_Click"  Header="Create Account"/>
+            </MenuItem>
             <MenuItem Header="HELP">
                 <MenuItem Header="Topics"/>
                 <MenuItem Header="About"/>

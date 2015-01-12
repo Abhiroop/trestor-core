@@ -107,6 +107,12 @@
       <DependentUpon>ColoredTB.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\Converters.cs" />
+    <Compile Include="UI\CreateAccount.xaml.cs">
+      <DependentUpon>CreateAccount.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\CreateTransaction.xaml.cs">
+      <DependentUpon>CreateTransaction.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Utils\DisplayUtils.cs" />
     <Compile Include="Ledgers\Ledger.cs" />
@@ -121,6 +127,14 @@
     <Compile Include="Utils\TNetUtils.cs" />
     <Compile Include="Network\Networking\WorkProof.cs" />
     <Page Include="UI\ColoredTB.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\CreateAccount.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\CreateTransaction.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

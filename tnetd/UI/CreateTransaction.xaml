@@ -1,0 +1,40 @@
+﻿<Window x:Class="TNetD.UI.CreateTransaction"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CreateTransaction" Height="340" Width="577">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="5*"/>
+            <RowDefinition Height="30*"/>
+            <RowDefinition Height="30*"/>
+            <RowDefinition Height="30*"/>
+            <RowDefinition Height="30*"/>
+            <RowDefinition Height="30*"/>
+            <RowDefinition Height="5*"/>
+            <RowDefinition Height="30*"/>
+            <RowDefinition Height="5*"/>
+            <RowDefinition Height="20*"/>
+            <RowDefinition Height="5*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="130"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="100"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock HorizontalAlignment="Left" Margin="20,0,0,0" Grid.Row="1" TextWrapping="Wrap" Text="Sender Public" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="20,0,0,0" Grid.Row="2" TextWrapping="Wrap" Text="Sender Private" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="20,0,0,0" Grid.Row="3" TextWrapping="Wrap" Text="Destination Public" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="20,0,0,0" Grid.Row="4"  TextWrapping="Wrap" Text="Amount" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="20,0,0,0" Grid.Row="5"  TextWrapping="Wrap" Text="Fee" VerticalAlignment="Top"/>        
+        <TextBlock HorizontalAlignment="Left" Margin="20,0,0,0" Grid.Row="7"  TextWrapping="Wrap" Text="Transaction HEX" VerticalAlignment="Top"/>
+
+        <TextBox Name="tb_SenderPublic" HorizontalAlignment="Stretch" Grid.Row="1"  TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="1"/>
+        <TextBox Name="tb_SenderPrivate" HorizontalAlignment="Stretch" Grid.Row="2"  TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="1"/>
+        <TextBox Name="tb_DestPublic" HorizontalAlignment="Stretch" Grid.Row="3"  TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="1"/>
+        <TextBox Name="tb_Value" HorizontalAlignment="Stretch" Grid.Row="4"  TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="1"/>
+        <TextBox Name="tb_Fee" HorizontalAlignment="Stretch" Grid.Row="5"  TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="1"/>
+        
+        <TextBox Name="tb_TX_Hex" HorizontalAlignment="Stretch" Grid.Row="7"  TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="1"/>
+        <Button Content="Generate Transaction" Grid.Column="1" HorizontalAlignment="Left"  Grid.Row="9" VerticalAlignment="Top" Width="153" Click="Button_Click"/>
+    </Grid>
+</Window>

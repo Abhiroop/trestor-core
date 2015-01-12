@@ -1,4 +1,4 @@
 ﻿
 
 
-public enum RPCStatus {  Failure, Success, Exception, ServerNotReady, ServerBusy }
+public enum RPCStatus {  Failure, Success, Exception, ServerNotReady, ServerBusy, InvalidAPIUsage }
