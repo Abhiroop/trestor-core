@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -22,6 +23,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TNetD.Address;
 using TNetD.Network.Networking;
 using TNetD.Nodes;
 using TNetD.PersistentStore;
@@ -197,12 +199,33 @@ namespace TNetD
         {
             CreateTransaction ct = new CreateTransaction();
             ct.Show();
+
+            StringBuilder sb = new StringBuilder();
+
+
+            for (int j = 0; j < 256; j++)
+            for(int i=0;i<256;i++)
+            {
+                byte[] Address = AddressFactory.GetAddress(nodes[0].PublicKey.Hex, "arpan", (byte)i, (byte)j);
+                sb.AppendLine("" + i + " - " + j + " - " + AddressFactory.GetAddressString(Address));
+
+            }
+
+            File.WriteAllText ("tk.txt",sb.ToString());
+
+            DisplayUtils.Display("DONE."  );
         }
 
         private void menu_CreateAccount_Click(object sender, RoutedEventArgs e)
         {
             CreateAccount ca = new CreateAccount();
             ca.Show();
+        }
+
+        private void menu_Benchmarks_Click(object sender, RoutedEventArgs e)
+        {
+            Benchmarks bm = new Benchmarks();
+            bm.Show();
         }
 
     }

@@ -135,10 +135,6 @@ namespace TNetD.Nodes
         {
             if (context.Request.RawUrl.Matches(@"^/q")) // ProcessQueries
             {
-                //RPCStatus status = RPCStatus.Failure;
-
-                //JS_Transaction_Reply trnx = new JS_Transaction_Reply();
-
                 if (context.Request.RawUrl.StartsWith("/q"))
                 {
                     foreach (string key in context.Request.QueryString.AllKeys)
@@ -170,115 +166,122 @@ namespace TNetD.Nodes
             }
             else if (context.Request.RawUrl.Matches(@"^/propagate")) // Propagate Transactions 
             {
-                JS_Msg msg;
-
-                if (context.Request.HttpMethod.ToUpper().Equals("POST") && context.Request.HasEntityBody && 
-                    context.Request.ContentLength64 < Constants.PREFS_MAX_RPC_POST_CONTENT_LENGTH)
-                {
-                    StreamReader sr = new StreamReader(context.Request.InputStream);
-
-                    try
-                    {
-                        byte[] data = HexUtil.GetBytes(sr.ReadToEnd());
-                        TransactionContent tco = new TransactionContent();
-                        tco.Deserialize(data);                        
-
-                        if (tco.VerifySignature())
-                        {
-                            msg = new JS_Msg("Transaction Added to propagation queue.", RPCStatus.Success);
-                        }
-                        else
-                        {
-                            msg = new JS_Msg("Signature Verification Failed.", RPCStatus.Failure);
-                        }
-                    }
-                    catch
-                    {
-                        msg = new JS_Msg("Malformed Transaction.", RPCStatus.Failure);
-                    }                    
-                }
-                else
-                {
-                    msg = new JS_Msg("Improper usage. Need to use POST and Transaction Proposal as Content.", RPCStatus.InvalidAPIUsage);                    
-                }
-
-                this.SendJsonResponse(context, msg.GetResponse());
+                HandlePropagate(context);
 
                 return true;
             }
             else if (context.Request.RawUrl.Matches(@"^/transactions")) // Fetch Transactions
             {
-                List<JS_TransactionReply> txidReply = new List<JS_TransactionReply>();
-
-                //bool txidprocessed = false;
-                int txidProcCnt = 0;
-
                 if (context.Request.RawUrl.StartsWith("/transactions"))
                 {
-                    foreach (string key in context.Request.QueryString.AllKeys)
-                    {
-                        switch (key)
-                        {
-                            case "txid":
-
-                                //txidprocessed = true;
-
-                                string[] txids = context.Request.QueryString["txid"].Split(',');
-
-                                foreach (string txid in txids)
-                                {
-                                    byte[] _txid = new byte[0];
-
-                                    try
-                                    {
-                                        _txid = HexUtil.GetBytes(txid);
-                                    }
-                                    catch { }
-
-                                    if (_txid.Length == 32)
-                                    {
-                                        TransactionContent tcxo;
-                                        if (TransactionStore.FetchTransaction(new Hash(_txid), out tcxo) == DBResponse.FetchSuccess)
-                                        {
-                                            txidReply.Add(new JS_TransactionReply(tcxo));
-                                            txidProcCnt++;
-                                        }
-                                    }
-                                }
-
-                                break;
-
-                            default:
-
-                                break;
-                        }
-                    }
-
-                    // // /////////////////////////////////////////////////////////////////////
-
-                    if (txidReply.Count == 1)
-                    {
-                        this.SendJsonResponse(context, txidReply[0].GetResponse());
-                        return true;
-                    }
-                    else if (txidReply.Count > 1)
-                    {
-                        JS_TransactionReplies replies = new JS_TransactionReplies(txidReply);
-                        this.SendJsonResponse(context, replies.GetResponse());
-                        return true;
-                    }
-                    else
-                    {
-                        JS_Resp resp = new JS_Resp();
-                        this.SendJsonResponse(context, resp);
-                        return true;
-                    }
+                    HandleTransactionQuery(context);
+                    return true;
                 }
-
-                return true;
             }
 
             return false;
+        }
+
+        private void HandleTransactionQuery(HttpListenerContext context)
+        {
+            List<JS_TransactionReply> txidReply = new List<JS_TransactionReply>();
+
+            int txidProcCnt = 0;
+
+
+            foreach (string key in context.Request.QueryString.AllKeys)
+            {
+                switch (key)
+                {
+                    case "txid":
+
+                        //txidprocessed = true;
+
+                        string[] txids = context.Request.QueryString["txid"].Split(',');
+
+                        foreach (string txid in txids)
+                        {
+                            byte[] _txid = new byte[0];
+
+                            try
+                            {
+                                _txid = HexUtil.GetBytes(txid);
+                            }
+                            catch { }
+
+                            if (_txid.Length == 32)
+                            {
+                                TransactionContent tcxo;
+                                if (TransactionStore.FetchTransaction(new Hash(_txid), out tcxo) == DBResponse.FetchSuccess)
+                                {
+                                    txidReply.Add(new JS_TransactionReply(tcxo));
+                                    txidProcCnt++;
+                                }
+                            }
+                        }
+
+                        break;
+
+                    default:
+
+                        break;
+                }
+            }
+
+            // // /////////////////////////////////////////////////////////////////////
+
+            if (txidReply.Count == 1)
+            {
+                this.SendJsonResponse(context, txidReply[0].GetResponse());
+            }
+            else if (txidReply.Count > 1)
+            {
+                JS_TransactionReplies replies = new JS_TransactionReplies(txidReply);
+                this.SendJsonResponse(context, replies.GetResponse());
+
+            }
+            else
+            {
+                JS_Resp resp = new JS_Resp();
+                this.SendJsonResponse(context, resp);
+            }
+        }
+
+        private void HandlePropagate(HttpListenerContext context)
+        {
+            JS_Msg msg;
+
+            if (context.Request.HttpMethod.ToUpper().Equals("POST") && context.Request.HasEntityBody &&
+                context.Request.ContentLength64 < Constants.PREFS_MAX_RPC_POST_CONTENT_LENGTH)
+            {
+                StreamReader sr = new StreamReader(context.Request.InputStream);
+
+                try
+                {
+                    byte[] data = HexUtil.GetBytes(sr.ReadToEnd());
+                    TransactionContent tco = new TransactionContent();
+                    tco.Deserialize(data);
+
+                    if (tco.VerifySignature())
+                    {
+                        msg = new JS_Msg("Transaction Added to propagation queue.", RPCStatus.Success);
+                    }
+                    else
+                    {
+                        msg = new JS_Msg("Signature Verification Failed.", RPCStatus.Failure);
+                    }
+                }
+                catch
+                {
+                    msg = new JS_Msg("Malformed Transaction.", RPCStatus.Failure);
+                }
+            }
+            else
+            {
+                msg = new JS_Msg("Improper usage. Need to use POST and Transaction Proposal as Content.", RPCStatus.InvalidAPIUsage);
+            }
+
+            this.SendJsonResponse(context, msg.GetResponse());
         }
 
         void network_PacketReceived(Hash publicKey, NetworkPacket packet)

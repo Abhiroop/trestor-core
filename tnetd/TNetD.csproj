@@ -103,6 +103,9 @@
     <Compile Include="Tree\ListTreeLeafNode.cs" />
     <Compile Include="Tree\ListTreeNode.cs" />
     <Compile Include="Tree\TreeSyncData.cs" />
+    <Compile Include="UI\Benchmarks.xaml.cs">
+      <DependentUpon>Benchmarks.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\ColoredTB.xaml.cs">
       <DependentUpon>ColoredTB.xaml</DependentUpon>
     </Compile>
@@ -126,6 +129,10 @@
     <Compile Include="Network\Networking\StructsAndEnums.cs" />
     <Compile Include="Utils\TNetUtils.cs" />
     <Compile Include="Network\Networking\WorkProof.cs" />
+    <Page Include="UI\Benchmarks.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UI\ColoredTB.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

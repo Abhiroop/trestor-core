@@ -33,6 +33,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -57,6 +58,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
@@ -64,6 +66,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Address\AddressFactory.cs" />
+    <Compile Include="ArrayHelpers.cs" />
+    <Compile Include="Base58.cs" />
     <Compile Include="Chaos.NaCl\CryptoBytes.cs" />
     <Compile Include="Chaos.NaCl\Ed25519.cs" />
     <Compile Include="Chaos.NaCl\Internal\Array16.cs" />
@@ -127,6 +131,17 @@
     <Compile Include="Chaos.NaCl\Sha512.cs" />
     <Compile Include="Chaos.NaCl\XSalsa20Poly1305.cs" />
     <Compile Include="CommonConstants.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2B.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2BConfig.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2BCore-FullyUnrolled.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2BCore-Inline.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2BCore-Simple.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2BCore.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2BHasher.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2BNodeHasher.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2BTreeConfig.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2IvBuilder.cs" />
+    <Compile Include="Crypto\BLAKE2\Hasher.cs" />
     <Compile Include="Crypto\ISymmCipher.cs" />
     <Compile Include="Crypto\RC4.cs" />
     <Compile Include="Crypto\Salsa20.cs" />
@@ -147,6 +162,7 @@
   <ItemGroup>
     <Resource Include="Chaos.NaCl\Internal\Salsa\replace regex.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
