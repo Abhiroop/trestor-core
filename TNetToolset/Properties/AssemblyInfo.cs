@@ -7,12 +7,12 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("tnetd")]
-[assembly: AssemblyDescription("TNet Network Validator Daemon")]
+[assembly: AssemblyTitle("TNet Toolset")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Trestor Foundation")]
-[assembly: AssemblyProduct("TNet")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
+[assembly: AssemblyCompany("Arpan Jati")]
+[assembly: AssemblyProduct("TNet Toolset")]
+[assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

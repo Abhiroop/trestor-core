@@ -1,7 +1,7 @@
 ﻿/*
  *  @Author: Arpan Jati
  *  @Version: 1.0
- *  @Date: 9 Jan 2015 | 10 Jan 2015
+ *  @Date: 9 Jan 2015 | 10 Jan 2015 | 14 Jan 2015
  *  @Description: Json Structs for serialization
  */
 
@@ -54,7 +54,7 @@ namespace TNetD.Json.JS_Structs
         }
     }
 
-    class JS_Info : JS_Response
+    class JS_NodeInfo : JS_Response
     {
         public byte[] PublicKey;
         public string Name;
@@ -97,13 +97,21 @@ namespace TNetD.Json.JS_Structs
         }
     }
 
-    class JS_TransactionReplies : JS_Response
+    class JS_AccountReply : JS_Response
     {
-        public List<JS_TransactionReply> Transactions;
+        public byte[] PublicKey;      
+        public long Money;
+        public string Name;
+        public AccountState AccountState;  
+        public long LastTransactionTime;
 
-        public JS_TransactionReplies(List<JS_TransactionReply> transactions)
+        public JS_AccountReply(AccountInfo accountInfo)
         {
-            this.Transactions = transactions;
+            PublicKey = accountInfo.PublicKey.Hex;
+            Money = accountInfo.Money;
+            Name = accountInfo.Name;
+            AccountState = accountInfo.AccountState;
+            LastTransactionTime = accountInfo.LastTransactionTime;
         }
 
         public JS_Resp GetResponse()
@@ -111,5 +119,47 @@ namespace TNetD.Json.JS_Structs
             return new JS_Resp(RPCStatus.Success, this);
         }
     }
+
+    class JS_TransactionReplies : JS_Response
+    {
+        public List<JS_TransactionReply> Transactions;
+
+        public JS_TransactionReplies()
+        {
+            Transactions = new List<JS_TransactionReply>();
+        }
+
+        public JS_TransactionReplies(List<JS_TransactionReply> transactions)
+        {
+            Transactions = transactions;
+        }
+
+        public JS_Resp GetResponse()
+        {
+            return new JS_Resp(RPCStatus.Success, this);
+        }
+    }
+
+
+    class JS_AccountReplies : JS_Response
+    {
+        public List<JS_AccountReply> Accounts;
+
+        public JS_AccountReplies()
+        {
+            Accounts = new List<JS_AccountReply>();
+        }
+
+        public JS_AccountReplies(List<JS_AccountReply> accounts)
+        {
+            Accounts = accounts;
+        }
+
+        public JS_Resp GetResponse()
+        {
+            return new JS_Resp(RPCStatus.Success, this);
+        }
+    }
+
 
 }

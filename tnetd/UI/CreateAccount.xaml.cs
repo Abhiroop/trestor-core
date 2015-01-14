@@ -26,6 +26,8 @@ namespace TNetD.UI
             InitializeComponent();
         }
 
+        AddressFactory af = new AddressFactory();
+
         private void tb_PrivateRandom_TextChanged(object sender, TextChangedEventArgs e)
         {
             try
@@ -51,9 +53,9 @@ namespace TNetD.UI
             {
                 byte[] PK = HexUtil.GetBytes(tb_Public.Text);
 
-                byte [] Address = AddressFactory.GetAddress(PK, tb_Name.Text);
+                byte[] Address = af.GetAddress(PK, tb_Name.Text);
 
-                tb_Address.Text = AddressFactory.GetAddressString(Address);
+                tb_Address.Text = af.GetAddressString(Address);
             }
             catch
             {                

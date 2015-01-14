@@ -1,5 +1,5 @@
 ﻿
-// Arpan
+// Arpan Jati
 // Jan / 2015
 
 using System;
@@ -91,7 +91,7 @@ namespace TNetD
             {
                 int digit = Digits.IndexOf(s[i]); //Slow
                 if (digit < 0)
-                    throw new FormatException(string.Format("Invalid Base58 character `{0}` at position {1}", s[i], i));
+                    throw new FormatException(string.Format("Invalid Base58 character {0} at position {1}", s[i], i));
                 intData = intData * 58 + digit;
             }
 

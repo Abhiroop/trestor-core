@@ -15,7 +15,6 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-//using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -191,7 +190,6 @@ namespace TNetD
         private void lv_TX_MouseUp(object sender, MouseButtonEventArgs e)
         {
             TransactionContent var = (TransactionContent)lv_TX.SelectedItem;
-
             tb_Tx_txid.Text = var.TransactionID.ToString();
         }
 
@@ -200,20 +198,23 @@ namespace TNetD
             CreateTransaction ct = new CreateTransaction();
             ct.Show();
 
-            StringBuilder sb = new StringBuilder();
-
+            /*StringBuilder sb = new StringBuilder();
+            AddressFactory af = new AddressFactory();
 
             for (int j = 0; j < 256; j++)
-            for(int i=0;i<256;i++)
             {
-                byte[] Address = AddressFactory.GetAddress(nodes[0].PublicKey.Hex, "arpan", (byte)i, (byte)j);
-                sb.AppendLine("" + i + " - " + j + " - " + AddressFactory.GetAddressString(Address));
+                for (int i = 0; i < 256; i++)
+                {
+                    af.NetworkType = (byte)j;
+                    af.AccountType = (byte)i;
 
+                    byte[] Address = af.GetAddress(nodes[0].PublicKey.Hex, "arpan");
+                    sb.AppendLine("" + i + " - " + j + " - " + af.GetAddressString(Address));
+                }
             }
 
-            File.WriteAllText ("tk.txt",sb.ToString());
-
-            DisplayUtils.Display("DONE."  );
+            File.WriteAllText("tk.txt", sb.ToString());
+            DisplayUtils.Display("DONE.");*/
         }
 
         private void menu_CreateAccount_Click(object sender, RoutedEventArgs e)
@@ -227,6 +228,41 @@ namespace TNetD
             Benchmarks bm = new Benchmarks();
             bm.Show();
         }
+
+        private void menu_Reset_Ledger_To_Genesis_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBoxResult.Yes == MessageBox.Show("DO you really want to reset the current state. All state information will be lost.",
+                "Ledger State Reset !!!", MessageBoxButton.YesNo))
+            {
+                GenesisFileParser gfp = new GenesisFileParser("ACCOUNTS.GEN_PUBLIC");
+
+                List<AccountInfo> aiData = new List<AccountInfo>();
+                List<GenesisAccountData> gData;
+
+                gfp.GetAccounts(out gData);
+
+                foreach (Node n in nodes)
+                {
+                    var resp = n.PersistentAccountStore.DeleteEverything();
+
+                    foreach (GenesisAccountData gad in gData)
+                    {
+                        AccountInfo ai = new AccountInfo(new Hash(gad.Public), Constants.FIN_TRE_PER_GENESIS_ACCOUNT);
+
+                        ai.AccountState = AccountState.NORMAL;
+                        ai.LastTransactionTime = 0;
+                        ai.Name = gad.Name;
+
+                        aiData.Add(ai);
+                    }
+
+                    n.PersistentAccountStore.AddUpdateBatch(aiData);
+                }
+
+                MessageBox.Show("ACCOUNTS RESET. It will take some time to synchronise with the network to resume normal operation.");
+            }
+        }
+
 
     }
 }

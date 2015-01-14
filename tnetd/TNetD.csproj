@@ -67,6 +67,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Json\JsonService.cs" />
     <Compile Include="Json\REST\BytesToHexConverter.cs" />
     <Compile Include="Json\REST\Client\RESTClient.cs" />
     <Compile Include="Json\REST\Client\RESTRequest.cs" />
@@ -80,7 +81,6 @@
     <Compile Include="Json\REST\Util\Extensions.cs" />
     <Compile Include="Json\REST\Util\HttpMethod.cs" />
     <Compile Include="Json\REST\Util\Responder.cs" />
-    <Compile Include="Json\JsonService.cs" />
     <Compile Include="Ledgers\SQLiteLedgerFileHandler.cs" />
     <Compile Include="Network\FakeNetwork.cs" />
     <Compile Include="Network\Networking\PacketSender.cs" />
@@ -96,7 +96,6 @@
     <Compile Include="PersistentStore\ITransactionStore.cs" />
     <Compile Include="PersistentStore\SQLiteAccountStore.cs" />
     <Compile Include="PersistentStore\SQLiteTransactionStore.cs" />
-    <Compile Include="Transactions\AccountInfo.cs" />
     <Compile Include="Consensus\CandidateSet.cs" />
     <Compile Include="Tree\FlatNodeStore.cs" />
     <Compile Include="Tree\ListHashTree.cs" />
@@ -234,6 +233,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Transactions\" />
     <Folder Include="WebRoot\images\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

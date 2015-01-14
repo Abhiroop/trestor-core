@@ -165,7 +165,7 @@ namespace TNetD.Tree
                             // DisplayUtils.Display("CH : - " + i.ToString("X") + " : " + HexUtil.ToString(hsh.Hex));
                         }
                     }
-                    NodeHash = new Hash((new SHA512Managed()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
+                    NodeHash = new Hash((new SHA512Cng()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
                     LeafDone = true;
                 }
                 else
@@ -181,7 +181,7 @@ namespace TNetD.Tree
                             // DisplayUtils.Display("- " + i.ToString("X") + " : " + HexUtil.ToString(ai.ID.Hex) );
                         }
                     }
-                    NodeHash = new Hash((new SHA512Managed()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
+                    NodeHash = new Hash((new SHA512Cng()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
                 }
 
                 val.SetHash(NodeHash);

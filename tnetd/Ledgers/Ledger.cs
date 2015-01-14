@@ -17,7 +17,14 @@ namespace TNetD.Ledgers
         public ListHashTree LedgerTree = null;
         public long TransactionFees;
         public long TotalAmount;
-       // public DateTime CloseTime;
+        // public DateTime CloseTime;
+
+        long _load_stats = 0;
+
+        public long InitiallyLoadedNodes
+        {
+            get { return _load_stats; }
+        }
 
         Dictionary<Hash, TransactionContent> newCandidates;
 
@@ -36,6 +43,26 @@ namespace TNetD.Ledgers
 
             //ledgerData = new LedgerData();
             newCandidates = new Dictionary<Hash, TransactionContent>();
+
+            //Initial Load.
+            ReloadFromPersistentStore();
+        }
+
+        /// <summary>
+        /// This will reset the entire state for the ledger, invalidating all the un-commited changes.
+        /// TODO. CONSIDER USING A TREE DELETE/CLEAR OPERATION before the fetch.
+        /// </summary>
+        public long ReloadFromPersistentStore()
+        {
+            _load_stats = 0;
+            persistentStore.FetchAllAccounts(Add_UPDATE_TREE);
+            return _load_stats;
+        }
+
+        public void Add_UPDATE_TREE(AccountInfo userInfo)
+        {
+            LedgerTree.AddUpdate(userInfo);
+            _load_stats++;
         }
 
         /// <summary>
@@ -59,7 +86,6 @@ namespace TNetD.Ledgers
             }
         }
 
-        
         /// <summary>
         /// Inserts the list of new transactions to the proposed candidate set.
         /// </summary>
@@ -88,23 +114,18 @@ namespace TNetD.Ledgers
                 newCandidates.Add(tID, transaction);
             }
         }
-
         
-
         public void RefreshValidTransactions()
         {
             //newCandidates = GetValidatedTransactions(newCandidates);
         }
-
-     
-
+        
         public AccountInfo this[Hash account]
         {
             get
             {
                 return (AccountInfo)LedgerTree[account];
-            }
-            //return ai.Money;
+            }            
         }
 
         public bool AccountExists(Hash account)
@@ -123,12 +144,5 @@ namespace TNetD.Ledgers
         }
 
 
-
-
-
     }
-
-
-
-
 }

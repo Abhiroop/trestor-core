@@ -14,7 +14,7 @@ using TNetD.Tree;
 
 namespace TNetD.Transactions
 {
-    public enum AcountState { NORMAL, BLOCKED, DISABLED, PERMANENT_BLOCK, DELETED };
+    public enum AccountState { NORMAL = 0, BLOCKED = 1, DISABLED = 2, PERMANENT_BLOCK = 3, DELETED = 4 };
 
     /// <summary>
     /// Holds the data for an account.
@@ -39,7 +39,7 @@ namespace TNetD.Transactions
         /// <summary>
         /// Current state of the account
         /// </summary>
-        public AcountState AccountState;
+        public AccountState AccountState;
 
         /// <summary>
         /// Last Transaction Time in UTC / FileTime
@@ -55,7 +55,7 @@ namespace TNetD.Transactions
             LastTransactionTime = 0;
         }
 
-        public AccountInfo(Hash publicKey, long money, string name, AcountState accountState, long lastTransactionTime)
+        public AccountInfo(Hash publicKey, long money, string name, AccountState accountState, long lastTransactionTime)
         {
             PublicKey = publicKey;
             Money = money;
@@ -118,7 +118,7 @@ namespace TNetD.Transactions
                     case 3:
                         byte accountState = 0;
                         ProtocolPackager.UnpackByte(PDT, 3, ref accountState);
-                        AccountState = (AcountState) accountState;
+                        AccountState = (AccountState)accountState;
                         break;
 
                     case 4:

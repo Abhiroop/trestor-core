@@ -119,7 +119,7 @@ namespace Grapevine
             var buffer = context.Request.ContentEncoding.GetBytes(json);
             var length = buffer.Length;
 
-            context.Response.Headers.Add("Service", "TNetD - RPC");
+            context.Response.Headers.Add("Service", "TNetD - Trestor Network - RPC");
             context.Response.ContentType = ContentType.JSON.ToValue();
             context.Response.ContentEncoding = Encoding.UTF8;
             context.Response.ContentLength64 = length;

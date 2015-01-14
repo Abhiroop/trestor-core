@@ -178,44 +178,51 @@ namespace TNetD.Nodes
                     return true;
                 }
             }
+            else if (context.Request.RawUrl.Matches(@"^/accounts")) // Fetch Transactions
+            {
+                if (context.Request.RawUrl.StartsWith("/accounts"))
+                {
+                    HandleAccountQuery(context);
+                    return true;
+                }
+            }
 
             return false;
         }
 
-        private void HandleTransactionQuery(HttpListenerContext context)
+        private void HandleAccountQuery(HttpListenerContext context)
         {
-            List<JS_TransactionReply> txidReply = new List<JS_TransactionReply>();
-
-            int txidProcCnt = 0;
-
-
+            JS_AccountReplies replies = new JS_AccountReplies();
+            
             foreach (string key in context.Request.QueryString.AllKeys)
             {
                 switch (key)
                 {
-                    case "txid":
+                    case "pk":
 
-                        //txidprocessed = true;
+                        string[] _pks = context.Request.QueryString["pk"].Split(',');
 
-                        string[] txids = context.Request.QueryString["txid"].Split(',');
-
-                        foreach (string txid in txids)
+                        foreach (string pk in _pks)
                         {
-                            byte[] _txid = new byte[0];
+                            byte[] _pk = new byte[0];
 
                             try
                             {
-                                _txid = HexUtil.GetBytes(txid);
+                                _pk = HexUtil.GetBytes(pk);
                             }
                             catch { }
 
-                            if (_txid.Length == 32)
-                            {
-                                TransactionContent tcxo;
-                                if (TransactionStore.FetchTransaction(new Hash(_txid), out tcxo) == DBResponse.FetchSuccess)
+                            if (_pk.Length == 32)
+                            {                                
+                                Hash hpk = new Hash(_pk);
+                                /*if (PersistentAccountStore.FetchAccount(out ai, new Hash(_pk)) == DBResponse.FetchSuccess)
                                 {
-                                    txidReply.Add(new JS_TransactionReply(tcxo));
-                                    txidProcCnt++;
+                                    replies.Accounts.Add(new JS_AccountReply(ai));                                    
+                                }*/
+
+                                if (ledger.AccountExists(hpk))
+                                {
+                                    replies.Accounts.Add(new JS_AccountReply(ledger[hpk]));
                                 }
                             }
                         }
@@ -230,15 +237,72 @@ namespace TNetD.Nodes
 
             // // /////////////////////////////////////////////////////////////////////
 
-            if (txidReply.Count == 1)
+            if (replies.Accounts.Count == 1)
             {
-                this.SendJsonResponse(context, txidReply[0].GetResponse());
+                this.SendJsonResponse(context, replies.Accounts[0].GetResponse());
             }
-            else if (txidReply.Count > 1)
-            {
-                JS_TransactionReplies replies = new JS_TransactionReplies(txidReply);
+            else if (replies.Accounts.Count > 1)
+            {   
                 this.SendJsonResponse(context, replies.GetResponse());
+            }
+            else
+            {
+                JS_Resp resp = new JS_Resp();
+                this.SendJsonResponse(context, resp);
+            }
+        }
 
+        private void HandleTransactionQuery(HttpListenerContext context)
+        {
+            JS_TransactionReplies replies = new JS_TransactionReplies();
+
+            foreach (string key in context.Request.QueryString.AllKeys)
+            {
+                switch (key)
+                {
+                    case "id":
+
+                        //txidprocessed = true;
+
+                        string[] txids = context.Request.QueryString["id"].Split(',');
+
+                        foreach (string txid in txids)
+                        {
+                            byte[] _txid = new byte[0];
+
+                            try
+                            {
+                                _txid = HexUtil.GetBytes(txid);
+                            }
+                            catch { }
+
+                            if (_txid.Length == 32)
+                            {
+                                TransactionContent tcxo;
+                                if (TransactionStore.FetchTransaction(out tcxo, new Hash(_txid)) == DBResponse.FetchSuccess)
+                                {
+                                    replies.Transactions.Add(new JS_TransactionReply(tcxo));                                    
+                                }
+                            }
+                        }
+
+                        break;
+
+                    default:
+
+                        break;
+                }
+            }
+
+            // // /////////////////////////////////////////////////////////////////////
+
+            if (replies.Transactions.Count == 1)
+            {
+                this.SendJsonResponse(context, replies.Transactions[0].GetResponse());
+            }
+            else if (replies.Transactions.Count > 1)
+            {                
+                this.SendJsonResponse(context, replies.GetResponse());
             }
             else
             {
@@ -287,8 +351,6 @@ namespace TNetD.Nodes
         void network_PacketReceived(Hash publicKey, NetworkPacket packet)
         {
             DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + publicKey + " | Data Length : " + packet.Data.Length);
-
-            //throw new NotImplementedException();
         }
 
         public void StopNode()
@@ -302,31 +364,23 @@ namespace TNetD.Nodes
         void SendInitialize(Hash publicKey)
         {
             //await Task.Delay(Constants.random.Next(500, 1000)); // Wait a random delay before connecting.
-
             NetworkPacketQueueEntry npqe = new NetworkPacketQueueEntry(publicKey, new NetworkPacket(PublicKey, PacketType.TPT_HELLO, new byte[0]));
-
             network.AddToQueue(npqe);
         }
 
         private void Tmr_Elapsed(object sender, ElapsedEventArgs e)
         {
             //await Task.WhenAll(tasks.ToArray());
-
-
-
+            
             while (PendingIncomingCandidates.Count > 0)
             {
-
-                // ledger.PushNewCandidate(PendingIncomingCandidates.Pop());
+                
             }
 
             // Send the transcation to the TrustedNodes
             while (PendingIncomingTransactions.Count > 0)
             {
-                // TransactionContent tc = PendingIncomingTransactions.Pop();
-
-                //  ReceivedCandidates
-                // ReceivedCandidates
+                
             }
         }
 
@@ -369,7 +423,6 @@ namespace TNetD.Nodes
         }
 
         Stack<TransactionContentPack> PendingIncomingCandidates = new Stack<TransactionContentPack>();
-
         Stack<TransactionContentPack> PendingIncomingTransactions = new Stack<TransactionContentPack>();
 
         /// <summary>

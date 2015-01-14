@@ -55,7 +55,12 @@ namespace TNetD
 
         public static readonly int SYNC_LEAF_COUNT_THRESHOLD = 200;
 
-        ///////////////////////////
+        /// <summary>
+        /// Number of Tre's per Genesis Account. Currently equivalent to 100,000 USD (1 T = 1 US Cent).
+        /// </summary>
+        public static readonly long FIN_TRE_PER_GENESIS_ACCOUNT = 10000000000000;
+
+        ///////////////////////////////////////////////////////   10000000000000 = 100 Billion * [10^6] / 10000 Genesis Accounts
 
         public static readonly int Network_UpdateFrequencyMS = 100;
         public static readonly int Network_DefaultListenPort = 2014;

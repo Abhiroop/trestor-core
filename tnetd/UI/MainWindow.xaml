@@ -95,6 +95,8 @@
                 <MenuItem Header="Restart" />
                 <Separator/>
                 <MenuItem Header="Resync"/>
+                <Separator/>
+                <MenuItem Name="menu_Reset_Ledger_To_Genesis" Header="Reset Ledger to Genesis" Click="menu_Reset_Ledger_To_Genesis_Click"/>
             </MenuItem>
             <MenuItem Header="SIMULATION">
                 <MenuItem Name="menuItem_Simulation_Start" Header="Start" Click="menuItem_Simulation_Start_Click"/>
@@ -107,6 +109,7 @@
                 <MenuItem Name="menu_CreateTransaction" Click="menu_CreateTransaction_Click" Header="Create Transaction"/>
                 <MenuItem Name="menu_CreateAccount" Click="menu_CreateAccount_Click"  Header="Create Account"/>
                 <MenuItem Name="menu_Benchmarks" Header="Benchmarks" Click="menu_Benchmarks_Click"/>
+                
             </MenuItem>
             <MenuItem Header="HELP">
                 <MenuItem Header="Topics"/>

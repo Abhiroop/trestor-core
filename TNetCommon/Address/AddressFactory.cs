@@ -14,18 +14,43 @@ using System.Diagnostics.Contracts;
 
 namespace TNetD.Address
 {
-
     /// <summary>
-    /// Generates addresses from PublicKey, UserName and NetworkType
+    /// Generate addresses from PublicKey and UserName
     /// </summary>
-    public static class AddressFactory
+    public class AddressFactory
     {
+        byte _NetworkType = (byte) 15;
+        byte _AccountType = (byte) 32;
+
+        public AddressFactory()
+        {
+
+        }
+
+        public AddressFactory(byte NetworkType = (byte)15, byte AccountType = (byte)32)
+        {
+            this._NetworkType = NetworkType;
+            this._AccountType = AccountType;
+        }
+        
+        public byte NetworkType
+        {
+            get { return _NetworkType; }
+            set { _NetworkType = value; }
+        }
+
+        public byte AccountType
+        {
+            get { return _AccountType; }
+            set { _AccountType = value; }
+        }
+        
         /// <summary>
         /// Returns the 
         /// H = SHA512, 
         /// Address Format : Address = NetType || AccountType || {[H(H(PK) || PK || NAME)], Take first 20 bytes}
         /// </summary>
-        public static byte[] GetAddress(byte[] PublicKey, string UserName, byte NetworkType = (byte)15, byte AccountType = (byte)32)
+        public byte[] GetAddress(byte[] PublicKey, string UserName)
         {
             //Contract.Requires<ArgumentException>(PublicKey != null);
             //Contract.Requires<ArgumentException>(UserName != null);
@@ -42,8 +67,8 @@ namespace TNetD.Address
 
             byte[] Address_PH = new byte[22];
 
-            Address_PH[0] = NetworkType;
-            Address_PH[1] = AccountType;
+            Address_PH[0] = _NetworkType;
+            Address_PH[1] = _AccountType;
             Array.Copy(H_Hpk__PK__NAME, 0, Address_PH, 2, 20);
 
             /* byte[] CheckSum = (new SHA512Managed()).ComputeHash(Address_PH, 0, 22).Take(4).ToArray();
@@ -52,7 +77,34 @@ namespace TNetD.Address
             return Address_PH;
         }
 
-       /* private static string GetAddressString_Internal(byte[] Address)
+        /// <summary>
+        /// Returns true if the address, is consistent with the provided UserName and PublicKey.
+        /// </summary>
+        /// <param name="Address">Address without checksum.</param>
+        /// <param name="PublicKey">32 byte Public Key</param>
+        /// <param name="UserName">UserName / can be zero length.</param>
+        /// <returns></returns>
+        public bool VerfiyAddress(byte[] Address, byte [] PublicKey, string UserName)
+        {
+            if (Address.ByteArrayEquals(GetAddress(PublicKey, UserName)))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool VerfiyAddress(string Address, byte[] PublicKey, string UserName)
+        {
+            if (Address == Base58Encoding.EncodeWithCheckSum(GetAddress(PublicKey, UserName)))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+       /* private string GetAddressString_Internal(byte[] Address)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append((char)Address[0]);
@@ -63,7 +115,7 @@ namespace TNetD.Address
             return sb.ToString();
         }*/
 
-        public static string GetAddressString(byte[] Address )
+        public string GetAddressString(byte[] Address )
         {
             if (Address.Length != 22)
             {
@@ -76,7 +128,7 @@ namespace TNetD.Address
         }
 
         /*
-        public static bool ValidateAddress(byte[] Address)
+        public bool ValidateAddress(byte[] Address)
         {
             if (Address.Length != 26)
                 return false;

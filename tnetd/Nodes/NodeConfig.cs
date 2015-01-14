@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using TNetD.Address;
 using TNetD.Json.JS_Structs;
 using TNetD.Network.Networking;
 
@@ -358,12 +359,13 @@ namespace TNetD.Nodes
         #endregion
 
 
-        public JS_Info Get_JS_Info()
+        public JS_NodeInfo Get_JS_Info()
         {
-            JS_Info info = new JS_Info();
+            JS_NodeInfo info = new JS_NodeInfo();
+            AddressFactory af = new AddressFactory();
 
             info.Name = Name;
-            info.Address = Address.AddressFactory.GetAddress(PublicKey.Hex, Name);
+            info.Address = af.GetAddress(PublicKey.Hex, Name);
             info.Email = Email;
             info.Organisation = Organisation;
             info.Platform = Platform;
