@@ -11,7 +11,7 @@ using TNetD.Transactions;
 
 namespace TNetD.PersistentStore
 {
-    public delegate void AccountFetchEventHandler(AccountInfo accountInfo);
+    public delegate bool AccountFetchEventHandler(AccountInfo accountInfo);
 
     /// <summary>
     /// This is an interface to implement all the PersistentStorage techniques.

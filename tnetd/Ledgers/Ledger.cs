@@ -12,6 +12,12 @@ namespace TNetD.Ledgers
 {
     class Ledger
     {
+        public enum LedgerEventType { Insert, Update, Progress };
+
+        public delegate void LedgerEventHandler(LedgerEventType ledgerEvent, string Message);
+
+        public event LedgerEventHandler LedgerEvent;
+        
         IPersistentAccountStore persistentStore;
 
         /// <summary>
@@ -54,8 +60,12 @@ namespace TNetD.Ledgers
             //ledgerData = new LedgerData();
             newCandidates = new Dictionary<Hash, TransactionContent>();
 
-            //Initial Load.
-            ReloadFromPersistentStore();
+            //Initial Load.           
+        }
+
+        public void InitializeLedger()
+        {
+             ReloadFromPersistentStore();
         }
 
         /// <summary>
@@ -67,29 +77,8 @@ namespace TNetD.Ledgers
             _load_stats = 0;
             AddressAccountInfoMap.Clear();
             NameAccountInfoMap.Clear();
-            persistentStore.FetchAllAccounts(Add_UPDATE_TREE);
+            persistentStore.FetchAllAccounts(AddUserToLedger);
             return _load_stats;
-        }
-
-        public void Add_UPDATE_TREE(AccountInfo userInfo)
-        {
-            LedgerTree.AddUpdate(userInfo);
-            
-            string address = userInfo.GetAddress();
-            if (!AddressAccountInfoMap.ContainsKey(address))
-            {
-                AddressAccountInfoMap.Add(address, userInfo);
-            }
-
-            if (userInfo.Name.Length >= Constants.Pref_MinNameLength)
-            {
-                if (!NameAccountInfoMap.ContainsKey(userInfo.Name))
-                {
-                    NameAccountInfoMap.Add(userInfo.Name, userInfo);
-                }
-            }
-
-            _load_stats++;
         }
 
         /// <summary>
@@ -99,19 +88,41 @@ namespace TNetD.Ledgers
         /// <returns></returns>
         public bool AddUserToLedger(AccountInfo userInfo)
         {
-            // MAKE sure account does not exist
-            bool contains = LedgerTree.NodeExists(userInfo.PublicKey);
+            TreeResponseType response = LedgerTree.AddUpdate(userInfo);
 
-            if (!contains)
+            if (response == TreeResponseType.Added || response == TreeResponseType.Updated)
             {
-                AddressAccountInfoMap.Add(userInfo.GetAddress(), userInfo);
-                LedgerTree.AddUpdate(userInfo);
+                string address = userInfo.GetAddress();
+                if (AddressAccountInfoMap.ContainsKey(address))
+                {
+                    AddressAccountInfoMap[address] = userInfo; // Update
+                }
+                else
+                {
+                    AddressAccountInfoMap.Add(address, userInfo); // Add
+                }
+
+                if (userInfo.Name.Length >= Constants.Pref_MinNameLength)
+                {
+                    if (NameAccountInfoMap.ContainsKey(userInfo.Name))
+                    {
+                        NameAccountInfoMap[userInfo.Name] = userInfo; // Update
+                    }
+                    else
+                    {
+                        NameAccountInfoMap.Add(userInfo.Name, userInfo); // Add
+                    }
+                }
+
+                if ((_load_stats % 100 == 0) && (LedgerEvent != null))
+                    LedgerEvent(LedgerEventType.Progress, "Loaded " + _load_stats + " Accounts.");
+
+                _load_stats++;
+
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         /// <summary>
@@ -142,12 +153,12 @@ namespace TNetD.Ledgers
                 newCandidates.Add(tID, transaction);
             }
         }
-        
+
         public void RefreshValidTransactions()
         {
             //newCandidates = GetValidatedTransactions(newCandidates);
         }
-        
+
         /// <summary>
         /// Gets an account from the tree.
         /// </summary>
@@ -158,7 +169,7 @@ namespace TNetD.Ledgers
             get
             {
                 return (AccountInfo)LedgerTree[account];
-            }            
+            }
         }
 
         public bool AccountExists(Hash account)

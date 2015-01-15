@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
@@ -42,6 +43,8 @@ namespace TNetD
         List<Node> nodes = new List<Node>();
         GlobalConfiguration globalConfiguration;
 
+        Thread background_Load;
+
         public MainWindow()
         {
             Constants.Initialize();
@@ -51,10 +54,41 @@ namespace TNetD
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
             globalConfiguration = new GlobalConfiguration();
 
-            nodes.Add(new Node(0, globalConfiguration));
-            nodes.Add(new Node(1, globalConfiguration));
-
             lv_TX.ItemsSource = _tranxData;
+
+            background_Load = new Thread(LoadNodes);
+
+            background_Load.Start();
+        }
+
+        void AddNode(int idx)
+        {
+            Node nd = new Node(idx, globalConfiguration);
+            nd.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
+            nd.BeginBackgroundLoad();
+
+            nodes.Add(nd);
+        }
+
+        void LocalLedger_LedgerEvent(Ledgers.Ledger.LedgerEventType ledgerEvent, string Message)
+        {
+            try
+            {
+                this.Dispatcher.Invoke(new Action(() =>
+                {
+                    textBlock_Status.Text = "" + ledgerEvent.ToString() + " - " + Message;
+                    //textBlock_StatusLog.Inlines.Add(new Run(Text + "\n") { Foreground = new SolidColorBrush(color) });
+                }));
+            }
+            catch { }
+            //throw new NotImplementedException();
+        }
+
+
+        void LoadNodes()
+        {
+            AddNode(0);
+            AddNode(1);
         }
 
         void DisplayUtils_DisplayText(string Text, Color color, DisplayType type)
@@ -150,6 +184,14 @@ namespace TNetD
             foreach (Node nd in nodes)
             {
                 nd.StopNode();
+            }
+
+            if (background_Load != null)
+            {
+                if (background_Load.IsAlive)
+                {
+                    background_Load.Abort();
+                }
             }
         }
 

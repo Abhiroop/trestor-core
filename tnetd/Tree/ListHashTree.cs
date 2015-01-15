@@ -11,6 +11,9 @@ using TNetD.Transactions;
 
 namespace TNetD.Tree
 {
+
+    public enum TreeResponseType { Added, Removed, Updated, Failed };
+
     /// <summary>
     /// This represents a Merkle Hash tree, each node has 16 child nodes.
     /// The depth is defined by the length of the Hash in Nibbles.
@@ -86,9 +89,10 @@ namespace TNetD.Tree
         /// </summary>
         /// <param name="Value">The Value to be added</param>
         /// <returns></returns>
-        public bool AddUpdate(LeafDataType Value)
+        public TreeResponseType AddUpdate(LeafDataType Value)
         {
             bool Good = false;
+            bool Add = true;
 
             Hash ID = Value.GetID();
 
@@ -128,12 +132,12 @@ namespace TNetD.Tree
                         _Values.Add(Value.GetID(), Value);
                         TempRoot.Children[Nibble] = new ListTreeLeafNode(_Values);
                         _TraversedNodes++;
-
+                        Add = true;
                         Good = true;
                     } // Add to current leaf node
                     else if (TempRoot.Children[Nibble].GetType() == typeof(ListTreeLeafNode))
                     {
-                        ((ListTreeLeafNode)TempRoot.Children[Nibble]).Add(Value.GetID(), Value);
+                        Add = ((ListTreeLeafNode)TempRoot.Children[Nibble]).AddUpdate(Value.GetID(), Value);
                         Good = true;
                     }
                     else
@@ -187,7 +191,9 @@ namespace TNetD.Tree
                 val.SetHash(NodeHash);
             }
 
-            return Good;
+            return Good ? //IS Good
+                (Add ? TreeResponseType.Added : TreeResponseType.Updated) : // YES: Added / Updated
+                TreeResponseType.Failed; // NO
         }
 
         public int TraverseNodes()

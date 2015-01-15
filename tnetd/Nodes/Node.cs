@@ -16,6 +16,7 @@ using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using TNetD.Json.JS_Structs;
@@ -31,6 +32,8 @@ namespace TNetD.Nodes
 
     internal class Node : Responder
     {
+        Thread background_Load;
+
         SecureNetwork network = default(SecureNetwork);
 
         RESTServer restServer = default(RESTServer);
@@ -71,7 +74,7 @@ namespace TNetD.Nodes
             }
         }
 
-        Timer Tmr;
+        System.Timers.Timer Tmr;
 
         // TODO: MAKE PRIVATE : AND FAST
         public NodeConfig nodeConfig = default(NodeConfig);
@@ -88,9 +91,9 @@ namespace TNetD.Nodes
             network = new SecureNetwork(nodeConfig);
             network.PacketReceived += network_PacketReceived;
 
-            TrustedNodes = globalConfiguration.TrustedNodes;
-
             network.Initialize();
+
+            TrustedNodes = globalConfiguration.TrustedNodes;
 
             PersistentAccountStore = new SQLiteAccountStore(nodeConfig);
             TransactionStore = new SQLiteTransactionStore(nodeConfig);
@@ -98,10 +101,11 @@ namespace TNetD.Nodes
             AI = new AccountInfo(PublicKey, Money);
 
             ledger = new Ledger(PersistentAccountStore);
+            
 
-            ledger.AddUserToLedger(AI);
+            //ledger.AddUserToLedger(AI);
 
-            Tmr = new Timer();
+            Tmr = new System.Timers.Timer();
             Tmr.Elapsed += Tmr_Elapsed;
             Tmr.Enabled = true;
             Tmr.Interval = nodeConfig.UpdateFrequencyMS;
@@ -128,6 +132,25 @@ namespace TNetD.Nodes
             restServer = new RESTServer("localhost", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
 
             restServer.Start();
+
+            background_Load = new Thread(BackgroundLoad);
+            
+        }
+
+        /// <summary>
+        /// Add more content to be loaded in background here.
+        /// Maybe scheduled using timers also.
+        /// </summary>
+        void BackgroundLoad()
+        {
+            ledger.InitializeLedger();
+
+
+        }
+
+        public void BeginBackgroundLoad()
+        {
+            background_Load.Start();            
         }
 
         // RPCRequestHandler rpcRequestHandler;
@@ -383,6 +406,14 @@ namespace TNetD.Nodes
             network.Stop();
 
             restServer.Stop();
+
+            if (background_Load != null)
+            {
+                if (background_Load.IsAlive)
+                {
+                    background_Load.Abort();
+                }
+            }
         }
 
         void SendInitialize(Hash publicKey)
