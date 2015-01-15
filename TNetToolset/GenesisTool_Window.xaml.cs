@@ -25,6 +25,7 @@ using TNetD.Address;
 
 namespace TNetToolset
 {
+
     /// <summary>
     /// Interaction logic for GenesisTool_Window.xaml
     /// </summary>
@@ -71,17 +72,17 @@ namespace TNetToolset
 
             RNGCryptoServiceProvider rngCSP = new RNGCryptoServiceProvider();
 
-            byte[] Net_Types = new byte[] { 14, 29 };
-            byte[] Acc_Types_Main = new byte[] { 201, 234, 217 };
-            byte[] Acc_Types_Test = new byte[] { 25, 59, 40 };
+            NetworkType[] Net_Types = new NetworkType[] { NetworkType.MainNet, NetworkType.TestNet };
+            AccountType[] Acc_Types_Main = new AccountType[] { AccountType.MainGenesis, AccountType.MainValidator, AccountType.MainNormal };
+            AccountType[] Acc_Types_Test = new AccountType[] { AccountType.TestGenesis, AccountType.TestValidator, AccountType.TestNormal };
 
             AddressFactory af = new AddressFactory();
 
             af.NetworkType = Net_Types[cb_NetworkType.SelectedIndex];
 
             af.AccountType = cb_NetworkType.SelectedIndex == 0 ?
-                Acc_Types_Main[cb_AccountType.SelectedIndex] :
-                Acc_Types_Test[cb_AccountType.SelectedIndex];
+                (AccountType)Acc_Types_Main[cb_AccountType.SelectedIndex] :
+                (AccountType)Acc_Types_Test[cb_AccountType.SelectedIndex];
 
             string AccountPrefix = tb_AccountNamePrefix.Text.Trim();
             string DescriptionPrefix = tb_AccountDescriptionPrefix.Text.Trim();
@@ -102,7 +103,7 @@ namespace TNetToolset
 
                 string NAME = AccountPrefix + "_" + i;
 
-                string ADDRESS = af.GetAddressString(af.GetAddress(publicKey, NAME));
+                string ADDRESS = AddressFactory.GetAddressString(af.GetAddress(publicKey, NAME));
 
                 string DESCRIPTION = DescriptionPrefix;// +"_" + i;
 

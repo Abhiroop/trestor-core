@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TNetD.Address;
 using TNetD.Transactions;
 
 namespace TNetD.Json.JS_Structs
@@ -102,7 +103,10 @@ namespace TNetD.Json.JS_Structs
         public byte[] PublicKey;      
         public long Money;
         public string Name;
-        public AccountState AccountState;  
+        public string Address;
+        public AccountState AccountState;
+        public NetworkType NetworkType;
+        public AccountType AccountType;
         public long LastTransactionTime;
 
         public JS_AccountReply(AccountInfo accountInfo)
@@ -110,6 +114,13 @@ namespace TNetD.Json.JS_Structs
             PublicKey = accountInfo.PublicKey.Hex;
             Money = accountInfo.Money;
             Name = accountInfo.Name;
+
+            Address =  AddressFactory.GetAddressString(AddressFactory.GetAddress(accountInfo.PublicKey.Hex,
+                accountInfo.Name, accountInfo.NetworkType, accountInfo.AccountType));
+
+            NetworkType = accountInfo.NetworkType;
+            AccountType = accountInfo.AccountType;
+
             AccountState = accountInfo.AccountState;
             LastTransactionTime = accountInfo.LastTransactionTime;
         }

@@ -146,7 +146,6 @@ namespace TNetD.Nodes
 
                                 break;
 
-
                             default:
 
                                 break;
@@ -383,7 +382,6 @@ namespace TNetD.Nodes
                 
             }
         }
-
 
         void CreateArbitraryTransactionAndSendToTrustedNodes()
         {

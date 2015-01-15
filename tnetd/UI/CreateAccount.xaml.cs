@@ -55,7 +55,7 @@ namespace TNetD.UI
 
                 byte[] Address = af.GetAddress(PK, tb_Name.Text);
 
-                tb_Address.Text = af.GetAddressString(Address);
+                tb_Address.Text = AddressFactory.GetAddressString(Address);
             }
             catch
             {                

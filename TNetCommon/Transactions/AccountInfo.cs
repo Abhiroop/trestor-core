@@ -9,12 +9,13 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using TNetD;
+using TNetD.Address;
 using TNetD.Protocol;
 using TNetD.Tree;
 
 namespace TNetD.Transactions
 {
-    public enum AccountState { NORMAL = 0, BLOCKED = 1, DISABLED = 2, PERMANENT_BLOCK = 3, DELETED = 4 };
+    public enum AccountState { Normal = 0, Blocked = 1, Disabled = 2, PermanentBlock = 3, Deleted = 4 };
 
     /// <summary>
     /// Holds the data for an account.
@@ -42,6 +43,16 @@ namespace TNetD.Transactions
         public AccountState AccountState;
 
         /// <summary>
+        /// Account Type : Genesis, Validator, Network
+        /// </summary>
+        public AccountType AccountType;
+
+        /// <summary>
+        /// NetworkType : Main / Test
+        /// </summary>
+        public NetworkType NetworkType;
+
+        /// <summary>
         /// Last Transaction Time in UTC / FileTime
         /// </summary>
         public long LastTransactionTime;
@@ -51,16 +62,21 @@ namespace TNetD.Transactions
             PublicKey = publicKey;
             Money = money;
             Name = "";
-            AccountState = 0;
+            AccountState = AccountState.Normal;
+            NetworkType = NetworkType.MainNet;
+            AccountType = AccountType.MainNormal;
             LastTransactionTime = 0;
         }
 
-        public AccountInfo(Hash publicKey, long money, string name, AccountState accountState, long lastTransactionTime)
+        public AccountInfo(Hash publicKey, long money, string name, AccountState accountState, 
+            NetworkType networkType, AccountType accountType,  long lastTransactionTime)
         {
             PublicKey = publicKey;
             Money = money;
             Name = name;
             AccountState = accountState;
+            NetworkType = networkType;
+            AccountType = accountType;
             LastTransactionTime = lastTransactionTime;
         }
 
@@ -70,10 +86,12 @@ namespace TNetD.Transactions
             data.AddRange(PublicKey.Hex);
             data.AddRange(Conversions.Int64ToVector(Money));
             data.AddRange(Encoding.GetEncoding(28591).GetBytes(Name));
-            data.AddRange(Conversions.Int64ToVector(LastTransactionTime));
             data.Add((byte)AccountState);
-            Hash h = new Hash(((new SHA512Managed()).ComputeHash(data.ToArray())).Take(32).ToArray());
-            return h;
+            data.Add((byte)NetworkType);
+            data.Add((byte)AccountType);
+            data.AddRange(Conversions.Int64ToVector(LastTransactionTime));
+           
+            return new Hash(((new SHA512Cng()).ComputeHash(data.ToArray())).Take(32).ToArray());
         }
 
         override public Hash GetID()
@@ -88,7 +106,9 @@ namespace TNetD.Transactions
             PDTs.Add(ProtocolPackager.Pack(Money, 1));
             PDTs.Add(ProtocolPackager.Pack(Name, 2));
             PDTs.Add(ProtocolPackager.Pack((byte)AccountState, 3));
-            PDTs.Add(ProtocolPackager.Pack(LastTransactionTime, 4));
+            PDTs.Add(ProtocolPackager.Pack((byte)NetworkType, 4));
+            PDTs.Add(ProtocolPackager.Pack((byte)AccountType, 5));
+            PDTs.Add(ProtocolPackager.Pack(LastTransactionTime, 6));
             return ProtocolPackager.PackRaw(PDTs);
         }
 
@@ -122,7 +142,19 @@ namespace TNetD.Transactions
                         break;
 
                     case 4:
-                        ProtocolPackager.UnpackInt64(PDT, 4, ref LastTransactionTime);
+                        byte networkType = 0;
+                        ProtocolPackager.UnpackByte(PDT, 4, ref networkType);
+                        NetworkType = (NetworkType)networkType;
+                        break;
+
+                    case 5:
+                        byte accountType = 0;
+                        ProtocolPackager.UnpackByte(PDT, 5, ref accountType);
+                        AccountType = (AccountType)accountType;
+                        break;
+
+                    case 6:
+                        ProtocolPackager.UnpackInt64(PDT, 6, ref LastTransactionTime);
                         break;
                 }
             }

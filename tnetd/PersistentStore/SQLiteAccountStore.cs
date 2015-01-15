@@ -1,7 +1,8 @@
 ﻿
 //
 // @Author: Arpan Jati
-// @Date: 1-2-3-6 Jan 2015 | 15 Jan 2015
+// @Date: 1-2-3-6 Jan 2015
+// 15 Jan 2015 : Adding : NetworkType / AccountType
 //
 
 using System;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
 using System.Text;
+using TNetD.Address;
 using TNetD.Nodes;
 using TNetD.Transactions;
 
@@ -31,7 +33,7 @@ namespace TNetD.PersistentStore
 
         public bool AccountExists(Hash publicKey)
         {
-            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE PublicKey = @publicKey", sqliteConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE PublicKey = @publicKey;", sqliteConnection))
             {
                 cmd.Parameters.Add(new SQLiteParameter("@publicKey", publicKey.Hex));
                 using (SQLiteDataReader reader = cmd.ExecuteReader())
@@ -51,7 +53,7 @@ namespace TNetD.PersistentStore
 
             long Records = 0;
 
-            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger", sqliteConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger;", sqliteConnection))
             {
                 using (SQLiteDataReader reader = cmd.ExecuteReader())
                 {                    
@@ -63,11 +65,17 @@ namespace TNetD.PersistentStore
                             string userName = (string)reader[1];
                             long balance = (long)reader[2];
                             long accountState = (long)reader[3];
-                            long lastTransactionTime = (long)reader[4];
+
+                            long networkType = (long)reader[4];
+                            long accountType = (long)reader[5];
+
+                            long lastTransactionTime = (long)reader[6];
 
                             if(accountFetch != null)
                             {
-                                AccountInfo accountInfo = new AccountInfo(_publicKey, balance, userName, (AccountState)accountState, lastTransactionTime);
+                                AccountInfo accountInfo = new AccountInfo(_publicKey, balance, userName, (AccountState)accountState, 
+                                    (NetworkType)networkType, (AccountType)accountType, lastTransactionTime);
+
                                 accountFetch(accountInfo);
                             }
                             
@@ -87,7 +95,7 @@ namespace TNetD.PersistentStore
         {
             DBResponse response = DBResponse.FetchFailed;
 
-            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE PublicKey = @publicKey", sqliteConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE PublicKey = @publicKey;", sqliteConnection))
             {
                 cmd.Parameters.Add(new SQLiteParameter("@publicKey", publicKey.Hex));
                 using (SQLiteDataReader reader = cmd.ExecuteReader())
@@ -102,11 +110,17 @@ namespace TNetD.PersistentStore
                             string userName = (string)reader[1];
                             long balance = (long)reader[2];
                             long accountState = (long)reader[3];
-                            long lastTransactionTime = (long)reader[4];
+
+                            long networkType = (long)reader[4];
+                            long accountType = (long)reader[5];
+
+                            long lastTransactionTime = (long)reader[6];
 
                             if (_publicKey == publicKey)
                             {
-                                accountInfo = new AccountInfo(_publicKey, balance, userName, (AccountState)accountState, lastTransactionTime);
+                                accountInfo = new AccountInfo(_publicKey, balance, userName, (AccountState)accountState, 
+                                    (NetworkType)networkType, (AccountType)accountType, lastTransactionTime);
+
                                 response = DBResponse.FetchSuccess;
                             }
                         }
@@ -139,7 +153,7 @@ namespace TNetD.PersistentStore
         {
             bool doUpdate = false;
 
-            using (SQLiteCommand cmd = new SQLiteCommand("SELECT PublicKey FROM Ledger WHERE PublicKey = @publicKey", sqliteConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT PublicKey FROM Ledger WHERE PublicKey = @publicKey;", sqliteConnection))
             {
                 cmd.Parameters.Add(new SQLiteParameter("@publicKey", accountInfo.PublicKey.Hex));
                 using (SQLiteDataReader reader = cmd.ExecuteReader())
@@ -157,13 +171,15 @@ namespace TNetD.PersistentStore
             {
                 // /////////////  Perform the UPDATE  ///////////////
 
-                using (SQLiteCommand cmd = new SQLiteCommand("UPDATE Ledger SET UserName = @userName, Balance = @balance, AccountState = @accountState, LastTransaction = @transactionTime WHERE PublicKey = @publicKey;", sqliteConnection))
+                using (SQLiteCommand cmd = new SQLiteCommand("UPDATE Ledger SET UserName = @userName, Balance = @balance, AccountState = @accountState, NetworkType=@networkType, AccountType=@accountType, LastTransactionTime = @lastTransactionTime WHERE PublicKey = @publicKey;", sqliteConnection))
                 {
                     cmd.Parameters.Add(new SQLiteParameter("@publicKey", accountInfo.PublicKey.Hex));
                     cmd.Parameters.Add(new SQLiteParameter("@userName", accountInfo.Name));
                     cmd.Parameters.Add(new SQLiteParameter("@balance", accountInfo.Money));
                     cmd.Parameters.Add(new SQLiteParameter("@accountState", (byte)accountInfo.AccountState));
-                    cmd.Parameters.Add(new SQLiteParameter("@transactionTime", accountInfo.LastTransactionTime));
+                    cmd.Parameters.Add(new SQLiteParameter("@networkType", (byte)accountInfo.NetworkType));
+                    cmd.Parameters.Add(new SQLiteParameter("@accountType", (byte)accountInfo.AccountType));
+                    cmd.Parameters.Add(new SQLiteParameter("@lastTransactionTime", accountInfo.LastTransactionTime));
 
                     if (cmd.ExecuteNonQuery() != 1)
                     {
@@ -179,13 +195,15 @@ namespace TNetD.PersistentStore
             {
                 // /////////////  Perform the INSERT  ///////////////
 
-                using (SQLiteCommand cmd = new SQLiteCommand("INSERT INTO Ledger VALUES(@publicKey, @userName, @balance, @accountState, @transactionTime);", sqliteConnection))
+                using (SQLiteCommand cmd = new SQLiteCommand("INSERT INTO Ledger VALUES(@publicKey, @userName, @balance, @accountState, @networkType, @accountType, @lastTransactionTime);", sqliteConnection))
                 {
                     cmd.Parameters.Add(new SQLiteParameter("@publicKey", accountInfo.PublicKey.Hex));
                     cmd.Parameters.Add(new SQLiteParameter("@userName", accountInfo.Name));
                     cmd.Parameters.Add(new SQLiteParameter("@balance", accountInfo.Money));
                     cmd.Parameters.Add(new SQLiteParameter("@accountState", (byte)accountInfo.AccountState));
-                    cmd.Parameters.Add(new SQLiteParameter("@transactionTime", accountInfo.LastTransactionTime));
+                    cmd.Parameters.Add(new SQLiteParameter("@networkType", (byte)accountInfo.NetworkType));
+                    cmd.Parameters.Add(new SQLiteParameter("@accountType", (byte)accountInfo.AccountType));
+                    cmd.Parameters.Add(new SQLiteParameter("@lastTransactionTime", accountInfo.LastTransactionTime));
 
                     if (cmd.ExecuteNonQuery() != 1)
                     {
@@ -207,7 +225,7 @@ namespace TNetD.PersistentStore
             {
                 if (!DBUtils.TableExists("Ledger", sqliteConnection))
                 {
-                    DBUtils.ExecuteNonQuery("CREATE TABLE Ledger (PublicKey BLOB PRIMARY KEY, UserName TEXT, Balance INTEGER, AccountState INTEGER, LastTransaction INTEGER);", sqliteConnection);
+                    DBUtils.ExecuteNonQuery("CREATE TABLE Ledger (PublicKey BLOB PRIMARY KEY, UserName TEXT, Balance INTEGER, AccountState INTEGER, NetworkType INTEGER, AccountType INTEGER, LastTransactionTime INTEGER);", sqliteConnection);
                 }
 
                 if (!DBUtils.TableExists("LedgerInfo", sqliteConnection))

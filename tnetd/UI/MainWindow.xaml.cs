@@ -249,11 +249,19 @@ namespace TNetD
                     {
                         AccountInfo ai = new AccountInfo(new Hash(gad.Public), Constants.FIN_TRE_PER_GENESIS_ACCOUNT);
 
-                        ai.AccountState = AccountState.NORMAL;
-                        ai.LastTransactionTime = 0;
-                        ai.Name = gad.Name;
+                        byte[] Address = Base58Encoding.DecodeWithCheckSum(gad.Address);
 
-                        aiData.Add(ai);
+                        if (Address.Length == 22)
+                        {
+                            ai.NetworkType = (NetworkType)Address[0];
+                            ai.AccountType = (AccountType)Address[1];
+
+                            ai.AccountState = AccountState.Normal;
+                            ai.LastTransactionTime = 0;
+                            ai.Name = gad.Name;
+
+                            aiData.Add(ai);
+                        }
                     }
 
                     n.PersistentAccountStore.AddUpdateBatch(aiData);
