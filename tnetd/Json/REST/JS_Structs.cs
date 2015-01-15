@@ -115,8 +115,7 @@ namespace TNetD.Json.JS_Structs
             Money = accountInfo.Money;
             Name = accountInfo.Name;
 
-            Address =  AddressFactory.GetAddressString(AddressFactory.GetAddress(accountInfo.PublicKey.Hex,
-                accountInfo.Name, accountInfo.NetworkType, accountInfo.AccountType));
+            Address = accountInfo.GetAddress();
 
             NetworkType = accountInfo.NetworkType;
             AccountType = accountInfo.AccountType;

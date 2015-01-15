@@ -192,36 +192,63 @@ namespace TNetD.Nodes
         private void HandleAccountQuery(HttpListenerContext context)
         {
             JS_AccountReplies replies = new JS_AccountReplies();
-            
+
             foreach (string key in context.Request.QueryString.AllKeys)
             {
                 switch (key)
                 {
-                    case "pk":
-
-                        string[] _pks = context.Request.QueryString["pk"].Split(',');
-
-                        foreach (string pk in _pks)
+                    case "p":
                         {
-                            byte[] _pk = new byte[0];
+                            string[] publicKeys = context.Request.QueryString["p"].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                            try
+                            foreach (string publicKey in publicKeys)
                             {
-                                _pk = HexUtil.GetBytes(pk);
+                                byte[] publicKey_Bytes = new byte[0];
+
+                                try
+                                {
+                                    publicKey_Bytes = HexUtil.GetBytes(publicKey);
+                                }
+                                catch { }
+
+                                if (publicKey_Bytes.Length == 32)
+                                {
+                                    Hash h_publicKey = new Hash(publicKey_Bytes);
+                                    if (ledger.AccountExists(h_publicKey))
+                                    {
+                                        replies.Accounts.Add(new JS_AccountReply(ledger[h_publicKey]));
+                                    }
+                                }
                             }
-                            catch { }
+                        }
+                        break;
 
-                            if (_pk.Length == 32)
-                            {                                
-                                Hash hpk = new Hash(_pk);
-                                /*if (PersistentAccountStore.FetchAccount(out ai, new Hash(_pk)) == DBResponse.FetchSuccess)
-                                {
-                                    replies.Accounts.Add(new JS_AccountReply(ai));                                    
-                                }*/
+                    case "a":
+                        {
+                            string[] adresses = context.Request.QueryString["a"].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                                if (ledger.AccountExists(hpk))
+                            foreach (string address in adresses)
+                            {
+                                if (ledger.AddressAccountInfoMap.ContainsKey(address))
                                 {
-                                    replies.Accounts.Add(new JS_AccountReply(ledger[hpk]));
+                                    AccountInfo _ai = ledger.AddressAccountInfoMap[address];
+                                    replies.Accounts.Add(new JS_AccountReply(_ai));   
+                                }                                
+                            }
+                        }
+
+                        break;
+
+                    case "n":
+                        {
+                            string[] names = context.Request.QueryString["n"].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                            foreach (string name in names)
+                            {
+                                if (ledger.NameAccountInfoMap.ContainsKey(name))
+                                {
+                                    AccountInfo _ai = ledger.NameAccountInfoMap[name];
+                                    replies.Accounts.Add(new JS_AccountReply(_ai));
                                 }
                             }
                         }
@@ -241,7 +268,7 @@ namespace TNetD.Nodes
                 this.SendJsonResponse(context, replies.Accounts[0].GetResponse());
             }
             else if (replies.Accounts.Count > 1)
-            {   
+            {
                 this.SendJsonResponse(context, replies.GetResponse());
             }
             else
@@ -261,8 +288,6 @@ namespace TNetD.Nodes
                 {
                     case "id":
 
-                        //txidprocessed = true;
-
                         string[] txids = context.Request.QueryString["id"].Split(',');
 
                         foreach (string txid in txids)
@@ -280,7 +305,7 @@ namespace TNetD.Nodes
                                 TransactionContent tcxo;
                                 if (TransactionStore.FetchTransaction(out tcxo, new Hash(_txid)) == DBResponse.FetchSuccess)
                                 {
-                                    replies.Transactions.Add(new JS_TransactionReply(tcxo));                                    
+                                    replies.Transactions.Add(new JS_TransactionReply(tcxo));
                                 }
                             }
                         }
@@ -300,7 +325,7 @@ namespace TNetD.Nodes
                 this.SendJsonResponse(context, replies.Transactions[0].GetResponse());
             }
             else if (replies.Transactions.Count > 1)
-            {                
+            {
                 this.SendJsonResponse(context, replies.GetResponse());
             }
             else
@@ -370,16 +395,16 @@ namespace TNetD.Nodes
         private void Tmr_Elapsed(object sender, ElapsedEventArgs e)
         {
             //await Task.WhenAll(tasks.ToArray());
-            
+
             while (PendingIncomingCandidates.Count > 0)
             {
-                
+
             }
 
             // Send the transcation to the TrustedNodes
             while (PendingIncomingTransactions.Count > 0)
             {
-                
+
             }
         }
 

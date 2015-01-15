@@ -22,6 +22,8 @@ namespace TNetD
         /// </summary>
         public static readonly int HashTree_NodeListDepth = 4;
 
+        public static readonly int Pref_MinNameLength = 5;
+
         public static readonly int GlobalNodes = 100;
 
         public static readonly int Connections_PerNode_Max = 20;

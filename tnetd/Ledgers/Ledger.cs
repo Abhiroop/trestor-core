@@ -14,6 +14,16 @@ namespace TNetD.Ledgers
     {
         IPersistentAccountStore persistentStore;
 
+        /// <summary>
+        /// A mapping between Adresses and Account. Later to be converted to DB based implementation.
+        /// </summary>
+        public Dictionary<string, AccountInfo> AddressAccountInfoMap = new Dictionary<string, AccountInfo>();
+
+        /// <summary>
+        /// A mapping between Name and Account.
+        /// </summary>
+        public Dictionary<string, AccountInfo> NameAccountInfoMap = new Dictionary<string, AccountInfo>();
+
         public ListHashTree LedgerTree = null;
         public long TransactionFees;
         public long TotalAmount;
@@ -55,6 +65,8 @@ namespace TNetD.Ledgers
         public long ReloadFromPersistentStore()
         {
             _load_stats = 0;
+            AddressAccountInfoMap.Clear();
+            NameAccountInfoMap.Clear();
             persistentStore.FetchAllAccounts(Add_UPDATE_TREE);
             return _load_stats;
         }
@@ -62,6 +74,21 @@ namespace TNetD.Ledgers
         public void Add_UPDATE_TREE(AccountInfo userInfo)
         {
             LedgerTree.AddUpdate(userInfo);
+            
+            string address = userInfo.GetAddress();
+            if (!AddressAccountInfoMap.ContainsKey(address))
+            {
+                AddressAccountInfoMap.Add(address, userInfo);
+            }
+
+            if (userInfo.Name.Length >= Constants.Pref_MinNameLength)
+            {
+                if (!NameAccountInfoMap.ContainsKey(userInfo.Name))
+                {
+                    NameAccountInfoMap.Add(userInfo.Name, userInfo);
+                }
+            }
+
             _load_stats++;
         }
 
@@ -77,6 +104,7 @@ namespace TNetD.Ledgers
 
             if (!contains)
             {
+                AddressAccountInfoMap.Add(userInfo.GetAddress(), userInfo);
                 LedgerTree.AddUpdate(userInfo);
                 return true;
             }
@@ -120,6 +148,11 @@ namespace TNetD.Ledgers
             //newCandidates = GetValidatedTransactions(newCandidates);
         }
         
+        /// <summary>
+        /// Gets an account from the tree.
+        /// </summary>
+        /// <param name="account">PublicKey of the account.</param>
+        /// <returns></returns>
         public AccountInfo this[Hash account]
         {
             get

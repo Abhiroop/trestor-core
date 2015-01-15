@@ -1,6 +1,7 @@
 ﻿//
 // @Author: Arpan Jati
-// @Date: Dec 22, 2014 | 1 Jan, 2015 
+// @Date: Dec 22, 2014 | 1 Jan, 2015
+// 15th Jan 2015 : +AccountType +NetworkType + GetAddress()
 //
 
 using System;
@@ -97,6 +98,17 @@ namespace TNetD.Transactions
         override public Hash GetID()
         {
             return PublicKey;
+        }
+
+        /// <summary>
+        /// Calculates the address for the AccountInfo, performs recalculation of the hashes.
+        /// A bit expensive, still quite fast.
+        /// </summary>
+        /// <returns></returns>
+        public string GetAddress()
+        {
+            return AddressFactory.GetAddressString(AddressFactory.GetAddress(PublicKey.Hex,
+                Name, NetworkType, AccountType));
         }
 
         public byte[] Serialize()
