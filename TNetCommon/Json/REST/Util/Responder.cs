@@ -115,7 +115,7 @@ namespace Grapevine
         /// </summary>
         protected void SendJsonResponse(HttpListenerContext context, object obj)
         {
-            var json = JsonConvert.SerializeObject(obj, Constants.jss);
+            var json = JsonConvert.SerializeObject(obj, Common.jss);
             var buffer = context.Request.ContentEncoding.GetBytes(json);
             var length = buffer.Length;
 

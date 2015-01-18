@@ -47,7 +47,7 @@ namespace TNetD
 
         public MainWindow()
         {
-            Constants.Initialize();
+            Common.Initialize();
 
             InitializeComponent();
 
@@ -206,9 +206,9 @@ namespace TNetD
 
             TransactionContent transactionContent;
 
-            bool TransOk = stf.Create(new Hash(signature), out transactionContent);
+            TransactionProcessingResult TransOk = stf.Create(new Hash(signature), out transactionContent);
 
-            if (TransOk)
+            if (TransOk == TransactionProcessingResult.Accepted)
             {
                 DisplayUtils.Display("Transaction Valid: ");
 
@@ -231,8 +231,14 @@ namespace TNetD
 
         private void lv_TX_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            TransactionContent var = (TransactionContent)lv_TX.SelectedItem;
-            tb_Tx_txid.Text = var.TransactionID.ToString();
+            if (lv_TX != null)
+            {
+                if (lv_TX.SelectedItem != null)
+                {
+                    TransactionContent var = (TransactionContent)lv_TX.SelectedItem;
+                    tb_Tx_txid.Text = var.TransactionID.ToString();
+                }
+            }
         }
 
         private void menu_CreateTransaction_Click(object sender, RoutedEventArgs e)

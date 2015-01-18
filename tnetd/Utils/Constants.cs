@@ -104,16 +104,7 @@ namespace TNetD
 
         public static readonly string File_TrustedNodes = "TrustedNodes.ini";
 
-        public static JsonSerializerSettings jss = new JsonSerializerSettings();
-
-        /// <summary>
-        ///  TODO: BAD/ REMOVE STATIC METHOD
-        /// </summary>
-        public static void Initialize()
-        {
-            jss.Converters.Add(new BytesToHexConverter());
-            jss.Formatting = Formatting.Indented;
-        }   
+          
         
     }
 }

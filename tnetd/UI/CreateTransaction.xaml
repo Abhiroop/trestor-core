@@ -28,7 +28,7 @@
         <TextBlock HorizontalAlignment="Left" Margin="20,0,0,0" Grid.Row="5"  TextWrapping="Wrap" Text="Fee" VerticalAlignment="Top"/>        
         <TextBlock HorizontalAlignment="Left" Margin="20,0,0,0" Grid.Row="7"  TextWrapping="Wrap" Text="Transaction HEX" VerticalAlignment="Top"/>
 
-        <TextBox Name="tb_SenderPublic" HorizontalAlignment="Stretch" Grid.Row="1"  TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="1"/>
+        <TextBox Name="tb_SenderPublic" HorizontalAlignment="Stretch" Grid.Row="1" IsReadOnly="True" TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="1"/>
         <TextBox Name="tb_SenderPrivate" HorizontalAlignment="Stretch" Grid.Row="2"  TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="1"/>
         <TextBox Name="tb_DestPublic" HorizontalAlignment="Stretch" Grid.Row="3"  TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="1"/>
         <TextBox Name="tb_Value" HorizontalAlignment="Stretch" Grid.Row="4"  TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="1"/>
@@ -36,5 +36,6 @@
         
         <TextBox Name="tb_TX_Hex" HorizontalAlignment="Stretch" Grid.Row="7"  TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="1"/>
         <Button Content="Generate Transaction" Grid.Column="1" HorizontalAlignment="Left"  Grid.Row="9" VerticalAlignment="Top" Width="153" Click="Button_Click"/>
+        <CheckBox Name="check_Json" Content="JSON" Grid.Column="1" HorizontalAlignment="Left" Margin="205,2,0,0" Grid.Row="9" VerticalAlignment="Top"/>
     </Grid>
 </Window>

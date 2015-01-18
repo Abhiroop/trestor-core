@@ -8,6 +8,7 @@
 using Chaos.NaCl;
 using Grapevine;
 using Grapevine.Server;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ using TNetD.Transactions;
 
 namespace TNetD.Nodes
 {
-    public delegate bool RPCRequestHandler(HttpListenerContext context);
+    
 
     internal class Node : Responder
     {
@@ -38,12 +39,9 @@ namespace TNetD.Nodes
 
         RESTServer restServer = default(RESTServer);
 
-        //public Dictionary<Hash, Node> TrustedNodes = new Dictionary<Hash, Node>();
+        NodeState nodeState = new NodeState();
 
-        /// <summary>
-        /// Outer Dict is TransactionID, inner is Voter node.
-        /// </summary>
-        public Dictionary<Hash, Dictionary<Hash, CandidateStatus>> ReceivedCandidates = new Dictionary<Hash, Dictionary<Hash, CandidateStatus>>();
+        IncomingTransactionMap incomingTransactionMap;
 
         /// <summary>
         /// A dictionary of Trusted nodes, stored by PublicKey
@@ -88,6 +86,8 @@ namespace TNetD.Nodes
         {
             nodeConfig = new NodeConfig(ID, globalConfiguration);
 
+            incomingTransactionMap = new IncomingTransactionMap(nodeState);
+
             network = new SecureNetwork(nodeConfig);
             network.PacketReceived += network_PacketReceived;
 
@@ -101,7 +101,7 @@ namespace TNetD.Nodes
             AI = new AccountInfo(PublicKey, Money);
 
             ledger = new Ledger(PersistentAccountStore);
-            
+
 
             //ledger.AddUserToLedger(AI);
 
@@ -134,7 +134,7 @@ namespace TNetD.Nodes
             restServer.Start();
 
             background_Load = new Thread(BackgroundLoad);
-            
+
         }
 
         /// <summary>
@@ -150,45 +150,33 @@ namespace TNetD.Nodes
 
         public void BeginBackgroundLoad()
         {
-            background_Load.Start();            
+            background_Load.Start();
         }
 
         // RPCRequestHandler rpcRequestHandler;
         bool RPCRequestHandler(HttpListenerContext context)
         {
-            if (context.Request.RawUrl.Matches(@"^/q")) // ProcessQueries
-            {
-                if (context.Request.RawUrl.StartsWith("/q"))
-                {
-                    foreach (string key in context.Request.QueryString.AllKeys)
-                    {
-                        switch (key)
-                        {
-                            case "address":
-
-
-                                break;
-
-                            default:
-
-                                break;
-                        }
-                    }
-                }
-
-                this.SendJsonResponse(context, new JS_Resp());
-
-                return true;
-            }
-            else if (context.Request.RawUrl.Matches(@"^/info")) // ProcessInfo 
+            if (context.Request.RawUrl.Matches(@"^/info")) // ProcessInfo 
             {
                 this.SendJsonResponse(context, nodeConfig.Get_JS_Info().GetResponse());
 
                 return true;
             }
-            else if (context.Request.RawUrl.Matches(@"^/propagate")) // Propagate Transactions 
+            else if (context.Request.RawUrl.Matches(@"^/propagateraw")) // Propagate RAW 
             {
-                HandlePropagate(context);
+                HandlePropagate(context, true);
+
+                return true;
+            }
+            else if (context.Request.RawUrl.Matches(@"^/propagate")) // Propagate JSON 
+            {
+                HandlePropagate(context, false);
+
+                return true;
+            }
+            else if (context.Request.RawUrl.Matches(@"^/txstatus")) // Handle Transaction Status Query
+            {
+                HandleTransactionStatusQuery(context);
 
                 return true;
             }
@@ -210,6 +198,66 @@ namespace TNetD.Nodes
             }
 
             return false;
+        }
+
+        private void HandleTransactionStatusQuery(HttpListenerContext context)
+        {
+            JS_TransactionStateReplies replies = new JS_TransactionStateReplies();
+
+            foreach (string key in context.Request.QueryString.AllKeys)
+            {
+                switch (key)
+                {
+                    case "id":
+
+                        string[] transactionIDs = context.Request.QueryString["id"].Split(',');
+
+                        foreach (string transactionID in transactionIDs)
+                        {
+                            byte[] transactionID_Bytes = new byte[0];
+
+                            try
+                            {
+                                transactionID_Bytes = HexUtil.GetBytes(transactionID);
+                            }
+                            catch { }
+
+                            if (transactionID_Bytes.Length == Common.LEN_TRANSACTION_ID)
+                            {
+                                HandleTransactionStatusQuery_Internal(ref replies, new Hash(transactionID_Bytes));
+                            }
+                        }
+
+                        break;
+
+                    default:
+
+                        break;
+                }
+            }
+
+            // // /////////////////////////////////////////////////////////////////////
+
+            if (replies.TransactionState.Count == 1)
+            {
+                this.SendJsonResponse(context, replies.TransactionState[0].GetResponse());
+            }
+            else if (replies.TransactionState.Count > 1)
+            {
+                this.SendJsonResponse(context, replies.GetResponse());
+            }
+            else
+            {
+                JS_Resp resp = new JS_Resp();
+                this.SendJsonResponse(context, resp);
+            }
+        }
+
+        private void HandleTransactionStatusQuery_Internal(ref JS_TransactionStateReplies replies, Hash transactionID)
+        {
+            // incomingTransactionMap
+
+
         }
 
         private void HandleAccountQuery(HttpListenerContext context)
@@ -255,8 +303,8 @@ namespace TNetD.Nodes
                                 if (ledger.AddressAccountInfoMap.ContainsKey(address))
                                 {
                                     AccountInfo _ai = ledger.AddressAccountInfoMap[address];
-                                    replies.Accounts.Add(new JS_AccountReply(_ai));   
-                                }                                
+                                    replies.Accounts.Add(new JS_AccountReply(_ai));
+                                }
                             }
                         }
 
@@ -311,22 +359,22 @@ namespace TNetD.Nodes
                 {
                     case "id":
 
-                        string[] txids = context.Request.QueryString["id"].Split(',');
+                        string[] transactionIDs = context.Request.QueryString["id"].Split(',');
 
-                        foreach (string txid in txids)
+                        foreach (string transactionID in transactionIDs)
                         {
-                            byte[] _txid = new byte[0];
+                            byte[] transactionID_Bytes = new byte[0];
 
                             try
                             {
-                                _txid = HexUtil.GetBytes(txid);
+                                transactionID_Bytes = HexUtil.GetBytes(transactionID);
                             }
                             catch { }
 
-                            if (_txid.Length == 32)
+                            if (transactionID_Bytes.Length == 32)
                             {
                                 TransactionContent tcxo;
-                                if (TransactionStore.FetchTransaction(out tcxo, new Hash(_txid)) == DBResponse.FetchSuccess)
+                                if (TransactionStore.FetchTransaction(out tcxo, new Hash(transactionID_Bytes)) == DBResponse.FetchSuccess)
                                 {
                                     replies.Transactions.Add(new JS_TransactionReply(tcxo));
                                 }
@@ -358,7 +406,7 @@ namespace TNetD.Nodes
             }
         }
 
-        private void HandlePropagate(HttpListenerContext context)
+        private void HandlePropagate(HttpListenerContext context, bool IsRaw)
         {
             JS_Msg msg;
 
@@ -369,11 +417,20 @@ namespace TNetD.Nodes
 
                 try
                 {
-                    byte[] data = HexUtil.GetBytes(sr.ReadToEnd());
-                    TransactionContent tco = new TransactionContent();
-                    tco.Deserialize(data);
+                    TransactionContent tco;
+                    
+                    if (IsRaw)
+                    {
+                        tco = new TransactionContent();
+                        byte[] data = HexUtil.GetBytes(sr.ReadToEnd());
+                        tco.Deserialize(data);
+                    }
+                    else
+                    {
+                        tco = JsonConvert.DeserializeObject<TransactionContent>(sr.ReadToEnd());
+                    }
 
-                    if (tco.VerifySignature())
+                    if (tco.VerifySignature() == TransactionProcessingResult.Accepted)
                     {
                         msg = new JS_Msg("Transaction Added to propagation queue.", RPCStatus.Success);
                     }
@@ -382,7 +439,7 @@ namespace TNetD.Nodes
                         msg = new JS_Msg("Signature Verification Failed.", RPCStatus.Failure);
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
                     msg = new JS_Msg("Malformed Transaction.", RPCStatus.Failure);
                 }

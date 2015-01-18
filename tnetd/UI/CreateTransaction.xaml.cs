@@ -1,4 +1,5 @@
 ﻿using Chaos.NaCl;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using TNetD.Json.JS_Structs;
 using TNetD.Transactions;
 
 namespace TNetD.UI
@@ -30,9 +32,15 @@ namespace TNetD.UI
         {
             try
             {
-                byte[] PubSrc = HexUtil.GetBytes(tb_SenderPublic.Text);
-                byte[] PrivSrc = HexUtil.GetBytes(tb_SenderPrivate.Text);
+                byte[] PubSrc;
+                byte[] PrivExpanded;
+                byte[] PrivSeed = HexUtil.GetBytes(tb_SenderPrivate.Text);
+                
                 byte[] PubDst = HexUtil.GetBytes(tb_DestPublic.Text);
+
+                Ed25519.KeyPairFromSeed(out PubSrc, out PrivExpanded, PrivSeed);
+
+                tb_SenderPublic.Text = HexUtil.ToString(PubSrc);
 
                 long value = long.Parse(tb_Value.Text);
                 long fee = long.Parse(tb_Fee.Text);
@@ -41,23 +49,31 @@ namespace TNetD.UI
 
                 byte[] dd = stf.GetTransactionData();
 
-                Hash sig = new Hash(Ed25519.Sign(dd, PrivSrc));
+                Hash sig = new Hash(Ed25519.Sign(dd, PrivExpanded));
 
                 TransactionContent tc;
 
-                if (stf.Create(sig, out tc))
+                if (stf.Create(sig, out tc) == TransactionProcessingResult.Accepted)
                 {
-                    tb_TX_Hex.Text = HexUtil.ToString(tc.Serialize());
+                    if (check_Json.IsChecked.Value)
+                    {
+                        tb_TX_Hex.Text = JsonConvert.SerializeObject(new JS_TransactionReply(tc), Common.jss);
+                    }
+                    else
+                    {
+                        tb_TX_Hex.Text = HexUtil.ToString(tc.Serialize());
+                    }
                 }
                 else
                 {
                     tb_TX_Hex.Text = "INVALID DATA !!!";
                 }
             }
-            catch {
+            catch
+            {
                 tb_TX_Hex.Text = "Exception ocurred !!!";
             }
-            
+
         }
     }
 }

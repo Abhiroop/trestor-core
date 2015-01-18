@@ -34,7 +34,7 @@ namespace TNetD.Transactions
             this.destination = destination;
             this.destValue = destValue;
             this.transactionFee = transactionFee;
-
+            
             TransactionEntity teSrc = new TransactionEntity(this.source.Hex, destValue + transactionFee);
             TransactionEntity teDst = new TransactionEntity(this.destination.Hex, destValue);
 
@@ -61,7 +61,7 @@ namespace TNetD.Transactions
         /// <param name="signature"></param>
         /// <param name="transactionContent"></param>
         /// <returns></returns>
-        public bool Create(Hash signature, out TransactionContent transactionContent)
+        public TransactionProcessingResult Create(Hash signature, out TransactionContent transactionContent)
         {
             TC.SetSignatures(new List<Hash> { signature });
 

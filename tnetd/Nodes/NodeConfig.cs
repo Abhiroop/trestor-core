@@ -15,6 +15,10 @@ using TNetD.Network.Networking;
 
 namespace TNetD.Nodes
 {
+    /// <summary>
+    /// Initial configuration information for the node.
+    /// Keeps everything needed to start the node.
+    /// </summary>
     class NodeConfig
     {
         #region Locals
@@ -362,15 +366,16 @@ namespace TNetD.Nodes
         public JS_NodeInfo Get_JS_Info()
         {
             JS_NodeInfo info = new JS_NodeInfo();
-            AddressFactory af = new AddressFactory();
-
+           
             info.Name = Name;
-            info.Address = af.GetAddress(PublicKey.Hex, Name);
+            info.Address = AddressFactory.GetAddressString(AddressFactory.GetAddress(PublicKey.Hex, Name, 
+                NetworkType.MainNet, AccountType.MainValidator));
+
             info.Email = Email;
             info.Organisation = Organisation;
             info.Platform = Platform;
             info.PublicKey = PublicKey.Hex;
-            info.time = DateTime.UtcNow;
+            info.TimeUTC = DateTime.UtcNow;
 
             return info;
         }

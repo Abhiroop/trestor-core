@@ -68,7 +68,7 @@ namespace TNetD.Protocol
             return pack.ToArray();
         }
 
-        public static byte[] PackRaw(ProtocolDataType [] packets)
+        public static byte[] PackRaw(ProtocolDataType[] packets)
         {
             List<byte> pack = new List<byte>();
             foreach (ProtocolDataType packet in packets)
@@ -109,7 +109,7 @@ namespace TNetD.Protocol
                     byte DataType = packedData[index + 1];
 
                     int readDelta;
-                    long Length = Varint2.Decode(packedData, index+2, out readDelta);
+                    long Length = Varint2.Decode(packedData, index + 2, out readDelta);
                     index += readDelta;
 
                     if (packedData.Length - index - Length >= 2)
@@ -171,7 +171,7 @@ namespace TNetD.Protocol
                 long R = 0;
                 ProtocolPackager.UnpackVarint(p, 0, ref R);
 
-                if(datas[fIndex] != R)
+                if (datas[fIndex] != R)
                 {
                     Console.WriteLine("FAIL AT : " + fIndex + ", Value: " + R);
                 }

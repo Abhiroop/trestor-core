@@ -5,7 +5,7 @@
  *  @Description: Json Structs for serialization
  */
 
-using Newtonsoft.Json;
+//using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,9 @@ using TNetD.Transactions;
 
 namespace TNetD.Json.JS_Structs
 {
-    class JS_Resp
+    public enum RPCStatus { Failure, Success, Exception, ServerNotReady, ServerBusy, InvalidAPIUsage }
+
+    public class JS_Resp
     {
         public RPCStatus Status = RPCStatus.Failure;
         public JS_Response Data;
@@ -33,12 +35,12 @@ namespace TNetD.Json.JS_Structs
         }
     }
 
-    interface JS_Response
+    public interface JS_Response
     {
         JS_Resp GetResponse();
     }
 
-    class JS_Msg : JS_Response
+    public class JS_Msg : JS_Response
     {
         public string Message;
         private RPCStatus status = RPCStatus.Failure;
@@ -55,12 +57,12 @@ namespace TNetD.Json.JS_Structs
         }
     }
 
-    class JS_NodeInfo : JS_Response
+    public class JS_NodeInfo : JS_Response
     {
         public byte[] PublicKey;
         public string Name;
-        public byte[] Address;
-        public DateTime time;
+        public string Address;
+        public DateTime TimeUTC;
         public string Organisation;
         public string Platform;
         public string Email;
@@ -71,8 +73,10 @@ namespace TNetD.Json.JS_Structs
         }
     }
 
-    class JS_TransactionReply : JS_Response
+    public class JS_TransactionReply : JS_Response
     {
+        public byte[] VersionData;
+        public byte[] ExecutionData;
         public byte[] TransactionID;
         public long Timestamp;
         public long Value;
@@ -83,6 +87,8 @@ namespace TNetD.Json.JS_Structs
 
         public JS_TransactionReply(TransactionContent content)
         {
+            VersionData = content.VersionData;
+            ExecutionData = content.ExecutionData;
             Sources = content.Sources;
             Destinations = content.Destinations;
             Signatures = (from sig in content.Signatures select sig.Hex).ToList();
@@ -98,9 +104,34 @@ namespace TNetD.Json.JS_Structs
         }
     }
 
-    class JS_AccountReply : JS_Response
+    public class JS_TransactionState_Reply : JS_Response
     {
-        public byte[] PublicKey;      
+        public JS_TransactionReply Transaction;
+        public TransactionStatusType TransactionStatusType;
+        public TransactionProcessingResult TransactionProcessingResult;
+        public int ValidationsCount;
+        public long LedgerSequence;
+
+        public JS_TransactionState_Reply(TransactionContent transactionContent, TransactionStatusType transactionStatusType,
+         TransactionProcessingResult transactionProcessingResult = TransactionProcessingResult.Unprocessed,
+            int validationsCount = 0, long ledgerSequence = 0)
+        {
+            Transaction = new JS_TransactionReply(transactionContent);
+            TransactionStatusType = transactionStatusType;
+            TransactionProcessingResult = transactionProcessingResult;
+            ValidationsCount = validationsCount;
+            LedgerSequence = ledgerSequence;
+        }
+
+        public JS_Resp GetResponse()
+        {
+            return new JS_Resp(RPCStatus.Success, this);
+        }
+    }
+
+    public class JS_AccountReply : JS_Response
+    {
+        public byte[] PublicKey;
         public long Money;
         public string Name;
         public string Address;
@@ -130,7 +161,7 @@ namespace TNetD.Json.JS_Structs
         }
     }
 
-    class JS_TransactionReplies : JS_Response
+    public class JS_TransactionReplies : JS_Response
     {
         public List<JS_TransactionReply> Transactions;
 
@@ -150,8 +181,27 @@ namespace TNetD.Json.JS_Structs
         }
     }
 
+    public class JS_TransactionStateReplies : JS_Response
+    {
+        public List<JS_TransactionState_Reply> TransactionState;
 
-    class JS_AccountReplies : JS_Response
+        public JS_TransactionStateReplies()
+        {
+            TransactionState = new List<JS_TransactionState_Reply>();
+        }
+
+        public JS_TransactionStateReplies(List<JS_TransactionState_Reply> transactionState)
+        {
+            TransactionState = transactionState;
+        }
+
+        public JS_Resp GetResponse()
+        {
+            return new JS_Resp(RPCStatus.Success, this);
+        }
+    }
+
+    public class JS_AccountReplies : JS_Response
     {
         public List<JS_AccountReply> Accounts;
 

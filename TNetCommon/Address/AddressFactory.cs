@@ -27,18 +27,19 @@ namespace TNetD.Address
     /// </summary>
     public class AddressFactory
     {
-        NetworkType _NetworkType = NetworkType.MainNet;
-        AccountType _AccountType = AccountType.MainNormal;
+        NetworkType _NetworkType;
+        AccountType _AccountType;
 
         public AddressFactory()
         {
-
+            _NetworkType = NetworkType.MainNet;
+            _AccountType = AccountType.MainNormal;
         }
 
         public AddressFactory(NetworkType networkType, AccountType accountType)
         {
-            this._NetworkType = networkType;
-            this._AccountType = accountType;
+            _NetworkType = networkType;
+            _AccountType = accountType;
         }
 
         public NetworkType NetworkType
@@ -56,7 +57,7 @@ namespace TNetD.Address
         /// <summary>
         /// Returns the 
         /// H = SHA512, 
-        /// Address Format : Address = NetType || AccountType || {[H(H(PK) || PK || NAME || NetType || AccountType)], Take first 20 bytes}
+        /// Address Format : Address = NetType || AccountType || [H(H(PK) || PK || NAME || NetType || AccountType)], Take first 20 bytes}
         /// </summary>
         public static byte[] GetAddress(byte[] PublicKey, string UserName, NetworkType networkType, AccountType accountType)
         {
@@ -78,23 +79,17 @@ namespace TNetD.Address
             byte[] NAME = Utils.Encoding88591.GetBytes(UserName);
 
             byte[] Hpk = (new SHA512Cng()).ComputeHash(PublicKey);
+                       
+            byte[] NA_Type = new byte[] { (byte)networkType, (byte)accountType };    
 
-            ///////////////
-
-            byte[] N_A_Type = new byte[2];
-            N_A_Type[0] = (byte)networkType;
-            N_A_Type[1] = (byte)accountType;
-
-            ///////////////
-
-            byte[] Hpk__PK__NAME = Hpk.Concat(PublicKey).Concat(NAME).Concat(N_A_Type).ToArray();
+            byte[] Hpk__PK__NAME = Hpk.Concat(PublicKey).Concat(NAME).Concat(NA_Type).ToArray();
 
             byte[] H_Hpk__PK__NAME = (new SHA512Cng()).ComputeHash(Hpk__PK__NAME).Take(20).ToArray();
 
             byte[] Address_PH = new byte[22];
 
-            Address_PH[0] = N_A_Type[0];
-            Address_PH[1] = N_A_Type[1];
+            Address_PH[0] = NA_Type[0];
+            Address_PH[1] = NA_Type[1];
             Array.Copy(H_Hpk__PK__NAME, 0, Address_PH, 2, 20);
 
             /* byte[] CheckSum = (new SHA512Managed()).ComputeHash(Address_PH, 0, 22).Take(4).ToArray();
