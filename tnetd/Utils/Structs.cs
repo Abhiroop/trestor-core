@@ -68,8 +68,14 @@ namespace TNetD
 
     class TransactionContentData
     {
-        TransactionContent TC;
+        TransactionContent TransactionContent;
         HashSet<Hash> ForwardersPK;
+
+        public TransactionContentData()
+        {
+            TransactionContent = new TransactionContent();
+            ForwardersPK = new HashSet<Hash>();
+        }
     }
 
 

@@ -27,7 +27,7 @@ namespace TNetD.Network.Networking
         NodeConfig nodeConfig;
 
         NodeSocketData nodeSocketData = default(NodeSocketData);
-       
+
         ConcurrentQueue<NetworkPacket> outgoingQueue = new ConcurrentQueue<NetworkPacket>();
 
         public event PacketReceivedHandler PacketReceived;
@@ -36,7 +36,7 @@ namespace TNetD.Network.Networking
         public event KeepAlivesHandler KeepAlives;
 
         Random rnd = new Random();
-        
+
         Timer updateTimer;
 
         public OutgoingConnection(NodeSocketData nodeSocketData, NodeConfig nodeConfig)
@@ -91,7 +91,7 @@ namespace TNetD.Network.Networking
 
         public bool KeyExchanged = false;
 
-        public bool ThreadKilled = false;
+        public bool Ended = false;
 
         TcpClient tcpClient = default(TcpClient);
 
@@ -123,9 +123,11 @@ namespace TNetD.Network.Networking
                 tcpClient.SendTimeout = 30000;
 
                 tcpClient.Connect(nodeSocketData.IP, nodeSocketData.ListenPort);
-                
-                Thread thr = new Thread(() => { ConnectAndProcess(tcpClient); });
-                thr.Start();
+
+                /*Thread thr = new Thread(() => { ConnectAndProcess(tcpClient); });
+                thr.Start();*/
+
+                Task.Run(() => ConnectAndProcess(tcpClient));
 
             }
             catch (Exception ex)
@@ -163,13 +165,14 @@ namespace TNetD.Network.Networking
                                 bytesRead = 0;
                                 try
                                 {
-                                    bytesRead = nsRead.Read(inbuffer, 0, inbuffer.Length);
-                                    messageStream.Write(inbuffer, 0, bytesRead);
+                                    bytesRead = await nsRead.ReadAsync(inbuffer, 0, inbuffer.Length);
 
                                     if (bytesRead == 0)
                                     {
                                         break;
                                     }
+
+                                    messageStream.Write(inbuffer, 0, bytesRead);
 
                                     if (bytesRead > 0)
                                     {
@@ -303,7 +306,7 @@ namespace TNetD.Network.Networking
             if (Constants.NetworkVerbosity >= Verbosity.Warning)
                 DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : Disconnected", DisplayType.Warning);
 
-            ThreadKilled = true;
+            Ended = true;
         }
 
         string MakeIntString(byte[] data)
@@ -330,7 +333,7 @@ namespace TNetD.Network.Networking
                 byte[] HMAC = (new HMACSHA256(AuthenticationKey)).ComputeHash(CryptedCounterSenderData).Take(16).ToArray();
 
                 byte[] NONCE_MAC_DATA = nonce.Concat(HMAC).Concat(CryptedCounterSenderData).ToArray();
-                               
+
                 await PacketSender.SendTransportPacket(tcpClient.GetStream(), TransportPacketType.DataCrypted, NONCE_MAC_DATA);
 
             }
@@ -444,7 +447,7 @@ namespace TNetD.Network.Networking
                     break;
 
                 case TransportPacketType.KeyExComplete_2:
-                    
+
                     if (KeyExchanged)
                     {
                         if (Constants.NetworkVerbosity >= Verbosity.Info)

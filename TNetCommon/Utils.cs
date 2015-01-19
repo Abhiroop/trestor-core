@@ -44,6 +44,12 @@ namespace TNetD
             return (DiffBytes == 0);
         }
 
+        /// <summary>
+        /// REturns true if the two byte arrays are equal.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
         public static bool ByteArrayEquals(this byte[] x, byte[] y)
         {
             return ByteArrayEquals(x, 0, y, 0, x.Length);

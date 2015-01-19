@@ -41,9 +41,7 @@ namespace TNetD.Ledgers
         {
             get { return _load_stats; }
         }
-
-        Dictionary<Hash, TransactionContent> newCandidates;
-
+        
         /// <summary>
         /// List of public nodes which have sent bad transactions.
         /// </summary>
@@ -57,27 +55,23 @@ namespace TNetD.Ledgers
             this.TotalAmount = 0;
             //this.CloseTime = 0;
 
-            //ledgerData = new LedgerData();
-            newCandidates = new Dictionary<Hash, TransactionContent>();
-
-            //Initial Load.           
         }
 
-        public void InitializeLedger()
+        async public void InitializeLedger()
         {
-             ReloadFromPersistentStore();
+             await ReloadFromPersistentStore();
         }
 
         /// <summary>
         /// This will reset the entire state for the ledger, invalidating all the un-commited changes.
         /// TODO. CONSIDER USING A TREE DELETE/CLEAR OPERATION before the fetch.
         /// </summary>
-        public long ReloadFromPersistentStore()
+        async public Task<long> ReloadFromPersistentStore()
         {
             _load_stats = 0;
             AddressAccountInfoMap.Clear();
             NameAccountInfoMap.Clear();
-            persistentStore.FetchAllAccounts(AddUserToLedger);
+            await persistentStore.FetchAllAccounts(AddUserToLedger);
             return _load_stats;
         }
 
@@ -124,41 +118,7 @@ namespace TNetD.Ledgers
 
             return false;
         }
-
-        /// <summary>
-        /// Inserts the list of new transactions to the proposed candidate set.
-        /// </summary>
-        /// <param name="proposedTransactions"></param>
-        public void PushNewProposedTransactions(TransactionContent[] proposedTransactions)
-        {
-            foreach (TransactionContent tc in proposedTransactions)
-            {
-                Hash tHash = tc.TransactionID;
-                if (!newCandidates.ContainsKey(tHash))
-                {
-                    newCandidates.Add(tHash, tc);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Inserts the TransactionContent to the proposed candidate set.
-        /// </summary>
-        /// <param name="proposedTransactions"></param>
-        public void PushNewCandidate(TransactionContent transaction)
-        {
-            Hash tID = transaction.TransactionID;
-            if (!newCandidates.ContainsKey(tID))
-            {
-                newCandidates.Add(tID, transaction);
-            }
-        }
-
-        public void RefreshValidTransactions()
-        {
-            //newCandidates = GetValidatedTransactions(newCandidates);
-        }
-
+      
         /// <summary>
         /// Gets an account from the tree.
         /// </summary>
@@ -176,12 +136,7 @@ namespace TNetD.Ledgers
         {
             return LedgerTree.NodeExists(account);
         }
-
-        public Dictionary<Hash, TransactionContent> Candidates
-        {
-            get { return newCandidates; }
-        }
-
+        
         public Hash GetRootHash()
         {
             return LedgerTree.GetRootHash();

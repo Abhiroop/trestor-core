@@ -33,7 +33,7 @@ namespace TNetD.Nodes
 
     internal class Node : Responder
     {
-        Thread background_Load;
+        //Thread background_Load;
 
         SecureNetwork network = default(SecureNetwork);
 
@@ -113,44 +113,40 @@ namespace TNetD.Nodes
 
             // ////////////////////
 
-            // Connect to TrustedNodes
-            // List<Task> tasks = new List<Task>();
-
-            foreach (KeyValuePair<Hash, NodeSocketData> kvp in TrustedNodes)
-            {
-                if (kvp.Key != PublicKey) // Make sure we are not connecting to self !!
-                {
-                    if (!network.IsConnected(kvp.Key))
-                    {
-                        SendInitialize(kvp.Key);
-                    }
-                }
-            }
 
             ////////////////////////
 
             restServer = new RESTServer("localhost", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
 
             restServer.Start();
-
-            background_Load = new Thread(BackgroundLoad);
-
         }
 
         /// <summary>
         /// Add more content to be loaded in background here.
-        /// Maybe scheduled using timers also.
-        /// </summary>
-        void BackgroundLoad()
+        /// </summary>       
+        async public void BeginBackgroundLoad()
         {
-            ledger.InitializeLedger();
+            await Task.Run(async () =>  {
 
+                ledger.InitializeLedger();
 
-        }
+                // Connect to TrustedNodes
+                List<Task> tasks = new List<Task>();
 
-        public void BeginBackgroundLoad()
-        {
-            background_Load.Start();
+                foreach (KeyValuePair<Hash, NodeSocketData> kvp in TrustedNodes)
+                {
+                    if (kvp.Key != PublicKey) // Make sure we are not connecting to self !!
+                    {
+                        if (!network.IsConnected(kvp.Key))
+                        {
+                            tasks.Add(SendInitialize(kvp.Key));
+                        }
+                    }
+                }
+
+                await Task.WhenAll(tasks);
+            
+            });            
         }
 
         // RPCRequestHandler rpcRequestHandler;
@@ -417,26 +413,29 @@ namespace TNetD.Nodes
 
                 try
                 {
-                    TransactionContent tco;
+                    TransactionContent tco = new TransactionContent();
                     
                     if (IsRaw)
-                    {
-                        tco = new TransactionContent();
+                    {                        
                         byte[] data = HexUtil.GetBytes(sr.ReadToEnd());
                         tco.Deserialize(data);
                     }
                     else
                     {
-                        tco = JsonConvert.DeserializeObject<TransactionContent>(sr.ReadToEnd());
+                        JS_TransactionReply jtr = JsonConvert.DeserializeObject<JS_TransactionReply>(sr.ReadToEnd());
+                        tco.Deserialize(jtr);
                     }
 
-                    if (tco.VerifySignature() == TransactionProcessingResult.Accepted)
+                    TransactionProcessingResult tpResult = incomingTransactionMap.HandlePropagationRequest(tco);
+
+                    if (tpResult == TransactionProcessingResult.Accepted)
                     {
+                        
                         msg = new JS_Msg("Transaction Added to propagation queue.", RPCStatus.Success);
                     }
                     else
                     {
-                        msg = new JS_Msg("Signature Verification Failed.", RPCStatus.Failure);
+                        msg = new JS_Msg("Transaction Processing Error: " + tpResult, RPCStatus.Failure);
                     }
                 }
                 catch(Exception ex)
@@ -464,18 +463,18 @@ namespace TNetD.Nodes
 
             restServer.Stop();
 
-            if (background_Load != null)
+            /*if (background_Load != null)
             {
                 if (background_Load.IsAlive)
                 {
                     background_Load.Abort();
                 }
-            }
+            }*/
         }
 
-        void SendInitialize(Hash publicKey)
+        async Task SendInitialize(Hash publicKey)
         {
-            //await Task.Delay(Constants.random.Next(500, 1000)); // Wait a random delay before connecting.
+            await Task.Delay(Constants.random.Next(500, 1000)); // Wait a random delay before connecting.
             NetworkPacketQueueEntry npqe = new NetworkPacketQueueEntry(publicKey, new NetworkPacket(PublicKey, PacketType.TPT_HELLO, new byte[0]));
             network.AddToQueue(npqe);
         }

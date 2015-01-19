@@ -23,6 +23,8 @@ namespace TNetD.Transactions
         //[Transaction ID] -> Transaction Data
         ConcurrentDictionary<Hash, TransactionContent> IncomingTransactions = new ConcurrentDictionary<Hash, TransactionContent>();
 
+        ConcurrentDictionary<Hash, TransactionContent> IncomingPropagations = new ConcurrentDictionary<Hash, TransactionContent>();
+
         public IncomingTransactionMap(NodeState nodeState)
         {
             this.nodeState = nodeState;
@@ -42,7 +44,7 @@ namespace TNetD.Transactions
 
             return new Tuple<TransactionContent, bool>(null, false);
         }
-                     
+
         /// <summary>
         /// Given a transactionID returns current associated TransactionContentData, else return false.
         /// </summary>
@@ -64,9 +66,11 @@ namespace TNetD.Transactions
         /// </summary>
         /// <param name="transactionContent"></param>
         /// <param name="senderPublicKey"></param>
-        void InsertNewTransaction(TransactionContent transactionContent, Hash senderPublicKey)
+        public void InsertNewTransaction(TransactionContent transactionContent, Hash senderPublicKey)
         {
-            if (transactionContent.VerifySignature() == TransactionProcessingResult.Accepted)
+            TransactionProcessingResult rslt = transactionContent.VerifySignature();
+
+            if (rslt == TransactionProcessingResult.Accepted)
             {
                 // Insert if the transaction does not already exist.
                 if (!IncomingTransactions.ContainsKey(transactionContent.TransactionID))
@@ -80,7 +84,23 @@ namespace TNetD.Transactions
                 nodeState.GlobalBlacklistedUsers.Add(senderPublicKey);
             }
         }
-        
+
+        public TransactionProcessingResult HandlePropagationRequest(TransactionContent transactionContent)
+        {
+            TransactionProcessingResult rslt = transactionContent.VerifySignature();
+
+            if (rslt == TransactionProcessingResult.Accepted)
+            {
+                // Insert if the transaction does not already exist.
+                if (!IncomingPropagations.ContainsKey(transactionContent.TransactionID))
+                {
+                    IncomingPropagations.TryAdd(transactionContent.TransactionID, transactionContent);
+                }
+            }
+
+            return rslt;
+        }
+
         /*
         void IncomingTransactionMap::GetEligibleTransactionForConsensus(vector<Hash> connectedValidators, vector<Hash>& transactionIDtoMigrate)
         {
@@ -119,7 +139,7 @@ namespace TNetD.Transactions
                 }
             }
         }
-        
+
         Hash[] FetchAllTransactionIDs()
         {
             return (Hash[])TransactionMap.Keys;
@@ -151,7 +171,7 @@ namespace TNetD.Transactions
         }*/
 
         bool HaveTransactionInfo(Hash transactionID)
-        {           
+        {
             return (TransactionMap.ContainsKey(transactionID));
         }
 

@@ -107,7 +107,7 @@ namespace TNetD.Network.Networking
 
                 foreach (KeyValuePair<Hash, OutgoingConnection> kvp in outgoingConnections)
                 {
-                    if (kvp.Value.ThreadKilled) // Remove killed connections
+                    if (kvp.Value.Ended) // Remove killed connections
                     {
                         toRemove.Add(kvp.Key);
                     }

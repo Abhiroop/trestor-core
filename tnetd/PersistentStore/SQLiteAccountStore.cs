@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using TNetD.Address;
 using TNetD.Nodes;
 using TNetD.Transactions;
@@ -46,46 +47,49 @@ namespace TNetD.PersistentStore
                 return false;
             }
         }
-        
-        public Tuple<DBResponse, long> FetchAllAccounts(AccountFetchEventHandler accountFetch)
+
+        public async Task<Tuple<DBResponse, long>> FetchAllAccounts(AccountFetchEventHandler accountFetch)
         {
             DBResponse response = DBResponse.FetchFailed;
-
             long Records = 0;
 
-            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger;", sqliteConnection))
-            {
-                using (SQLiteDataReader reader = cmd.ExecuteReader())
-                {                    
-                    if (reader.HasRows)
+            await Task.Run(() => {
+
+                using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger;", sqliteConnection))
+                {
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
                     {
-                        while (reader.Read())
+                        if (reader.HasRows)
                         {
-                            Hash _publicKey = new Hash((byte[])reader[0]);
-                            string userName = (string)reader[1];
-                            long balance = (long)reader[2];
-                            long accountState = (long)reader[3];
-
-                            long networkType = (long)reader[4];
-                            long accountType = (long)reader[5];
-
-                            long lastTransactionTime = (long)reader[6];
-
-                            if(accountFetch != null)
+                            while (reader.Read())
                             {
-                                AccountInfo accountInfo = new AccountInfo(_publicKey, balance, userName, (AccountState)accountState, 
-                                    (NetworkType)networkType, (AccountType)accountType, lastTransactionTime);
+                                Hash _publicKey = new Hash((byte[])reader[0]);
+                                string userName = (string)reader[1];
+                                long balance = (long)reader[2];
+                                long accountState = (long)reader[3];
 
-                                accountFetch(accountInfo);
+                                long networkType = (long)reader[4];
+                                long accountType = (long)reader[5];
+
+                                long lastTransactionTime = (long)reader[6];
+
+                                if (accountFetch != null)
+                                {
+                                    AccountInfo accountInfo = new AccountInfo(_publicKey, balance, userName, (AccountState)accountState,
+                                        (NetworkType)networkType, (AccountType)accountType, lastTransactionTime);
+
+                                    accountFetch(accountInfo);
+                                }
+
+                                response = DBResponse.FetchSuccess;
+
+                                Records++;
                             }
-                            
-                            response = DBResponse.FetchSuccess;
-
-                            Records++;
                         }
                     }
                 }
-            }
+            
+            });                    
 
             return new Tuple<DBResponse, long>(response, Records);
         }

@@ -10,7 +10,7 @@ namespace TNetD.Network.Networking
 {
     public class IncomingClient
     {
-        public Thread thread;
+        //public Thread thread;
         public TcpClient client = default(TcpClient);
         public string UserName = "";
 
@@ -42,7 +42,7 @@ namespace TNetD.Network.Networking
 
         public byte[] DHRandomBytes;
         public byte[] DHPublicKey;
-        public byte[] DHPrivateKey;        
+        public byte[] DHPrivateKey;
 
         /// <summary>
         /// Key using which all the data is encrypted.
@@ -53,6 +53,11 @@ namespace TNetD.Network.Networking
         /// HMAC Signing key for all the data.
         /// </summary>
         public byte[] AuthenticationKey;
+
+        /// <summary>
+        /// Becomes true when the connection is disconnected.
+        /// </summary>
+        public bool Ended = false;
 
         public IncomingClient()
         {
@@ -66,8 +71,8 @@ namespace TNetD.Network.Networking
 
             TransportKey = new byte[32];
             AuthenticationKey = new byte[32];
-                        
-            DHRandomBytes = new byte[32];            
+
+            DHRandomBytes = new byte[32];
         }
     }
 }

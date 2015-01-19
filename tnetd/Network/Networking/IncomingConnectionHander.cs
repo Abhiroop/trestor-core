@@ -6,7 +6,6 @@
 
 using Chaos.NaCl;
 using Elliptic;
-using TNetD;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,11 +13,11 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TNetD.Nodes;
 using TNetD.Crypto;
+using System.Reactive.Linq;
 
 namespace TNetD.Network.Networking
 {
@@ -40,7 +39,10 @@ namespace TNetD.Network.Networking
 
             listener = new TcpListener(IPAddress.Any, ListenPort);
             timer = new Timer(TimerCallback_Housekeeping, null, 0, 2000);
-            timer_hello = new Timer(TimerCallback_Hello, null, 0, 500);
+            /* timer_hello = new Timer(TimerCallback_Hello, null, 0, 500);*/
+
+            Observable.Interval(TimeSpan.FromMilliseconds(100))
+                .Subscribe(async x => await TimerCallback_Hello(x));
 
             ServicePointManager.DefaultConnectionLimit = 200000;
 
@@ -55,6 +57,9 @@ namespace TNetD.Network.Networking
         /// </summary>
         public Dictionary<Hash, IncomingClient> IncomingConnections = new Dictionary<Hash, IncomingClient>();
 
+        /// <summary>
+        /// Incoiming Connections Keyed on Identifier.
+        /// </summary>
         public Dictionary<Hash, IncomingClient> ThreadList = new Dictionary<Hash, IncomingClient>();
 
         /// <summary>
@@ -88,17 +93,18 @@ namespace TNetD.Network.Networking
             else return false;
         }
 
-        private void TimerCallback_Hello(Object o)
+        private async Task TimerCallback_Hello(long o)
         {
-            while(outgoingQueue.Count > 0)
+            while (outgoingQueue.Count > 0)
             {
                 NetworkPacketQueueEntry npqe = outgoingQueue.Dequeue();
 
-                if(IncomingConnections.ContainsKey(npqe.PublicKey_Dest))
+                if (IncomingConnections.ContainsKey(npqe.PublicKey_Dest))
                 {
-                    SendData(npqe.Packet.Serialize(), IncomingConnections[npqe.PublicKey_Dest]);
+                    await SendData(npqe.Packet.Serialize(), IncomingConnections[npqe.PublicKey_Dest]);
                 }
             }
+
 
             /*
 
@@ -153,35 +159,13 @@ namespace TNetD.Network.Networking
         {
             /// Remove Threads
 
-            try
-            {
-                List<Hash> threadsForRemoval = new List<Hash>();
-                foreach (KeyValuePair<Hash, IncomingClient> kvp in ThreadList)
-                {
-                    if ((kvp.Value.thread.IsAlive == false) || (kvp.Value.thread.ThreadState == ThreadState.Stopped))
-                    {
-                        threadsForRemoval.Add(kvp.Key);
-                    }
-                }
-
-                foreach (Hash h in threadsForRemoval)
-                {
-                    ThreadList.Remove(h);
-                    DisplayUtils.Display("Removed Thread: " + HexUtil.ToString(h.Hex), DisplayType.Warning);
-                }
-            }
-            catch (System.Exception ex)
-            {
-                DisplayUtils.Display("TimerCallback()", ex);
-            }
-
             // Remove bad connections
             try
             {
                 List<Hash> threadsForRemoval = new List<Hash>();
                 foreach (KeyValuePair<Hash, IncomingClient> kvp in ThreadList)
                 {
-                    if ((kvp.Value.thread.IsAlive == false) || (kvp.Value.thread.ThreadState == ThreadState.Stopped))
+                    if (kvp.Value.Ended == true)
                     {
                         threadsForRemoval.Add(kvp.Key);
                     }
@@ -200,7 +184,7 @@ namespace TNetD.Network.Networking
 
         }
 
-        private void ClientHandler(object oTcpClient)
+        private async void ClientHandler(object oTcpClient)
         {
             IncomingClient iClient = (IncomingClient)oTcpClient;
             TcpClient tcpClient = iClient.client;
@@ -215,6 +199,7 @@ namespace TNetD.Network.Networking
             byte[] inbuffer = new byte[Constants.PREFS_APP_TCP_BUFFER_SIZE];
 
             List<TransportPacket> mp = new List<TransportPacket>();
+
             try
             {
                 while (tcpClient != null)
@@ -232,12 +217,18 @@ namespace TNetD.Network.Networking
 
                                 try
                                 {
-                                    bytesRead = reader.Read(inbuffer, 0, inbuffer.Length);
+                                    bytesRead = await reader.ReadAsync(inbuffer, 0, inbuffer.Length);
+
+                                    if (bytesRead == 0)
+                                    {
+                                        break;
+                                    }
+
                                     messageStream.Write(inbuffer, 0, bytesRead);
 
                                     if (bytesRead > 0)
                                     {
-                                       // DisplayUtils.Display("\nBytes : " + bytesRead);
+                                        // DisplayUtils.Display("\nBytes : " + bytesRead);
 
                                         long SuccessPosition = 0;
                                         byte[] content = messageStream.ToArray();
@@ -252,7 +243,7 @@ namespace TNetD.Network.Networking
                                                 try
                                                 {
                                                     Constants.SERVER_GLOBAL_PACKETS++;
-                                                    ProcessIncomingUserInternal(iClient, p);
+                                                    await ProcessIncomingUserInternal(iClient, p);
                                                 }
                                                 catch (Exception ex)
                                                 {
@@ -279,7 +270,7 @@ namespace TNetD.Network.Networking
                             while (bytesRead > 0);
                         }
 
-                        Thread.Sleep(50);
+                        //Thread.Sleep(50);
                     }
                     else
                         break;
@@ -290,6 +281,8 @@ namespace TNetD.Network.Networking
             {
                 DisplayUtils.Display("ClientHandler()", ex);
             }
+
+            iClient.Ended = true;
         }
 
         //System.Diagnostics.Stopwatch sw_timer = new System.Diagnostics.Stopwatch();
@@ -416,32 +409,32 @@ namespace TNetD.Network.Networking
 
                                 bool serverVerified = Ed25519.Verify(workSign, iClient.WorkTask, remotePK);
 
-                                 if (serverVerified)
-                                 {
-                                     iClient.PublicKey = new Hash(remotePK);
+                                if (serverVerified)
+                                {
+                                    iClient.PublicKey = new Hash(remotePK);
 
-                                     if (Constants.NetworkVerbosity >= Verbosity.Info)
-                                     {
-                                         /*DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : Key Exchanged 1: Shared KEY [TransportKey] : {" +
-                                             (HexUtil.ToString(TransportKey)) + "}", DisplayType.Info);*/
+                                    if (Constants.NetworkVerbosity >= Verbosity.Info)
+                                    {
+                                        /*DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : Key Exchanged 1: Shared KEY [TransportKey] : {" +
+                                            (HexUtil.ToString(TransportKey)) + "}", DisplayType.Info);*/
 
-                                         DisplayUtils.Display(iClient.PublicKey.ToString() + " Client Authenticated", DisplayType.Info);
-                                     }
+                                        DisplayUtils.Display(iClient.PublicKey.ToString() + " Client Authenticated", DisplayType.Info);
+                                    }
 
-                                     await PacketSender.SendTransportPacket(writer, TransportPacketType.KeyExComplete_2, new byte[0]);
+                                    await PacketSender.SendTransportPacket(writer, TransportPacketType.KeyExComplete_2, new byte[0]);
 
-                                     iClient.KeyExchanged = true;
+                                    iClient.KeyExchanged = true;
 
-                                     IncomingConnections.Add(iClient.PublicKey, iClient);
+                                    IncomingConnections.Add(iClient.PublicKey, iClient);
 
-                                     DisplayUtils.Display("Exchange Complete 2, Shared KEY [TransportKey] : " + HexUtil.ToString(iClient.TransportKey), DisplayType.Info);
-                                     
-                                 }                               
+                                    DisplayUtils.Display("Exchange Complete 2, Shared KEY [TransportKey] : " + HexUtil.ToString(iClient.TransportKey), DisplayType.Info);
+
+                                }
                             }
                         }
                     }
 
-                    break;                
+                    break;
 
                 case TransportPacketType.DataCrypted:
 
@@ -508,7 +501,7 @@ namespace TNetD.Network.Networking
             }
             catch { }
         }
-        
+
         public void StartListeningInternal()
         {
             try
@@ -527,11 +520,11 @@ namespace TNetD.Network.Networking
 
                     ThreadList.Add(hsh, _inClient);
 
-                    //Task.Factory.StartNew(() => { ClientHandler(_inClient); });
+                    Task.Run(() => { ClientHandler(_inClient); });
 
-                    Thread clientThread = new Thread(new ParameterizedThreadStart(ClientHandler));
+                    /*Thread clientThread = new Thread(new ParameterizedThreadStart(ClientHandler));
                     _inClient.thread = clientThread;
-                    clientThread.Start(_inClient);
+                    clientThread.Start(_inClient);*/
                 }
             }
             catch (Exception ex)
@@ -544,33 +537,33 @@ namespace TNetD.Network.Networking
         {
             listener.Stop();
 
-            try
-            {
-                foreach (KeyValuePair<Hash, IncomingClient> kvp in ThreadList)
-                {
-                    if (kvp.Value.thread.IsAlive)
-                    {
-                        if (kvp.Value.client != null)
-                        {
-                            try
-                            {
-                                kvp.Value.client.Client.Dispose();
-                            }
-                            catch { }
-                        }
-                    }
-                }
-            }
-            catch { }
+            /* try
+             {
+                 foreach (KeyValuePair<Hash, IncomingClient> kvp in ThreadList)
+                 {
+                     if (kvp.Value.thread.IsAlive)
+                     {
+                         if (kvp.Value.client != null)
+                         {
+                             try
+                             {
+                                 kvp.Value.client.Client.Dispose();
+                             }
+                             catch { }
+                         }
+                     }
+                 }
+             }
+             catch { }*/
         }
-        
+
         public void StartListening()
         {
             ThreadStart ts = new ThreadStart(StartListeningInternal);
             Thread thr = new Thread(ts);
             thr.Start();
         }
-        
+
 
     }
 }

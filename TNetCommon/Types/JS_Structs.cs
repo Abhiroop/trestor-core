@@ -85,6 +85,10 @@ namespace TNetD.Json.JS_Structs
         public List<TransactionEntity> Destinations;
         public List<byte[]> Signatures;
 
+        public JS_TransactionReply()
+        {
+        }
+
         public JS_TransactionReply(TransactionContent content)
         {
             VersionData = content.VersionData;

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using TNetD.Transactions;
 
 namespace TNetD.PersistentStore
@@ -53,7 +54,7 @@ namespace TNetD.PersistentStore
         /// </summary>
         /// <param name="accountFetch"></param>
         /// <returns></returns>
-        Tuple<DBResponse, long> FetchAllAccounts(AccountFetchEventHandler accountFetch);
+        Task<Tuple<DBResponse, long>> FetchAllAccounts(AccountFetchEventHandler accountFetch);
 
         /// <summary>
         /// Returns true if the account exists.

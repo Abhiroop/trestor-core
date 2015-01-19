@@ -1,6 +1,6 @@
 ﻿
 // @Author : Arpan Jati
-// @Date: 23th Dec 2014 | 12th Jan 2015 | 16th Jan 2015
+// @Date: 23th Dec 2014 | 12th Jan 2015 | 16th Jan 2015 | 20th Jan 2015
 
 using Chaos.NaCl;
 using System;
@@ -375,10 +375,36 @@ namespace TNetD.Transactions
 
         /////////////////////////
 
-        public void Deserialize(JS_TransactionReply Data)
+        public bool Deserialize(JS_TransactionReply Data)
         {
             Init();
 
+            Destinations = Data.Destinations;
+            executionData =  Data.ExecutionData;
+            Signatures = (from sig in Data.Signatures select new Hash(sig)).ToList();
+
+            Sources = Data.Sources;
+            timeStamp = Data.Timestamp;
+            transactionFee = Data.TransactionFee;
+
+            versionData = Data.VersionData;
+
+            if(this.Value != Value)
+            {
+
+                return false;
+                //throw new ArgumentException("JSON Deserialization: Invalid Total Value");
+            }
+
+            UpdateIntHash();
+
+            if (!Data.TransactionID.ByteArrayEquals(TransactionID.Hex))
+            {
+                return false;
+                //throw new ArgumentException("JSON Deserialization: Transaction ID Mismatch");
+            }
+
+            return true;
         }
 
         public void Deserialize(byte[] Data)
