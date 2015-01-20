@@ -22,6 +22,8 @@ namespace TNetD
         /// </summary>
         public static readonly int HashTree_NodeListDepth = 4;
 
+        public static readonly int Pref_MinNameLength = 5;
+
         public static readonly int GlobalNodes = 100;
 
         public static readonly int Connections_PerNode_Max = 20;
@@ -55,7 +57,12 @@ namespace TNetD
 
         public static readonly int SYNC_LEAF_COUNT_THRESHOLD = 200;
 
-        ///////////////////////////
+        /// <summary>
+        /// Number of Tre's per Genesis Account. Currently equivalent to 100,000 USD (1 T = 1 US Cent).
+        /// </summary>
+        public static readonly long FIN_TRE_PER_GENESIS_ACCOUNT = 10000000000000;
+
+        ///////////////////////////////////////////////////////   10000000000000 = 100 Billion * [10^6] / 10000 Genesis Accounts
 
         public static readonly int Network_UpdateFrequencyMS = 100;
         public static readonly int Network_DefaultListenPort = 2014;
@@ -65,6 +72,8 @@ namespace TNetD
         public static bool ApplicationRunning = true;
 
         public static int PREFS_APP_TCP_BUFFER_SIZE = 4096;// 512 * 1024;
+
+        public static long PREFS_MAX_RPC_POST_CONTENT_LENGTH = 50*1024; // 50 KiB 
                 
         public static byte TransportVersion = 1;
         public static byte ProtocolVersion = 1;
@@ -95,16 +104,7 @@ namespace TNetD
 
         public static readonly string File_TrustedNodes = "TrustedNodes.ini";
 
-        public static JsonSerializerSettings jss = new JsonSerializerSettings();
-
-        /// <summary>
-        ///  TODO: BAD/ REMOVE STATIC METHOD
-        /// </summary>
-        public static void Initialize()
-        {
-            jss.Converters.Add(new BytesToHexConverter());
-            jss.Formatting = Formatting.Indented;
-        }   
+          
         
     }
 }

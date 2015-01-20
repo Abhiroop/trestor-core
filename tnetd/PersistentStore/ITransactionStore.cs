@@ -17,15 +17,17 @@ namespace TNetD.PersistentStore
     /// </summary>
     interface ITransactionStore
     {
+        int AddUpdateBatch(List<TransactionContent> accountInfoData);
+
         /// <summary>
-        /// Adds or updates elements from the PersistentStore
+        /// Adds or updates elements to the PersistentStore
         /// </summary>
         /// <param name="transactionContent"></param>
         /// <returns></returns>
         DBResponse AddUpdate(TransactionContent transactionContent);
-        
+
         /// <summary>
-        /// Deletes the transaction from the Persistent Store [Must not be used in practice !!!]
+        /// Deletes the transaction to the Persistent Store [Must not be used in practice !!!]
         /// </summary>
         /// <param name="transactionID"></param>
         /// <returns></returns>
@@ -34,10 +36,10 @@ namespace TNetD.PersistentStore
         /// <summary>
         /// Fetches a transaction from the Persistent Store 
         /// </summary>
-        /// <param name="transactionID"></param>
         /// <param name="transactionContent"></param>
+        /// <param name="transactionID"></param>
         /// <returns></returns>
-        DBResponse FetchTransaction(Hash transactionID, out TransactionContent transactionContent);
+        DBResponse FetchTransaction(out TransactionContent transactionContent, Hash transactionID);
 
         /// <summary>
         /// Returns true if the transaction exists in the database.
@@ -45,6 +47,13 @@ namespace TNetD.PersistentStore
         /// <param name="transactionID"></param>
         /// <returns></returns>
         bool Exists(Hash transactionID);
+               
+        /// <summary>
+        /// Deletes everything in the DB. Returns 'DeleteFailed' if already empty.
+        /// ONLY FOR TEST. DO NOT USE.
+        /// </summary>
+        /// <returns></returns>
+        Tuple<DBResponse, long> DeleteEverything();
 
     }
 }

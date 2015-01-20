@@ -1,4 +1,8 @@
-﻿using System;
+﻿
+// @Author: Arpan Jati
+// @Date: 6-7 Jan / 2015 | 15 Jan 2015
+
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
@@ -41,8 +45,8 @@ namespace TNetD.PersistentStore
             }
             return false;
         }
-        
-        public DBResponse FetchTransaction(Hash transactionID, out TransactionContent transactionContent)
+
+        public DBResponse FetchTransaction(out TransactionContent transactionContent, Hash transactionID)
         {
             DBResponse response = DBResponse.FetchFailed;
 
@@ -81,6 +85,24 @@ namespace TNetD.PersistentStore
             }
 
             return response;
+        }
+
+        public int AddUpdateBatch(List<TransactionContent> accountInfoData)
+        {
+            int Successes = 0;
+            SQLiteTransaction st = sqliteConnection.BeginTransaction();
+
+            foreach (TransactionContent ai in accountInfoData)
+            {
+                DBResponse resp = AddUpdate(ai);
+                if ((resp == DBResponse.InsertSuccess) || (resp == DBResponse.UpdateSuccess))
+                {
+                    Successes++;
+                }
+            }
+
+            st.Commit();
+            return Successes;
         }
 
         public DBResponse AddUpdate(TransactionContent transactionContent)
@@ -178,6 +200,29 @@ namespace TNetD.PersistentStore
             }
             return response;
         }
+
+        /// <summary>
+        /// Deletes everything in the DB. Returns 'DeleteFailed' if already empty.
+        /// ONLY FOR TEST. DO NOT USE.
+        /// </summary>
+        /// <returns></returns>
+        public Tuple<DBResponse, long> DeleteEverything()
+        {
+            DBResponse response = DBResponse.DeleteFailed;
+            int removed = 0;
+
+            using (SQLiteCommand cmd = new SQLiteCommand("DELETE FROM Transactions;", sqliteConnection))
+            {
+                removed = cmd.ExecuteNonQuery();
+                if (removed > 0) // There should be atleast single entry for a PublicKey.
+                {
+                    response = DBResponse.DeleteSuccess;
+                }
+            }
+
+            return new Tuple<DBResponse, long>(response, removed);
+        }
+
 
     }
 

@@ -55,9 +55,23 @@ namespace TNetD
         }
     }*/
 
-    
 
-   
+    struct TimeStruct
+    {
+        long sendTime;
+        long receivedTime;
+        long TimeFromValidator;
+        Hash token;
+        long timeDifference; //my time - other time
+    };
+
+
+    class TransactionContentData
+    {
+        TransactionContent TC;
+        HashSet<Hash> ForwardersPK;
+    }
+
 
 
 }

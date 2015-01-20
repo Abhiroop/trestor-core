@@ -73,13 +73,23 @@ namespace TNetD.Tree
         }
 
         /// <summary>
-        /// Adds an entry to the tree
+        /// Adds/Updates an entry in the tree
         /// </summary>
-        /// <param name="hash">Hash is the Full hash for the value (32 bytes)</param>
+        /// <param name="ID">Hash is the Full hash for the value (32 bytes)</param>
         /// <param name="value"></param>
-        public void Add(Hash ID, LeafDataType value)
+        /// <returns>True if added. False if updated.</returns>
+        public bool AddUpdate(Hash ID, LeafDataType value)
         {
-            Values.Add(ID, value);
+            if(Values.ContainsKey(ID))
+            {
+                Values[ID] = value;
+                return false;
+            }
+            else
+            {
+                Values.Add(ID, value);
+                return true;
+            }            
         }
 
         /// <summary>
@@ -90,13 +100,15 @@ namespace TNetD.Tree
         public Hash GetHash()
         {
             List<byte> _tempHash = new List<byte>();
-
+            _tempHash.Capacity = Values.Count * 32;
             foreach (KeyValuePair<Hash, LeafDataType> val in Values)
             {
                 _tempHash.AddRange(val.Value.GetHash().Hex);
             }
 
-            return new Hash((new SHA512Managed()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
+            if (_tempHash.Count != Values.Count * 32) throw new IndexOutOfRangeException("Bad Hash Length from LeafEntries.");
+
+            return new Hash((new SHA512Cng()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
         }
 
 

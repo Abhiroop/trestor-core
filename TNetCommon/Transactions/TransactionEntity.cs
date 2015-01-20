@@ -1,6 +1,6 @@
 ﻿
 // @Author : Arpan Jati
-// @Date: 23th Dec 2014
+// @Date: 23th Dec 2014 | 12 Jan 2015
 
 using System;
 using System.Collections.Generic;
@@ -14,26 +14,38 @@ namespace TNetD.Transactions
 {
     public class TransactionEntity : ISerializableBase
     {
-        public byte[] PublicKey;
-        public long Amount;
+        byte[] _publicKey;
+        long _value;
+
+        public byte[] PublicKey 
+        {
+            get { return _publicKey; }
+            set { _publicKey = value;  }
+        }
+
+        public long Value 
+        {
+            get { return _value; }
+            set { _value = value; }
+        }
 
         public TransactionEntity()
         {
-            PublicKey = new byte[0];
-            Amount = 0;
+            _publicKey = new byte[0];
+            _value = 0;
         }
 
         public TransactionEntity(byte[] PublicKey, long Amount)
         {
-            this.PublicKey = PublicKey;
-            this.Amount = Amount;
+            this._publicKey = PublicKey;
+            this._value = Amount;
         }
 
         public byte[] Serialize()
         {
             ProtocolDataType [] PDTs = new ProtocolDataType[2];
-            PDTs[0] = (ProtocolPackager.Pack(PublicKey, 0));
-            PDTs[1] =(ProtocolPackager.Pack(Amount, 1));
+            PDTs[0] = (ProtocolPackager.Pack(_publicKey, 0));
+            PDTs[1] = (ProtocolPackager.Pack(_value, 1));
             return ProtocolPackager.PackRaw(PDTs);
         }
 
@@ -49,11 +61,11 @@ namespace TNetD.Transactions
                 switch (PDT.NameType)
                 {
                     case 0:
-                        ProtocolPackager.UnpackByteVector_s(PDT, 0, Common.KEYLEN_PUBLIC, ref PublicKey);
+                        ProtocolPackager.UnpackByteVector_s(PDT, 0, Common.KEYLEN_PUBLIC, ref _publicKey);
                         break;
 
                     case 1:
-                        ProtocolPackager.UnpackInt64(PDT, 1, ref Amount);
+                        ProtocolPackager.UnpackInt64(PDT, 1, ref _value);
                         break;
                 }
             }

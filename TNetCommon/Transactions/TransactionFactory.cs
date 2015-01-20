@@ -22,25 +22,25 @@ namespace TNetD.Transactions
     public class SingleTransactionFactory
     {
         Hash source, destination;
-        long amount;
+        long destValue, transactionFee=0;
 
         TransactionContent TC;
 
         byte[] tranxData;
 
-        public SingleTransactionFactory(Hash source, Hash destination, long amount)
+        public SingleTransactionFactory(Hash source, Hash destination, long transactionFee, long destValue)
         {
             this.source = source;
             this.destination = destination;
-            this.amount = amount;
-
-            TransactionEntity teSrc = new TransactionEntity(this.source.Hex, amount);
-            TransactionEntity teDst = new TransactionEntity(this.destination.Hex, amount);
+            this.destValue = destValue;
+            this.transactionFee = transactionFee;
+            
+            TransactionEntity teSrc = new TransactionEntity(this.source.Hex, destValue + transactionFee);
+            TransactionEntity teDst = new TransactionEntity(this.destination.Hex, destValue);
 
             long Time = DateTime.UtcNow.ToFileTimeUtc();
 
-            TC = new TransactionContent(new TransactionEntity[] { teSrc }, Time,
-                new TransactionEntity[] { teDst });
+            TC = new TransactionContent(new TransactionEntity[] { teSrc }, new TransactionEntity[] { teDst }, transactionFee, Time);
 
             tranxData = TC.GetTransactionData();
         }
@@ -61,9 +61,9 @@ namespace TNetD.Transactions
         /// <param name="signature"></param>
         /// <param name="transactionContent"></param>
         /// <returns></returns>
-        public bool Create(byte[] signature, out TransactionContent transactionContent)
+        public TransactionProcessingResult Create(Hash signature, out TransactionContent transactionContent)
         {
-            TC.SetSignatures(new List<byte[]> { signature });
+            TC.SetSignatures(new List<Hash> { signature });
 
             transactionContent = TC;
                         

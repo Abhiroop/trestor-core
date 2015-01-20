@@ -9,12 +9,13 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-//using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -22,6 +23,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TNetD.Address;
 using TNetD.Network.Networking;
 using TNetD.Nodes;
 using TNetD.PersistentStore;
@@ -36,26 +38,57 @@ namespace TNetD
     /// </summary>
     public partial class MainWindow : Window
     {
-        ObservableCollection<TransactionData> _tranxData = new ObservableCollection<TransactionData>();
-        
+        ObservableCollection<TransactionContent> _tranxData = new ObservableCollection<TransactionContent>();
+
         List<Node> nodes = new List<Node>();
         GlobalConfiguration globalConfiguration;
 
+        Thread background_Load;
+
         public MainWindow()
         {
-            Constants.Initialize();
+            Common.Initialize();
 
             InitializeComponent();
 
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
             globalConfiguration = new GlobalConfiguration();
 
-            nodes.Add(new Node(0, globalConfiguration));
-            nodes.Add(new Node(1, globalConfiguration));
-
-
-
             lv_TX.ItemsSource = _tranxData;
+
+            background_Load = new Thread(LoadNodes);
+
+            background_Load.Start();
+        }
+
+        void AddNode(int idx)
+        {
+            Node nd = new Node(idx, globalConfiguration);
+            nd.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
+            nd.BeginBackgroundLoad();
+
+            nodes.Add(nd);
+        }
+
+        void LocalLedger_LedgerEvent(Ledgers.Ledger.LedgerEventType ledgerEvent, string Message)
+        {
+            try
+            {
+                this.Dispatcher.Invoke(new Action(() =>
+                {
+                    textBlock_Status.Text = "" + ledgerEvent.ToString() + " - " + Message;
+                    //textBlock_StatusLog.Inlines.Add(new Run(Text + "\n") { Foreground = new SolidColorBrush(color) });
+                }));
+            }
+            catch { }
+            //throw new NotImplementedException();
+        }
+
+
+        void LoadNodes()
+        {
+            AddNode(0);
+            AddNode(1);
         }
 
         void DisplayUtils_DisplayText(string Text, Color color, DisplayType type)
@@ -152,34 +185,38 @@ namespace TNetD
             {
                 nd.StopNode();
             }
+
+            if (background_Load != null)
+            {
+                if (background_Load.IsAlive)
+                {
+                    background_Load.Abort();
+                }
+            }
         }
 
         /// ///////
 
         private void menuItem_Server_Start_Click(object sender, RoutedEventArgs e)
         {
-           /* GlobalConfiguration gc = new GlobalConfiguration();
-            NodeConfig nc = new NodeConfig(0, gc);
-            NodeConfig nc1 = new NodeConfig(1, gc);*/
-            
-            SingleTransactionFactory stf = new SingleTransactionFactory(nodes[0].PublicKey, nodes[1].PublicKey, Constants.random.Next(10, 150000));
+            SingleTransactionFactory stf = new SingleTransactionFactory(nodes[0].PublicKey, nodes[1].PublicKey, Constants.random.Next(100, 1000), Constants.random.Next(10, 150000));
 
             byte[] tranxData = stf.GetTransactionData();
             byte[] signature = nodes[0].nodeConfig.SignDataWithPrivateKey(tranxData);
 
             TransactionContent transactionContent;
 
-            bool TransOk = stf.Create(signature, out transactionContent);
+            TransactionProcessingResult TransOk = stf.Create(new Hash(signature), out transactionContent);
 
-            if (TransOk)
+            if (TransOk == TransactionProcessingResult.Accepted)
             {
                 DisplayUtils.Display("Transaction Valid: ");
 
-                DBResponse dBResponse =  nodes[0].TransactionStore.AddUpdate(transactionContent);
+                DBResponse dBResponse = nodes[0].TransactionStore.AddUpdate(transactionContent);
 
                 DisplayUtils.Display("dBResponse: " + dBResponse);
 
-                _tranxData.Add(new TransactionData(transactionContent));
+                _tranxData.Add(transactionContent);
             }
         }
 
@@ -194,10 +231,94 @@ namespace TNetD
 
         private void lv_TX_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            TransactionData var = (TransactionData)lv_TX.SelectedItem;
-
-            tb_Tx_txid.Text = var.TransactionID;
+            if (lv_TX != null)
+            {
+                if (lv_TX.SelectedItem != null)
+                {
+                    TransactionContent var = (TransactionContent)lv_TX.SelectedItem;
+                    tb_Tx_txid.Text = var.TransactionID.ToString();
+                }
+            }
         }
+
+        private void menu_CreateTransaction_Click(object sender, RoutedEventArgs e)
+        {
+            CreateTransaction ct = new CreateTransaction();
+            ct.Show();
+
+            /*StringBuilder sb = new StringBuilder();
+            AddressFactory af = new AddressFactory();
+
+            for (int j = 0; j < 256; j++)
+            {
+                for (int i = 0; i < 256; i++)
+                {
+                    af.NetworkType = (byte)j;
+                    af.AccountType = (byte)i;
+
+                    byte[] Address = af.GetAddress(nodes[0].PublicKey.Hex, "arpan");
+                    sb.AppendLine("" + i + " - " + j + " - " + af.GetAddressString(Address));
+                }
+            }
+
+            File.WriteAllText("tk.txt", sb.ToString());
+            DisplayUtils.Display("DONE.");*/
+        }
+
+        private void menu_CreateAccount_Click(object sender, RoutedEventArgs e)
+        {
+            CreateAccount ca = new CreateAccount();
+            ca.Show();
+        }
+
+        private void menu_Benchmarks_Click(object sender, RoutedEventArgs e)
+        {
+            Benchmarks bm = new Benchmarks();
+            bm.Show();
+        }
+
+        private void menu_Reset_Ledger_To_Genesis_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBoxResult.Yes == MessageBox.Show("DO you really want to reset the current state. All state information will be lost.",
+                "Ledger State Reset !!!", MessageBoxButton.YesNo))
+            {
+                GenesisFileParser gfp = new GenesisFileParser("ACCOUNTS.GEN_PUBLIC");
+
+                List<AccountInfo> aiData = new List<AccountInfo>();
+                List<GenesisAccountData> gData;
+
+                gfp.GetAccounts(out gData);
+
+                foreach (Node n in nodes)
+                {
+                    var resp = n.PersistentAccountStore.DeleteEverything();
+
+                    foreach (GenesisAccountData gad in gData)
+                    {
+                        AccountInfo ai = new AccountInfo(new Hash(gad.Public), Constants.FIN_TRE_PER_GENESIS_ACCOUNT);
+
+                        byte[] Address = Base58Encoding.DecodeWithCheckSum(gad.Address);
+
+                        if (Address.Length == 22)
+                        {
+                            ai.NetworkType = (NetworkType)Address[0];
+                            ai.AccountType = (AccountType)Address[1];
+
+                            ai.AccountState = AccountState.Normal;
+                            ai.LastTransactionTime = 0;
+                            ai.Name = gad.Name;
+
+                            aiData.Add(ai);
+                        }
+                    }
+
+                    n.PersistentAccountStore.AddUpdateBatch(aiData);
+                }
+
+                MessageBox.Show("ACCOUNTS RESET. It will take some time to synchronise with the network to resume normal operation.");
+            }
+        }
+
 
     }
 }

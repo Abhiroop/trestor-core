@@ -67,20 +67,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Json\REST\BytesToHexConverter.cs" />
-    <Compile Include="Json\REST\Client\RESTClient.cs" />
-    <Compile Include="Json\REST\Client\RESTRequest.cs" />
-    <Compile Include="Json\REST\Client\RESTResponse.cs" />
-    <Compile Include="Json\REST\JS_Structs.cs" />
-    <Compile Include="Json\REST\Server\Config.cs" />
-    <Compile Include="Json\REST\Server\RESTServer.cs" />
-    <Compile Include="Json\REST\Util\ContentType.cs" />
-    <Compile Include="Json\REST\Util\EventLogger.cs" />
-    <Compile Include="Json\REST\Util\Exceptions.cs" />
-    <Compile Include="Json\REST\Util\Extensions.cs" />
-    <Compile Include="Json\REST\Util\HttpMethod.cs" />
-    <Compile Include="Json\REST\Util\Responder.cs" />
-    <Compile Include="Json\JsonService.cs" />
     <Compile Include="Ledgers\SQLiteLedgerFileHandler.cs" />
     <Compile Include="Network\FakeNetwork.cs" />
     <Compile Include="Network\Networking\PacketSender.cs" />
@@ -91,23 +77,32 @@
     <Compile Include="Network\Networking\IncomingClient.cs" />
     <Compile Include="Nodes\GlobalConfiguration.cs" />
     <Compile Include="Nodes\NodeConfig.cs" />
+    <Compile Include="Nodes\NodeState.cs" />
     <Compile Include="PersistentStore\DBUtils.cs" />
     <Compile Include="PersistentStore\IPersistentAccountStore.cs" />
     <Compile Include="PersistentStore\ITransactionStore.cs" />
     <Compile Include="PersistentStore\SQLiteAccountStore.cs" />
     <Compile Include="PersistentStore\SQLiteTransactionStore.cs" />
-    <Compile Include="Transactions\AccountInfo.cs" />
     <Compile Include="Consensus\CandidateSet.cs" />
+    <Compile Include="Transactions\IncomingTransactionMap.cs" />
     <Compile Include="Tree\FlatNodeStore.cs" />
     <Compile Include="Tree\ListHashTree.cs" />
     <Compile Include="Tree\ListTreeLeafNode.cs" />
     <Compile Include="Tree\ListTreeNode.cs" />
     <Compile Include="Tree\TreeSyncData.cs" />
+    <Compile Include="UI\Benchmarks.xaml.cs">
+      <DependentUpon>Benchmarks.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\ColoredTB.xaml.cs">
       <DependentUpon>ColoredTB.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\Converters.cs" />
-    <Compile Include="UI\TransactionData.cs" />
+    <Compile Include="UI\CreateAccount.xaml.cs">
+      <DependentUpon>CreateAccount.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\CreateTransaction.xaml.cs">
+      <DependentUpon>CreateTransaction.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Utils\DisplayUtils.cs" />
     <Compile Include="Ledgers\Ledger.cs" />
@@ -121,7 +116,19 @@
     <Compile Include="Network\Networking\StructsAndEnums.cs" />
     <Compile Include="Utils\TNetUtils.cs" />
     <Compile Include="Network\Networking\WorkProof.cs" />
+    <Page Include="UI\Benchmarks.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UI\ColoredTB.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\CreateAccount.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\CreateTransaction.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

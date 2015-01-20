@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Threading;
-using TNetD.Nodes;
+//using TNetD.Nodes;
 
 namespace Grapevine.Server
 {
@@ -13,6 +13,8 @@ namespace Grapevine.Server
     /// Delegate for pre and post starting and stopping of RESTServer
     /// </summary>
     public delegate void ToggleServerHandler();
+
+    public delegate bool RPCRequestHandler(HttpListenerContext context);
 
     public class RESTServer : Responder, IDisposable
     {
