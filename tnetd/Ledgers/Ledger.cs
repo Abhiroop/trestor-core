@@ -71,6 +71,8 @@ namespace TNetD.Ledgers
 
             await ReloadFromPersistentStore();
 
+            LedgerEvent(LedgerEventType.Progress, "Ready");
+
             initialLoading = false;
         }
 
@@ -142,7 +144,7 @@ namespace TNetD.Ledgers
                     }
                 }
 
-                if (!initialLoading)
+                if (initialLoading)
                 {
                     if ((_load_stats % 100 == 0) && (LedgerEvent != null))
                         LedgerEvent(LedgerEventType.Progress, "Loaded " + _load_stats + " Accounts.");
@@ -172,7 +174,7 @@ namespace TNetD.Ledgers
         }
 
         /// <summary>
-        /// Gets an account from the tree.
+        /// Gets/Sets an account from the tree.
         /// </summary>
         /// <param name="account">PublicKey of the account.</param>
         /// <returns></returns>
@@ -181,6 +183,10 @@ namespace TNetD.Ledgers
             get
             {
                 return (AccountInfo)LedgerTree[account];
+            }
+            set
+            {
+                LedgerTree.AddUpdate(value);
             }
         }
 

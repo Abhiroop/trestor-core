@@ -515,6 +515,8 @@ namespace TNetD.Nodes
                     Dictionary<Hash, TreeDiffData> pendingDifferenceData = new Dictionary<Hash, TreeDiffData>();
                     List<AccountInfo> newAccounts = new List<AccountInfo>();
 
+                    long totalTransactionFees = 0;
+
                     while (transactionContentStack.Count > 0)
                     {
                         TransactionContent transactionContent = transactionContentStack.Pop();
@@ -528,6 +530,8 @@ namespace TNetD.Nodes
                                 bool badSource = false;
                                 bool badAccountState = false;
                                 bool insufficientFunds = false;
+
+                                totalTransactionFees += transactionContent.TransactionFee;
 
                                 foreach (TransactionEntity source in transactionContent.Sources)
                                 {
@@ -574,9 +578,7 @@ namespace TNetD.Nodes
                                 }
 
                                 bool badAccountCreationValue = false;
-
                                 
-
                                 /// Check Destinations
 
                                 foreach (TransactionEntity destination in transactionContent.Destinations)
@@ -681,8 +683,12 @@ namespace TNetD.Nodes
                             DisplayUtils.Display("Exception while processing transactions.", ex);
                         }
 
-                    } //While ends
+                    } //While ends { transactionContentStack }
 
+                    ///////////////////////////////////////////////////////////////////////////////////////////
+                    //  TODO: MAKE A RETRY QUEUE in case of Failures.                                        //
+                    //  CRITICAL: REWRITE TO APPLY ONE TRANSACTION AT A TIME TO THE LEDGERS.                 //    
+                    ///////////////////////////////////////////////////////////////////////////////////////////
 
                     ////// Create the accounts in the Ledger  /////
 
@@ -720,9 +726,8 @@ namespace TNetD.Nodes
                         throw new Exception("Persistent DB batch read failure. #2");
                     }
 
-                    /// We are here without exceptions 
-                    /// Great the accounts are ready to be written to.
-                    
+                    // We are here without exceptions 
+                    // Great the accounts are ready to be written to.                    
                     // Verify that the initial account contents are the same.
 
                     foreach(KeyValuePair<Hash, AccountInfo> kvp in accountsInLedger)
@@ -748,15 +753,37 @@ namespace TNetD.Nodes
                         }
                     }
 
-                    // Fine The account information is same in both the ledger and Persistent DB
+                    // Fine, the account information is same in both the Ledger and Persistent-DB
+                    // CRITICAL : NO EXCEPTION HANDLERS INSIDE !!
 
+                    List<AccountInfo> finalPersistentDBUpdateList = new List<AccountInfo>();
+
+                    // This essentially gets values from Ledger Tree and updates the Persistent-DB
+
+                    foreach(KeyValuePair<Hash, TreeDiffData> kvp in pendingDifferenceData)
+                    {                        
+                        TreeDiffData diffData = kvp.Value;
+
+                        // Apply to ledger
+
+                        AccountInfo ledgerAccount = ledger[diffData.PublicKey];
+
+                        ledgerAccount.Money += diffData.AddValue;
+                        ledgerAccount.Money -= diffData.RemoveValue;
+
+                        ledger[diffData.PublicKey] = ledgerAccount;
+                                                
+                        // This is good enough as we have previously checked for correctness and matching
+                        // values in both locations.
+
+                        finalPersistentDBUpdateList.Add(ledgerAccount);
+                    }
+
+                    // Apply to persistent DB.
+
+                    PersistentAccountStore.AddUpdateBatch(finalPersistentDBUpdateList);
                     
-
-
-                    // Next is to populate the ledger and then mark the accounts to save to persistent db.
-                    // then save the marked account.
-
-
+                    
                     // Apply the transactions to the PersistentDatabase.
 
                     /*while (PendingIncomingCandidates.Count > 0)
