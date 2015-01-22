@@ -3,7 +3,7 @@
 // @Author: Arpan Jati
 // @Date: 1-2-3-6 Jan 2015
 // 15 Jan 2015 : Adding : NetworkType / AccountType
-//
+// 22 Jan 2015 : IPersistentAccountStore.BatchFetch
 
 using System;
 using System.Collections.Generic;
@@ -93,7 +93,22 @@ namespace TNetD.PersistentStore
 
             return new Tuple<DBResponse, long>(response, Records);
         }
+                        
+        public int BatchFetch(out List<AccountInfo> accountInfoList, IEnumerable<Hash> AccountPKs )
+        {
+            accountInfoList = new List<AccountInfo>();
 
+            foreach(Hash accountPK in AccountPKs)
+            {
+                AccountInfo accountInfo;
+                if(FetchAccount(out accountInfo, accountPK) == DBResponse.FetchSuccess)
+                {
+                    accountInfoList.Add(accountInfo);
+                }
+            }
+
+            return accountInfoList.Count();
+        }
 
         public DBResponse FetchAccount(out AccountInfo accountInfo, Hash publicKey)
         {
@@ -135,7 +150,7 @@ namespace TNetD.PersistentStore
             return response;
         }
 
-        public int AddUpdateBatch(List<AccountInfo> accountInfoData)
+        public int AddUpdateBatch(IEnumerable<AccountInfo> accountInfoData)
         {
             int Successes = 0;
             SQLiteTransaction st = sqliteConnection.BeginTransaction();

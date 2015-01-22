@@ -199,7 +199,7 @@ namespace TNetD
 
         private void menuItem_Server_Start_Click(object sender, RoutedEventArgs e)
         {
-            SingleTransactionFactory stf = new SingleTransactionFactory(nodes[0].PublicKey, nodes[1].PublicKey, Constants.random.Next(100, 1000), Constants.random.Next(10, 150000));
+            /*SingleTransactionFactory stf = new SingleTransactionFactory(nodes[0].PublicKey, nodes[1].PublicKey, Constants.random.Next(100, 1000), Constants.random.Next(10, 150000));
 
             byte[] tranxData = stf.GetTransactionData();
             byte[] signature = nodes[0].nodeConfig.SignDataWithPrivateKey(tranxData);
@@ -217,7 +217,7 @@ namespace TNetD
                 DisplayUtils.Display("dBResponse: " + dBResponse);
 
                 _tranxData.Add(transactionContent);
-            }
+            }*/
         }
 
         private void menuItem_Server_Stop_Click(object sender, RoutedEventArgs e)

@@ -1,6 +1,7 @@
 ﻿
 //@Author: Arpan Jati
 //@Date: 16th January 2015
+// 21st Jan 2015 : IncomingPropagations / Single node TEST_MODE.
 
 using System;
 using System.Collections.Concurrent;
@@ -16,18 +17,74 @@ namespace TNetD.Transactions
     class IncomingTransactionMap
     {
         NodeState nodeState;
+        NodeConfig nodeConfig;
+        bool TimerEventProcessed = true;
 
         //[Transaction ID] -> [[Transaction Content] -> [vector of sender address]]
         ConcurrentDictionary<Hash, TransactionContentData> TransactionMap = new ConcurrentDictionary<Hash, TransactionContentData>();
 
-        //[Transaction ID] -> Transaction Data
-        ConcurrentDictionary<Hash, TransactionContent> IncomingTransactions = new ConcurrentDictionary<Hash, TransactionContent>();
-
+        /// <summary>
+        /// Incoming transactions from multiple sources to be processes.
+        /// //[Transaction ID] -> Transaction Data
+        /// TODO: MAKE PRIVATE
+        /// </summary>
+        public ConcurrentDictionary<Hash, TransactionContent> IncomingTransactions { get; private set; }
+        
+        /// <summary>
+        /// Incoming propagations from Wallets using /propagateraw and /propagate.
+        /// [Transaction ID] -> Transaction Data
+        /// </summary>
         ConcurrentDictionary<Hash, TransactionContent> IncomingPropagations = new ConcurrentDictionary<Hash, TransactionContent>();
 
-        public IncomingTransactionMap(NodeState nodeState)
+        public IncomingTransactionMap(NodeState nodeState, NodeConfig nodeConfig)
         {
             this.nodeState = nodeState;
+            this.nodeConfig = nodeConfig;
+
+            IncomingTransactions = new ConcurrentDictionary<Hash, TransactionContent>();
+
+            System.Timers.Timer Tmr = new System.Timers.Timer();
+            Tmr.Elapsed += Tmr_Elapsed;
+            Tmr.Enabled = true;
+            Tmr.Interval = nodeConfig.UpdateFrequencyMS;
+            Tmr.Start();
+        }
+        
+        void Tmr_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if(TimerEventProcessed) // Lock to prevent multiple invocations 
+            {
+                TimerEventProcessed = false;
+
+                // // // // // // // // //
+
+                try
+                {
+                    // Add the propafations to the transactions list.
+                    foreach(KeyValuePair<Hash, TransactionContent> kvp in IncomingPropagations)
+                    {
+                        if(IncomingTransactions.ContainsKey(kvp.Key))
+                        {
+                            IncomingTransactions.TryAdd(kvp.Value.TransactionID, kvp.Value);
+                        }
+                    }
+
+                    // More processing.
+
+                }
+                catch
+                {
+                    DisplayUtils.Display("Timer Event : Exception : IncomingTransactionMap", DisplayType.Warning);
+                }
+
+                // // // // // // // // //
+            }
+            else
+            {
+                DisplayUtils.Display("Timer Expired : IncomingTransactionMap" , DisplayType.Warning);
+            }
+
+            TimerEventProcessed = true;            
         }
 
         /// <summary>
@@ -39,7 +96,13 @@ namespace TNetD.Transactions
         {
             if (IncomingTransactions.ContainsKey(transactionID))
             {
-                return new Tuple<TransactionContent, bool>(IncomingTransactions[transactionID], true);
+                TransactionContent transactionContent;
+                bool okay = IncomingTransactions.TryGetValue(transactionID, out transactionContent);
+
+                if(!okay)
+                    DisplayUtils.Display("Fetch Fail : GetTransactionContent", DisplayType.Warning);
+
+                return new Tuple<TransactionContent, bool>(transactionContent, okay);
             }
 
             return new Tuple<TransactionContent, bool>(null, false);
@@ -85,6 +148,11 @@ namespace TNetD.Transactions
             }
         }
 
+        /// <summary>
+        /// Handles Propagation request
+        /// </summary>
+        /// <param name="transactionContent"></param>
+        /// <returns></returns>
         public TransactionProcessingResult HandlePropagationRequest(TransactionContent transactionContent)
         {
             TransactionProcessingResult rslt = transactionContent.VerifySignature();

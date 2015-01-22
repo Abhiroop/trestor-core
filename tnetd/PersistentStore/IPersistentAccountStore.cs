@@ -1,7 +1,7 @@
 ﻿//
 // @Author: Arpan Jati
 // @Date: Jan 1-5 , 2015 | Jan 15 2015
-//
+// Jan 22 2015 : BatchFetch, IEnumaerables
 
 using System;
 using System.Collections.Generic;
@@ -25,7 +25,7 @@ namespace TNetD.PersistentStore
         /// </summary>
         /// <param name="accountInfoData"></param>
         /// <returns></returns>
-        int AddUpdateBatch(List<AccountInfo> accountInfoData);
+        int AddUpdateBatch(IEnumerable<AccountInfo> accountInfoData);
 
         /// <summary>
         /// Adds or updates elements to the PersistentStore
@@ -48,6 +48,14 @@ namespace TNetD.PersistentStore
         /// <param name="publicKey"></param>
         /// <returns></returns>
         DBResponse FetchAccount(out AccountInfo accountInfo, Hash publicKey);
+
+        /// <summary>
+        /// Fetches a list of Specified User Accounts.
+        /// </summary>
+        /// <param name="accountInfoList"></param>
+        /// <param name="AccountPKs"></param>
+        /// <returns>Number of accounts successfully fetched.</returns>
+        int BatchFetch(out List<AccountInfo> accountInfoList, IEnumerable<Hash> AccountPKs);
 
         /// <summary>
         /// Fetches all accounts in the associated Database. Order is not guranteed.

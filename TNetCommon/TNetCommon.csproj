@@ -78,6 +78,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Address\AccountIdentifier.cs" />
+    <Compile Include="Address\AddressData.cs" />
     <Compile Include="Address\AddressFactory.cs" />
     <Compile Include="Address\GenesisFileParser.cs" />
     <Compile Include="ArrayHelpers.cs" />
@@ -179,6 +181,7 @@
     <Compile Include="Conversions.cs" />
     <Compile Include="Protocol\ProtocolPackager.cs" />
     <Compile Include="Protocol\SerializableBase.cs" />
+    <Compile Include="Protocol\StandardVarint.cs" />
     <Compile Include="Protocol\Varint2.cs" />
     <Compile Include="Transactions\AccountInfo.cs" />
     <Compile Include="Transactions\TransactionContent.cs" />

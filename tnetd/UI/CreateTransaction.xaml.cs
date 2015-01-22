@@ -30,7 +30,7 @@ namespace TNetD.UI
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            try
+            /*try
             {
                 byte[] PubSrc;
                 byte[] PrivExpanded;
@@ -57,7 +57,7 @@ namespace TNetD.UI
                 {
                     if (check_Json.IsChecked.Value)
                     {
-                        tb_TX_Hex.Text = JsonConvert.SerializeObject(new JS_TransactionReply(tc), Common.jss);
+                        tb_TX_Hex.Text = JsonConvert.SerializeObject(new JS_TransactionReply(tc), Common.JsonSerializerSettings);
                     }
                     else
                     {
@@ -72,7 +72,7 @@ namespace TNetD.UI
             catch
             {
                 tb_TX_Hex.Text = "Exception ocurred !!!";
-            }
+            }*/
 
         }
     }

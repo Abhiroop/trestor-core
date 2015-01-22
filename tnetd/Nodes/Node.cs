@@ -20,6 +20,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using TNetD.Address;
 using TNetD.Json.JS_Structs;
 using TNetD.Ledgers;
 using TNetD.Network;
@@ -29,11 +30,11 @@ using TNetD.Transactions;
 
 namespace TNetD.Nodes
 {
-    
+
 
     internal class Node : Responder
     {
-        //Thread background_Load;
+        bool TimerEventProcessed = true;
 
         SecureNetwork network = default(SecureNetwork);
 
@@ -86,7 +87,7 @@ namespace TNetD.Nodes
         {
             nodeConfig = new NodeConfig(ID, globalConfiguration);
 
-            incomingTransactionMap = new IncomingTransactionMap(nodeState);
+            incomingTransactionMap = new IncomingTransactionMap(nodeState, nodeConfig);
 
             network = new SecureNetwork(nodeConfig);
             network.PacketReceived += network_PacketReceived;
@@ -126,8 +127,8 @@ namespace TNetD.Nodes
         /// </summary>       
         async public void BeginBackgroundLoad()
         {
-            await Task.Run(async () =>  {
-
+            await Task.Run(async () =>
+            {
                 ledger.InitializeLedger();
 
                 // Connect to TrustedNodes
@@ -145,9 +146,12 @@ namespace TNetD.Nodes
                 }
 
                 await Task.WhenAll(tasks);
-            
-            });            
+
+            });
         }
+
+
+        #region RPC HANDLING
 
         // RPCRequestHandler rpcRequestHandler;
         bool RPCRequestHandler(HttpListenerContext context)
@@ -409,28 +413,29 @@ namespace TNetD.Nodes
             if (context.Request.HttpMethod.ToUpper().Equals("POST") && context.Request.HasEntityBody &&
                 context.Request.ContentLength64 < Constants.PREFS_MAX_RPC_POST_CONTENT_LENGTH)
             {
-                StreamReader sr = new StreamReader(context.Request.InputStream);
+                StreamReader inputStream = new StreamReader(context.Request.InputStream);
 
                 try
                 {
-                    TransactionContent tco = new TransactionContent();
-                    
+                    TransactionContent transactionContent = new TransactionContent();
+
                     if (IsRaw)
-                    {                        
-                        byte[] data = HexUtil.GetBytes(sr.ReadToEnd());
-                        tco.Deserialize(data);
+                    {
+                        byte[] data = HexUtil.GetBytes(inputStream.ReadToEnd());
+                        transactionContent.Deserialize(data);
                     }
                     else
                     {
-                        JS_TransactionReply jtr = JsonConvert.DeserializeObject<JS_TransactionReply>(sr.ReadToEnd());
-                        tco.Deserialize(jtr);
+                        JS_TransactionReply jtr = JsonConvert.DeserializeObject<JS_TransactionReply>(inputStream.ReadToEnd(),
+                            Common.JsonSerializerSettings);
+
+                        transactionContent.Deserialize(jtr);
                     }
 
-                    TransactionProcessingResult tpResult = incomingTransactionMap.HandlePropagationRequest(tco);
+                    TransactionProcessingResult tpResult = incomingTransactionMap.HandlePropagationRequest(transactionContent);
 
                     if (tpResult == TransactionProcessingResult.Accepted)
                     {
-                        
                         msg = new JS_Msg("Transaction Added to propagation queue.", RPCStatus.Success);
                     }
                     else
@@ -438,18 +443,20 @@ namespace TNetD.Nodes
                         msg = new JS_Msg("Transaction Processing Error: " + tpResult, RPCStatus.Failure);
                     }
                 }
-                catch(Exception ex)
+                catch
                 {
                     msg = new JS_Msg("Malformed Transaction.", RPCStatus.Failure);
                 }
             }
             else
             {
-                msg = new JS_Msg("Improper usage. Need to use POST and Transaction Proposal as Content.", RPCStatus.InvalidAPIUsage);
+                msg = new JS_Msg("Improper usage. Need to use HTTP POST with 'Transaction Proposal' as Content.", RPCStatus.InvalidAPIUsage);
             }
 
             this.SendJsonResponse(context, msg.GetResponse());
         }
+
+        #endregion
 
         void network_PacketReceived(Hash publicKey, NetworkPacket packet)
         {
@@ -479,21 +486,255 @@ namespace TNetD.Nodes
             network.AddToQueue(npqe);
         }
 
+        class TreeDiffData
+        {
+            public Hash PublicKey { get; set; }
+            public long RemoveValue { get; set; }
+            public long AddValue { get; set; }
+        }
+
         private void Tmr_Elapsed(object sender, ElapsedEventArgs e)
         {
-            //await Task.WhenAll(tasks.ToArray());
-
-            while (PendingIncomingCandidates.Count > 0)
+            if (TimerEventProcessed) // Lock to prevent multiple invocations 
             {
+                TimerEventProcessed = false;
 
+                // // // // // // // // //
+
+                try
+                {
+                    Stack<TransactionContent> transactionContentStack = new Stack<TransactionContent>();
+
+                    foreach (KeyValuePair<Hash, TransactionContent> kvp in incomingTransactionMap.IncomingTransactions)
+                    {
+                        transactionContentStack.Push(kvp.Value);
+                    }
+
+                    incomingTransactionMap.IncomingTransactions.Clear();
+
+                    Dictionary<Hash, TreeDiffData> pendingDifferenceData = new Dictionary<Hash, TreeDiffData>();
+                    List<AccountInfo> newAccounts = new List<AccountInfo>();
+
+                    while (transactionContentStack.Count > 0)
+                    {
+                        TransactionContent transactionContent = transactionContentStack.Pop();
+
+                        try
+                        {
+                            if (transactionContent.VerifySignature() == TransactionProcessingResult.Accepted)
+                            {
+                                /// Check Sources.
+
+                                bool badSource = false;
+                                bool badAccountState = false;
+                                bool insufficientFunds = false;
+
+                                foreach (TransactionEntity source in transactionContent.Sources)
+                                {
+                                    Hash PK = new Hash(source.PublicKey);
+
+                                    if (ledger.AccountExists(PK))
+                                    {
+                                        AccountInfo account = ledger[PK];
+
+                                        long PendingValueDifference = 0;
+
+                                        // Check if the account exists in the pending transaction queue.
+                                        if (pendingDifferenceData.ContainsKey(PK))
+                                        {
+                                            TreeDiffData treeDiffData = pendingDifferenceData[PK];
+
+                                            PendingValueDifference += treeDiffData.AddValue;
+                                            PendingValueDifference -= treeDiffData.RemoveValue;
+                                        }
+
+                                        if (account.AccountState == AccountState.Normal)
+                                        {
+                                            if ((account.Money + PendingValueDifference) >= (source.Value + Constants.FIN_MIN_BALANCE))
+                                            {
+                                                // Has enough money.
+                                            }
+                                            else
+                                            {
+                                                insufficientFunds = true;
+                                                break;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            badAccountState = true;
+                                            break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        badSource = true;
+                                        break;
+                                    }
+                                }
+
+                                bool badAccountCreationValue = false;
+
+                                
+
+                                /// Check Destinations
+
+                                foreach (TransactionEntity destination in transactionContent.Destinations)
+                                {
+                                    Hash PK = new Hash(destination.PublicKey);
+
+                                    if (ledger.AccountExists(PK))
+                                    {
+                                        // Perfect
+
+                                        AccountInfo ai = ledger[PK];
+
+                                        if (ai.AccountState != AccountState.Normal)
+                                        {
+                                            badAccountState = true;
+                                            break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // Need to create Account
+
+                                        if (destination.Value > Constants.FIN_MIN_BALANCE)
+                                        {
+                                            AddressData ad = AddressFactory.DecodeAddressString(destination.Address);
+
+                                            AccountInfo ai = new AccountInfo(PK, 0, destination.Name, AccountState.Normal,
+                                                ad.NetworkType, ad.AccountType, nodeState.network_time);
+
+                                            newAccounts.Add(ai);
+
+                                        }
+                                        else
+                                        {
+                                            badAccountCreationValue = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                // TODO: ALL WELL / Check for tx FEE.
+
+                                /// TEMPORARY SINGLE NODE STUFF // DIRECT DB WRITE.
+
+                                //Make a list of updated accounts.
+
+                                if (!badSource && !badAccountCreationValue && !badAccountState && !insufficientFunds)
+                                {
+                                    // If we are here, this means that the transaction is GOOD and should be added to the difference list.
+
+                                    foreach (TransactionEntity source in transactionContent.Sources)
+                                    {
+                                        // As it is a source the known amount would be substracted from the value.
+                                        Hash PK = new Hash(source.PublicKey);
+
+                                        if (pendingDifferenceData.ContainsKey(PK)) // Update Old
+                                        {
+                                            TreeDiffData treeDiffData = pendingDifferenceData[PK];
+                                            treeDiffData.RemoveValue += source.Value; // Reference updates the actual value
+                                        }
+                                        else // Create New
+                                        {
+                                            TreeDiffData treeDiffData = new TreeDiffData();
+                                            treeDiffData.PublicKey = PK;
+                                            treeDiffData.RemoveValue += source.Value;
+                                            pendingDifferenceData.Add(PK, treeDiffData);
+                                        }
+                                    }
+
+                                    foreach (TransactionEntity destination in transactionContent.Destinations)
+                                    {
+                                        // As it is a destination the known amount would be added to the value.
+                                        Hash PK = new Hash(destination.PublicKey);
+
+                                        if (pendingDifferenceData.ContainsKey(PK)) // Update Old
+                                        {
+                                            TreeDiffData treeDiffData = pendingDifferenceData[PK];
+                                            treeDiffData.AddValue += destination.Value; // Reference updates the actual value
+                                        }
+                                        else // Create New
+                                        {
+                                            TreeDiffData treeDiffData = new TreeDiffData();
+                                            treeDiffData.PublicKey = PK;
+                                            treeDiffData.AddValue += destination.Value;
+                                            pendingDifferenceData.Add(PK, treeDiffData);
+                                        }
+                                    }
+
+                                    /// Added to difference list.
+
+                                }
+                                else
+                                {
+                                    //TODO: LOG THIS and Display properly.
+                                    DisplayUtils.Display("BAD TRANSACTION");
+                                }
+
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            DisplayUtils.Display("Exception while processing transactions.", ex);
+                        }
+
+                    } //While ends
+
+                    // Create the new accounts in the PersistentDatabase.
+
+                    int newCount = PersistentAccountStore.AddUpdateBatch(newAccounts);
+
+                    if(newCount != newAccounts.Count)
+                    {
+                        throw new Exception("Persistent database batch write failure. #2");
+                    }
+
+                    List<AccountInfo> accountsInDB;
+
+                    int fetchedAccountsCount = PersistentAccountStore.BatchFetch(out accountsInDB, pendingDifferenceData.Keys);
+
+                    if(fetchedAccountsCount != pendingDifferenceData.Count)
+                    {
+                        throw new Exception("Persistent database batch read failure. #2");
+                    }
+
+                    // Next is to populate the ledger and then mark the accounts to save to persistent db.
+                    // then save the marked account.
+
+
+                    // Apply the transactions to the PersistentDatabase.
+
+                    /*while (PendingIncomingCandidates.Count > 0)
+                    {
+                    }
+
+                    // Send the transcation to the TrustedNodes
+                    while (PendingIncomingTransactions.Count > 0)
+                    {
+                    }*/
+                }
+                catch
+                {
+                    DisplayUtils.Display("Timer Event : Exception : Node", DisplayType.Warning);
+                }
+
+                // // // // // // // // //
+            }
+            else
+            {
+                DisplayUtils.Display("Timer Expired : Node", DisplayType.Warning);
             }
 
-            // Send the transcation to the TrustedNodes
-            while (PendingIncomingTransactions.Count > 0)
-            {
-
-            }
+            TimerEventProcessed = true;
         }
+
+
+
+
+
 
         void CreateArbitraryTransactionAndSendToTrustedNodes()
         {

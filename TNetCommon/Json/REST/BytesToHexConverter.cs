@@ -1,6 +1,6 @@
 ﻿
 // @Author: Arpan Jati
-// @Date: 9th Jan 2015
+// @Date: 9th Jan 2015 | Tested: 21 Jan 2015
 
 using Newtonsoft.Json;
 using System;
@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 // Ref: http://stackoverflow.com/questions/11829035/newton-soft-json-jsonserializersettings-for-object-with-property-as-byte-array
 // Modified to use HexUtil
-// Write tested / read not yet tested
+// Write tested / read tested
 
 namespace TNetD.Json.REST
 {

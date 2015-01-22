@@ -18,15 +18,15 @@ namespace TNetD
 
         public static readonly int NETWORK_Min_Transaction_Fee = 100000; // ~ 0.1 US Cent, approx, initial value.
         
-        public static JsonSerializerSettings jss = new JsonSerializerSettings();
+        public static JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings();
         
         /// <summary>
         ///  TODO: BAD/ REMOVE STATIC METHOD
         /// </summary>
         public static void Initialize()
         {
-            jss.Converters.Add(new BytesToHexConverter());
-            jss.Formatting = Formatting.Indented;
+            JsonSerializerSettings.Converters.Add(new BytesToHexConverter());
+            JsonSerializerSettings.Formatting = Formatting.Indented;
         } 
 
     }

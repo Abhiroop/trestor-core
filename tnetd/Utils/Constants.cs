@@ -38,16 +38,19 @@ namespace TNetD
         /// This is the percentage at which the node begins to vote for a packet.
         /// </summary>
         public static readonly int Consensus_BeginForwarding = 50;
-
-
+        
         public static readonly int PacketLimitPerSecond = 10;
         public static readonly int DataLimitPerSecond = 512 * 1024; // Bytes per second.
 
         //public static List<Node> GlobalNodeList = new List<Node>();
      
         /// ////////////////////////
+
+        /// <summary>
+        ///  Minimum 10 trest balance.
+        /// </summary>
+        public static readonly long FIN_MIN_BALANCE = 10000000;
        
-        public static readonly long FIN_MIN_BALANCE = 1500;
         public static readonly int VALIDATOR_COUNT = 5;
         public static readonly int SIM_REFRESH_MS = 50;
         public static readonly int SIM_REFRESH_MS_SIM = 50;
@@ -100,6 +103,9 @@ namespace TNetD
 
         // /////////////////// Node Data //////////////////////
 
+        /// <summary>
+        /// Global Node event update rate.
+        /// </summary>
         public static readonly int Node_UpdateFrequencyMS = 100;
 
         public static readonly string File_TrustedNodes = "TrustedNodes.ini";

@@ -1,6 +1,6 @@
 ﻿
 // @Author : Arpan Jati
-// @Date: 23th Dec 2014 | 12th Jan 2015 | 16th Jan 2015 | 20th Jan 2015
+// @Date: 23th Dec 2014 | 12th Jan 2015 | 16th Jan 2015 | 20th Jan 2015 | 22nd Jan 2015 
 
 using Chaos.NaCl;
 using System;
@@ -20,7 +20,11 @@ namespace TNetD.Transactions
     {
         Unprocessed, Accepted, InsufficientFunds, SourceSinkValueMismatch, SignatureInvalid,
         InsufficientSignatureCount, InsufficientFees, InvalidTime, SourceDestinationTypeMismatch,
-        NoProperSources, NoProperDestinations, InvalidVersion, InvalidExecutionData
+        NoProperSources, NoProperDestinations, InvalidVersion, InvalidExecutionData, 
+        /// <summary>
+        /// The Source entity is also present as one of the Destinations.
+        /// </summary>
+        SourceInDestination
     };
 
     /// <summary>
@@ -201,6 +205,16 @@ namespace TNetD.Transactions
         {
             long incoming = 0;
             long outgoing = 0;
+
+            // TODO: MxN complexity, fix with loop limit or Dictionary.
+            foreach(TransactionEntity src in Sources)
+            {
+                foreach (TransactionEntity dst in Destinations)
+                {
+                    if (src.Address == dst.Address)
+                        return TransactionProcessingResult.SourceInDestination;
+                }
+            }
 
             if (Sources.Count != Signatures.Count)
                 return TransactionProcessingResult.InsufficientSignatureCount;

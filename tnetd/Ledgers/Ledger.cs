@@ -132,6 +132,11 @@ namespace TNetD.Ledgers
             }
         }
 
+        /// <summary>
+        /// Returns true if the account exists in the Hash Tree.
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns></returns>
         public bool AccountExists(Hash account)
         {
             return LedgerTree.NodeExists(account);

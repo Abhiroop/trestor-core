@@ -21,7 +21,7 @@ namespace TNetD.Address
         MainGenesis = 201, MainValidator = 234, MainNormal = 217,
         TestGenesis = 25, TestValidator = 59, TestNormal = 40
     };
-
+    
     /// <summary>
     /// Generate addresses from PublicKey and UserName
     /// </summary>
@@ -29,7 +29,7 @@ namespace TNetD.Address
     {
         NetworkType _NetworkType;
         AccountType _AccountType;
-
+        
         public AddressFactory()
         {
             _NetworkType = NetworkType.MainNet;
@@ -52,6 +52,16 @@ namespace TNetD.Address
         {
             get { return _AccountType; }
             set { _AccountType = value; }
+        }
+
+        public static AddressData DecodeAddressString(string Base58Address)
+        {
+            return new AddressData(Base58Address);
+        }
+
+        public static AccountIdentifier CreateAccountIdentifier(Hash publicKey, string name, string addressDataString)
+        {
+            return new AccountIdentifier(publicKey, name, addressDataString);
         }
 
         /// <summary>
@@ -79,8 +89,8 @@ namespace TNetD.Address
             byte[] NAME = Utils.Encoding88591.GetBytes(UserName);
 
             byte[] Hpk = (new SHA512Cng()).ComputeHash(PublicKey);
-                       
-            byte[] NA_Type = new byte[] { (byte)networkType, (byte)accountType };    
+
+            byte[] NA_Type = new byte[] { (byte)networkType, (byte)accountType };
 
             byte[] Hpk__PK__NAME = Hpk.Concat(PublicKey).Concat(NAME).Concat(NA_Type).ToArray();
 

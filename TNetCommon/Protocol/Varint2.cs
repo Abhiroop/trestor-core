@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TNetD.Protocol
@@ -70,11 +71,14 @@ namespace TNetD.Protocol
             int bitLength = GetBitLength(value);
 
             int fullDataBytesNeeded = (byte)(bitLength >> 3); // Divide by 8 to get number of bytes
-            int extraPackedBits =  (byte)(bitLength - (fullDataBytesNeeded << 3));
+            int extraPackedBits = (byte)(bitLength - (fullDataBytesNeeded << 3));
 
             if (extraPackedBits <= 4) // MSB's in Length Byte
             {
                 int totalBytesNeeded = fullDataBytesNeeded + 1;
+
+                if (totalBytesNeeded > 9) throw new ArithmeticException("Encoding Enception. This should not happen.");
+
                 byte[] EncodedBytes = new byte[totalBytesNeeded];
 
                 EncodedBytes[0] = (byte)((((byte)(totalBytesNeeded) & 0xF) << 4) | ((byte)(val >> (fullDataBytesNeeded << 3) & 0xF)));
@@ -86,9 +90,12 @@ namespace TNetD.Protocol
                 //Console.WriteLine(" ============================================");
                 return EncodedBytes;
             }
-            else // Extra byte for MSB's
+            else // Extra byte for MSB's*/
             {
                 int totalBytesNeeded = fullDataBytesNeeded + 2;
+
+                if (totalBytesNeeded > 9) throw new ArithmeticException("Encoding Enception. This should not happen.");
+
                 byte[] EncodedBytes = new byte[totalBytesNeeded];
 
                 EncodedBytes[0] = (byte)(((byte)(totalBytesNeeded) & 0xF) << 4);
@@ -161,14 +168,33 @@ namespace TNetD.Protocol
         {
             Random rnd = new Random();
 
-            for (int i = 0; i < 1000000; i++)
+            long varint2Bytes = 0;
+            long varintBytes = 0;
+
+            System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+
+            watch.Start();
+
+           // Parallel.For(0, 1000000, i => 
+            for (int i = 0; i < 10000000; i++)
             {
-                long Long = (long)(rnd.Next());//.NextDouble() * (long.MaxValue));
-                int bitLength = GetBitLength(Long);
+                // max Tres ~= 100,000,000,000,000,000 
+                long Long = (long)(rnd.Next(0, 2147483647)) * (long)(rnd.Next(0, 2147483647));//.NextDouble() * (long.MaxValue));
+                //int bitLength = GetBitLength(Long);
                 //byte[] enc_old = Encode(Long);
                 byte[] enc = Encode(Long);
+                //Interlocked.Add(ref varint2Bytes, enc.Length);
+                varint2Bytes += enc.Length;
+
+                byte[] enc_norm = VarintBitConverter.GetVarintBytes(Long);
+                //Interlocked.Add(ref varintBytes, enc_norm.Length);
+                varintBytes += enc_norm.Length;
+                
+                //Console.Write(Long + " - " + HexUtil.ToString(enc) + " - " + HexUtil.ToString(enc_norm) + "\n");
 
                 long Decoded = Decode(enc);
+
+                //UInt64 Decoded =  VarintBitConverter.ToUInt64(enc_norm);
 
                 if ((Long != Decoded))
                 {
@@ -179,12 +205,16 @@ namespace TNetD.Protocol
 
                 //Console.Write(Long + " - " + bitLength + " - " + HexUtil.ToString(enc));
                 //Console.WriteLine((Long == Decoded) ? " : Match" : " : FAIL ---------------------------");
+
             }
+            //});
+                       
 
+            watch.Stop();
 
-
-
-            Console.WriteLine(" TEST FINISHED ---------------------------");
+            Console.WriteLine(" TEST FINISHED ---------------------------\n Varint :" + varintBytes + "\n Varint 2: " + varint2Bytes +
+                "\n\n Time Taken: " + watch.ElapsedMilliseconds  + " (ms)"      
+                );
         }
 
     }
