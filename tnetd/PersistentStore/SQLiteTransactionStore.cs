@@ -13,7 +13,7 @@ using TNetD.Transactions;
 
 namespace TNetD.PersistentStore
 {
-    class SQLiteTransactionStore : ITransactionStore 
+    class SQLiteTransactionStore : IPersistentTransactionStore
     {
         SQLiteConnection sqliteConnection = default(SQLiteConnection);
 
@@ -38,7 +38,7 @@ namespace TNetD.PersistentStore
                 using (SQLiteDataReader reader = cmd.ExecuteReader())
                 {
                     if (reader.HasRows)
-                    {                        
+                    {
                         return true;
                     }
                 }
@@ -87,14 +87,65 @@ namespace TNetD.PersistentStore
             return response;
         }
 
-        public int AddUpdateBatch(List<TransactionContent> accountInfoData)
+        // FEATURE: PUT OFFSET SUPPORT FOR LARGE HISTORY SYNC
+        
+        /// <summary>
+        /// Fetches transaction history from the database. 
+        /// </summary>
+        /// <param name="publicKey">Public Key of Account</param>
+        /// <param name="TimeStamp">The time after which tranactions are needed</param>
+        /// <param name="Limit">Max result count, 0 means all (Bounded by system limit.)</param>
+        /// <returns></returns>
+        public DBResponse FetchTransactionHistory(out List<TransactionContent> transactions, Hash publicKey, long timeStamp, int Limit)
+        {
+            DBResponse response = DBResponse.Exception;
+
+            string LIMIT_CLAUSE = "";
+
+            if (Limit > 0 && Limit < Constants.DB_HISTORY_LIMIT)
+            {
+                LIMIT_CLAUSE = "LIMIT " + Limit;
+            }
+
+            // TransactionHistory (TransactionID BLOB, PublicKey BLOB, TimeStamp Integer)
+
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT TransactionID FROM TransactionHistory WHERE (PublicKey = @publicKey AND TimeStamp >= @timeStamp) ORDER BY TimeStamp DESC " + LIMIT_CLAUSE + ";", sqliteConnection))
+            {
+                cmd.Parameters.Add(new SQLiteParameter("@publicKey", publicKey.Hex));
+                cmd.Parameters.Add(new SQLiteParameter("@timeStamp", timeStamp));
+
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
+                {
+                    transactions = new List<TransactionContent>();
+
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            Hash transactionID = new Hash((byte[])reader[0]);
+
+                            TransactionContent transactionContent;
+                            if (FetchTransaction(out transactionContent, transactionID) == DBResponse.FetchSuccess)
+                            {
+                                transactions.Add(transactionContent);
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            return response;
+        }
+
+        public int AddUpdateBatch(Dictionary<Hash, TransactionContent> accountInfoData)
         {
             int Successes = 0;
             SQLiteTransaction st = sqliteConnection.BeginTransaction();
 
-            foreach (TransactionContent ai in accountInfoData)
+            foreach (KeyValuePair<Hash, TransactionContent> kvp in accountInfoData)
             {
-                DBResponse resp = AddUpdate(ai);
+                DBResponse resp = AddUpdate(kvp.Value);
                 if ((resp == DBResponse.InsertSuccess) || (resp == DBResponse.UpdateSuccess))
                 {
                     Successes++;
@@ -105,9 +156,15 @@ namespace TNetD.PersistentStore
             return Successes;
         }
 
+        /// <summary>
+        /// Add a transaction to the transaction store. 
+        /// Currently no method to revoke transactions.
+        /// Do nor call directly in a loop, use BeginTransaction / Commit.
+        /// </summary>
+        /// <param name="transactionContent"></param>
+        /// <returns></returns>
         public DBResponse AddUpdate(TransactionContent transactionContent)
         {
-
             bool doUpdate = false;
 
             using (SQLiteCommand cmd = new SQLiteCommand("SELECT TransactionID FROM Transactions WHERE TransactionID = @transactionID;", sqliteConnection))
@@ -127,20 +184,24 @@ namespace TNetD.PersistentStore
             {
                 // /////////////  Perform the UPDATE  ///////////////
 
-                using (SQLiteCommand cmd = new SQLiteCommand("UPDATE Transactions SET SerializedContent = @serializedContent WHERE TransactionID = @transactionID;", sqliteConnection))
-                {
-                    cmd.Parameters.Add(new SQLiteParameter("@transactionID", transactionContent.TransactionID.Hex));
-                    cmd.Parameters.Add(new SQLiteParameter("@serializedContent", transactionContent.Serialize()));
+                // WELL ITS IMPLEMENTED BUT NOT NEEDED
 
-                    if (cmd.ExecuteNonQuery() != 1)
-                    {
-                        response = DBResponse.UpdateFailed;
-                    }
-                    else
-                    {
-                        response = DBResponse.UpdateSuccess;
-                    }
-                }
+                throw new NotImplementedException("Unsupported right now. Technically not needed. Transactions need to be only added and fetched.");
+
+                /* using (SQLiteCommand cmd = new SQLiteCommand("UPDATE Transactions SET SerializedContent = @serializedContent WHERE TransactionID = @transactionID;", sqliteConnection))
+                 {
+                     cmd.Parameters.Add(new SQLiteParameter("@transactionID", transactionContent.TransactionID.Hex));
+                     cmd.Parameters.Add(new SQLiteParameter("@serializedContent", transactionContent.Serialize()));
+
+                     if (cmd.ExecuteNonQuery() != 1)
+                     {
+                         response = DBResponse.UpdateFailed;
+                     }
+                     else
+                     {
+                         response = DBResponse.UpdateSuccess;
+                     }
+                 }*/
             }
             else
             {
@@ -160,11 +221,49 @@ namespace TNetD.PersistentStore
                         response = DBResponse.InsertSuccess;
                     }
                 }
+
+                if (response == DBResponse.InsertSuccess)
+                {
+                    // Add to the History Table
+
+                    foreach (TransactionEntity entity in transactionContent.Sources)
+                    {
+                        InsertToHistoryTable(transactionContent.TransactionID, transactionContent.Timestamp, entity);
+                    }
+
+                    foreach (TransactionEntity entity in transactionContent.Destinations)
+                    {
+                        InsertToHistoryTable(transactionContent.TransactionID, transactionContent.Timestamp, entity);
+                    }
+                }
             }
 
             return response;
         }
-                
+
+        private DBResponse InsertToHistoryTable(Hash transactionID, long timeStamp, TransactionEntity entity)
+        {
+            DBResponse response = DBResponse.Exception;
+
+            using (SQLiteCommand cmd = new SQLiteCommand("INSERT INTO TransactionHistory VALUES(@transactionID, @publicKey, @timeStamp);", sqliteConnection))
+            {
+                cmd.Parameters.Add(new SQLiteParameter("@transactionID", transactionID.Hex));
+                cmd.Parameters.Add(new SQLiteParameter("@publicKey", entity.PublicKey));
+                cmd.Parameters.Add(new SQLiteParameter("@timeStamp", timeStamp));
+
+                if (cmd.ExecuteNonQuery() != 1)
+                {
+                    response = DBResponse.InsertFailed;
+                }
+                else
+                {
+                    response = DBResponse.InsertSuccess;
+                }
+            }
+
+            return response;
+        }
+
         /// <summary>
         /// Verify if the Transaction table exists. Recreate if it does not exist.
         /// </summary>
@@ -175,6 +274,14 @@ namespace TNetD.PersistentStore
                 if (!DBUtils.TableExists("Transactions", sqliteConnection))
                 {
                     DBUtils.ExecuteNonQuery("CREATE TABLE Transactions (TransactionID BLOB PRIMARY KEY, SerializedContent BLOB);", sqliteConnection);
+                }
+
+                ///  Extra Table for Transaction History : OPTIONAL FOR NODES
+                if (!DBUtils.TableExists("TransactionHistory", sqliteConnection))
+                {
+                    DBUtils.ExecuteNonQuery("CREATE TABLE TransactionHistory (TransactionID BLOB, PublicKey BLOB, TimeStamp Integer);", sqliteConnection);
+                    // Make an index table to make history lookups much faster.
+                    DBUtils.ExecuteNonQuery("CREATE INDEX Idx1 ON TransactionHistory(PublicKey, TimeStamp);", sqliteConnection);
                 }
             }
         }
@@ -190,7 +297,7 @@ namespace TNetD.PersistentStore
             DBResponse response = DBResponse.DeleteFailed;
             using (SQLiteCommand cmd = new SQLiteCommand("DELETE FROM Transactions WHERE (TransactionID = @transactionID);", sqliteConnection))
             {
-                cmd.Parameters.Add(new SQLiteParameter("@transactionID", transactionID.Hex));                
+                cmd.Parameters.Add(new SQLiteParameter("@transactionID", transactionID.Hex));
 
                 // There should be a single entry for a TransactionID.
                 if (cmd.ExecuteNonQuery() == 1)

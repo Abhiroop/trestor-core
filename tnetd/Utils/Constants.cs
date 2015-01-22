@@ -50,6 +50,8 @@ namespace TNetD
         ///  Minimum 10 trest balance.
         /// </summary>
         public static readonly long FIN_MIN_BALANCE = 10000000;
+
+        public static readonly long DB_HISTORY_LIMIT = 1000;
        
         public static readonly int VALIDATOR_COUNT = 5;
         public static readonly int SIM_REFRESH_MS = 50;

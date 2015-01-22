@@ -226,7 +226,7 @@ namespace TNetD
             NodeConfig nc = new NodeConfig(0, gc);
             NodeConfig nc1 = new NodeConfig(1, gc);
 
-            ITransactionStore transactionStore = new SQLiteTransactionStore(nc);
+            IPersistentTransactionStore transactionStore = new SQLiteTransactionStore(nc);
         }
 
         private void lv_TX_MouseUp(object sender, MouseButtonEventArgs e)

@@ -15,9 +15,9 @@ namespace TNetD.PersistentStore
     /// This is an interface to implement all the PersistentStorage techniques.
     /// Plans to support SQLite, LevelDB/RocksDB
     /// </summary>
-    interface ITransactionStore
+    interface IPersistentTransactionStore
     {
-        int AddUpdateBatch(List<TransactionContent> accountInfoData);
+        int AddUpdateBatch(Dictionary<Hash,TransactionContent> accountInfoData);
 
         /// <summary>
         /// Adds or updates elements to the PersistentStore

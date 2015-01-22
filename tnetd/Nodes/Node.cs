@@ -56,7 +56,7 @@ namespace TNetD.Nodes
         public AccountInfo AI;
 
         public IPersistentAccountStore PersistentAccountStore;
-        public ITransactionStore TransactionStore;
+        public IPersistentTransactionStore PersistentTransactionStore;
 
         Ledger ledger;
 
@@ -97,7 +97,7 @@ namespace TNetD.Nodes
             TrustedNodes = globalConfiguration.TrustedNodes;
 
             PersistentAccountStore = new SQLiteAccountStore(nodeConfig);
-            TransactionStore = new SQLiteTransactionStore(nodeConfig);
+            PersistentTransactionStore = new SQLiteTransactionStore(nodeConfig);
 
             AI = new AccountInfo(PublicKey, Money);
 
@@ -374,7 +374,7 @@ namespace TNetD.Nodes
                             if (transactionID_Bytes.Length == 32)
                             {
                                 TransactionContent tcxo;
-                                if (TransactionStore.FetchTransaction(out tcxo, new Hash(transactionID_Bytes)) == DBResponse.FetchSuccess)
+                                if (PersistentTransactionStore.FetchTransaction(out tcxo, new Hash(transactionID_Bytes)) == DBResponse.FetchSuccess)
                                 {
                                     replies.Transactions.Add(new JS_TransactionReply(tcxo));
                                 }
@@ -493,6 +493,11 @@ namespace TNetD.Nodes
             public long AddValue { get; set; }
         }
 
+        /// <summary>
+        /// Timer now fast. Actual/Final timer would depend on consensus rate.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Tmr_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (TimerEventProcessed) // Lock to prevent multiple invocations 
@@ -513,6 +518,7 @@ namespace TNetD.Nodes
                     incomingTransactionMap.IncomingTransactions.Clear();
 
                     Dictionary<Hash, TreeDiffData> pendingDifferenceData = new Dictionary<Hash, TreeDiffData>();
+                    Dictionary<Hash, TransactionContent> acceptedTransactions = new Dictionary<Hash, TransactionContent>();
                     List<AccountInfo> newAccounts = new List<AccountInfo>();
 
                     long totalTransactionFees = 0;
@@ -525,155 +531,167 @@ namespace TNetD.Nodes
                         {
                             if (transactionContent.VerifySignature() == TransactionProcessingResult.Accepted)
                             {
-                                /// Check Sources.
+                                TransactionContent transactionFromPersistentDB;
 
-                                bool badSource = false;
-                                bool badAccountState = false;
-                                bool insufficientFunds = false;
-
-                                totalTransactionFees += transactionContent.TransactionFee;
-
-                                foreach (TransactionEntity source in transactionContent.Sources)
+                                if (PersistentTransactionStore.FetchTransaction(out transactionFromPersistentDB, transactionContent.TransactionID) 
+                                    == DBResponse.FetchSuccess)
                                 {
-                                    Hash PK = new Hash(source.PublicKey);
+                                    //TODO: LOG THIS and Display properly.
+                                    DisplayUtils.Display("Transaction Processed. Improbable because of previous checks.", DisplayType.BadData);
+                                }
+                                else
+                                {
+                                    /// Check Sources.
 
-                                    if (ledger.AccountExists(PK))
+                                    bool badSource = false;
+                                    bool badAccountState = false;
+                                    bool insufficientFunds = false;
+
+                                    totalTransactionFees += transactionContent.TransactionFee;
+
+                                    foreach (TransactionEntity source in transactionContent.Sources)
                                     {
-                                        AccountInfo account = ledger[PK];
+                                        Hash PK = new Hash(source.PublicKey);
 
-                                        long PendingValueDifference = 0;
-
-                                        // Check if the account exists in the pending transaction queue.
-                                        if (pendingDifferenceData.ContainsKey(PK))
+                                        if (ledger.AccountExists(PK))
                                         {
-                                            TreeDiffData treeDiffData = pendingDifferenceData[PK];
+                                            AccountInfo account = ledger[PK];
 
-                                            PendingValueDifference += treeDiffData.AddValue;
-                                            PendingValueDifference -= treeDiffData.RemoveValue;
-                                        }
+                                            long PendingValueDifference = 0;
 
-                                        if (account.AccountState == AccountState.Normal)
-                                        {
-                                            if ((account.Money + PendingValueDifference) >= (source.Value + Constants.FIN_MIN_BALANCE))
+                                            // Check if the account exists in the pending transaction queue.
+                                            if (pendingDifferenceData.ContainsKey(PK))
                                             {
-                                                // Has enough money.
+                                                TreeDiffData treeDiffData = pendingDifferenceData[PK];
+
+                                                PendingValueDifference += treeDiffData.AddValue;
+                                                PendingValueDifference -= treeDiffData.RemoveValue;
+                                            }
+
+                                            if (account.AccountState == AccountState.Normal)
+                                            {
+                                                if ((account.Money + PendingValueDifference) >= (source.Value + Constants.FIN_MIN_BALANCE))
+                                                {
+                                                    // Has enough money.
+                                                }
+                                                else
+                                                {
+                                                    insufficientFunds = true;
+                                                    break;
+                                                }
                                             }
                                             else
                                             {
-                                                insufficientFunds = true;
+                                                badAccountState = true;
                                                 break;
                                             }
                                         }
                                         else
                                         {
-                                            badAccountState = true;
+                                            badSource = true;
                                             break;
                                         }
                                     }
-                                    else
-                                    {
-                                        badSource = true;
-                                        break;
-                                    }
-                                }
 
-                                bool badAccountCreationValue = false;
-                                
-                                /// Check Destinations
+                                    bool badAccountCreationValue = false;
 
-                                foreach (TransactionEntity destination in transactionContent.Destinations)
-                                {
-                                    Hash PK = new Hash(destination.PublicKey);
-
-                                    if (ledger.AccountExists(PK))
-                                    {
-                                        // Perfect
-
-                                        AccountInfo ai = ledger[PK];
-
-                                        if (ai.AccountState != AccountState.Normal)
-                                        {
-                                            badAccountState = true;
-                                            break;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        // Need to create Account
-
-                                        if (destination.Value > Constants.FIN_MIN_BALANCE)
-                                        {
-                                            AddressData ad = AddressFactory.DecodeAddressString(destination.Address);
-
-                                            AccountInfo ai = new AccountInfo(PK, 0, destination.Name, AccountState.Normal,
-                                                ad.NetworkType, ad.AccountType, nodeState.network_time);
-
-                                            newAccounts.Add(ai);
-
-                                        }
-                                        else
-                                        {
-                                            badAccountCreationValue = true;
-                                            break;
-                                        }
-                                    }
-                                }
-
-                                // TODO: ALL WELL / Check for tx FEE.
-
-                                /// TEMPORARY SINGLE NODE STUFF // DIRECT DB WRITE.
-
-                                //Make a list of updated accounts.
-
-                                if (!badSource && !badAccountCreationValue && !badAccountState && !insufficientFunds)
-                                {
-                                    // If we are here, this means that the transaction is GOOD and should be added to the difference list.
-
-                                    foreach (TransactionEntity source in transactionContent.Sources)
-                                    {
-                                        // As it is a source the known amount would be substracted from the value.
-                                        Hash PK = new Hash(source.PublicKey);
-
-                                        if (pendingDifferenceData.ContainsKey(PK)) // Update Old
-                                        {
-                                            TreeDiffData treeDiffData = pendingDifferenceData[PK];
-                                            treeDiffData.RemoveValue += source.Value; // Reference updates the actual value
-                                        }
-                                        else // Create New
-                                        {
-                                            TreeDiffData treeDiffData = new TreeDiffData();
-                                            treeDiffData.PublicKey = PK;
-                                            treeDiffData.RemoveValue += source.Value;
-                                            pendingDifferenceData.Add(PK, treeDiffData);
-                                        }
-                                    }
+                                    /// Check Destinations
 
                                     foreach (TransactionEntity destination in transactionContent.Destinations)
                                     {
-                                        // As it is a destination the known amount would be added to the value.
                                         Hash PK = new Hash(destination.PublicKey);
 
-                                        if (pendingDifferenceData.ContainsKey(PK)) // Update Old
+                                        if (ledger.AccountExists(PK))
                                         {
-                                            TreeDiffData treeDiffData = pendingDifferenceData[PK];
-                                            treeDiffData.AddValue += destination.Value; // Reference updates the actual value
+                                            // Perfect
+
+                                            AccountInfo ai = ledger[PK];
+
+                                            if (ai.AccountState != AccountState.Normal)
+                                            {
+                                                badAccountState = true;
+                                                break;
+                                            }
                                         }
-                                        else // Create New
+                                        else
                                         {
-                                            TreeDiffData treeDiffData = new TreeDiffData();
-                                            treeDiffData.PublicKey = PK;
-                                            treeDiffData.AddValue += destination.Value;
-                                            pendingDifferenceData.Add(PK, treeDiffData);
+                                            // Need to create Account
+
+                                            if (destination.Value > Constants.FIN_MIN_BALANCE)
+                                            {
+                                                AddressData ad = AddressFactory.DecodeAddressString(destination.Address);
+
+                                                AccountInfo ai = new AccountInfo(PK, 0, destination.Name, AccountState.Normal,
+                                                    ad.NetworkType, ad.AccountType, nodeState.network_time);
+
+                                                newAccounts.Add(ai);
+
+                                            }
+                                            else
+                                            {
+                                                badAccountCreationValue = true;
+                                                break;
+                                            }
                                         }
                                     }
 
-                                    /// Added to difference list.
+                                    // TODO: ALL WELL / Check for tx FEE.
+                                    // TEMPORARY SINGLE NODE STUFF // DIRECT DB WRITE.
+                                    // Make a list of updated accounts.
 
-                                }
-                                else
-                                {
-                                    //TODO: LOG THIS and Display properly.
-                                    DisplayUtils.Display("BAD TRANSACTION");
+                                    if (!badSource && !badAccountCreationValue && !badAccountState && !insufficientFunds)
+                                    {
+                                        // If we are here, this means that the transaction is GOOD and should be added to the difference list.
+
+                                        foreach (TransactionEntity source in transactionContent.Sources)
+                                        {
+                                            // As it is a source the known amount would be substracted from the value.
+                                            Hash PK = new Hash(source.PublicKey);
+
+                                            if (pendingDifferenceData.ContainsKey(PK)) // Update Old
+                                            {
+                                                TreeDiffData treeDiffData = pendingDifferenceData[PK];
+                                                treeDiffData.RemoveValue += source.Value; // Reference updates the actual value
+                                            }
+                                            else // Create New
+                                            {
+                                                TreeDiffData treeDiffData = new TreeDiffData();
+                                                treeDiffData.PublicKey = PK;
+                                                treeDiffData.RemoveValue += source.Value;
+                                                pendingDifferenceData.Add(PK, treeDiffData);
+                                            }
+                                        }
+
+                                        foreach (TransactionEntity destination in transactionContent.Destinations)
+                                        {
+                                            // As it is a destination the known amount would be added to the value.
+                                            Hash PK = new Hash(destination.PublicKey);
+
+                                            if (pendingDifferenceData.ContainsKey(PK)) // Update Old
+                                            {
+                                                TreeDiffData treeDiffData = pendingDifferenceData[PK];
+                                                treeDiffData.AddValue += destination.Value; // Reference updates the actual value
+                                            }
+                                            else // Create New
+                                            {
+                                                TreeDiffData treeDiffData = new TreeDiffData();
+                                                treeDiffData.PublicKey = PK;
+                                                treeDiffData.AddValue += destination.Value;
+                                                pendingDifferenceData.Add(PK, treeDiffData);
+                                            }
+                                        }
+
+                                        /// Added to difference list.
+                                        acceptedTransactions.Add(transactionContent.TransactionID, transactionContent);
+
+
+                                    }
+                                    else
+                                    {
+                                        //TODO: LOG THIS and Display properly.
+                                        DisplayUtils.Display("BAD TRANSACTION");
+                                    }
+
                                 }
 
                             }
@@ -721,7 +739,7 @@ namespace TNetD.Nodes
 
                     int fetchedAccountsCount = PersistentAccountStore.BatchFetch(out accountsInDB, pendingDifferenceData.Keys);
 
-                    if(fetchedAccountsCount != pendingDifferenceData.Count)
+                    if (fetchedAccountsCount != pendingDifferenceData.Count)
                     {
                         throw new Exception("Persistent DB batch read failure. #2");
                     }
@@ -730,10 +748,10 @@ namespace TNetD.Nodes
                     // Great the accounts are ready to be written to.                    
                     // Verify that the initial account contents are the same.
 
-                    foreach(KeyValuePair<Hash, AccountInfo> kvp in accountsInLedger)
+                    foreach (KeyValuePair<Hash, AccountInfo> kvp in accountsInLedger)
                     {
-                        if(accountsInDB.ContainsKey(kvp.Key))
-                        {                            
+                        if (accountsInDB.ContainsKey(kvp.Key))
+                        {
                             AccountInfo ledgerAccount = kvp.Value;
                             AccountInfo persistentAccount = accountsInDB[kvp.Key];
 
@@ -760,8 +778,8 @@ namespace TNetD.Nodes
 
                     // This essentially gets values from Ledger Tree and updates the Persistent-DB
 
-                    foreach(KeyValuePair<Hash, TreeDiffData> kvp in pendingDifferenceData)
-                    {                        
+                    foreach (KeyValuePair<Hash, TreeDiffData> kvp in pendingDifferenceData)
+                    {
                         TreeDiffData diffData = kvp.Value;
 
                         // Apply to ledger
@@ -772,7 +790,7 @@ namespace TNetD.Nodes
                         ledgerAccount.Money -= diffData.RemoveValue;
 
                         ledger[diffData.PublicKey] = ledgerAccount;
-                                                
+
                         // This is good enough as we have previously checked for correctness and matching
                         // values in both locations.
 
@@ -782,8 +800,9 @@ namespace TNetD.Nodes
                     // Apply to persistent DB.
 
                     PersistentAccountStore.AddUpdateBatch(finalPersistentDBUpdateList);
-                    
-                    
+
+                    PersistentTransactionStore.AddUpdateBatch(acceptedTransactions);
+
                     // Apply the transactions to the PersistentDatabase.
 
                     /*while (PendingIncomingCandidates.Count > 0)
@@ -810,7 +829,7 @@ namespace TNetD.Nodes
             TimerEventProcessed = true;
         }
 
-        
+
 
         void CreateArbitraryTransactionAndSendToTrustedNodes()
         {

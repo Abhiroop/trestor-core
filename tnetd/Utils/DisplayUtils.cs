@@ -12,7 +12,7 @@ using System.Windows.Media;
 
 namespace TNetD
 {
-    public enum DisplayType { Info, Warning, Exception, AuthFailure };
+    public enum DisplayType { Info, Warning, Exception, AuthFailure, BadData };
 
     static class DisplayUtils
     {
@@ -34,23 +34,23 @@ namespace TNetD
             switch (type)
             {
                 case DisplayType.Info:
-                    //Console.ForegroundColor = ConsoleColor.Green;
                     DisplayText((WriteHeader ? " INFO: " : "") + Message, Colors.LawnGreen, type);
                     break;
 
                 case DisplayType.Warning:
-                    //Console.ForegroundColor = ConsoleColor.Yellow;
                     DisplayText((WriteHeader ? " WARNING: " : "") + Message, Colors.Yellow, type);
                     break;
 
                 case DisplayType.Exception:
-                    //Console.ForegroundColor = ConsoleColor.Orange;
                     DisplayText((WriteHeader ? " Exception: " : "") + Message, Colors.Orange, type);
                     break;
 
                 case DisplayType.AuthFailure:
-                    //Console.ForegroundColor = ConsoleColor.Red;
-                    DisplayText((WriteHeader ? " Exception: " : "") + Message, Colors.Red, type);
+                    DisplayText((WriteHeader ? " AuthFailure: " : "") + Message, Colors.Red, type);
+                    break;
+
+                case DisplayType.BadData:
+                    DisplayText((WriteHeader ? " BadData: " : "") + Message, Colors.Magenta, type);
                     break;
             }
         }
