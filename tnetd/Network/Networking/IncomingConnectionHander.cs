@@ -559,6 +559,7 @@ namespace TNetD.Network.Networking
 
         public void StartListening()
         {
+            // Create a thread to start the listen process, everything else is done using async-await.
             ThreadStart ts = new ThreadStart(StartListeningInternal);
             Thread thr = new Thread(ts);
             thr.Start();

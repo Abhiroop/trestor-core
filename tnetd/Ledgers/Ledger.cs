@@ -1,4 +1,11 @@
-﻿
+﻿/*
+ *  @Author: Arpan Jati
+ *  @Version: 1.0
+ *  @Date: Initial Versions: Oct - Jan 2015
+ *  22 Jan 2015 : AddUpdateBatch
+ *  
+ */
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +24,7 @@ namespace TNetD.Ledgers
         public delegate void LedgerEventHandler(LedgerEventType ledgerEvent, string Message);
 
         public event LedgerEventHandler LedgerEvent;
-        
+
         IPersistentAccountStore persistentStore;
 
         /// <summary>
@@ -36,12 +43,13 @@ namespace TNetD.Ledgers
         // public DateTime CloseTime;
 
         long _load_stats = 0;
+        bool initialLoading = false;
 
         public long InitiallyLoadedNodes
         {
             get { return _load_stats; }
         }
-        
+
         /// <summary>
         /// List of public nodes which have sent bad transactions.
         /// </summary>
@@ -59,7 +67,11 @@ namespace TNetD.Ledgers
 
         async public void InitializeLedger()
         {
-             await ReloadFromPersistentStore();
+            initialLoading = true;
+
+            await ReloadFromPersistentStore();
+
+            initialLoading = false;
         }
 
         /// <summary>
@@ -76,11 +88,33 @@ namespace TNetD.Ledgers
         }
 
         /// <summary>
-        /// Add User, false if user already exists.
+        /// Batch add accounts to LedgerTree
+        /// </summary>
+        /// <param name="accountInfoData"></param>
+        /// <returns>Numbe of accounts added/updated</returns>
+        public int AddUpdateBatch(IEnumerable<AccountInfo> accountInfoData)
+        {
+            int Successes = 0;
+
+            foreach (AccountInfo ai in accountInfoData)
+            {
+                TreeResponseType resp = AddUserToLedger(ai);
+                if ((resp == TreeResponseType.Added) || (resp == TreeResponseType.Updated))
+                {
+                    Successes++;
+                }
+            }
+
+            return Successes;
+        }
+
+        /// <summary>
+        /// Add User, false if user already exists. 
+        /// TODO: PROPER TESTBENCH { CRITICAL }
         /// </summary>
         /// <param name="userInfo"></param>
         /// <returns></returns>
-        public bool AddUserToLedger(AccountInfo userInfo)
+        public TreeResponseType AddUserToLedger(AccountInfo userInfo)
         {
             TreeResponseType response = LedgerTree.AddUpdate(userInfo);
 
@@ -108,17 +142,35 @@ namespace TNetD.Ledgers
                     }
                 }
 
-                if ((_load_stats % 100 == 0) && (LedgerEvent != null))
-                    LedgerEvent(LedgerEventType.Progress, "Loaded " + _load_stats + " Accounts.");
+                if (!initialLoading)
+                {
+                    if ((_load_stats % 100 == 0) && (LedgerEvent != null))
+                        LedgerEvent(LedgerEventType.Progress, "Loaded " + _load_stats + " Accounts.");
 
-                _load_stats++;
+                    _load_stats++;
+                }
 
-                return true;
             }
 
-            return false;
+            return response;
         }
-      
+
+
+        public int BatchFetch(out  Dictionary<Hash, AccountInfo> accountInfoList, IEnumerable<Hash> accountPKs)
+        {
+            accountInfoList = new Dictionary<Hash, AccountInfo>();
+
+            foreach (Hash accountPK in accountPKs)
+            {
+                if (LedgerTree.NodeExists(accountPK))
+                {
+                    accountInfoList.Add(accountPK, (AccountInfo)LedgerTree[accountPK]);
+                }
+            }
+
+            return accountInfoList.Count();
+        }
+
         /// <summary>
         /// Gets an account from the tree.
         /// </summary>
@@ -141,7 +193,7 @@ namespace TNetD.Ledgers
         {
             return LedgerTree.NodeExists(account);
         }
-        
+
         public Hash GetRootHash()
         {
             return LedgerTree.GetRootHash();

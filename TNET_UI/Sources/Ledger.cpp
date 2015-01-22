@@ -24,7 +24,7 @@ Ledger::Ledger(State _state, string LedgerDB_FileName, FakeNetwork _network)
 	network = _network;
 	TransactionFees = 0;
 
-	ledgerFileHandler = LedgerFileHandler_LevelDB(LedgerTree, LedgerDB_FileName);
+	ledgerFileHandler = LedgerFileHandler(LedgerTree, LedgerDB_FileName);
 	state = _state;
 
 	//ledgerFileHandler

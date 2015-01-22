@@ -94,16 +94,16 @@ namespace TNetD.PersistentStore
             return new Tuple<DBResponse, long>(response, Records);
         }
                         
-        public int BatchFetch(out List<AccountInfo> accountInfoList, IEnumerable<Hash> AccountPKs )
+        public int BatchFetch(out Dictionary<Hash, AccountInfo> accountInfoList, IEnumerable<Hash> AccountPKs )
         {
-            accountInfoList = new List<AccountInfo>();
+            accountInfoList = new Dictionary<Hash, AccountInfo>();
 
             foreach(Hash accountPK in AccountPKs)
             {
                 AccountInfo accountInfo;
                 if(FetchAccount(out accountInfo, accountPK) == DBResponse.FetchSuccess)
                 {
-                    accountInfoList.Add(accountInfo);
+                    accountInfoList.Add(accountPK, accountInfo);
                 }
             }
 

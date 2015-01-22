@@ -9,7 +9,7 @@
 #include "TransactionContent.h"
 #include "CreditDebitData.h"
 #include "LedgerRootInfo.h"
-#include "LedgerFileHandler_LevelDB.h"
+#include "LedgerFileHandler.h"
 
 // FOR TESTING
 #include "FakeNetwork.h"
@@ -39,7 +39,7 @@ public:
 	
 	LedgerRootInfo ledgerRootInfo;
 	HashTree<AccountInfo, LedgerRootInfo> LedgerTree;
-	LedgerFileHandler_LevelDB ledgerFileHandler;
+	LedgerFileHandler ledgerFileHandler;
 
 	int64_t TransactionFees;
 	int64_t CloseTime;

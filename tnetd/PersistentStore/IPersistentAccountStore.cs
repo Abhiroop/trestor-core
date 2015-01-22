@@ -9,10 +9,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TNetD.Transactions;
+using TNetD.Tree;
 
 namespace TNetD.PersistentStore
 {
-    public delegate bool AccountFetchEventHandler(AccountInfo accountInfo);
+    public delegate TreeResponseType AccountFetchEventHandler(AccountInfo accountInfo);
 
     /// <summary>
     /// This is an interface to implement all the PersistentStorage techniques.
@@ -55,7 +56,7 @@ namespace TNetD.PersistentStore
         /// <param name="accountInfoList"></param>
         /// <param name="AccountPKs"></param>
         /// <returns>Number of accounts successfully fetched.</returns>
-        int BatchFetch(out List<AccountInfo> accountInfoList, IEnumerable<Hash> AccountPKs);
+        int BatchFetch(out Dictionary<Hash, AccountInfo> accountInfoList, IEnumerable<Hash> AccountPKs);
 
         /// <summary>
         /// Fetches all accounts in the associated Database. Order is not guranteed.

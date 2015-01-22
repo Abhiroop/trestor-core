@@ -683,23 +683,75 @@ namespace TNetD.Nodes
 
                     } //While ends
 
-                    // Create the new accounts in the PersistentDatabase.
 
-                    int newCount = PersistentAccountStore.AddUpdateBatch(newAccounts);
+                    ////// Create the accounts in the Ledger  /////
 
-                    if(newCount != newAccounts.Count)
+                    int newLedgerAccountCount = ledger.AddUpdateBatch(newAccounts);
+
+                    if (newLedgerAccountCount != newAccounts.Count)
                     {
-                        throw new Exception("Persistent database batch write failure. #2");
+                        throw new Exception("Ledger batch write failure. #2");
                     }
 
-                    List<AccountInfo> accountsInDB;
+                    Dictionary<Hash, AccountInfo> accountsInLedger;
+
+                    int fetchedLedgerAccountsCount = ledger.BatchFetch(out accountsInLedger, pendingDifferenceData.Keys);
+
+                    if (fetchedLedgerAccountsCount != pendingDifferenceData.Count)
+                    {
+                        throw new Exception("Ledger batch read failure. #2");
+                    }
+
+                    ////// Create the new accounts in the PersistentDatabase  /////
+
+                    int newDBAccountCount = PersistentAccountStore.AddUpdateBatch(newAccounts);
+
+                    if (newDBAccountCount != newAccounts.Count)
+                    {
+                        throw new Exception("Persistent DB batch write failure. #2");
+                    }
+
+                    Dictionary<Hash, AccountInfo> accountsInDB;
 
                     int fetchedAccountsCount = PersistentAccountStore.BatchFetch(out accountsInDB, pendingDifferenceData.Keys);
 
                     if(fetchedAccountsCount != pendingDifferenceData.Count)
                     {
-                        throw new Exception("Persistent database batch read failure. #2");
+                        throw new Exception("Persistent DB batch read failure. #2");
                     }
+
+                    /// We are here without exceptions 
+                    /// Great the accounts are ready to be written to.
+                    
+                    // Verify that the initial account contents are the same.
+
+                    foreach(KeyValuePair<Hash, AccountInfo> kvp in accountsInLedger)
+                    {
+                        if(accountsInDB.ContainsKey(kvp.Key))
+                        {                            
+                            AccountInfo ledgerAccount = kvp.Value;
+                            AccountInfo persistentAccount = accountsInDB[kvp.Key];
+
+                            if (ledgerAccount.LastTransactionTime != persistentAccount.LastTransactionTime)
+                            {
+                                throw new Exception("Persistent DB or Ledger unauthorized overwrite Time. #1");
+                            }
+
+                            if (ledgerAccount.Money != persistentAccount.Money)
+                            {
+                                throw new Exception("Persistent DB or Ledger unauthorized overwrite Value. #1");
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception("Improbable Assertion Failed: Persistent DB or Ledger account missing !!!");
+                        }
+                    }
+
+                    // Fine The account information is same in both the ledger and Persistent DB
+
+                    
+
 
                     // Next is to populate the ledger and then mark the accounts to save to persistent db.
                     // then save the marked account.
@@ -731,10 +783,7 @@ namespace TNetD.Nodes
             TimerEventProcessed = true;
         }
 
-
-
-
-
+        
 
         void CreateArbitraryTransactionAndSendToTrustedNodes()
         {
