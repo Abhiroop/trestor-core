@@ -88,10 +88,11 @@ namespace TNetD.PersistentStore
         }
 
         // FEATURE: PUT OFFSET SUPPORT FOR LARGE HISTORY SYNC
-        
+
         /// <summary>
         /// Fetches transaction history from the database. 
         /// </summary>
+        /// <param name="transactions"></param>
         /// <param name="publicKey">Public Key of Account</param>
         /// <param name="TimeStamp">The time after which tranactions are needed</param>
         /// <param name="Limit">Max result count, 0 means all (Bounded by system limit.)</param>
@@ -105,6 +106,10 @@ namespace TNetD.PersistentStore
             if (Limit > 0 && Limit < Constants.DB_HISTORY_LIMIT)
             {
                 LIMIT_CLAUSE = "LIMIT " + Limit;
+            }
+            else
+            {
+                LIMIT_CLAUSE = "LIMIT " + Constants.DB_HISTORY_LIMIT;
             }
 
             // TransactionHistory (TransactionID BLOB, PublicKey BLOB, TimeStamp Integer)
@@ -138,6 +143,8 @@ namespace TNetD.PersistentStore
             return response;
         }
 
+        //CRITICAL: HANDLE CASE WHEN ENTRY ALREADY EXISTS GRACEFULLY
+
         public int AddUpdateBatch(Dictionary<Hash, TransactionContent> accountInfoData)
         {
             int Successes = 0;
@@ -153,6 +160,7 @@ namespace TNetD.PersistentStore
             }
 
             st.Commit();
+                        
             return Successes;
         }
 
@@ -184,7 +192,8 @@ namespace TNetD.PersistentStore
             {
                 // /////////////  Perform the UPDATE  ///////////////
 
-                // WELL ITS IMPLEMENTED BUT NOT NEEDED
+                // WELL ITS IMPLEMENTED BUT NOT NEEDED.
+                // Not emplemet because of the unnecessary added complexity of handling the history table. 
 
                 throw new NotImplementedException("Unsupported right now. Technically not needed. Transactions need to be only added and fetched.");
 
@@ -205,7 +214,7 @@ namespace TNetD.PersistentStore
             }
             else
             {
-                // /////////////  Perform the INSERT  ///////////////
+                ///////////////  Perform the INSERT  ///////////////
 
                 using (SQLiteCommand cmd = new SQLiteCommand("INSERT INTO Transactions VALUES(@transactionID, @serializedContent);", sqliteConnection))
                 {

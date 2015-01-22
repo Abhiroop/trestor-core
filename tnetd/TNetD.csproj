@@ -81,6 +81,7 @@
     <Compile Include="Nodes\GlobalConfiguration.cs" />
     <Compile Include="Nodes\NodeConfig.cs" />
     <Compile Include="Nodes\NodeState.cs" />
+    <Compile Include="Nodes\TreeDiffData.cs" />
     <Compile Include="PersistentStore\DBUtils.cs" />
     <Compile Include="PersistentStore\IPersistentAccountStore.cs" />
     <Compile Include="PersistentStore\ITransactionStore.cs" />

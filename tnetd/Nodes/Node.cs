@@ -73,7 +73,7 @@ namespace TNetD.Nodes
             }
         }
 
-        System.Timers.Timer Tmr;
+        System.Timers.Timer TimerConsensus;
 
         // TODO: MAKE PRIVATE : AND FAST
         public NodeConfig nodeConfig = default(NodeConfig);
@@ -106,17 +106,14 @@ namespace TNetD.Nodes
 
             //ledger.AddUserToLedger(AI);
 
-            Tmr = new System.Timers.Timer();
-            Tmr.Elapsed += Tmr_Elapsed;
-            Tmr.Enabled = true;
-            Tmr.Interval = nodeConfig.UpdateFrequencyMS;
-            Tmr.Start();
+            TimerConsensus = new System.Timers.Timer();
+            TimerConsensus.Elapsed += TimerConsensus_Elapsed;
+            TimerConsensus.Enabled = true;
+            TimerConsensus.Interval = nodeConfig.UpdateFrequencyConsensusMS;
+            TimerConsensus.Start();
 
             // ////////////////////
-
-
-            ////////////////////////
-
+            
             restServer = new RESTServer("localhost", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
 
             restServer.Start();
@@ -162,6 +159,12 @@ namespace TNetD.Nodes
 
                 return true;
             }
+            else if (context.Request.RawUrl.Matches(@"^/wallet")) // ProcessInfo 
+            {
+                HandleWalletQuery(context);
+
+                return true;
+            }
             else if (context.Request.RawUrl.Matches(@"^/propagateraw")) // Propagate RAW 
             {
                 HandlePropagate(context, true);
@@ -188,6 +191,12 @@ namespace TNetD.Nodes
                     return true;
                 }
             }
+            else if (context.Request.RawUrl.Matches(@"^/history")) // Handle Transaction History Fetch
+            {
+                HandleTransactionHistoryQuery(context);
+
+                return true;
+            }
             else if (context.Request.RawUrl.Matches(@"^/accounts")) // Fetch Transactions
             {
                 if (context.Request.RawUrl.StartsWith("/accounts"))
@@ -198,6 +207,133 @@ namespace TNetD.Nodes
             }
 
             return false;
+        }
+
+        private void HandleWalletQuery(HttpListenerContext context)
+        {
+            JS_Msg msg = new JS_Msg("Exception During Parsing", RPCStatus.Exception);
+
+            try
+            {
+                string NAME = "";
+
+                string name = context.Request.QueryString["name"];
+
+                if (!String.IsNullOrEmpty(name))
+                {
+                    string[] _name = name.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (_name.Length == 1)
+                    {
+                        if (_name[0].Length >= Constants.Pref_MinNameLength)
+                        {
+                            NAME = name;
+                        }
+                        else
+                        {
+                            msg = new JS_Msg("Invalid Name Length.", RPCStatus.Exception);
+                            throw new ArgumentException("RPC: Invalid Name Length.");
+                        }
+                    }
+                }
+
+                Tuple<AccountIdentifier, byte[]> accountData = AddressFactory.CreateNewAccount(NAME);
+
+                JS_Address addr = new JS_Address(accountData.Item1, accountData.Item2);
+
+                this.SendJsonResponse(context, addr.GetResponse());
+                return;
+            }
+            catch
+            {
+                
+            }
+            finally
+            {
+                this.SendJsonResponse(context, msg);
+            }
+        }
+
+        private void HandleTransactionHistoryQuery(HttpListenerContext context)
+        {
+            JS_TransactionReplies replies = new JS_TransactionReplies();
+            JS_Msg msg = new JS_Msg("Processing Starting", RPCStatus.Exception);
+
+            try
+            {
+                string tran = context.Request.QueryString["id"];
+
+                if (tran != "")
+                {
+                    string[] transactionIDs = tran.Split(',');
+
+                    if (transactionIDs.Length == 1)
+                    {
+                        byte[] transactionID_Bytes = new byte[0];
+
+                        try
+                        {
+                            transactionID_Bytes = HexUtil.GetBytes(transactionIDs[0]);
+                        }
+                        catch { }
+
+                        if (transactionID_Bytes.Length == Common.LEN_TRANSACTION_ID)
+                        {
+                            string _limit = context.Request.QueryString["limit"];
+                            int limit = 0;
+                            if (_limit != "")
+                            {
+                                string[] __limit = _limit.Split(new char[] { ',' }, 1, StringSplitOptions.RemoveEmptyEntries);
+                                if (__limit.Length == 1)
+                                {
+                                    int.TryParse(__limit[0], out limit);
+                                }
+                            }
+
+                            string _timeStamp = context.Request.QueryString["time"];
+                            long timeStamp = 0;
+                            if (_timeStamp != "")
+                            {
+                                string[] __timeStamp = _timeStamp.Split(new char[] { ',' }, 1, StringSplitOptions.RemoveEmptyEntries);
+                                if (__timeStamp.Length == 1)
+                                {
+                                    long.TryParse(__timeStamp[0], out timeStamp);
+                                }
+                            }
+
+                            List<TransactionContent> transactionContents;
+
+                            PersistentTransactionStore.FetchTransactionHistory(out transactionContents, new Hash(transactionID_Bytes), timeStamp, limit);
+
+                            foreach (TransactionContent transactionContent in transactionContents)
+                            {
+                                replies.Transactions.Add(new JS_TransactionReply(transactionContent));
+                            }
+
+                        }
+                    }
+                }
+
+                msg = new JS_Msg("History Fetch Success.", RPCStatus.Success);
+            }
+            catch
+            {
+                msg = new JS_Msg("Exception During Parsing.", RPCStatus.Exception);
+            }
+            finally
+            {
+                if (replies.Transactions.Count == 1)
+                {
+                    this.SendJsonResponse(context, replies.Transactions[0].GetResponse());
+                }
+                else if (replies.Transactions.Count > 1)
+                {
+                    this.SendJsonResponse(context, replies.GetResponse());
+                }
+                else
+                {
+                    this.SendJsonResponse(context, msg);
+                }
+            }
         }
 
         private void HandleTransactionStatusQuery(HttpListenerContext context)
@@ -255,9 +391,29 @@ namespace TNetD.Nodes
 
         private void HandleTransactionStatusQuery_Internal(ref JS_TransactionStateReplies replies, Hash transactionID)
         {
-            // incomingTransactionMap
+            // Check if the transaction is in the proposed queue.
+            Tuple<TransactionContent, bool> response_prop = incomingTransactionMap.GetPropagationContent(transactionID);
+            if (response_prop.Item2 == true)
+            {
+                replies.TransactionState.Add(new JS_TransactionState_Reply(response_prop.Item1, TransactionStatusType.Proposed));
+                return;
+            }
 
+            // Check if the transaction is in the processing queue.
+            Tuple<TransactionContent, bool> response_queue = incomingTransactionMap.GetTransactionContent(transactionID);
+            if (response_queue.Item2 == true)
+            {
+                replies.TransactionState.Add(new JS_TransactionState_Reply(response_queue.Item1, TransactionStatusType.InProcessingQueue));
+                return;
+            }
 
+            // Check if the transaction is processed.
+            TransactionContent transactionContent;
+            if (PersistentTransactionStore.FetchTransaction(out transactionContent, transactionID) == DBResponse.FetchSuccess)
+            {
+                replies.TransactionState.Add(new JS_TransactionState_Reply(transactionContent, TransactionStatusType.Processed));
+                return;
+            }
         }
 
         private void HandleAccountQuery(HttpListenerContext context)
@@ -466,8 +622,8 @@ namespace TNetD.Nodes
         public void StopNode()
         {
             Constants.ApplicationRunning = false;
-            network.Stop();
 
+            network.Stop();
             restServer.Stop();
 
             /*if (background_Load != null)
@@ -481,24 +637,21 @@ namespace TNetD.Nodes
 
         async Task SendInitialize(Hash publicKey)
         {
-            await Task.Delay(Constants.random.Next(500, 1000)); // Wait a random delay before connecting.
+            await Task.Delay(Common.random.Next(500, 1000)); // Wait a random delay before connecting.
             NetworkPacketQueueEntry npqe = new NetworkPacketQueueEntry(publicKey, new NetworkPacket(PublicKey, PacketType.TPT_HELLO, new byte[0]));
             network.AddToQueue(npqe);
         }
+             
 
-        class TreeDiffData
-        {
-            public Hash PublicKey { get; set; }
-            public long RemoveValue { get; set; }
-            public long AddValue { get; set; }
-        }
+        #region TRANSACTION PROCESSING
+
 
         /// <summary>
         /// Timer now fast. Actual/Final timer would depend on consensus rate.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Tmr_Elapsed(object sender, ElapsedEventArgs e)
+        private void TimerConsensus_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (TimerEventProcessed) // Lock to prevent multiple invocations 
             {
@@ -533,7 +686,7 @@ namespace TNetD.Nodes
                             {
                                 TransactionContent transactionFromPersistentDB;
 
-                                if (PersistentTransactionStore.FetchTransaction(out transactionFromPersistentDB, transactionContent.TransactionID) 
+                                if (PersistentTransactionStore.FetchTransaction(out transactionFromPersistentDB, transactionContent.TransactionID)
                                     == DBResponse.FetchSuccess)
                                 {
                                     //TODO: LOG THIS and Display properly.
@@ -635,7 +788,7 @@ namespace TNetD.Nodes
                                         }
                                     }
 
-                                    // TODO: ALL WELL / Check for tx FEE.
+                                    // TODO: ALL WELL / Check for Transaction FEE.
                                     // TEMPORARY SINGLE NODE STUFF // DIRECT DB WRITE.
                                     // Make a list of updated accounts.
 
@@ -683,7 +836,6 @@ namespace TNetD.Nodes
 
                                         /// Added to difference list.
                                         acceptedTransactions.Add(transactionContent.TransactionID, transactionContent);
-
 
                                     }
                                     else
@@ -829,7 +981,7 @@ namespace TNetD.Nodes
             TimerEventProcessed = true;
         }
 
-
+        #endregion
 
         void CreateArbitraryTransactionAndSendToTrustedNodes()
         {
@@ -868,7 +1020,7 @@ namespace TNetD.Nodes
             }
         }
 
-        Stack<TransactionContentPack> PendingIncomingCandidates = new Stack<TransactionContentPack>();
+        /*Stack<TransactionContentPack> PendingIncomingCandidates = new Stack<TransactionContentPack>();
         Stack<TransactionContentPack> PendingIncomingTransactions = new Stack<TransactionContentPack>();
 
         /// <summary>
@@ -897,7 +1049,7 @@ namespace TNetD.Nodes
                     InCandidatesCount++;
                 }
             }
-        }
+        }*/
 
 
     }

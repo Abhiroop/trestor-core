@@ -80,7 +80,7 @@ namespace TNetD.Transactions
         public TransactionEntity(AccountIdentifier account, long value)
         {
             this._value = value;
-            this.publicKey = account.PublicKey.Hex;
+            this.publicKey = account.PublicKey;
             this.name = account.Name;
             this.address = account.AddressData.AddressString;
         }

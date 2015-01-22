@@ -122,11 +122,11 @@ namespace TNetD
             {
                 N_H[5] = (byte)(i * 3);
 
-                Constants.rngCsp.GetBytes(N_H);
+                Common.rngCsp.GetBytes(N_H);
 
                 accounts.Add(new Hash(N_H));
 
-                long _taks = Constants.random.Next(0, 1000000000);
+                long _taks = Common.random.Next(0, 1000000000);
 
                 taka += _taks;
 

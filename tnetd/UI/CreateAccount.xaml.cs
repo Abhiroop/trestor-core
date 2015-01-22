@@ -67,7 +67,7 @@ namespace TNetD.UI
         {
             // GEN.
             byte [] _pr = new byte[32];
-            Constants.rngCsp.GetBytes(_pr);
+            Common.rngCsp.GetBytes(_pr);
 
             tb_PrivateRandom.Text = HexUtil.ToString(_pr);
         }

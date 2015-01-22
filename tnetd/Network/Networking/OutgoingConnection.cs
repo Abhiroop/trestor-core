@@ -101,8 +101,8 @@ namespace TNetD.Network.Networking
             {
                 byte[] DH_RandomBytes = new byte[32];
 
-                Constants.rngCsp.GetBytes(DH_RandomBytes);
-                Constants.rngCsp.GetBytes(AuthRandom);
+                Common.rngCsp.GetBytes(DH_RandomBytes);
+                Common.rngCsp.GetBytes(AuthRandom);
 
                 DH_PrivateKey = Curve25519.ClampPrivateKey(DH_RandomBytes);
                 DH_PublicKey = Curve25519.GetPublicKey(DH_PrivateKey);
@@ -324,7 +324,7 @@ namespace TNetD.Network.Networking
             try
             {
                 byte[] nonce = new byte[8];
-                Constants.rngCsp.GetBytes(nonce);
+                Common.rngCsp.GetBytes(nonce);
 
                 byte[] counter_sender_data = Utils.GetLengthAsBytes((int)PacketCounter).Concat(Data).ToArray();
 

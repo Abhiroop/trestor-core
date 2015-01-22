@@ -111,7 +111,7 @@ namespace Grapevine
         }
         
         /// <summary>
-        /// Respond to a request by searlizing an object to JSON
+        /// Respond to a request by serializing an object to JSON
         /// </summary>
         protected void SendJsonResponse(HttpListenerContext context, object obj)
         {
@@ -129,7 +129,7 @@ namespace Grapevine
         }
 
         /// <summary>
-        /// Respond to a request by searlizing a JObject to JSON
+        /// Respond to a request by serializing a JObject to JSON
         /// </summary>
         protected void SendJsonResponse(HttpListenerContext context, JObject json)
         {

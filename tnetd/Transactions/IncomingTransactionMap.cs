@@ -46,7 +46,7 @@ namespace TNetD.Transactions
             System.Timers.Timer Tmr = new System.Timers.Timer();
             Tmr.Elapsed += Tmr_Elapsed;
             Tmr.Enabled = true;
-            Tmr.Interval = nodeConfig.UpdateFrequencyMS;
+            Tmr.Interval = nodeConfig.UpdateFrequencyPacketProcessMS;
             Tmr.Start();
         }
         
@@ -69,6 +69,10 @@ namespace TNetD.Transactions
                         }
                     }
 
+                    IncomingPropagations.Clear();
+
+                    //TODO: Forward to connected peers.
+
                     // More processing.
 
                 }
@@ -87,12 +91,28 @@ namespace TNetD.Transactions
             TimerEventProcessed = true;            
         }
 
+        public Tuple<TransactionContent, bool> GetPropagationContent(Hash transactionID)
+        {
+            if (IncomingPropagations.ContainsKey(transactionID))
+            {
+                TransactionContent transactionContent;
+                bool okay = IncomingPropagations.TryGetValue(transactionID, out transactionContent);
+
+                if (!okay)
+                    DisplayUtils.Display("Propagation Fetch Fail : GetPropagationContent", DisplayType.Warning);
+
+                return new Tuple<TransactionContent, bool>(transactionContent, okay);
+            }
+
+            return new Tuple<TransactionContent, bool>(null, false);
+        }
+
         /// <summary>
         /// Given a transactionID returns current associated TransactionContent, else return false.
         /// </summary>
         /// <param name="transactionID"></param>
         /// <returns></returns>
-        Tuple<TransactionContent, bool> GetTransactionContent(Hash transactionID)
+        public Tuple<TransactionContent, bool> GetTransactionContent(Hash transactionID)
         {
             if (IncomingTransactions.ContainsKey(transactionID))
             {
@@ -100,7 +120,7 @@ namespace TNetD.Transactions
                 bool okay = IncomingTransactions.TryGetValue(transactionID, out transactionContent);
 
                 if(!okay)
-                    DisplayUtils.Display("Fetch Fail : GetTransactionContent", DisplayType.Warning);
+                    DisplayUtils.Display("Incoming Transaction Fetch Fail : GetTransactionContent", DisplayType.Warning);
 
                 return new Tuple<TransactionContent, bool>(transactionContent, okay);
             }

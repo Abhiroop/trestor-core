@@ -42,6 +42,16 @@ namespace TNetD.PersistentStore
         DBResponse FetchTransaction(out TransactionContent transactionContent, Hash transactionID);
 
         /// <summary>
+        /// Fetches transaction history from the database. 
+        /// </summary>
+        /// <param name="transactions"></param>
+        /// <param name="publicKey">Public Key of Account</param>
+        /// <param name="TimeStamp">The time after which tranactions are needed</param>
+        /// <param name="Limit">Max result count, 0 means all (Bounded by system limit.)</param>
+        /// <returns></returns>
+        DBResponse FetchTransactionHistory(out List<TransactionContent> transactions, Hash publicKey, long timeStamp, int Limit);
+
+        /// <summary>
         /// Returns true if the transaction exists in the database.
         /// </summary>
         /// <param name="transactionID"></param>

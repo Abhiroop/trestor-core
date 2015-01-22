@@ -27,7 +27,7 @@ namespace TNetD
 
             while (ints.Count < Count)
             {
-                int Rand = Constants.random.Next(0, maxNumber);
+                int Rand = Common.random.Next(0, maxNumber);
 
                 if (!ints.Contains(Rand) && (self != Rand))
                 {

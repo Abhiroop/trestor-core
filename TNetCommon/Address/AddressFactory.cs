@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 using System.Diagnostics.Contracts;
+using Chaos.NaCl;
 
 namespace TNetD.Address
 {
@@ -21,7 +22,7 @@ namespace TNetD.Address
         MainGenesis = 201, MainValidator = 234, MainNormal = 217,
         TestGenesis = 25, TestValidator = 59, TestNormal = 40
     };
-    
+
     /// <summary>
     /// Generate addresses from PublicKey and UserName
     /// </summary>
@@ -29,7 +30,7 @@ namespace TNetD.Address
     {
         NetworkType _NetworkType;
         AccountType _AccountType;
-        
+
         public AddressFactory()
         {
             _NetworkType = NetworkType.MainNet;
@@ -54,12 +55,35 @@ namespace TNetD.Address
             set { _AccountType = value; }
         }
 
+        /// <summary>
+        /// Creates a new account and returns a Tuple containing account information and SecretSeed
+        /// </summary>
+        /// <param name="Name"></param>
+        /// <returns></returns>
+        public static Tuple<AccountIdentifier, byte[]> CreateNewAccount(string Name = "")
+        {
+            byte[] PrivateSecretSeed = new byte[Common.KEYLEN_PRIVATE];
+
+            Common.rngCsp.GetBytes(PrivateSecretSeed);
+
+            byte[] PublicKey;
+            byte[] SecretKeyExpanded;
+
+            Ed25519.KeyPairFromSeed(out PublicKey, out SecretKeyExpanded, PrivateSecretSeed);
+
+            byte[] Address = GetAddress(PublicKey, Name, NetworkType.MainNet, AccountType.MainNormal);
+
+            string ADD = Base58Encoding.EncodeWithCheckSum(Address);
+
+            return new Tuple<AccountIdentifier, byte[]>(new AccountIdentifier(PublicKey, Name, ADD), PrivateSecretSeed);
+        }
+
         public static AddressData DecodeAddressString(string Base58Address)
         {
             return new AddressData(Base58Address);
         }
 
-        public static AccountIdentifier CreateAccountIdentifier(Hash publicKey, string name, string addressDataString)
+        public static AccountIdentifier CreateAccountIdentifier(byte[] publicKey, string name, string addressDataString)
         {
             return new AccountIdentifier(publicKey, name, addressDataString);
         }

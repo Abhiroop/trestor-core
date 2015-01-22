@@ -24,6 +24,8 @@ namespace TNetD.Nodes
         #region Locals
 
         public int UpdateFrequencyMS;
+        public int UpdateFrequencyPacketProcessMS;
+        public int UpdateFrequencyConsensusMS;
         public int ListenPortProtocol;
         public int ListenPortRPC;
         public int NodeID;
@@ -104,7 +106,10 @@ namespace TNetD.Nodes
 
             // // // // // // // // // // // // // // // // // // // // // // // // // // //
 
+            //TODO: MAKE THESE LOCAL INI VARIABLES
             UpdateFrequencyMS = Constants.Node_UpdateFrequencyMS;
+            UpdateFrequencyConsensusMS = Constants.Node_UpdateFrequencyConsensusMS;
+            UpdateFrequencyPacketProcessMS = Constants.Node_UpdateFrequencyPacketProcessMS;
 
             // /////////////////////
 
@@ -143,7 +148,7 @@ namespace TNetD.Nodes
 
             // Get new port
 
-            _ListenPortProtocol = Constants.random.Next(32768, 65000);
+            _ListenPortProtocol = Common.random.Next(32768, 65000);
 
             iniFile.IniWriteValue("Network", "ListenPortProtocol", _ListenPortProtocol.ToString());
 
@@ -186,7 +191,7 @@ namespace TNetD.Nodes
 
             // Get new port
 
-            _ListenPortRPC = Constants.random.Next(32768, 65000);
+            _ListenPortRPC = Common.random.Next(32768, 65000);
 
             iniFile.IniWriteValue("Network", "ListenPortRPC", _ListenPortRPC.ToString());
 
@@ -224,7 +229,7 @@ namespace TNetD.Nodes
             if (_RAND.Length != 32)
             {
                 _RAND = new byte[32];
-                Constants.rngCsp.GetBytes(_RAND);
+                Common.rngCsp.GetBytes(_RAND);
 
                 DisplayUtils.Display(" Node " + NodeID + " Creating new PrivateKey : " + HexUtil.ToString(_RAND));
                 _iniFile.IniWriteValue("Keys", "PrivateRandom", HexUtil.ToString(_RAND));

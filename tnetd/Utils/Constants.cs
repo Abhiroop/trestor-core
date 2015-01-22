@@ -10,10 +10,7 @@ using TNetD.Json.REST;
 namespace TNetD
 {
     static class Constants
-    {
-        public static  RNGCryptoServiceProvider rngCsp = new RNGCryptoServiceProvider();
-
-        public static Random random = new Random();
+    {        
         
         /// <summary>
         /// Depth at which hash tree leaves are stored.
@@ -22,7 +19,10 @@ namespace TNetD
         /// </summary>
         public static readonly int HashTree_NodeListDepth = 4;
 
-        public static readonly int Pref_MinNameLength = 5;
+        /// <summary>
+        /// Minimum allowable Account Name Length
+        /// </summary>
+        public static readonly int Pref_MinNameLength = 3;
 
         public static readonly int GlobalNodes = 100;
 
@@ -109,6 +109,16 @@ namespace TNetD
         /// Global Node event update rate.
         /// </summary>
         public static readonly int Node_UpdateFrequencyMS = 100;
+
+        /// <summary>
+        /// Timer Update rate for consensus.
+        /// </summary>
+        public static readonly int Node_UpdateFrequencyConsensusMS = 5000;
+
+        /// <summary>
+        /// Update rate for handling packets.
+        /// </summary>
+        public static readonly int Node_UpdateFrequencyPacketProcessMS = 500;
 
         public static readonly string File_TrustedNodes = "TrustedNodes.ini";
 

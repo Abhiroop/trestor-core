@@ -57,6 +57,23 @@ namespace TNetD.Json.JS_Structs
         }
     }
 
+    public class JS_Address : JS_Response
+    {
+        public AccountIdentifier AccountIdentifier;
+        public byte[] Secret;
+
+        public JS_Address(AccountIdentifier AccountIdentifier, byte[] Secret)
+        {
+            this.AccountIdentifier = AccountIdentifier;
+            this.Secret = Secret;
+        }
+
+        public JS_Resp GetResponse()
+        {
+            return new JS_Resp(RPCStatus.Success, this);
+        }
+    }
+
     public class JS_NodeInfo : JS_Response
     {
         public byte[] PublicKey;
