@@ -566,7 +566,8 @@ namespace TNetD.Nodes
                     }
                     else
                     {
-                        JS_TransactionReply jtr = JsonConvert.DeserializeObject<JS_TransactionReply>(inputStream.ReadToEnd(),
+                        string json = inputStream.ReadToEnd();
+                        JS_TransactionReply jtr = JsonConvert.DeserializeObject<JS_TransactionReply>(json,
                             Common.JsonSerializerSettings);
 
                         transactionContent.Deserialize(jtr);
@@ -645,11 +646,11 @@ namespace TNetD.Nodes
 
                 try
                 {
-                    Stack<TransactionContent> transactionContentStack = new Stack<TransactionContent>();
+                    Queue<TransactionContent> transactionContentStack = new Queue<TransactionContent>();
 
                     foreach (KeyValuePair<Hash, TransactionContent> kvp in incomingTransactionMap.IncomingTransactions)
                     {
-                        transactionContentStack.Push(kvp.Value);
+                        transactionContentStack.Enqueue(kvp.Value);
                     }
 
                     incomingTransactionMap.IncomingTransactions.Clear();
@@ -662,7 +663,7 @@ namespace TNetD.Nodes
 
                     while (transactionContentStack.Count > 0)
                     {
-                        TransactionContent transactionContent = transactionContentStack.Pop();
+                        TransactionContent transactionContent = transactionContentStack.Dequeue();
 
                         try
                         {
@@ -821,11 +822,14 @@ namespace TNetD.Nodes
                                         /// Added to difference list.
                                         acceptedTransactions.Add(transactionContent.TransactionID, transactionContent);
 
+                                        DisplayUtils.Display("Transaction added to intermediate list : " + 
+                                            HexUtil.ToString(transactionContent.TransactionID.Hex));
                                     }
                                     else
                                     {
                                         //TODO: LOG THIS and Display properly.
-                                        DisplayUtils.Display("BAD TRANSACTION");
+                                        DisplayUtils.Display("BAD Transaction : " +
+                                           HexUtil.ToString(transactionContent.TransactionID.Hex), DisplayType.BadData);
                                     }
 
                                 }
@@ -882,7 +886,7 @@ namespace TNetD.Nodes
 
                     // We are here without exceptions 
                     // Great the accounts are ready to be written to.                    
-                    // Verify that the initial account contents are the same.
+                    // Cross-Verify that the initial account contents are the same.
 
                     foreach (KeyValuePair<Hash, AccountInfo> kvp in accountsInLedger)
                     {
@@ -922,11 +926,14 @@ namespace TNetD.Nodes
 
                         AccountInfo ledgerAccount = ledger[diffData.PublicKey];
 
+                        DisplayUtils.Display("\nFor Account : '" + ledgerAccount.Name + "' : " + HexUtil.ToString(ledgerAccount.PublicKey.Hex));
+                        DisplayUtils.Display("Balance: " + ledgerAccount.Money + ", Added:" + diffData.AddValue + ", Removed:" + diffData.RemoveValue);
+                        
                         ledgerAccount.Money += diffData.AddValue;
                         ledgerAccount.Money -= diffData.RemoveValue;
 
                         ledger[diffData.PublicKey] = ledgerAccount;
-
+                        
                         // This is good enough as we have previously checked for correctness and matching
                         // values in both locations.
 
@@ -950,7 +957,7 @@ namespace TNetD.Nodes
                     {
                     }*/
                 }
-                catch
+                catch(Exception ex)
                 {
                     DisplayUtils.Display("Timer Event : Exception : Node", DisplayType.Warning);
                 }

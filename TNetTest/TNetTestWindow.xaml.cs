@@ -111,6 +111,8 @@ namespace TNetTest
                 // TEST CODE
                 int[] sdIndex = Utils.GenerateNonRepeatingDistribution(GAD.Count, 2);
 
+                sdIndex[0] = 6250;
+
                 SentTransactionRequest(GAD[sdIndex[0]], GAD[sdIndex[1]]);
 
 
