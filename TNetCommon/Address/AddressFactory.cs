@@ -78,6 +78,21 @@ namespace TNetD.Address
             return new Tuple<AccountIdentifier, byte[]>(new AccountIdentifier(PublicKey, Name, ADD), PrivateSecretSeed);
         }
 
+        public static AccountIdentifier PrivateKeyToAccount(byte[] PrivateSecretSeed, string Name = "")
+        {
+            byte[] PublicKey;
+            byte[] SecretKeyExpanded;
+            Ed25519.KeyPairFromSeed(out PublicKey, out SecretKeyExpanded, PrivateSecretSeed);
+            return PublicKeyToAccount(PublicKey, Name);
+        }
+
+        public static AccountIdentifier PublicKeyToAccount(byte[] PublicKey, string Name = "")
+        {     
+            byte[] Address = GetAddress(PublicKey, Name, NetworkType.MainNet, AccountType.MainNormal);
+            string ADD = Base58Encoding.EncodeWithCheckSum(Address);
+            return new AccountIdentifier(PublicKey, Name, ADD);
+        }
+
         public static AddressData DecodeAddressString(string Base58Address)
         {
             return new AddressData(Base58Address);

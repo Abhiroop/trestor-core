@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using TNetD.Address;
 using TNetD.Json.JS_Structs;
 using TNetD.Transactions;
 
@@ -30,30 +31,38 @@ namespace TNetD.UI
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            /*try
+            try
             {
-                byte[] PubSrc;
-                byte[] PrivExpanded;
-                byte[] PrivSeed = HexUtil.GetBytes(tb_SenderPrivate.Text);
+                byte[] PrivSeedSender = HexUtil.GetBytes(tb_SenderPrivate.Text);  
+                string SenderName = tb_SenderName.Text.Trim();
+
+                AccountIdentifier identifierSrc = AddressFactory.PrivateKeyToAccount(PrivSeedSender, SenderName);
                 
-                byte[] PubDst = HexUtil.GetBytes(tb_DestPublic.Text);
+                byte[] PubSrc;
+                byte[] PrivSrcExpanded;
+                Ed25519.KeyPairFromSeed(out PubSrc, out PrivSrcExpanded, PrivSeedSender);
+                
+                /////////////////
+                
+                byte[] PrivSeedDest = HexUtil.GetBytes(tb_DestPrivate.Text);
+                string DestName = tb_DestName.Text.Trim();
 
-                Ed25519.KeyPairFromSeed(out PubSrc, out PrivExpanded, PrivSeed);
-
-                tb_SenderPublic.Text = HexUtil.ToString(PubSrc);
-
+                AccountIdentifier identifierDest = AddressFactory.PrivateKeyToAccount(PrivSeedDest, DestName);
+                
                 long value = long.Parse(tb_Value.Text);
                 long fee = long.Parse(tb_Fee.Text);
 
-                SingleTransactionFactory stf = new SingleTransactionFactory(new Hash(PubSrc), new Hash(PubDst), fee, value);
+                SingleTransactionFactory stf = new SingleTransactionFactory(identifierSrc, identifierDest, fee, value);
 
                 byte[] dd = stf.GetTransactionData();
 
-                Hash sig = new Hash(Ed25519.Sign(dd, PrivExpanded));
+                Hash sig = new Hash(Ed25519.Sign(dd, PrivSrcExpanded));
 
                 TransactionContent tc;
 
-                if (stf.Create(sig, out tc) == TransactionProcessingResult.Accepted)
+                TransactionProcessingResult rslt = stf.Create(sig, out tc);
+
+                if (rslt == TransactionProcessingResult.Accepted)
                 {
                     if (check_Json.IsChecked.Value)
                     {
@@ -66,13 +75,31 @@ namespace TNetD.UI
                 }
                 else
                 {
-                    tb_TX_Hex.Text = "INVALID DATA !!!";
+                    tb_TX_Hex.Text = "INVALID DATA : " + rslt.ToString();
                 }
             }
             catch
             {
                 tb_TX_Hex.Text = "Exception ocurred !!!";
-            }*/
+            }
+
+        }
+
+        private void btn_Rand_Click(object sender, RoutedEventArgs e)
+        {
+            byte [] _rand_1 = new byte[32];
+            byte [] _rand_2 = new byte[32];
+
+            Common.rngCsp.GetBytes(_rand_1);
+            Common.rngCsp.GetBytes(_rand_2);
+
+            tb_SenderPrivate.Text = HexUtil.ToString(_rand_1);
+            tb_DestPrivate.Text = HexUtil.ToString(_rand_2);
+
+            tb_Fee.Text = Common.random.Next(Common.NETWORK_Min_Transaction_Fee, Common.NETWORK_Min_Transaction_Fee * 2) + "";
+
+            tb_Value.Text = Common.random.Next(1000, 50000000) + "";
+
 
         }
     }

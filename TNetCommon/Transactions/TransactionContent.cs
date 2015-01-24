@@ -315,6 +315,7 @@ namespace TNetD.Transactions
                 tranDataSig.AddRange(sig.Hex);
             }
 
+            // Not performing Hashing Here, as it is already performed by ED25519.Sign()
             return tranDataSig.ToArray();
         }
 
