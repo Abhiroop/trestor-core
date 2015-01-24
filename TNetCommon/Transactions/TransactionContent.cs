@@ -194,7 +194,8 @@ namespace TNetD.Transactions
 
             return transactionData.ToArray();
         }
-               
+
+
 
         /// <summary>
         /// Checks the general integrity of the transaction. 
