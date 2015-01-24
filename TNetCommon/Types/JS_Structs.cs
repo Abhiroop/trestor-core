@@ -98,8 +98,8 @@ namespace TNetD.Json.JS_Structs
         public long Timestamp;
         public long Value;
         public long TransactionFee;
-        public List<TransactionEntity> Sources;
-        public List<TransactionEntity> Destinations;
+        public JS_TransactionEntity[] Sources;
+        public JS_TransactionEntity[] Destinations;
         public List<byte[]> Signatures;
 
         public JS_TransactionReply()
@@ -110,8 +110,8 @@ namespace TNetD.Json.JS_Structs
         {
             VersionData = content.VersionData;
             ExecutionData = content.ExecutionData;
-            Sources = content.Sources;
-            Destinations = content.Destinations;
+            Sources = (from src in content.Sources select new JS_TransactionEntity(src)).ToArray();
+            Destinations = (from dst in content.Destinations select new JS_TransactionEntity(dst)).ToArray();
             Signatures = (from sig in content.Signatures select sig.Hex).ToList();
             Timestamp = content.Timestamp;
             TransactionID = content.TransactionID.Hex;
@@ -124,6 +124,71 @@ namespace TNetD.Json.JS_Structs
             return new JS_Resp(RPCStatus.Success, this);
         }
     }
+
+    public class JS_TransactionEntity : JS_Response
+    {
+        public byte[] PublicKey;
+        public string Name;
+        public string Address;
+        public long Value;
+
+        public JS_TransactionEntity()
+        {
+        }
+
+        public JS_TransactionEntity(TransactionEntity entity)
+        {
+            PublicKey = entity.PublicKey;
+            Name = entity.Name;
+            Address = entity.Address;
+            Value = entity.Value;
+        }
+
+        public JS_Resp GetResponse()
+        {
+            return new JS_Resp(RPCStatus.Success, this);
+        }
+    }
+
+
+    /*public class TransactionEntity : ISerializableBase
+    {
+        byte[] publicKey;
+        string name;
+        string address;
+        long _value;
+                
+        /// <summary>
+        /// Public key for the account.
+        /// </summary>
+        public byte[] PublicKey
+        {
+            get { return publicKey; }
+        }
+
+        /// <summary>
+        /// Name of the account. (Optional)
+        /// </summary>
+        public string Name
+        {
+            get { return name; }
+        }
+
+        /// <summary>
+        /// Base58 Encoded Address.
+        /// </summary>
+        public string Address
+        {
+            get { return address; }
+        }
+
+        /// <summary>
+        /// Remaining value/amount held with the account.
+        /// </summary>
+        public long Value
+        {
+            get { return _value; }
+        }*/
 
     public class JS_TransactionState_Reply : JS_Response
     {

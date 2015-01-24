@@ -14,14 +14,10 @@ namespace TNetD
 
         public static Hash GenerateNewToken()
         {
-            byte[] randBytes = new byte[8];
-            Random rand = new Random();
-            rand.NextBytes(randBytes);
+            byte[] randBytes = new byte[8];            
+            Common.rngCsp.GetBytes(randBytes);
             return new Hash(randBytes);
         }
-
-        
-
 
         public static void WaitForExit()
         {

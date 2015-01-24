@@ -3,6 +3,8 @@
 // @Date: 23th Dec 2014 | 12 Jan 2015
 // 22 Jan 2015 : Name Addition for adresses and new account creation.
 
+// TODO: Needs Good cleanup !!!.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +13,7 @@ using System.Threading.Tasks;
 using TNetD.Protocol;
 using TNetD;
 using TNetD.Address;
+using TNetD.Json.JS_Structs;
 
 namespace TNetD.Transactions
 {
@@ -85,6 +88,11 @@ namespace TNetD.Transactions
             this.address = account.AddressData.AddressString;
         }
 
+        public TransactionEntity(JS_TransactionEntity entity)
+        {
+            Deserialize(entity);
+        }
+
         public byte[] Serialize()
         {
             ProtocolDataType[] PDTs = new ProtocolDataType[4];
@@ -93,6 +101,14 @@ namespace TNetD.Transactions
             PDTs[2] = (ProtocolPackager.Pack(name, 2));
             PDTs[3] = (ProtocolPackager.Pack(address, 3));
             return ProtocolPackager.PackRaw(PDTs);
+        }
+
+        public void Deserialize(JS_TransactionEntity entity)
+        {
+            publicKey=entity.PublicKey;
+            name = entity.Name;
+            address = entity.Address;
+            _value = entity.Value;
         }
 
         public void Deserialize(byte[] Data)
