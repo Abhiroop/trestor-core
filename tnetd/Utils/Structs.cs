@@ -58,11 +58,11 @@ namespace TNetD
 
     struct TimeStruct
     {
-        long sendTime;
-        long receivedTime;
-        long TimeFromValidator;
-        Hash token;
-        long timeDifference; //my time - other time
+        public long sendTime;
+        public long receivedTime;
+        public long TimeFromValidator;
+        public Hash token;
+        public long timeDifference; //my time - other time
     };
 
 

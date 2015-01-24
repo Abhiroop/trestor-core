@@ -11,6 +11,15 @@ namespace TNetD
 
     class TNetUtils
     { 
+
+        public static Hash GenerateNewToken()
+        {
+            byte[] randBytes = new byte[8];
+            Random rand = new Random();
+            rand.NextBytes(randBytes);
+            return new Hash(randBytes);
+        }
+
         /// <summary>
         /// Generates nRandom Numbers
         /// </summary>

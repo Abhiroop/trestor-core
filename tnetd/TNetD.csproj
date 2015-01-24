@@ -88,6 +88,7 @@
     <Compile Include="PersistentStore\SQLiteAccountStore.cs" />
     <Compile Include="PersistentStore\SQLiteTransactionStore.cs" />
     <Compile Include="Consensus\CandidateSet.cs" />
+    <Compile Include="Time\TimeSync.cs" />
     <Compile Include="Transactions\IncomingTransactionMap.cs" />
     <Compile Include="Tree\FlatNodeStore.cs" />
     <Compile Include="Tree\ListHashTree.cs" />
