@@ -74,5 +74,51 @@ namespace TNetD.Time
         }
 
 
+        /*if everything is ok then 0
+        else 1
+        */
+        public bool SetTime(Hash PublicKey, Hash token, Int64 time)
+        {
+	        if (nodeState.timeMap.ContainsKey(PublicKey))
+	        {
+                TimeStruct ts; 
+                nodeState.timeMap.TryGetValue(PublicKey, out ts);
+		        Hash _token = ts.token;
+		        if (token != _token)
+			         return false;
+
+		        ts.receivedTime = nodeState.system_time;
+
+		        Int64 RTT_one_way = (nodeState.system_time - ts.sendTime) / 2;
+		        Int64 RTT_corrrected_time = time + RTT_one_way;
+
+		        ts.TimeFromValidator = RTT_corrrected_time;
+		        ts.timeDifference = (RTT_corrrected_time - nodeState.system_time);
+
+		         return true;
+	        }
+	        return false;
+        }
+
+        public Int64 CalculateAvgTime()
+        {
+	        Int64 total_diff = 0;
+	        int counter = 0;
+
+             IEnumerator<KeyValuePair<Hash, TimeStruct>> it =  nodeState.timeMap.GetEnumerator();
+
+             while (it.MoveNext())
+             {
+                 ++counter;
+                 KeyValuePair<Hash, TimeStruct> kvp = it.Current;
+
+                 TimeStruct ts = kvp.Value;
+
+                 total_diff += ts.timeDifference;
+             }
+	        return (total_diff / counter);
+        }
+
+
     }
 }
