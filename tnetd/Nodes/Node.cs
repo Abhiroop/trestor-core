@@ -50,8 +50,8 @@ namespace TNetD.Nodes
         public Dictionary<Hash, NodeSocketData> TrustedNodes;
 
         public int OutTransactionCount = 0;
-        public int InCandidatesCount;
-        public int InTransactionCount;
+        // public int InCandidatesCount;
+        // public int InTransactionCount;
 
         public AccountInfo AI;
 
@@ -321,11 +321,7 @@ namespace TNetD.Nodes
             }
             finally
             {
-                if (replies.Transactions.Count == 1)
-                {
-                    this.SendJsonResponse(context, replies.Transactions[0].GetResponse());
-                }
-                else if (replies.Transactions.Count > 1)
+                if (replies.Transactions.Count > 0)
                 {
                     this.SendJsonResponse(context, replies.GetResponse());
                 }
@@ -374,11 +370,7 @@ namespace TNetD.Nodes
 
             // // /////////////////////////////////////////////////////////////////////
 
-            if (replies.TransactionState.Count == 1)
-            {
-                this.SendJsonResponse(context, replies.TransactionState[0].GetResponse());
-            }
-            else if (replies.TransactionState.Count > 1)
+            if (replies.TransactionState.Count > 0)
             {
                 this.SendJsonResponse(context, replies.GetResponse());
             }
@@ -490,11 +482,7 @@ namespace TNetD.Nodes
 
             // // /////////////////////////////////////////////////////////////////////
 
-            if (replies.Accounts.Count == 1)
-            {
-                this.SendJsonResponse(context, replies.Accounts[0].GetResponse());
-            }
-            else if (replies.Accounts.Count > 1)
+            if (replies.Accounts.Count > 0)
             {
                 this.SendJsonResponse(context, replies.GetResponse());
             }
@@ -546,12 +534,8 @@ namespace TNetD.Nodes
             }
 
             // // /////////////////////////////////////////////////////////////////////
-
-            if (replies.Transactions.Count == 1)
-            {
-                this.SendJsonResponse(context, replies.Transactions[0].GetResponse());
-            }
-            else if (replies.Transactions.Count > 1)
+                        
+            if (replies.Transactions.Count > 0)
             {
                 this.SendJsonResponse(context, replies.GetResponse());
             }
