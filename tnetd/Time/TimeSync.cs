@@ -12,7 +12,7 @@ namespace TNetD.Time
     class TimeSync
     {
         NodeState nodeState;
-        ConcurrentDictionary<Int64, Int64> timeMachine = new ConcurrentDictionary<Int64, Int64>();
+        ConcurrentDictionary<Int64, Int64> TimeMachine = new ConcurrentDictionary<Int64, Int64>();
         public TimeSync(NodeState nodeState)
         {
             this.nodeState = nodeState;
@@ -42,5 +42,37 @@ namespace TNetD.Time
 		        }
 	         }
         }
+
+        public Int64 GetGlobalAvgTime()
+        {
+            List<Int64> timeVector = new List<Int64>();
+            IEnumerator<KeyValuePair<long, long>> it =  TimeMachine.GetEnumerator();
+       
+            while(it.MoveNext())
+            {
+                KeyValuePair<long, long> kvp = it.Current;
+                long myTime_i = kvp.Key;
+                long otherTime_i = kvp.Value;
+
+                long offSet = (nodeState.system_time - myTime_i);
+                long offSetBalancedOtherTime_i = offSet + otherTime_i;
+
+                timeVector.Add(offSetBalancedOtherTime_i);
+            }
+
+            Int64 timeSum = nodeState.system_time;
+
+            int total = timeVector.Capacity;
+
+            for (int i = 0; i < total; i++)
+            {
+                timeSum += timeVector[i];
+            }
+
+            Int64 avgTime = timeSum / (total + 1);
+            return avgTime;
+        }
+
+
     }
 }
