@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TNetD.Json.JS_Structs;
 
 namespace TNetD.Nodes
 {
@@ -27,15 +28,33 @@ namespace TNetD.Nodes
 
         public long system_time{ get; set; }
         public long network_time{ get; set; }
+        
+        // //////////////////////
+        /*public int ConnectedPeers;
+        public int TransactionsProcessed;
+        public int TransactionsAccepted;
+        public int TransactionsValidated;
+        public int RequestsProcessed;
+        public int LoadLevel = 1;*/
+
+        public JS_NodeInfo NodeInfo;
+
+        // //////////////////////
 
         public NodeState()
         {
             GlobalBlacklistedValidators = new ConcurrentBag<Hash>();
             GlobalBlacklistedUsers = new ConcurrentBag<Hash>();
             timeMap = new ConcurrentDictionary<Hash, TimeStruct>();
+            
             ConnectedValidators = new ConcurrentBag<Hash>();
             system_time = DateTime.UtcNow.ToFileTimeUtc();
             network_time = DateTime.UtcNow.ToFileTimeUtc();
+        }
+
+        public void SetNodeInfo(JS_NodeInfo NodeInfo)
+        {
+            this.NodeInfo = NodeInfo;
         }
     }
 }

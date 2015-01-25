@@ -5,6 +5,7 @@
  *  @Description: Json Structs for serialization
  */
 
+using Newtonsoft.Json;
 //using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -79,10 +80,63 @@ namespace TNetD.Json.JS_Structs
         public byte[] PublicKey;
         public string Name;
         public string Address;
-        public DateTime TimeUTC;
         public string Organisation;
         public string Platform;
         public string Email;
+        public string Version;
+        public JS_NodeDetails NodeDetails;
+        public JS_LedgerInfo LastLedgerInfo;
+
+        public JS_NodeInfo()
+        {
+            this.NodeDetails = new JS_NodeDetails();
+            this.LastLedgerInfo = new JS_LedgerInfo();
+        }
+
+        public JS_NodeInfo(JS_NodeDetails NodeDetails, JS_LedgerInfo LastLedgerInfo)
+        {
+            this.NodeDetails = NodeDetails;
+            this.LastLedgerInfo = LastLedgerInfo;
+        }
+
+        public JS_Resp GetResponse()
+        {
+            return new JS_Resp(RPCStatus.Success, this);
+        }
+    }
+
+    public class JS_NodeDetails : JS_Response
+    {
+        [JsonIgnore]
+        public int ConnectedPeers = 1;
+        public int TransactionsProcessed = 0;
+        public int TransactionsAccepted = 0;
+        public int TransactionsValidated = 0;
+        public int RequestsProcessed = 0;
+        public int LoadLevel = 1;
+        public DateTime TimeUTC = DateTime.UtcNow;
+
+        public JS_NodeDetails()
+        {
+
+        }
+
+        public JS_Resp GetResponse()
+        {
+            return new JS_Resp(RPCStatus.Success, this);
+        }
+    }
+
+    public class JS_LedgerInfo : JS_Response
+    {
+        public byte[] Hash;
+        public int Index = 0;
+        public DateTime CloseTime = DateTime.UtcNow;
+
+        public JS_LedgerInfo()
+        {
+            Hash = new byte[0];
+        }
 
         public JS_Resp GetResponse()
         {

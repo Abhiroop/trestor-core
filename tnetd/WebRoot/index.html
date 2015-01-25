@@ -1,15 +1,4 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<!--
-Design by TEMPLATED
-http://templated.co
-Released for free under the Creative Commons Attribution License
-
-Name       : PlainDisplay 
-Description: A two-column, fixed-width design with dark color scheme.
-Version    : 1.0
-Released   : 20140309
-
--->
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -28,15 +17,15 @@ Released   : 20140309
 	<div id="header-wrapper">
 	<div id="header" class="container">
 		<div id="logo">
-			<h1><a href="#">PlainDisplay</a></h1>
+			<h1><a href="https://trestor.org/"><img src="https://trestor.org/images/trestor-logo-home.png"></a></h1>
 		</div>
 		<div id="menu">
 			<ul>
-				<li class="current_page_item"><a href="#" accesskey="1" title="">Homepage</a></li>
-				<li><a href="#" accesskey="2" title="">Our Clients</a></li>
-				<li><a href="#" accesskey="3" title="">About Us</a></li>
-				<li><a href="#" accesskey="4" title="">Careers</a></li>
-				<li><a href="#" accesskey="5" title="">Contact Us</a></li>
+				<li class="current_page_item"><a href="#" accesskey="1" title="">Status</a></li>
+				<li><a href="https://trestor.org/about-us" accesskey="2" title="">About Us</a></li>
+				<li><a href="https://trestor.org/locate-retail-partner" accesskey="3" title="">Retail Partners</a></li>
+				<li><a href="https://trestor.org/faq" accesskey="4" title="">FAQ'S</a></li>
+				<li><a href="https://trestor.org/app" accesskey="5" title="">Download The App</a></li>
 			</ul>
 		</div>
 	</div>
@@ -44,61 +33,67 @@ Released   : 20140309
 	<div id="banner">
 		<div class="container">
 			<div class="title">
-				<h2>Etiam rhoncus volutpat</h2>
-				<span class="byline">Proin gravida porttitor accumsan</span> </div>
-			<ul class="actions">
-				<li><a href="#" class="button">Etiam posuere</a></li>
-			</ul>
+				<h2>Live Node Information</h2>
 		</div>
 	</div>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+
+	<script type="text/javascript">
+
+	$.ajaxSetup({ cache: false }); //disallows cachinge, so information should be new
+
+	var t = 0 ;
+	function loadNodeStatus()
+	{ //start function
+		var url = "http://54.69.239.153:2015/info";
+        $.getJSON(url,
+            function(data){
+                setTimeout("loadNodeStatus()",1000);
+				document.getElementById("PUBLICKEY").innerHTML = data.Data.PublicKey;
+				document.getElementById("NAME").innerHTML = data.Data.Name;
+				document.getElementById("ADDRESS").innerHTML = data.Data.Address;
+				document.getElementById("TIMEUTC").innerHTML = data.Data.TimeUTC;
+				document.getElementById("ORGANISATION").innerHTML = data.Data.Organisation;
+				document.getElementById("PLATFORM").innerHTML = data.Data.Platform;
+				document.getElementById("EMAIL").innerHTML = data.Data.Email;
+            }); 
+	} //end function        
+	
+	$(document).ready(function(){ 
+		loadNodeStatus();
+	}); 
+
+	</script>
 	<div id="extra" class="container">
 		<div class="title">
-			<h2>Praesent scelerisquet</h2>
-			<span class="byline">Donec leo, vivamus fermentum nibh in augue praesent a lacus at urna congue</span> </div>
-		<div id="three-column">
 			<div class="boxA">
 				<div class="box"> <span class="fa fa-cloud-download"></span>
-					<p>Praesent pellentesque facilisis elit. Class aptent taciti sociosqu ad litora torquent per conubia nostra.</p>
+					<p style="display:inline-block;" align="left"><b><i>Organisation &nbsp; : &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="ORGANISATION">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>TimeUTC &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="TIMEUTC">Loading..</div>
 				</div>
 			</div>
 			<div class="boxB">
-				<div class="box"> <span class="fa fa-cogs"></span>
-					<p>Etiam neque. Vivamus consequat lorem at nisl. Nullam non wisi a sem semper eleifend. Donec mattis.</p>
+				<div class="box"> <span class="fa fa-user"></span>
+					<p style="display:inline-block;" align="left"><b><i>Email &nbsp; :&nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="EMAIL">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Name &nbsp;  :&nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="NAME">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Address &nbsp;  : &nbsp; &nbsp; </p></i></b><div style="display:inline-block;" align="left" id="ADDRESS">Loading..</div>
 				</div>
 			</div>
 			<div class="boxC">
-				<div class="box"> <span class="fa fa-user"></span>
-					<p> Aenean lectus lorem, imperdiet at, ultrices eget, ornare et, wisi. Pellentesque adipiscing purus.</p>
+				<div class="box"> <span class="fa fa-cogs"></span>
+					<p style="display:inline-block;" align="left"><b><i>Platform &nbsp; : &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="PLATFORM">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>PublicKey &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="PUBLICKEY">Loading..</div>
 				</div>
 			</div>
 		</div>
-		<ul class="actions">
-			<li><a href="#" class="button">Etiam posuere</a></li>
-		</ul>
 	</div>
-	<div id="featured">
-		<div class="container">
-			<div class="title">
-				<h2>Fusce ultrices fringilla metus</h2>
-				<span class="byline">Donec leo, vivamus fermentum nibh in augue praesent a lacus at urna congue</span> </div>
-			<p>This is <strong>PlainDisplay</strong>, a free, fully standards-compliant CSS template designed by <a href="http://templated.co" rel="nofollow">TEMPLATED</a>. The photos in this template are from <a href="http://fotogrph.com/"> Fotogrph</a>. This free template is released under the <a href="http://templated.co/license">Creative Commons Attribution</a> license, so you're pretty much free to do whatever you want with it (even use it commercially) provided you give us credit for it. Have fun :) </p>
-		</div>
-		<ul class="actions">
-			<li><a href="#" class="button">Etiam posuere</a></li>
-		</ul>
-	</div>
-	<div id="page" class="container">
-		<div class="title">
-			<h2>Nulla luctus eleifend</h2>
-			<span class="byline">Lorem ipsum dolor sit amet, consectetuer adipiscing elit</span> </div>
-		<p> Vivamus fermentum nibh in augue. Praesent a lacus at urna congue rutrum. Nulla enim eros nibh. Duis enim nulla, luctus eu, dapibus lacinia, venenatis id, quam. Vestibulum imperdiet, magna nec eleifend rutrum, nunc lectus vestibulum velit, euismod lacinia quam nisl id lorem. Quisque erat. Vestibulum pellentesque, justo mollis pretium suscipit, justo nulla blandit libero, in blandit augue justo quis nisl. Fusce mattis viverra elit. Fusce quis tortor.</p>
-		<ul class="actions">
-			<li><a href="#" class="button">Etiam posuere</a></li>
-		</ul>
-	</div>
-</div>
-<div id="copyright" class="container">
-	<p>&copy; Untitled. All rights reserved. | Photos by <a href="http://fotogrph.com/">Fotogrph</a> | Design by <a href="http://templated.co" rel="nofollow">TEMPLATED</a>.</p>
-</div>
+	
+<!--
+	Design inspired by TEMPLATED (http://templated.co)
+-->
 </body>
 </html>

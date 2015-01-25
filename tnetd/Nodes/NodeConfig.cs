@@ -366,8 +366,7 @@ namespace TNetD.Nodes
         }
 
         #endregion
-
-
+        
         public JS_NodeInfo Get_JS_Info()
         {
             JS_NodeInfo info = new JS_NodeInfo();
@@ -380,8 +379,8 @@ namespace TNetD.Nodes
             info.Organisation = Organisation;
             info.Platform = Platform;
             info.PublicKey = PublicKey.Hex;
-            info.TimeUTC = DateTime.UtcNow;
-
+            info.Version = "0.1 pre-release (development)";
+           
             return info;
         }
     }

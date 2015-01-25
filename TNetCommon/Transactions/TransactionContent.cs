@@ -24,7 +24,7 @@ namespace TNetD.Transactions
         /// <summary>
         /// The Source entity is also present as one of the Destinations.
         /// </summary>
-        SourceInDestination
+        SourceDestinationRepeat
     };
 
     /// <summary>
@@ -207,13 +207,31 @@ namespace TNetD.Transactions
             long incoming = 0;
             long outgoing = 0;
 
-            // TODO: MxN complexity, fix with loop limit or Dictionary.
+            HashSet<Hash> srcDest = new HashSet<Hash>();
+           
             foreach(TransactionEntity src in Sources)
             {
-                foreach (TransactionEntity dst in Destinations)
+                Hash sr = new Hash(src.PublicKey);
+                if(!srcDest.Contains(sr))
                 {
-                    if (src.Address == dst.Address)
-                        return TransactionProcessingResult.SourceInDestination;
+                    srcDest.Add(sr);
+                }
+                else
+                {
+                    return TransactionProcessingResult.SourceDestinationRepeat;
+                }                
+            }
+
+            foreach (TransactionEntity dst in Destinations)
+            {
+                Hash sr = new Hash(dst.PublicKey);
+                if (!srcDest.Contains(sr))
+                {
+                    srcDest.Add(sr);
+                }
+                else
+                {
+                    return TransactionProcessingResult.SourceDestinationRepeat;
                 }
             }
 

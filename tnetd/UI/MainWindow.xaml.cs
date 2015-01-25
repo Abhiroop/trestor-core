@@ -279,7 +279,7 @@ namespace TNetD
 
         private void menu_Reset_Ledger_To_Genesis_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBoxResult.Yes == MessageBox.Show("DO you really want to reset the current state. All state information will be lost.",
+            if (MessageBoxResult.Yes == MessageBox.Show("Do you really want to reset the current state. All state information will be lost.",
                 "Ledger State Reset !!!", MessageBoxButton.YesNo))
             {
                 GenesisFileParser gfp = new GenesisFileParser("ACCOUNTS.GEN_PUBLIC");

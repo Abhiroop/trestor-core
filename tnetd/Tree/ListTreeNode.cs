@@ -16,7 +16,7 @@ namespace TNetD.Tree
     {
         public Hash address;
         protected long leafCount;
-        protected Hash hash;
+        protected Hash hash = new Hash();
         protected bool isLeaf;
 
         public long LeafCount

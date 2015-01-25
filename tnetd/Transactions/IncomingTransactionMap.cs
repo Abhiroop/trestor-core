@@ -8,6 +8,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using TNetD.Nodes;
 
@@ -71,6 +72,8 @@ namespace TNetD.Transactions
                         if(!IncomingTransactions.ContainsKey(kvp.Key))
                         {
                             IncomingTransactions.TryAdd(kvp.Value.TransactionID, kvp.Value);
+
+                            
                         }
                     }
 
@@ -179,13 +182,15 @@ namespace TNetD.Transactions
         /// <returns></returns>
         public TransactionProcessingResult HandlePropagationRequest(TransactionContent transactionContent)
         {
+            Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.TransactionsProcessed);
+
             TransactionProcessingResult rslt = transactionContent.VerifySignature();
 
             if (!TransactionProcessingMap.ContainsKey(transactionContent.TransactionID))
             {
                 TransactionProcessingMap.TryAdd(transactionContent.TransactionID, rslt);
             }
-                        
+
             if (!IncomingPropagations_ALL.ContainsKey(transactionContent.TransactionID))
             {
                 IncomingPropagations_ALL.TryAdd(transactionContent.TransactionID, transactionContent);
@@ -196,6 +201,7 @@ namespace TNetD.Transactions
                 // Insert if the transaction does not already exist.
                 if (!IncomingPropagations.ContainsKey(transactionContent.TransactionID))
                 {
+                    Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.TransactionsAccepted);                   
                     IncomingPropagations.TryAdd(transactionContent.TransactionID, transactionContent);
                 }               
             }        
