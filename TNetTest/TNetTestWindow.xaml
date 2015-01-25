@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="TNet Test Bench - v0.1 - Jan 2015" Height="402" Width="592">
     <Window.Resources>
-   
+
     </Window.Resources>
 
     <Grid>
@@ -22,8 +22,9 @@
             </MenuItem>
             <MenuItem Header="TRANSACTIONS">
                 <MenuItem Header="Start" Name="button_TransactionsStart" Click="button_TransactionsStart_Click"/>
+                <MenuItem Header="Verify" Name="button_TransactionsVerify" Click="button_TransactionsVerify_Click"/>
                 <MenuItem Header="Restart" />
-                <Separator/>               
+                <Separator/>
             </MenuItem>
             <MenuItem Header="HELP">
                 <MenuItem Header="Topics"/>
@@ -47,7 +48,17 @@
             </TabItem>
             <TabItem Header="Transactions">
                 <Grid>
-                    
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="143*"/>
+                        <ColumnDefinition Width="435*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="35*"/>
+                        <RowDefinition Height="36*"/>
+                        <RowDefinition Height="230*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Width="100" Height="22" Margin="33,0,10,14" Grid.Row="1">Transaction Count:</TextBlock>
+                    <TextBox Name="textBox_Transactions_TransactionCount" Width="100" Height="22" Margin="24,34,311,15" Grid.Column="1" Grid.RowSpan="2">1</TextBox>
                 </Grid>
             </TabItem>
 

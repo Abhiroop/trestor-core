@@ -199,7 +199,7 @@ namespace TNetD.Json.JS_Structs
         public long LedgerSequence;
 
         public JS_TransactionState_Reply(TransactionContent transactionContent, TransactionStatusType transactionStatusType,
-         TransactionProcessingResult transactionProcessingResult = TransactionProcessingResult.Unprocessed,
+         TransactionProcessingResult transactionProcessingResult,
             int validationsCount = 0, long ledgerSequence = 0)
         {
             Transaction = new JS_TransactionReply(transactionContent);

@@ -14,7 +14,7 @@ using TNetD.Protocol;
 
 namespace TNetD.Transactions
 {
-    public enum TransactionStatusType { Proposed, InProcessingQueue, Processed, VoteInProgress, Success, Failure };
+    public enum TransactionStatusType { Proposed, InProcessingQueue, Processed, VoteInProgress, Success, Failure, InPreProcessing };
 
     public enum TransactionProcessingResult
     {
