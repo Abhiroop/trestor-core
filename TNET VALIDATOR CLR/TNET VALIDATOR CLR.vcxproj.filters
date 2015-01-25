@@ -16,9 +16,6 @@
     <Filter Include="Sources">
       <UniqueIdentifier>{bd1708a4-eee5-49f7-8daf-2d7992d0927d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sources\ed25519">
-      <UniqueIdentifier>{b2f25913-1157-4a18-be93-7daef50a5e6f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sources\HashTree">
       <UniqueIdentifier>{9932b0f5-f6b2-4914-b354-536d2dfbd39c}</UniqueIdentifier>
     </Filter>
@@ -73,6 +70,9 @@
     <Filter Include="Sources\LevelDB">
       <UniqueIdentifier>{adf407c7-776b-48c6-9d88-c74da59f752c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ed25519">
+      <UniqueIdentifier>{b2f25913-1157-4a18-be93-7daef50a5e6f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\TNET_UI\Sources\BaseNetwork.cpp">
@@ -106,37 +106,37 @@
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\ed25519\add_scalar.cpp">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\ed25519\fe.cpp">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\ed25519\ge.cpp">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\ed25519\keypair.cpp">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\ed25519\key_exchange.cpp">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\ed25519\sc.cpp">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\ed25519\seed.cpp">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\ed25519\sha512.cpp">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\ed25519\sign.cpp">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\ed25519\test_ec.cpp">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\ed25519\verify.cpp">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClCompile>
     <ClCompile Include="..\TNET_UI\Sources\Base64.cpp">
       <Filter>Sources\Utils</Filter>
@@ -432,25 +432,25 @@
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\ed25519\ed25519.h">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\ed25519\fe.h">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\ed25519\fixedint_.h">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\ed25519\ge.h">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\ed25519\precomp_data.h">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\ed25519\sc.h">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\ed25519\sha512.h">
-      <Filter>Sources\ed25519</Filter>
+      <Filter>ed25519</Filter>
     </ClInclude>
     <ClInclude Include="..\TNET_UI\Sources\HashTree.h">
       <Filter>Sources\HashTree</Filter>
