@@ -8,10 +8,10 @@ namespace TNetD.Consensus
 {
     class VoteType
     {
-        Hash TransactionID;
+        public Hash TransactionID;
         // if vote is +ve the Vote = true
         // for -ve vote Vote = false
-        bool Vote;
+        public bool Vote;
         VoteType()
         {
             Vote = false;
