@@ -12,7 +12,7 @@ using TNetD.Transactions;
 namespace TNetD.Tree
 {
 
-    public enum TreeResponseType { Added, Removed, Updated, Failed };
+    public enum TreeResponseType { Added, Removed, Updated, Failed, NothingDone };
 
     /// <summary>
     /// This represents a Merkle Hash tree, each node has 16 child nodes.

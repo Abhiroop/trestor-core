@@ -63,7 +63,7 @@ namespace TNetD.PersistentStore
         /// </summary>
         /// <param name="accountFetch"></param>
         /// <returns></returns>
-        Task<Tuple<DBResponse, long>> FetchAllAccounts(AccountFetchEventHandler accountFetch);
+        Task<Tuple<DBResponse, long>> FetchAllAccountsAsync(AccountFetchEventHandler accountFetch);
 
         /// <summary>
         /// Returns true if the account exists.

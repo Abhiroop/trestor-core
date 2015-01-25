@@ -319,6 +319,12 @@ namespace TNetD
             }
         }
 
+        async private void menu_Server_RecalculateTotalBalances_Click(object sender, RoutedEventArgs e)
+        {
+            long Value = await nodes[0].CalculateTotalMoneyInPersistentStoreAsync();
+            MessageBox.Show("Total Balances: " + Value);
+        }
+
 
     }
 }

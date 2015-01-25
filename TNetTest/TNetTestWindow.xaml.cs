@@ -52,8 +52,8 @@ namespace TNetTest
 
             Common.rngCsp.GetBytes(_rand_1);
             Common.rngCsp.GetBytes(_rand_2);
-            
-            long fee = Common.random.Next(Common.NETWORK_Min_Transaction_Fee, Common.NETWORK_Min_Transaction_Fee * 2);
+
+            long fee = 10000; // Common.random.Next(Common.NETWORK_Min_Transaction_Fee, Common.NETWORK_Min_Transaction_Fee * 2);
             long value = Common.random.Next(1000, 50000000);
 
             byte[] PrivSeedSender = Src.RandomPrivate;
@@ -106,12 +106,12 @@ namespace TNetTest
         {
             Stopwatch sw = new Stopwatch();
 
-           // for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 100; i++)
             {
                 // TEST CODE
                 int[] sdIndex = Utils.GenerateNonRepeatingDistribution(GAD.Count, 2);
 
-                sdIndex[0] = 6250;
+                //sdIndex[0] = 6250;
 
                 SentTransactionRequest(GAD[sdIndex[0]], GAD[sdIndex[1]]);
 

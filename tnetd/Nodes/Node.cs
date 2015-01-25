@@ -27,6 +27,7 @@ using TNetD.Network;
 using TNetD.Network.Networking;
 using TNetD.PersistentStore;
 using TNetD.Transactions;
+using TNetD.Tree;
 
 namespace TNetD.Nodes
 {
@@ -113,7 +114,7 @@ namespace TNetD.Nodes
             TimerConsensus.Start();
 
             // ////////////////////
-            
+
             restServer = new RESTServer("localhost", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
 
             restServer.Start();
@@ -245,7 +246,7 @@ namespace TNetD.Nodes
             }
             catch
             {
-                
+
             }
             finally
             {
@@ -534,7 +535,7 @@ namespace TNetD.Nodes
             }
 
             // // /////////////////////////////////////////////////////////////////////
-                        
+
             if (replies.Transactions.Count > 0)
             {
                 this.SendJsonResponse(context, replies.GetResponse());
@@ -626,7 +627,7 @@ namespace TNetD.Nodes
             NetworkPacketQueueEntry npqe = new NetworkPacketQueueEntry(publicKey, new NetworkPacket(PublicKey, PacketType.TPT_HELLO, new byte[0]));
             network.AddToQueue(npqe);
         }
-             
+
 
         #region TRANSACTION PROCESSING
 
@@ -689,20 +690,20 @@ namespace TNetD.Nodes
 
                                     foreach (TransactionEntity source in transactionContent.Sources)
                                     {
-                                        Hash PK = new Hash(source.PublicKey);
+                                        Hash pkSource = new Hash(source.PublicKey);
 
-                                        if (ledger.AccountExists(PK))
+                                        if (ledger.AccountExists(pkSource))
                                         {
-                                            AccountInfo account = ledger[PK];
+                                            AccountInfo account = ledger[pkSource];
 
                                             long PendingValueDifference = 0;
 
                                             // Check if the account exists in the pending transaction queue.
-                                            if (pendingDifferenceData.ContainsKey(PK))
+                                            if (pendingDifferenceData.ContainsKey(pkSource))
                                             {
-                                                TreeDiffData treeDiffData = pendingDifferenceData[PK];
+                                                TreeDiffData treeDiffData = pendingDifferenceData[pkSource];
 
-                                                PendingValueDifference += treeDiffData.AddValue;
+                                                // PendingValueDifference += treeDiffData.AddValue; // [Allows simultaneous TX]
                                                 PendingValueDifference -= treeDiffData.RemoveValue;
                                             }
 
@@ -822,7 +823,7 @@ namespace TNetD.Nodes
                                         /// Added to difference list.
                                         acceptedTransactions.Add(transactionContent.TransactionID, transactionContent);
 
-                                        DisplayUtils.Display("Transaction added to intermediate list : " + 
+                                        DisplayUtils.Display("Transaction added to intermediate list : " +
                                             HexUtil.ToString(transactionContent.TransactionID.Hex));
                                     }
                                     else
@@ -928,12 +929,12 @@ namespace TNetD.Nodes
 
                         DisplayUtils.Display("\nFor Account : '" + ledgerAccount.Name + "' : " + HexUtil.ToString(ledgerAccount.PublicKey.Hex));
                         DisplayUtils.Display("Balance: " + ledgerAccount.Money + ", Added:" + diffData.AddValue + ", Removed:" + diffData.RemoveValue);
-                        
+
                         ledgerAccount.Money += diffData.AddValue;
                         ledgerAccount.Money -= diffData.RemoveValue;
 
                         ledger[diffData.PublicKey] = ledgerAccount;
-                        
+
                         // This is good enough as we have previously checked for correctness and matching
                         // values in both locations.
 
@@ -957,9 +958,9 @@ namespace TNetD.Nodes
                     {
                     }*/
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    DisplayUtils.Display("Timer Event : Exception : Node", DisplayType.Warning);
+                    DisplayUtils.Display("Timer Event : Exception : Node", ex);
                 }
 
                 // // // // // // // // //
@@ -991,6 +992,19 @@ namespace TNetD.Nodes
 
             //    OutTransactionCount++;
             //}
+        }
+
+        public async Task<long> CalculateTotalMoneyInPersistentStoreAsync()
+        {
+            long Tres = 0;
+
+            await PersistentAccountStore.FetchAllAccountsAsync((X) =>
+            {
+                Tres += X.Money;
+                return TreeResponseType.NothingDone;
+            });
+
+            return Tres;
         }
 
         void InitializeValuesFromGlobalLedger()
