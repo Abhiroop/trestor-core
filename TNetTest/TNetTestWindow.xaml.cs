@@ -44,8 +44,8 @@ namespace TNetTest
             GenesisFileParser gfp = new GenesisFileParser("ACCOUNTS.GEN_SECRET");
             gfp.GetAccounts(out GAD);
         }
-        
-        void SentTransactionRequest(GenesisAccountData Src, GenesisAccountData Dest)
+
+        Hash SentTransactionRequest(GenesisAccountData Src, GenesisAccountData Dest)
         {
             byte[] _rand_1 = new byte[32];
             byte[] _rand_2 = new byte[32];
@@ -100,26 +100,51 @@ namespace TNetTest
             {
                 textBlock_StatusLog.Text += "\n INVALID DATA : " + rslt.ToString();
             }
+
+            return (tc != null) ? tc.TransactionID : new Hash();
         }
-        
+
+        List<Hash> TX_IDs = new List<Hash>();
+
         private void button_TransactionsStart_Click(object sender, RoutedEventArgs e)
         {
             Stopwatch sw = new Stopwatch();
 
-            for (int i = 0; i < 100; i++)
+            TX_IDs.Clear();
+
+            int Count = int.Parse(textBox_Transactions_TransactionCount.Text);
+
+            for (int i = 0; i < Count; i++)
             {
                 // TEST CODE
                 int[] sdIndex = Utils.GenerateNonRepeatingDistribution(GAD.Count, 2);
 
                 //sdIndex[0] = 6250;
+                TX_IDs.Add(SentTransactionRequest(GAD[sdIndex[0]], GAD[sdIndex[1]]));
 
-                SentTransactionRequest(GAD[sdIndex[0]], GAD[sdIndex[1]]);
-
-
-                //RESTResponse response = client.Execute(new RESTRequest("info"));
-                //textBlock_StatusLog.Text += "\n" + response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n";
+                // RESTResponse response = client.Execute(new RESTRequest("info"));
+                // textBlock_StatusLog.Text += "\n" + response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n";
             }
 
         }
+
+        private void button_TransactionsVerify_Click(object sender, RoutedEventArgs e)
+        {
+            foreach(Hash txid in TX_IDs)
+            {
+
+                textBlock_StatusLog.Text += "\nSending TxStatus:" + txid.ToString();
+
+                RESTRequest request = new RESTRequest("txstatus", Grapevine.HttpMethod.GET);
+
+                request.AddQuery("id", txid.ToString());
+
+                RESTResponse response = client.Execute(request);
+
+                textBlock_StatusLog.Text += "\n" + response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n";
+
+            }
+        }
+
     }
 }

@@ -36,6 +36,11 @@ namespace TNetD.Transactions
         /// </summary>
         ConcurrentDictionary<Hash, TransactionContent> IncomingPropagations = new ConcurrentDictionary<Hash, TransactionContent>();
 
+        public ConcurrentDictionary<Hash, TransactionContent> IncomingPropagations_ALL = new ConcurrentDictionary<Hash, TransactionContent>();
+
+        // For status:
+        public ConcurrentDictionary<Hash, TransactionProcessingResult> TransactionProcessingMap = new ConcurrentDictionary<Hash, TransactionProcessingResult>();
+
         public IncomingTransactionMap(NodeState nodeState, NodeConfig nodeConfig)
         {
             this.nodeState = nodeState;
@@ -176,16 +181,34 @@ namespace TNetD.Transactions
         {
             TransactionProcessingResult rslt = transactionContent.VerifySignature();
 
+            if (!TransactionProcessingMap.ContainsKey(transactionContent.TransactionID))
+            {
+                TransactionProcessingMap.TryAdd(transactionContent.TransactionID, rslt);
+            }
+                        
+            if (!IncomingPropagations_ALL.ContainsKey(transactionContent.TransactionID))
+            {
+                IncomingPropagations_ALL.TryAdd(transactionContent.TransactionID, transactionContent);
+            }
+            
             if (rslt == TransactionProcessingResult.Accepted)
             {
                 // Insert if the transaction does not already exist.
                 if (!IncomingPropagations.ContainsKey(transactionContent.TransactionID))
                 {
                     IncomingPropagations.TryAdd(transactionContent.TransactionID, transactionContent);
-                }
-            }
+                }               
+            }        
 
             return rslt;
+        }
+
+        /// <summary>
+        /// Clears the map for transaction status queries, do after consensus.
+        /// </summary>
+        public void ClearTransactionProcessingMap()
+        {
+            TransactionProcessingMap.Clear();
         }
 
         /*

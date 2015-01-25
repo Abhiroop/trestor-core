@@ -103,8 +103,7 @@ namespace TNetD.Nodes
             AI = new AccountInfo(PublicKey, Money);
 
             ledger = new Ledger(PersistentAccountStore);
-
-
+            
             //ledger.AddUserToLedger(AI);
 
             TimerConsensus = new System.Timers.Timer();
@@ -384,19 +383,35 @@ namespace TNetD.Nodes
 
         private void HandleTransactionStatusQuery_Internal(ref JS_TransactionStateReplies replies, Hash transactionID)
         {
+
+            TransactionProcessingResult result = TransactionProcessingResult.Unprocessed;
+            if (incomingTransactionMap.TransactionProcessingMap.ContainsKey(transactionID))
+            {
+                result = incomingTransactionMap.TransactionProcessingMap[transactionID];
+
+                TransactionContent tc;
+                if (incomingTransactionMap.IncomingPropagations_ALL.ContainsKey(transactionID))
+                {
+                    tc = incomingTransactionMap.IncomingPropagations_ALL[transactionID];
+
+                    replies.TransactionState.Add(new JS_TransactionState_Reply(tc, TransactionStatusType.InPreProcessing, result));
+                    return;
+                }
+            }
+
             // Check if the transaction is in the proposed queue.
             Tuple<TransactionContent, bool> response_prop = incomingTransactionMap.GetPropagationContent(transactionID);
             if (response_prop.Item2 == true)
             {
-                replies.TransactionState.Add(new JS_TransactionState_Reply(response_prop.Item1, TransactionStatusType.Proposed));
+                replies.TransactionState.Add(new JS_TransactionState_Reply(response_prop.Item1, TransactionStatusType.Proposed, TransactionProcessingResult.Accepted));
                 return;
-            }
+            }           
 
             // Check if the transaction is in the processing queue.
             Tuple<TransactionContent, bool> response_queue = incomingTransactionMap.GetTransactionContent(transactionID);
             if (response_queue.Item2 == true)
             {
-                replies.TransactionState.Add(new JS_TransactionState_Reply(response_queue.Item1, TransactionStatusType.InProcessingQueue));
+                replies.TransactionState.Add(new JS_TransactionState_Reply(response_queue.Item1, TransactionStatusType.InProcessingQueue, TransactionProcessingResult.Accepted));
                 return;
             }
 
@@ -404,9 +419,14 @@ namespace TNetD.Nodes
             TransactionContent transactionContent;
             if (PersistentTransactionStore.FetchTransaction(out transactionContent, transactionID) == DBResponse.FetchSuccess)
             {
-                replies.TransactionState.Add(new JS_TransactionState_Reply(transactionContent, TransactionStatusType.Processed));
+                replies.TransactionState.Add(new JS_TransactionState_Reply(transactionContent, TransactionStatusType.Processed,
+                    TransactionProcessingResult.Accepted));
                 return;
             }
+
+                       
+
+            
         }
 
         private void HandleAccountQuery(HttpListenerContext context)
@@ -655,6 +675,8 @@ namespace TNetD.Nodes
                     }
 
                     incomingTransactionMap.IncomingTransactions.Clear();
+                    incomingTransactionMap.ClearTransactionProcessingMap();
+                    incomingTransactionMap.IncomingPropagations_ALL.Clear();
 
                     Dictionary<Hash, TreeDiffData> pendingDifferenceData = new Dictionary<Hash, TreeDiffData>();
                     Dictionary<Hash, TransactionContent> acceptedTransactions = new Dictionary<Hash, TransactionContent>();
@@ -946,6 +968,7 @@ namespace TNetD.Nodes
                     PersistentAccountStore.AddUpdateBatch(finalPersistentDBUpdateList);
 
                     PersistentTransactionStore.AddUpdateBatch(acceptedTransactions);
+
 
                     // Apply the transactions to the PersistentDatabase.
 

@@ -113,7 +113,7 @@ namespace TNetD
         /// <summary>
         /// Timer Update rate for consensus.
         /// </summary>
-        public static readonly int Node_UpdateFrequencyConsensusMS = 5000;
+        public static readonly int Node_UpdateFrequencyConsensusMS = 8000;
 
         /// <summary>
         /// Update rate for handling packets.
