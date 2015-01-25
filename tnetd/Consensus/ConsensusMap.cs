@@ -275,5 +275,41 @@ namespace TNetD.Consensus
 		        }
 	        }
         }
+
+        public void updateVote(List<VoteType> votes, Hash publicKey)
+        {
+	        for (int i = 0; i < (int)votes.Count; i++)
+	        {
+		        Hash TransactionID = votes[i].TransactionID;
+		        bool vote = votes[i].Vote;
+
+		        if (!consensusVoteMap.ContainsKey(TransactionID))
+		        {
+                    ConcurrentDictionary<Hash, bool> val = new ConcurrentDictionary<Hash,bool>();
+			        val.TryAdd(publicKey, vote);
+
+			        consensusVoteMap.TryAdd(TransactionID, val);
+			        //std::cout << endl << "------ Insert";
+		        }
+		        else
+		        {
+			        //std::cout << endl << "------ Update";
+
+			        ConcurrentDictionary<Hash, bool> oldHm = new ConcurrentDictionary<Hash,bool>();
+                    consensusVoteMap.TryGetValue(publicKey, out oldHm);
+
+			        if (!oldHm.ContainsKey(publicKey))
+			        {
+				        oldHm.TryAdd(publicKey, vote);
+				        //std::cout << endl << "-- Insert";
+			        }
+			        else
+			        {
+                        oldHm.TryUpdate(publicKey, vote, vote);
+                        //std::cout<< endl  << "-- Update";
+			        }	
+		        }
+	        }
+        }
     }
 }
