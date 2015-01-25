@@ -62,7 +62,7 @@ namespace TNetD.Time
 
             Int64 timeSum = nodeState.system_time;
 
-            int total = timeVector.Capacity;
+            int total = timeVector.Count;
 
             for (int i = 0; i < total; i++)
             {
