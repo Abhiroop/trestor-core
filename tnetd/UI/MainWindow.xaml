@@ -97,6 +97,7 @@
                 <MenuItem Header="Resync"/>
                 <Separator/>
                 <MenuItem Name="menu_Reset_Ledger_To_Genesis" Header="Reset Ledger to Genesis" Click="menu_Reset_Ledger_To_Genesis_Click"/>
+                <MenuItem Name="menu_Server_RecalculateTotalBalances" Header="Recalculate Total Balances" Click="menu_Server_RecalculateTotalBalances_Click"></MenuItem>
             </MenuItem>
             <MenuItem Header="SIMULATION">
                 <MenuItem Name="menuItem_Simulation_Start" Header="Start" Click="menuItem_Simulation_Start_Click"/>

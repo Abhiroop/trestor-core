@@ -315,6 +315,7 @@ namespace TNetD.Transactions
                 tranDataSig.AddRange(sig.Hex);
             }
 
+            // Not performing Hashing Here, as it is already performed by ED25519.Sign()
             return tranDataSig.ToArray();
         }
 
@@ -394,19 +395,19 @@ namespace TNetD.Transactions
         {
             Init();
 
-            Destinations = Data.Destinations;
+            versionData = Data.VersionData;
             executionData =  Data.ExecutionData;
+            timeStamp = Data.Timestamp;
+
+            Sources = (from src in Data.Sources select new TransactionEntity(src)).ToList();
+            Destinations = (from dst in Data.Destinations select new TransactionEntity(dst)).ToList();
+            
+            transactionFee = Data.TransactionFee;           
+
             Signatures = (from sig in Data.Signatures select new Hash(sig)).ToList();
 
-            Sources = Data.Sources;
-            timeStamp = Data.Timestamp;
-            transactionFee = Data.TransactionFee;
-
-            versionData = Data.VersionData;
-
-            if(this.Value != Value)
+            if (Value != Data.Value)
             {
-
                 return false;
                 //throw new ArgumentException("JSON Deserialization: Invalid Total Value");
             }

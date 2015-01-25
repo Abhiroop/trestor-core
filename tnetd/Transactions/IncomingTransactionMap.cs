@@ -63,7 +63,7 @@ namespace TNetD.Transactions
                     // Add the propafations to the transactions list.
                     foreach(KeyValuePair<Hash, TransactionContent> kvp in IncomingPropagations)
                     {
-                        if(IncomingTransactions.ContainsKey(kvp.Key))
+                        if(!IncomingTransactions.ContainsKey(kvp.Key))
                         {
                             IncomingTransactions.TryAdd(kvp.Value.TransactionID, kvp.Value);
                         }
@@ -71,8 +71,7 @@ namespace TNetD.Transactions
 
                     IncomingPropagations.Clear();
 
-                    //TODO: Forward to connected peers.
-
+                    // TODO: Forward to connected peers.
                     // More processing.
 
                 }

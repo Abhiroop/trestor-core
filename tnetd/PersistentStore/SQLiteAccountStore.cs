@@ -5,6 +5,8 @@
 // 15 Jan 2015 : Adding : NetworkType / AccountType
 // 22 Jan 2015 : IPersistentAccountStore.BatchFetch
 
+// TODO: ASYNC/AWAIT
+
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
@@ -48,7 +50,7 @@ namespace TNetD.PersistentStore
             }
         }
 
-        public async Task<Tuple<DBResponse, long>> FetchAllAccounts(AccountFetchEventHandler accountFetch)
+        public async Task<Tuple<DBResponse, long>> FetchAllAccountsAsync(AccountFetchEventHandler accountFetch)
         {
             DBResponse response = DBResponse.FetchFailed;
             long Records = 0;

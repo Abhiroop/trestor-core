@@ -18,7 +18,7 @@ namespace TNetD
         public static readonly int LEN_TRANSACTION_ID = 32;
         public static readonly int KEYLEN_PUBLIC = 32;
         public static readonly int KEYLEN_PRIVATE = 32;
-        public static readonly int KEYLEN_PRIVATE_EXPANDED = 32;
+        public static readonly int KEYLEN_PRIVATE_EXPANDED = 64;
         public static readonly int KEYLEN_SIGNATURE = 64;
 
 

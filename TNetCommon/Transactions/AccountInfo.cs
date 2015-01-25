@@ -49,7 +49,7 @@ namespace TNetD.Transactions
         }
 
         /// <summary>
-        /// Amount of money in 10^6 Trests
+        /// Amount of money in Tre's
         /// </summary>
         public long Money
         {

@@ -85,7 +85,7 @@ namespace TNetD.Ledgers
             _load_stats = 0;
             AddressAccountInfoMap.Clear();
             NameAccountInfoMap.Clear();
-            await persistentStore.FetchAllAccounts(AddUserToLedger);
+            await persistentStore.FetchAllAccountsAsync(AddUserToLedger);
             return _load_stats;
         }
 
