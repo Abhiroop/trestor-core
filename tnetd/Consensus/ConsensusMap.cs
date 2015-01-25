@@ -138,5 +138,142 @@ namespace TNetD.Consensus
             }
 	        return accountMoneyFlow;
         }
+
+        public void ConsolidateToLedger(ConcurrentDictionary<Hash, TreeDiffData> delta)
+        {
+	        //ACID property
+
+            IEnumerator<Hash> it = delta.Keys.GetEnumerator();
+	        while(it.MoveNext())
+	        {
+		        Hash accountID = it.Current;
+		        TreeDiffData MIOF = new TreeDiffData ();
+                delta.TryGetValue(accountID, out MIOF);
+
+		        if (!ledger.AccountExists(accountID))
+			        throw new Exception("Fatal error #3. Appicaion exit");
+
+                AccountInfo accountInfo = ledger[accountID];
+		        long inMoney = MIOF.AddValue;
+		        long outMoney = MIOF.RemoveValue;
+		
+		        if (outMoney > accountInfo.Money)
+			    throw new Exception("Fatal error #4. Appicaion exit");
+	        }
+
+            it.Reset();
+
+	        while (it.MoveNext())
+	        {
+		        Hash accountID = it.Current;
+                TreeDiffData MIOF = new TreeDiffData();
+                delta.TryGetValue(accountID, out MIOF);
+		
+		        AccountInfo accountInfo = ledger[accountID];
+
+		        long inMoney = MIOF.AddValue;
+		        long outMoney = MIOF.RemoveValue;
+
+		        accountInfo.Money += (inMoney - outMoney);
+	         }
+        }
+
+        
+        //check double spending here
+        void CheckTransactions(ref List<Hash> DoubleSpenderPublicKey, ref List<Hash> DoubleSpendingTransaction)
+        {
+	        ConcurrentDictionary<Hash, Int64> SpendMap = new ConcurrentDictionary<Hash,long>();
+
+	        //given a public key if it is a source of a transactionID
+	        ConcurrentDictionary<Hash, List<Hash>> PK_ID = new ConcurrentDictionary<Hash,List<Hash>>();
+
+        	Int64 TotalTransactionMoney = 0;
+
+            IEnumerator<Hash> it = consensusVoteMap.Keys.GetEnumerator();
+	        //populate spending
+	        while (it.MoveNext())
+	        {
+		        Hash transactionID = it.Current;
+		        //check each transaction data
+		        TransactionContentData TCD;
+                Tuple<TransactionContent, bool> tp = incomingTransactionMap.GetTransactionContent(transactionID);
+		        if (tp.Item2)
+		        {
+			        TransactionContent TC = tp.Item1;
+			        //get source information
+			        List<TransactionEntity> sources = TC.Sources;
+			        for (int i = 0; i < sources.Count; i++)
+			        {
+				        TransactionEntity TE = sources[i];
+				        Hash sourcePK = new Hash(TE.PublicKey);
+				        Int64 money = TE.Value;
+			
+				        if (!PK_ID.ContainsKey(sourcePK))
+				        {
+					        List<Hash> vc = new List<Hash>();
+					        vc.Add(transactionID);
+					        PK_ID.TryAdd(sourcePK, vc);
+				        }
+				        else
+				        {
+					        List<Hash> old_vc = new List<Hash>();
+                            PK_ID.TryGetValue(sourcePK, out old_vc);
+					        old_vc.Add(transactionID);
+                            PK_ID.TryUpdate(sourcePK, old_vc, old_vc);
+				        }
+
+				        TotalTransactionMoney += money;
+				    
+				        if (!SpendMap.ContainsKey(sourcePK))
+				        {
+					        SpendMap.TryAdd(sourcePK, money);
+				        }
+
+				        else
+				        {
+                            long val = 0;
+                            SpendMap.TryGetValue(sourcePK, out val);
+					        val += money;
+                            SpendMap.TryUpdate(sourcePK, val, val);
+				        }
+			        }
+		        }
+	        }
+
+            it.Reset();
+
+            it = SpendMap.Keys.GetEnumerator();
+	        
+            while (it.MoveNext())
+	        {
+		        Hash SpenderpublicKey = it.Current;
+		        Int64 outgoingMoney = 0;
+                SpendMap.TryGetValue(SpenderpublicKey, out outgoingMoney);
+
+		         if (ledger.AccountExists(SpenderpublicKey))
+		         {
+                     long balance = ledger[SpenderpublicKey].Money;
+			         if (outgoingMoney > balance)
+			         {
+				        DoubleSpenderPublicKey.Add(SpenderpublicKey);
+			
+			    	    if (PK_ID.ContainsKey(SpenderpublicKey))
+				        {
+					        List<Hash> ToBeCancelledTransactionIDs = new List<Hash>();
+                            PK_ID.TryGetValue(SpenderpublicKey, out ToBeCancelledTransactionIDs);
+					
+					        for (int i = 0; i < (int)ToBeCancelledTransactionIDs.Count; i++)
+					        {
+						        DoubleSpendingTransaction.Add(ToBeCancelledTransactionIDs[i]);
+					        }
+				        }
+			        }
+		        }
+		        else
+		        {
+			        //The ledger does not have this account info
+		        }
+	        }
+        }
     }
 }

@@ -71,6 +71,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Consensus\ConsensusMap.cs" />
+    <Compile Include="Consensus\VoteType.cs" />
     <Compile Include="Ledgers\SQLiteLedgerFileHandler.cs" />
     <Compile Include="Network\FakeNetwork.cs" />
     <Compile Include="Network\Networking\PacketSender.cs" />

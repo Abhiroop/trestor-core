@@ -11,7 +11,8 @@ namespace TNetD.Nodes
     {
         public TreeDiffData()
         {
-
+            RemoveValue = 0;
+            AddValue = 0;
         }
         
         public TreeDiffData(long AddValue, long RemoveValue)
