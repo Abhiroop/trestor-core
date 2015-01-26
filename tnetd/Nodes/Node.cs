@@ -128,7 +128,7 @@ namespace TNetD.Nodes
             TimerSecond.Interval = 100;
             TimerSecond.Start();
 
-            restServer = new RESTServer("localhost", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
+            restServer = new RESTServer("+", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
 
             restServer.Start();
         }
@@ -848,7 +848,7 @@ namespace TNetD.Nodes
                                             else
                                             {
                                                 // Need to create Account
-                                                if (destination.Value > Constants.FIN_MIN_BALANCE)
+                                                if (destination.Value >= Constants.FIN_MIN_BALANCE)
                                                 {
                                                     AddressData ad = AddressFactory.DecodeAddressString(destination.Address);
 

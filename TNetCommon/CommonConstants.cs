@@ -22,7 +22,10 @@ namespace TNetD
         public static readonly int KEYLEN_SIGNATURE = 64;
         
         public static readonly int NETWORK_Min_Transaction_Fee = 0;//100000; // ~ 0.1 US Cent, approx, initial value.
-        
+
+        public static readonly int NETWORK_Min_Transaction_Value_SrcDest = 0;
+        public static readonly int NETWORK_Min_Transaction_TotalValue = 0;
+
         public static JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings();
         
         /// <summary>

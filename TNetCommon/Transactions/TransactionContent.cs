@@ -255,7 +255,7 @@ namespace TNetD.Transactions
 
             for (int i = 0; i < (int)Sources.Count; i++)
             {
-                if (Sources[i].Value <= 0)
+                if (Sources[i].Value < Common.NETWORK_Min_Transaction_Value_SrcDest)
                     return TransactionProcessingResult.NoProperSources;
 
                 incoming += Sources[i].Value;
@@ -263,7 +263,7 @@ namespace TNetD.Transactions
 
             for (int i = 0; i < (int)Destinations.Count; i++)
             {
-                if (Destinations[i].Value <= 0)
+                if (Destinations[i].Value < Common.NETWORK_Min_Transaction_Value_SrcDest)
                     return TransactionProcessingResult.NoProperDestinations;
 
                 outgoing += Destinations[i].Value;
