@@ -24,7 +24,7 @@ namespace TNetD.Transactions
         /// <summary>
         /// The Source entity is also present as one of the Destinations.
         /// </summary>
-        SourceDestinationRepeat
+        SourceDestinationRepeat, InvalidTransactionEntity
     };
 
     /// <summary>
@@ -219,7 +219,12 @@ namespace TNetD.Transactions
                 else
                 {
                     return TransactionProcessingResult.SourceDestinationRepeat;
-                }                
+                }
+
+                if(!src.ValidateEntity())
+                {
+                    return TransactionProcessingResult.InvalidTransactionEntity;
+                }
             }
 
             foreach (TransactionEntity dst in Destinations)
@@ -232,6 +237,11 @@ namespace TNetD.Transactions
                 else
                 {
                     return TransactionProcessingResult.SourceDestinationRepeat;
+                }
+
+                if (!dst.ValidateEntity())
+                {
+                    return TransactionProcessingResult.InvalidTransactionEntity;
                 }
             }
 

@@ -11,7 +11,6 @@ namespace TNetD
 {
     static class Constants
     {        
-        
         /// <summary>
         /// Depth at which hash tree leaves are stored.
         /// Its highly critical to tree hash generation and synchronisation.
@@ -48,8 +47,9 @@ namespace TNetD
 
         /// <summary>
         ///  Minimum 10 trest balance.
+        ///  [CRITICAL: FIX ME !!!]
         /// </summary>
-        public static readonly long FIN_MIN_BALANCE = 10000000;
+        public static readonly long FIN_MIN_BALANCE = 0;//10000000;
 
         public static readonly long DB_HISTORY_LIMIT = 1000;
        
@@ -70,7 +70,7 @@ namespace TNetD
         ///////////////////////////////////////////////////////   10000000000000 = 100 Billion * [10^6] / 10000 Genesis Accounts
 
         public static readonly int Network_UpdateFrequencyMS = 100;
-        public static readonly int Network_DefaultListenPort = 2014;
+        public static readonly int Network_DefaultListenPort = 2015;
 
         public static readonly Verbosity NetworkVerbosity = Verbosity.ExtraInfo;
 

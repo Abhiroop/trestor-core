@@ -1,7 +1,7 @@
 ﻿//
 // @Author: Arpan Jati
 // @Date: Jan 1-5 , 2015 | Jan 15 2015
-// Jan 22 2015 : BatchFetch, IEnumaerables
+// Jan 22 2015 : BatchFetch, IEnumerables
 
 using System;
 using System.Collections.Generic;
@@ -78,6 +78,12 @@ namespace TNetD.PersistentStore
         /// </summary>
         /// <returns></returns>
         Tuple<DBResponse, long> DeleteEverything();
+        
+        DBResponse FetchAccount(out AccountInfo accountInfo, string UserName);
+
+        int BatchFetch(out Dictionary<string, AccountInfo> accountInfoList, IEnumerable<string> AccountNames);
 
     }
 }
+
+

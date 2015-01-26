@@ -55,7 +55,8 @@ namespace TNetD.PersistentStore
             DBResponse response = DBResponse.FetchFailed;
             long Records = 0;
 
-            await Task.Run(() => {
+            await Task.Run(() =>
+            {
 
                 using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger;", sqliteConnection))
                 {
@@ -90,20 +91,22 @@ namespace TNetD.PersistentStore
                         }
                     }
                 }
-            
-            });                    
+
+            });
 
             return new Tuple<DBResponse, long>(response, Records);
         }
-                        
-        public int BatchFetch(out Dictionary<Hash, AccountInfo> accountInfoList, IEnumerable<Hash> AccountPKs )
+
+        // ////////////////////////////////////////
+
+        public int BatchFetch(out Dictionary<Hash, AccountInfo> accountInfoList, IEnumerable<Hash> AccountPKs)
         {
             accountInfoList = new Dictionary<Hash, AccountInfo>();
 
-            foreach(Hash accountPK in AccountPKs)
+            foreach (Hash accountPK in AccountPKs)
             {
                 AccountInfo accountInfo;
-                if(FetchAccount(out accountInfo, accountPK) == DBResponse.FetchSuccess)
+                if (FetchAccount(out accountInfo, accountPK) == DBResponse.FetchSuccess)
                 {
                     accountInfoList.Add(accountPK, accountInfo);
                 }
@@ -139,7 +142,7 @@ namespace TNetD.PersistentStore
 
                             if (_publicKey == publicKey)
                             {
-                                accountInfo = new AccountInfo(_publicKey, balance, userName, (AccountState)accountState, 
+                                accountInfo = new AccountInfo(_publicKey, balance, userName, (AccountState)accountState,
                                     (NetworkType)networkType, (AccountType)accountType, lastTransactionTime);
 
                                 response = DBResponse.FetchSuccess;
@@ -151,6 +154,69 @@ namespace TNetD.PersistentStore
 
             return response;
         }
+
+        ////////////////////////
+
+
+        public DBResponse FetchAccount(out AccountInfo accountInfo, string UserName)
+        {
+            DBResponse response = DBResponse.FetchFailed;
+            accountInfo = default(AccountInfo);
+
+            if(UserName.Length >= Constants.Pref_MinNameLength)
+            {
+                using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE UserName = @userName;", sqliteConnection))
+                {
+                    cmd.Parameters.Add(new SQLiteParameter("@userName", UserName));
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            if (reader.Read())
+                            {
+                                Hash _publicKey = new Hash((byte[])reader[0]);
+                                string userName = (string)reader[1];
+                                long balance = (long)reader[2];
+                                long accountState = (long)reader[3];
+
+                                long networkType = (long)reader[4];
+                                long accountType = (long)reader[5];
+
+                                long lastTransactionTime = (long)reader[6];
+
+                                if (userName == UserName)
+                                {
+                                    accountInfo = new AccountInfo(_publicKey, balance, userName, (AccountState)accountState,
+                                        (NetworkType)networkType, (AccountType)accountType, lastTransactionTime);
+
+                                    response = DBResponse.FetchSuccess;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return response;
+        }
+
+        public int BatchFetch(out Dictionary<string, AccountInfo> accountInfoList, IEnumerable<string> AccountNames)
+        {
+            accountInfoList = new Dictionary<string, AccountInfo>();
+
+            foreach (string accountName in AccountNames)
+            {
+                AccountInfo accountInfo;
+                if (FetchAccount(out accountInfo, accountName) == DBResponse.FetchSuccess)
+                {
+                    accountInfoList.Add(accountName, accountInfo);
+                }
+            }
+
+            return accountInfoList.Count();
+        }
+
+        //////////////////////////////////////////
 
         public int AddUpdateBatch(IEnumerable<AccountInfo> accountInfoData)
         {
@@ -169,6 +235,8 @@ namespace TNetD.PersistentStore
             st.Commit();
             return Successes;
         }
+
+        // //////////////////////////////////////
 
         public DBResponse AddUpdate(AccountInfo accountInfo)
         {
@@ -247,6 +315,9 @@ namespace TNetD.PersistentStore
                 if (!DBUtils.TableExists("Ledger", sqliteConnection))
                 {
                     DBUtils.ExecuteNonQuery("CREATE TABLE Ledger (PublicKey BLOB PRIMARY KEY, UserName TEXT, Balance INTEGER, AccountState INTEGER, NetworkType INTEGER, AccountType INTEGER, LastTransactionTime INTEGER);", sqliteConnection);
+
+                    // Add an indes to have faster UserName fetches during transaction processing.
+                    DBUtils.ExecuteNonQuery("CREATE INDEX Idx1 ON Ledger(PublicKey, UserName);", sqliteConnection);
                 }
 
                 if (!DBUtils.TableExists("LedgerInfo", sqliteConnection))

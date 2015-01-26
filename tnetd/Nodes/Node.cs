@@ -128,7 +128,7 @@ namespace TNetD.Nodes
             TimerSecond.Interval = 100;
             TimerSecond.Start();
 
-            restServer = new RESTServer("+", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
+            restServer = new RESTServer("localhost", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
 
             restServer.Start();
         }
@@ -283,27 +283,27 @@ namespace TNetD.Nodes
 
             try
             {
-                string tran = context.Request.QueryString["id"];
+                string tran = context.Request.QueryString["pk"];
 
                 if (tran != "")
                 {
-                    string[] transactionIDs = tran.Split(',');
+                    string[] publicKey = tran.Split(',');
 
-                    if (transactionIDs.Length == 1)
+                    if (publicKey.Length == 1)
                     {
-                        byte[] transactionID_Bytes = new byte[0];
+                        byte[] publicKey_Bytes = new byte[0];
 
                         try
                         {
-                            transactionID_Bytes = HexUtil.GetBytes(transactionIDs[0]);
+                            publicKey_Bytes = HexUtil.GetBytes(publicKey[0]);
                         }
                         catch { }
 
-                        if (transactionID_Bytes.Length == Common.LEN_TRANSACTION_ID)
+                        if (publicKey_Bytes.Length == Common.LEN_TRANSACTION_ID)
                         {
                             string _limit = context.Request.QueryString["limit"];
                             int limit = 0;
-                            if (_limit != "")
+                            if (!String.IsNullOrEmpty(_limit))
                             {
                                 string[] __limit = _limit.Split(new char[] { ',' }, 1, StringSplitOptions.RemoveEmptyEntries);
                                 if (__limit.Length == 1)
@@ -314,7 +314,7 @@ namespace TNetD.Nodes
 
                             string _timeStamp = context.Request.QueryString["time"];
                             long timeStamp = 0;
-                            if (_timeStamp != "")
+                            if (!String.IsNullOrEmpty(_timeStamp))
                             {
                                 string[] __timeStamp = _timeStamp.Split(new char[] { ',' }, 1, StringSplitOptions.RemoveEmptyEntries);
                                 if (__timeStamp.Length == 1)
@@ -325,7 +325,7 @@ namespace TNetD.Nodes
 
                             List<TransactionContent> transactionContents;
 
-                            PersistentTransactionStore.FetchTransactionHistory(out transactionContents, new Hash(transactionID_Bytes), timeStamp, limit);
+                            PersistentTransactionStore.FetchTransactionHistory(out transactionContents, new Hash(publicKey_Bytes), timeStamp, limit);
 
                             foreach (TransactionContent transactionContent in transactionContents)
                             {
@@ -673,8 +673,7 @@ namespace TNetD.Nodes
 
 
         #region TRANSACTION PROCESSING
-
-
+        
         /// <summary>
         /// Timer now fast. Actual/Final timer would depend on consensus rate.
         /// </summary>
@@ -682,7 +681,7 @@ namespace TNetD.Nodes
         /// <param name="e"></param>
         private void TimerConsensus_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (TimerEventProcessed) // Lock to prevent multiple invocations 
+            if (TimerEventProcessed) // Lock to prevent multiple invocations
             {
                 TimerEventProcessed = false;
 
@@ -727,12 +726,58 @@ namespace TNetD.Nodes
                                         DisplayUtils.Display("Transaction Processed. Improbable because of previous checks.", DisplayType.BadData);
                                     }
                                     else
-                                    {
-                                        /// Check Sources.
-
+                                    {                                    
+                                        // Check Sources
                                         bool badSource = false;
+
+                                        // True if account
+                                        bool badAccountName_inTransaction = false;
+                                        bool badAccountAddress_inTransaction = false;
+
                                         bool badAccountState = false;
                                         bool insufficientFunds = false;
+                                                                                
+                                        // Check if account name in destination is valid.
+                                        
+                                        foreach (TransactionEntity te in transactionContent.Destinations)
+                                        {
+                                            AccountInfo ai;
+                                            if(PersistentAccountStore.FetchAccount(out ai, new Hash(te.PublicKey)) == DBResponse.FetchSuccess)
+                                            {
+                                                // Account Exists
+                                                if(ai.Name != te.Name)
+                                                {
+                                                    badAccountName_inTransaction = true;
+                                                    break;
+                                                }
+
+                                                string Addr = ai.GetAddress();
+
+                                                if (Addr != te.Address)
+                                                {
+                                                    badAccountAddress_inTransaction = true;
+                                                    break;
+                                                }                                               
+                                            }
+                                            else
+                                            {
+                                                if (te.Name.Length >= Constants.Pref_MinNameLength)
+                                                {
+                                                    // Check if same named account exists. When, public key could not be fetched.
+                                                    if (PersistentAccountStore.FetchAccount(out ai, te.Name) == DBResponse.FetchSuccess)
+                                                    {
+                                                        // Thats too bad, transaction cannot happen, 
+                                                        // new wallet has invalid Name (name already used).
+                                                        badAccountName_inTransaction = true;
+                                                    }
+                                                    else
+                                                    {
+
+                                                    }
+                                                }
+                                            }
+                                        }
+
 
                                         totalTransactionFees += transactionContent.TransactionFee;
 
@@ -803,7 +848,6 @@ namespace TNetD.Nodes
                                             else
                                             {
                                                 // Need to create Account
-
                                                 if (destination.Value > Constants.FIN_MIN_BALANCE)
                                                 {
                                                     AddressData ad = AddressFactory.DecodeAddressString(destination.Address);
@@ -812,7 +856,6 @@ namespace TNetD.Nodes
                                                         ad.NetworkType, ad.AccountType, nodeState.network_time);
 
                                                     newAccounts.Add(ai);
-
                                                 }
                                                 else
                                                 {
@@ -825,12 +868,11 @@ namespace TNetD.Nodes
                                         // TODO: ALL WELL / Check for Transaction FEE.
                                         // TEMPORARY SINGLE NODE STUFF // DIRECT DB WRITE.
                                         // Make a list of updated accounts.
-
-                                        if (!badSource && !badAccountCreationValue && !badAccountState && !insufficientFunds)
+                                        if (!badSource && !badAccountCreationValue && !badAccountState && !insufficientFunds
+                                            && !badAccountName_inTransaction && !badAccountAddress_inTransaction)
                                         {
                                             // If we are here, this means that the transaction is GOOD and should be added to the difference list.
-
-                                            Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.TransactionsAccepted);
+                                            Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.TransactionsValidated);
 
                                             foreach (TransactionEntity source in transactionContent.Sources)
                                             {

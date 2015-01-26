@@ -2,7 +2,7 @@
 // @Author : Arpan Jati
 // @Date: 23th Dec 2014 | 12 Jan 2015
 // 22 Jan 2015 : Name Addition for adresses and new account creation.
-
+// 26 Jan 2015 : ValidateEntity()
 // TODO: Needs Good cleanup !!!.
 
 using System;
@@ -91,6 +91,11 @@ namespace TNetD.Transactions
         public TransactionEntity(JS_TransactionEntity entity)
         {
             Deserialize(entity);
+        }
+
+        public bool ValidateEntity()
+        {
+            return AddressFactory.VerfiyAddress(address, publicKey, name);
         }
 
         public byte[] Serialize()

@@ -23,8 +23,6 @@ namespace TNetD
             return Convert.ToInt64((date - epoch).TotalSeconds);
         }
 
-
-
         public static bool ByteArrayEquals(byte[] x, int xOffset, byte[] y, int yOffset, int length)
         {
             if (x == null) new Exception("x is NULL");
@@ -45,7 +43,7 @@ namespace TNetD
         }
 
         /// <summary>
-        /// REturns true if the two byte arrays are equal.
+        /// Returns true if the two byte arrays are equal.
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
@@ -54,8 +52,7 @@ namespace TNetD
         {
             return ByteArrayEquals(x, 0, y, 0, x.Length);
         }
-
-
+        
         public static byte[] GetLengthAsBytes(int length)
         {
             byte[] len = new byte[4];
@@ -118,9 +115,7 @@ namespace TNetD
 
             return true;
         }
-
-
-
+        
         public static string GenerateUniqueGUID()
         {
             byte[] GUID = new byte[32];

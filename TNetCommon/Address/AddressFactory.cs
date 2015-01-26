@@ -3,6 +3,7 @@
  *  @date:  Original Sept 2014
  *          13th Jan 2015: Switched to use Base58
  *          15th Jan 2015: (Added NetworkType and AccountType in Hash + Added static methods)
+ *          26th Jan 2015: Address Verifications
  */
 
 using System;
@@ -78,17 +79,19 @@ namespace TNetD.Address
             return new Tuple<AccountIdentifier, byte[]>(new AccountIdentifier(PublicKey, Name, ADD), PrivateSecretSeed);
         }
 
-        public static AccountIdentifier PrivateKeyToAccount(byte[] PrivateSecretSeed, string Name = "")
+        public static AccountIdentifier PrivateKeyToAccount(byte[] PrivateSecretSeed, string Name = "", 
+            NetworkType NetworkType = NetworkType.MainNet, AccountType AccountType = AccountType.MainNormal)
         {
             byte[] PublicKey;
             byte[] SecretKeyExpanded;
             Ed25519.KeyPairFromSeed(out PublicKey, out SecretKeyExpanded, PrivateSecretSeed);
-            return PublicKeyToAccount(PublicKey, Name);
+            return PublicKeyToAccount(PublicKey, Name, NetworkType, AccountType);
         }
-
-        public static AccountIdentifier PublicKeyToAccount(byte[] PublicKey, string Name = "")
-        {     
-            byte[] Address = GetAddress(PublicKey, Name, NetworkType.MainNet, AccountType.MainNormal);
+        
+        public static AccountIdentifier PublicKeyToAccount(byte[] PublicKey, string Name = "", 
+            NetworkType NetworkType = NetworkType.MainNet, AccountType AccountType = AccountType.MainNormal)
+        {
+            byte[] Address = GetAddress(PublicKey, Name, NetworkType, AccountType);
             string ADD = Base58Encoding.EncodeWithCheckSum(Address);
             return new AccountIdentifier(PublicKey, Name, ADD);
         }
@@ -161,7 +164,7 @@ namespace TNetD.Address
         /// <returns></returns>
         public bool VerfiyAddress(byte[] Address, byte[] PublicKey, string UserName)
         {
-            if (Address.ByteArrayEquals(GetAddress(PublicKey, UserName)))
+            if (Address.ByteArrayEquals(GetAddress(PublicKey, UserName, (NetworkType)Address[0], (AccountType)Address[1])))
             {
                 return true;
             }
@@ -169,9 +172,20 @@ namespace TNetD.Address
             return false;
         }
 
-        public bool VerfiyAddress(string Address, byte[] PublicKey, string UserName)
+        /// <summary>
+        /// Verifies an address for proper PublicKey and UserName, uses the type from Address string.
+        /// </summary>
+        /// <param name="Address"></param>
+        /// <param name="PublicKey"></param>
+        /// <param name="UserName"></param>
+        /// <returns></returns>
+        public static bool VerfiyAddress(string Address, byte[] PublicKey, string UserName)
         {
-            if (Address == Base58Encoding.EncodeWithCheckSum(GetAddress(PublicKey, UserName)))
+            AddressData address = new AddressData(Address);
+
+            byte [] ExpectedAddress = GetAddress(PublicKey, UserName, address.NetworkType, address.AccountType);
+
+            if (Utils.ByteArrayEquals(address.AddressBinary, ExpectedAddress))
             {
                 return true;
             }

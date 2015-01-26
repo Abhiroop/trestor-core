@@ -67,7 +67,7 @@ namespace Grapevine.Client
             request.Reset();
 
             var response = new RESTResponse(httpresponse, stopwatch.ElapsedMilliseconds, error, errorStatus);
-            this.Cookies.Add(response.Cookies);
+            //this.Cookies.Add(response.Cookies);
 
             return response;
         }

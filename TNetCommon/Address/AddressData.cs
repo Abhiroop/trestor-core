@@ -21,22 +21,22 @@ namespace TNetD.Address
         public AccountType AccountType { get; set; }
 
         [JsonIgnore]
-        public byte[] Address { get; set; }
+        public byte[] AddressBinary { get; set; }
 
         public AddressData(string Base58Address)
         {
-            byte[] add_data = Base58Encoding.DecodeWithCheckSum(Base58Address);
+            byte[] add_bin = Base58Encoding.DecodeWithCheckSum(Base58Address);
 
-            if (add_data.Length == 22)
+            if (add_bin.Length == 22)
             {               
                 AddressString = Base58Address;
 
-                Address = new byte[20];
+                AddressBinary = add_bin;// new byte[20];
 
-                Array.Copy(add_data, 2, Address, 0, 20);
+               // Array.Copy(add_data, 2, Address, 0, 20);
 
-                NetworkType = (NetworkType)add_data[0];
-                AccountType = (AccountType)add_data[1];              
+                NetworkType = (NetworkType)add_bin[0];
+                AccountType = (AccountType)add_bin[1];              
             }
             else
             {

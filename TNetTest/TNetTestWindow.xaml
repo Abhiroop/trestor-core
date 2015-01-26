@@ -42,7 +42,7 @@
                     </Grid.RowDefinitions>
                     <Label>Simulation Status:</Label>
                     <ScrollViewer Grid.Row="1">
-                        <TextBlock x:Name="textBlock_StatusLog" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
+                        <TextBox x:Name="textBlock_StatusLog" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
                     </ScrollViewer>
                 </Grid>
             </TabItem>

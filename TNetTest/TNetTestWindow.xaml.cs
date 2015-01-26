@@ -28,9 +28,17 @@ namespace TNetTest
     /// </summary>
     public partial class TNetTestWindow : Window
     {
+        //RESTClient client = new RESTClient("http://54.69.239.153:2015");
         RESTClient client = new RESTClient("http://localhost:2015");
 
         List<GenesisAccountData> GAD = new List<GenesisAccountData>();
+
+        void WriteLog(string data)
+        {
+            textBlock_StatusLog.Text += "\n" + data;
+            if (textBlock_Status.Text.Length > 20000) 
+                textBlock_Status.Text = "";
+        }
 
         public TNetTestWindow()
         {
@@ -39,7 +47,7 @@ namespace TNetTest
             Common.Initialize();
 
             RESTResponse response = client.Execute(new RESTRequest("info"));
-            textBlock_StatusLog.Text += "" + response.Content;
+            WriteLog(response.Content);
 
             GenesisFileParser gfp = new GenesisFileParser("ACCOUNTS.GEN_SECRET");
             gfp.GetAccounts(out GAD);
@@ -70,7 +78,7 @@ namespace TNetTest
             byte[] PrivSeedDest = Dest.RandomPrivate;
             string DestName = Dest.Name;
 
-            AccountIdentifier identifierDest = AddressFactory.PrivateKeyToAccount(PrivSeedDest, DestName);
+            AccountIdentifier identifierDest = AddressFactory.PrivateKeyToAccount(PrivSeedDest, DestName, NetworkType.TestNet, AccountType.TestGenesis);
 
             SingleTransactionFactory stf = new SingleTransactionFactory(identifierSrc, identifierDest, fee, value);
 
@@ -86,7 +94,7 @@ namespace TNetTest
             {
                 string SER_DATA = JsonConvert.SerializeObject(new JS_TransactionReply(tc), Common.JsonSerializerSettings);
 
-                textBlock_StatusLog.Text += "\nSending:" + SER_DATA;
+                WriteLog("\nSending:" + SER_DATA);
 
                 RESTRequest request = new RESTRequest("propagate", Grapevine.HttpMethod.POST, Grapevine.ContentType.JSON);
 
@@ -94,11 +102,11 @@ namespace TNetTest
 
                 RESTResponse response = client.Execute(request);
 
-                textBlock_StatusLog.Text += "\n" + response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n";
+                WriteLog(response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n");
             }
             else
             {
-                textBlock_StatusLog.Text += "\n INVALID DATA : " + rslt.ToString();
+                WriteLog("INVALID DATA : " + rslt.ToString());
             }
 
             return (tc != null) ? tc.TransactionID : new Hash();
@@ -130,10 +138,9 @@ namespace TNetTest
 
         private void button_TransactionsVerify_Click(object sender, RoutedEventArgs e)
         {
-            foreach(Hash txid in TX_IDs)
+            foreach (Hash txid in TX_IDs)
             {
-
-                textBlock_StatusLog.Text += "\nSending TxStatus:" + txid.ToString();
+                WriteLog("Sending TxStatus:" + txid.ToString());
 
                 RESTRequest request = new RESTRequest("txstatus", Grapevine.HttpMethod.GET);
 
@@ -141,7 +148,7 @@ namespace TNetTest
 
                 RESTResponse response = client.Execute(request);
 
-                textBlock_StatusLog.Text += "\n" + response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n";
+                WriteLog(response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n");
 
             }
         }
