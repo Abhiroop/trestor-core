@@ -99,6 +99,8 @@ namespace TNetD
             }
         }
 
+        
+
         public static bool CompareByteArrays(this byte[] H1, byte[] H2)
         {
             if (H1.Length == H2.Length)

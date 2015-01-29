@@ -16,7 +16,7 @@ namespace TNetD
         /// Its highly critical to tree hash generation and synchronisation.
         /// Cannot be changed once the network starts working.
         /// </summary>
-        public static readonly int HashTree_NodeListDepth = 4;
+        public static readonly int HashTree_NodeListDepth = 8;
 
         /// <summary>
         /// Minimum allowable Account Name Length
@@ -49,7 +49,7 @@ namespace TNetD
         ///  Minimum 10 trest balance.
         ///  [CRITICAL: FIX ME !!!]
         /// </summary>
-        public static readonly long FIN_MIN_BALANCE = 0;//10000000;
+        public static readonly long FIN_MIN_BALANCE = 0; //10000000;
 
         public static readonly long DB_HISTORY_LIMIT = 1000;
        
@@ -113,7 +113,7 @@ namespace TNetD
         /// <summary>
         /// Timer Update rate for consensus.
         /// </summary>
-        public static readonly int Node_UpdateFrequencyConsensusMS = 8000;
+        public static readonly int Node_UpdateFrequencyConsensusMS = 4000;
 
         /// <summary>
         /// Update rate for handling packets.

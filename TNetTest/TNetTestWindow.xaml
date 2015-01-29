@@ -21,8 +21,15 @@
                 <MenuItem Name="menuItem_File_Exit" Header="EXIT" />
             </MenuItem>
             <MenuItem Header="TRANSACTIONS">
+                <MenuItem Header="Intialize" Name="button_TransactionsInitialize" Click="button_TransactionsInitialize_Click" />
                 <MenuItem Header="Start" Name="button_TransactionsStart" Click="button_TransactionsStart_Click"/>
                 <MenuItem Header="Verify" Name="button_TransactionsVerify" Click="button_TransactionsVerify_Click"/>
+                <MenuItem Header="Restart" />
+                <Separator/>
+            </MenuItem>
+            <MenuItem Header="MEMORY HARDNESS">
+                <MenuItem Header="Start" Name="button_MEM_HARD_Start" Click="button_MEM_HARD_Start_Click" />
+                <MenuItem Header="Verify" Name="button_MEM_HARD_Verify" />
                 <MenuItem Header="Restart" />
                 <Separator/>
             </MenuItem>

@@ -20,6 +20,8 @@ using TNetD;
 using TNetD.Address;
 using TNetD.Json.JS_Structs;
 using TNetD.Transactions;
+using TNetNative;
+
 
 namespace TNetTest
 {
@@ -36,7 +38,7 @@ namespace TNetTest
         void WriteLog(string data)
         {
             textBlock_StatusLog.Text += "\n" + data;
-            if (textBlock_Status.Text.Length > 20000) 
+            if (textBlock_Status.Text.Length > Common.UI_TextBox_Max_Length) 
                 textBlock_Status.Text = "";
         }
 
@@ -45,9 +47,6 @@ namespace TNetTest
             InitializeComponent();
 
             Common.Initialize();
-
-            RESTResponse response = client.Execute(new RESTRequest("info"));
-            WriteLog(response.Content);
 
             GenesisFileParser gfp = new GenesisFileParser("ACCOUNTS.GEN_SECRET");
             gfp.GetAccounts(out GAD);
@@ -151,6 +150,21 @@ namespace TNetTest
                 WriteLog(response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n");
 
             }
+        }
+
+        private void button_MEM_HARD_Start_Click(object sender, RoutedEventArgs e)
+        {
+            Rig2_Native rn = new Rig2_Native();
+            byte[] data = new byte[64];
+            ReturnTypes ret =  rn.Rig2(ref data, new byte[16] ,new byte[10], 8, 10);
+            
+            WriteLog("\nHASH:" + HexUtil.ToString(data));
+        }
+
+        private void button_TransactionsInitialize_Click(object sender, RoutedEventArgs e)
+        {
+            RESTResponse response = client.Execute(new RESTRequest("info"));
+            WriteLog(response.Content);
         }
 
     }

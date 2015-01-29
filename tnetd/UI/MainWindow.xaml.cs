@@ -83,12 +83,11 @@ namespace TNetD
             catch { }
             //throw new NotImplementedException();
         }
-
-
+        
         void LoadNodes()
         {
             AddNode(0);
-            AddNode(1);
+            //AddNode(1);
         }
 
         void DisplayUtils_DisplayText(string Text, Color color, DisplayType type)
@@ -97,6 +96,11 @@ namespace TNetD
             {
                 this.Dispatcher.Invoke(new Action(() =>
                 {
+                    if (textBlock_StatusLog.Text.Length > Common.UI_TextBox_Max_Length)
+                    {
+                        textBlock_StatusLog.Text = "";
+                    }
+
                     textBlock_StatusLog.Inlines.Add(new Run(Text + "\n") { Foreground = new SolidColorBrush(color) });
                 }));
             }

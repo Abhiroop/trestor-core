@@ -27,6 +27,9 @@ namespace TNetD
         public static readonly int NETWORK_Min_Transaction_TotalValue = 0;
 
         public static JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings();
+
+
+        public static readonly int UI_TextBox_Max_Length = 20000;
         
         /// <summary>
         ///  TODO: BAD/ REMOVE STATIC METHOD

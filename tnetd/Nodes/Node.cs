@@ -128,7 +128,7 @@ namespace TNetD.Nodes
             TimerSecond.Interval = 100;
             TimerSecond.Start();
 
-            restServer = new RESTServer("+", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
+            restServer = new RESTServer("localhost", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
 
             restServer.Start();
         }
@@ -733,9 +733,11 @@ namespace TNetD.Nodes
                                         // True if account
                                         bool badAccountName_inTransaction = false;
                                         bool badAccountAddress_inTransaction = false;
-
+                                        bool badAccountCreationValue = false;
                                         bool badAccountState = false;
                                         bool insufficientFunds = false;
+
+                                        List<AccountInfo> temp_NewAccounts = new List<AccountInfo>();
                                                                                 
                                         // Check if account name in destination is valid.
                                         
@@ -824,9 +826,7 @@ namespace TNetD.Nodes
                                                 break;
                                             }
                                         }
-
-                                        bool badAccountCreationValue = false;
-
+                                                     
                                         /// Check Destinations
 
                                         foreach (TransactionEntity destination in transactionContent.Destinations)
@@ -855,7 +855,7 @@ namespace TNetD.Nodes
                                                     AccountInfo ai = new AccountInfo(PK, 0, destination.Name, AccountState.Normal,
                                                         ad.NetworkType, ad.AccountType, nodeState.network_time);
 
-                                                    newAccounts.Add(ai);
+                                                    temp_NewAccounts.Add(ai);
                                                 }
                                                 else
                                                 {
@@ -871,6 +871,8 @@ namespace TNetD.Nodes
                                         if (!badSource && !badAccountCreationValue && !badAccountState && !insufficientFunds
                                             && !badAccountName_inTransaction && !badAccountAddress_inTransaction)
                                         {
+                                            newAccounts.AddRange(temp_NewAccounts);
+
                                             // If we are here, this means that the transaction is GOOD and should be added to the difference list.
                                             Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.TransactionsValidated);
 
