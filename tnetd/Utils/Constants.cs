@@ -121,8 +121,11 @@ namespace TNetD
         public static readonly int Node_UpdateFrequencyPacketProcessMS = 500;
 
         public static readonly string File_TrustedNodes = "TrustedNodes.ini";
-
-          
+        
+        /// <summary>
+        /// Minimum Level to be displayed.
+        /// </summary>
+        public static readonly DisplayType DebugLevel = DisplayType.ImportantInfo;
         
     }
 }

@@ -28,29 +28,29 @@ namespace TNetD.Nodes
         public int UpdateFrequencyConsensusMS;
         public int ListenPortProtocol;
         public int ListenPortRPC;
-        public int NodeID;
+        public int NodeID { get; private set; }
         public string WorkDirectory;
         public string Name;
         public string Email;
         public string Organisation;
-        public string Platform;       
+        public string Platform;
 
-        public Hash PublicKey;              
- 
+        public Hash PublicKey;
+
         public string Path_AccountDB;
-        public string Path_TransactionDB;        
+        public string Path_TransactionDB;
 
         public NetworkConfig NetworkConfig = new NetworkConfig();
 
         public GlobalConfiguration GlobalConfiguration;
-        
+
         byte[] masterNodeRandom;
         byte[] masterPrivateKeyExpanded;
 
         INIFile iniFile = default(INIFile);
 
         //////////////
-        
+
         #endregion
 
         public NodeConfig(int NodeID, GlobalConfiguration GlobalConfiguration)
@@ -71,7 +71,7 @@ namespace TNetD.Nodes
             }
 
             iniFile = new INIFile(WorkDirectory + "\\NodeConfig.ini");
-            
+
             masterNodeRandom = GetNodePrivateRandom(iniFile);
 
             DisplayUtils.Display(" Node " + NodeID + " | Private Key     : " + HexUtil.ToString(masterNodeRandom));
@@ -99,7 +99,7 @@ namespace TNetD.Nodes
             Path_TransactionDB = GetTransactionDBPath();
 
             DisplayUtils.Display(" Node " + NodeID + " | Trxn DB Path    : " + Path_TransactionDB);
-            
+
             // // // // // // // // //  Class Initializations // // // // // // // // // // // //
 
             NetworkConfig = new NetworkConfig(ListenPortProtocol);
@@ -123,7 +123,7 @@ namespace TNetD.Nodes
         /// </summary>
         /// <param name="Data">Data to be signed using the Private Key</param>
         /// <returns>64 byte Signature.</returns>
-        public byte [] SignDataWithPrivateKey(byte [] data)
+        public byte[] SignDataWithPrivateKey(byte[] data)
         {
             return Ed25519.Sign(data, masterPrivateKeyExpanded);
         }
@@ -172,7 +172,7 @@ namespace TNetD.Nodes
                 throw new Exception("Cannot write Network/ListenPortProtocol to config file.");
             }
         }
-        
+
         int GetListenPortRPC()
         {
             int _ListenPortRPC = -1;
@@ -233,7 +233,7 @@ namespace TNetD.Nodes
 
                 DisplayUtils.Display(" Node " + NodeID + " Creating new PrivateKey : " + HexUtil.ToString(_RAND));
                 _iniFile.IniWriteValue("Keys", "PrivateRandom", HexUtil.ToString(_RAND));
-                
+
                 byte[] _PublicKey, _temp;
                 Ed25519.KeyPairFromSeed(out _PublicKey, out _temp, _RAND);
 
@@ -265,7 +265,7 @@ namespace TNetD.Nodes
                 return _RAND;
             }
         }
-        
+
         string GetInitString(string Section, string Key, string Default)
         {
             string _Temp_String = "";
@@ -304,8 +304,8 @@ namespace TNetD.Nodes
             _AC_DB_Path = iniFile.IniReadValue("PersistentDatabase", "AccountDBPath");
 
             if (_AC_DB_Path != "")
-            {                
-                return _AC_DB_Path;           
+            {
+                return _AC_DB_Path;
             }
 
             // Get new port
@@ -321,8 +321,8 @@ namespace TNetD.Nodes
             _AC_DB_Path = iniFile.IniReadValue("PersistentDatabase", "AccountDBPath");
 
             if (_AC_DB_Path != "")
-            {               
-                return _AC_DB_Path;               
+            {
+                return _AC_DB_Path;
             }
             else
             {
@@ -338,8 +338,8 @@ namespace TNetD.Nodes
             _TX_DB_Path = iniFile.IniReadValue("PersistentDatabase", "TransactionDBPath");
 
             if (_TX_DB_Path != "")
-            {                
-                return _TX_DB_Path;          
+            {
+                return _TX_DB_Path;
             }
 
             // Get new port
@@ -355,8 +355,8 @@ namespace TNetD.Nodes
             _TX_DB_Path = iniFile.IniReadValue("PersistentDatabase", "TransactionDBPath");
 
             if (_TX_DB_Path != "")
-            {               
-                return _TX_DB_Path;                
+            {
+                return _TX_DB_Path;
             }
             else
             {
@@ -366,13 +366,13 @@ namespace TNetD.Nodes
         }
 
         #endregion
-        
+
         public JS_NodeInfo Get_JS_Info()
         {
             JS_NodeInfo info = new JS_NodeInfo();
-           
+
             info.Name = Name;
-            info.Address = AddressFactory.GetAddressString(AddressFactory.GetAddress(PublicKey.Hex, Name, 
+            info.Address = AddressFactory.GetAddressString(AddressFactory.GetAddress(PublicKey.Hex, Name,
                 NetworkType.MainNet, AccountType.MainValidator));
 
             info.Email = Email;
@@ -380,7 +380,7 @@ namespace TNetD.Nodes
             info.Platform = Platform;
             info.PublicKey = PublicKey.Hex;
             info.Version = "0.1 pre-release (development)";
-           
+
             return info;
         }
     }

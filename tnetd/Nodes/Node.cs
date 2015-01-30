@@ -32,9 +32,13 @@ using TNetD.Tree;
 namespace TNetD.Nodes
 {
 
+    public delegate void NodeStatusEventHandler(string Status, int NodeID);
 
     internal class Node : Responder
     {
+
+        public event NodeStatusEventHandler NodeStatusEvent;
+
         bool TimerEventProcessed = true;
 
         SecureNetwork network = default(SecureNetwork);
@@ -111,7 +115,7 @@ namespace TNetD.Nodes
             AI = new AccountInfo(PublicKey, Money);
 
             ledger = new Ledger(PersistentAccountStore);
-            
+
             //ledger.AddUserToLedger(AI);
 
             TimerConsensus = new System.Timers.Timer();
@@ -131,14 +135,20 @@ namespace TNetD.Nodes
             restServer = new RESTServer("localhost", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
 
             restServer.Start();
+
+            DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
         }
 
         void TimerSecond_Elapsed(object sender, ElapsedEventArgs e)
         {
             nodeState.NodeInfo.NodeDetails.TimeUTC = DateTime.UtcNow;
-
             nodeState.NodeInfo.LastLedgerInfo.Hash = ledger.GetRootHash().Hex;
 
+            if (NodeStatusEvent != null)
+            {
+                var json = JsonConvert.SerializeObject(nodeState.NodeInfo.GetResponse(), Common.JsonSerializerSettings);
+                NodeStatusEvent(json, nodeConfig.NodeID);
+            }
         }
 
         /// <summary>
@@ -168,7 +178,7 @@ namespace TNetD.Nodes
 
             });
         }
-        
+
         #region RPC HANDLING
 
         // RPCRequestHandler rpcRequestHandler;
@@ -428,7 +438,7 @@ namespace TNetD.Nodes
             {
                 replies.TransactionState.Add(new JS_TransactionState_Reply(response_prop.Item1, TransactionStatusType.Proposed, TransactionProcessingResult.Accepted));
                 return;
-            }           
+            }
 
             // Check if the transaction is in the processing queue.
             Tuple<TransactionContent, bool> response_queue = incomingTransactionMap.GetTransactionContent(transactionID);
@@ -447,9 +457,9 @@ namespace TNetD.Nodes
                 return;
             }
 
-                       
 
-            
+
+
         }
 
         private void HandleAccountQuery(HttpListenerContext context)
@@ -673,7 +683,7 @@ namespace TNetD.Nodes
 
 
         #region TRANSACTION PROCESSING
-        
+
         /// <summary>
         /// Timer now fast. Actual/Final timer would depend on consensus rate.
         /// </summary>
@@ -726,7 +736,7 @@ namespace TNetD.Nodes
                                         DisplayUtils.Display("Transaction Processed. Improbable because of previous checks.", DisplayType.BadData);
                                     }
                                     else
-                                    {                                    
+                                    {
                                         // Check Sources
                                         bool badSource = false;
 
@@ -738,16 +748,16 @@ namespace TNetD.Nodes
                                         bool insufficientFunds = false;
 
                                         List<AccountInfo> temp_NewAccounts = new List<AccountInfo>();
-                                                                                
+
                                         // Check if account name in destination is valid.
-                                        
+
                                         foreach (TransactionEntity te in transactionContent.Destinations)
                                         {
                                             AccountInfo ai;
-                                            if(PersistentAccountStore.FetchAccount(out ai, new Hash(te.PublicKey)) == DBResponse.FetchSuccess)
+                                            if (PersistentAccountStore.FetchAccount(out ai, new Hash(te.PublicKey)) == DBResponse.FetchSuccess)
                                             {
                                                 // Account Exists
-                                                if(ai.Name != te.Name)
+                                                if (ai.Name != te.Name)
                                                 {
                                                     badAccountName_inTransaction = true;
                                                     break;
@@ -759,7 +769,7 @@ namespace TNetD.Nodes
                                                 {
                                                     badAccountAddress_inTransaction = true;
                                                     break;
-                                                }                                               
+                                                }
                                             }
                                             else
                                             {
@@ -826,7 +836,7 @@ namespace TNetD.Nodes
                                                 break;
                                             }
                                         }
-                                                     
+
                                         /// Check Destinations
 
                                         foreach (TransactionEntity destination in transactionContent.Destinations)
@@ -918,17 +928,18 @@ namespace TNetD.Nodes
                                             acceptedTransactions.Add(transactionContent.TransactionID, transactionContent);
 
                                             DisplayUtils.Display("Transaction added to intermediate list : " +
-                                                HexUtil.ToString(transactionContent.TransactionID.Hex));
+                                                HexUtil.ToString(transactionContent.TransactionID.Hex), DisplayType.Info);
                                         }
                                         else
                                         {
                                             //TODO: LOG THIS and Display properly.
-                                            DisplayUtils.Display("BAD Transaction : " +
-                                               HexUtil.ToString(transactionContent.TransactionID.Hex), DisplayType.BadData);
+                                            DisplayUtils.Display("BAD Transaction : " + HexUtil.ToString(transactionContent.TransactionID.Hex) + "\n" +
+                                              "badSource= " + badSource + "badAccountCreationValue= " + badAccountCreationValue +
+                                              "badAccountState= " + badAccountState + "insufficientFunds= " + insufficientFunds +
+                                              "badAccountName_inTransaction= " + badAccountName_inTransaction +
+                                              "badAccountAddress_inTransaction= " + badAccountAddress_inTransaction + "\n", DisplayType.BadData);
                                         }
-
                                     }
-
                                 }
                             }
                             catch (Exception ex)
@@ -1021,8 +1032,8 @@ namespace TNetD.Nodes
 
                             AccountInfo ledgerAccount = ledger[diffData.PublicKey];
 
-                            DisplayUtils.Display("\nFor Account : '" + ledgerAccount.Name + "' : " + HexUtil.ToString(ledgerAccount.PublicKey.Hex));
-                            DisplayUtils.Display("Balance: " + ledgerAccount.Money + ", Added:" + diffData.AddValue + ", Removed:" + diffData.RemoveValue);
+                            DisplayUtils.Display("\nFor Account : '" + ledgerAccount.Name + "' : " + HexUtil.ToString(ledgerAccount.PublicKey.Hex), DisplayType.Info);
+                            DisplayUtils.Display("Balance: " + ledgerAccount.Money + ", Added:" + diffData.AddValue + ", Removed:" + diffData.RemoveValue, DisplayType.Info);
 
                             ledgerAccount.Money += diffData.AddValue;
                             ledgerAccount.Money -= diffData.RemoveValue;

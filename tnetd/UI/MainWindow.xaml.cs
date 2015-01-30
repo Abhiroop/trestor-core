@@ -59,15 +59,50 @@ namespace TNetD
             background_Load = new Thread(LoadNodes);
 
             background_Load.Start();
+
+
+            //System.Timers.Timer tmr_UI = new System.Timers.Timer(100);
+            //tmr_UI.Elapsed += tmr_UI_Elapsed;
+            //tmr_UI.Start();
+
         }
+
+        /*void tmr_UI_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            try
+            {
+                this.Dispatcher.Invoke(new Action(() =>
+                {
+                   // textBlock_StatusLabel.Text = "" + ledgerEvent.ToString() + " - " + Message;
+                    //textBlock_StatusLog.Inlines.Add(new Run(Text + "\n") { Foreground = new SolidColorBrush(color) });
+                }));
+            }
+            catch { }
+        }*/
 
         void AddNode(int idx)
         {
             Node nd = new Node(idx, globalConfiguration);
             nd.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
+            nd.NodeStatusEvent += nd_NodeStatusEvent;
             nd.BeginBackgroundLoad();
 
             nodes.Add(nd);
+        }
+
+        void nd_NodeStatusEvent(string Status, int NodeID)
+        {
+            if (NodeID == 0)
+            {
+                try
+                {
+                    this.Dispatcher.Invoke(new Action(() =>
+                    {
+                        textBlock_Status.Text = Status;
+                    }));
+                }
+                catch { }
+            }           
         }
 
         void LocalLedger_LedgerEvent(Ledgers.Ledger.LedgerEventType ledgerEvent, string Message)
@@ -76,7 +111,7 @@ namespace TNetD
             {
                 this.Dispatcher.Invoke(new Action(() =>
                 {
-                    textBlock_Status.Text = "" + ledgerEvent.ToString() + " - " + Message;
+                    textBlock_StatusLabel.Text = "" + ledgerEvent.ToString() + " - " + Message;
                     //textBlock_StatusLog.Inlines.Add(new Run(Text + "\n") { Foreground = new SolidColorBrush(color) });
                 }));
             }
@@ -92,19 +127,22 @@ namespace TNetD
 
         void DisplayUtils_DisplayText(string Text, Color color, DisplayType type)
         {
-            try
+            if (type >= Constants.DebugLevel)
             {
-                this.Dispatcher.Invoke(new Action(() =>
+                try
                 {
-                    if (textBlock_StatusLog.Text.Length > Common.UI_TextBox_Max_Length)
+                    this.Dispatcher.Invoke(new Action(() =>
                     {
-                        textBlock_StatusLog.Text = "";
-                    }
+                        if (textBlock_Log.Text.Length > Common.UI_TextBox_Max_Length)
+                        {
+                            textBlock_Log.Text = "";
+                        }
 
-                    textBlock_StatusLog.Inlines.Add(new Run(Text + "\n") { Foreground = new SolidColorBrush(color) });
-                }));
-            }
-            catch { }
+                        textBlock_Log.Inlines.Add(new Run(Text + "\n") { Foreground = new SolidColorBrush(color) });
+                    }));
+                }
+                catch { }
+            }           
         }
 
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
@@ -293,28 +331,30 @@ namespace TNetD
 
                 gfp.GetAccounts(out gData);
 
+                // Fetch Genesis Data / TEMP
+                foreach (GenesisAccountData gad in gData)
+                {
+                    AccountInfo ai = new AccountInfo(new Hash(gad.Public), Constants.FIN_TRE_PER_GENESIS_ACCOUNT);
+
+                    byte[] Address = Base58Encoding.DecodeWithCheckSum(gad.Address);
+
+                    if (Address.Length == 22)
+                    {
+                        ai.NetworkType = (NetworkType)Address[0];
+                        ai.AccountType = (AccountType)Address[1];
+
+                        ai.AccountState = AccountState.Normal;
+                        ai.LastTransactionTime = 0;
+                        ai.Name = gad.Name;
+
+                        aiData.Add(ai);
+                    }
+                }
+
+                // Write to nodes
                 foreach (Node n in nodes)
                 {
                     var resp = n.PersistentAccountStore.DeleteEverything();
-
-                    foreach (GenesisAccountData gad in gData)
-                    {
-                        AccountInfo ai = new AccountInfo(new Hash(gad.Public), Constants.FIN_TRE_PER_GENESIS_ACCOUNT);
-
-                        byte[] Address = Base58Encoding.DecodeWithCheckSum(gad.Address);
-
-                        if (Address.Length == 22)
-                        {
-                            ai.NetworkType = (NetworkType)Address[0];
-                            ai.AccountType = (AccountType)Address[1];
-
-                            ai.AccountState = AccountState.Normal;
-                            ai.LastTransactionTime = 0;
-                            ai.Name = gad.Name;
-
-                            aiData.Add(ai);
-                        }
-                    }
 
                     n.PersistentAccountStore.AddUpdateBatch(aiData);
                 }

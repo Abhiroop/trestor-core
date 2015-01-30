@@ -21,7 +21,7 @@
 		</div>
 		<div id="menu">
 			<ul>
-				<li class="current_page_item"><a href="#" accesskey="1" title="">Status</a></li>
+				<li class="current_page_item"><a href="http://54.69.239.153:2015/" accesskey="1" title="">Status</a></li>
 				<li><a href="https://trestor.org/about-us" accesskey="2" title="">About Us</a></li>
 				<li><a href="https://trestor.org/locate-retail-partner" accesskey="3" title="">Retail Partners</a></li>
 				<li><a href="https://trestor.org/faq" accesskey="4" title="">FAQ'S</a></li>
@@ -42,20 +42,28 @@
 
 	$.ajaxSetup({ cache: false }); //disallows cachinge, so information should be new
 
-	var t = 0 ;
 	function loadNodeStatus()
 	{ //start function
 		var url = "http://54.69.239.153:2015/info";
         $.getJSON(url,
             function(data){
-                setTimeout("loadNodeStatus()",1000);
+                setTimeout("loadNodeStatus()",10000);
 				document.getElementById("PUBLICKEY").innerHTML = data.Data.PublicKey;
 				document.getElementById("NAME").innerHTML = data.Data.Name;
 				document.getElementById("ADDRESS").innerHTML = data.Data.Address;
-				document.getElementById("TIMEUTC").innerHTML = data.Data.TimeUTC;
+				document.getElementById("VERSION").innerHTML = data.Data.Version;
 				document.getElementById("ORGANISATION").innerHTML = data.Data.Organisation;
 				document.getElementById("PLATFORM").innerHTML = data.Data.Platform;
 				document.getElementById("EMAIL").innerHTML = data.Data.Email;
+				document.getElementById("TRANSACTIONSPROCESSED").innerHTML = data.Data.NodeDetails.TransactionsProcessed;
+				document.getElementById("TRANSACTIONSACCEPTED").innerHTML = data.Data.NodeDetails.TransactionsAccepted;
+				document.getElementById("TRANSACTIONSVALIDATED").innerHTML = data.Data.NodeDetails.TransactionsValidated;
+				document.getElementById("REQUESTSPROCESSED").innerHTML = data.Data.NodeDetails.RequestsProcessed;
+				document.getElementById("LOADLEVEL").innerHTML = data.Data.NodeDetails.LoadLevel;
+				document.getElementById("TIMEUTC").innerHTML = data.Data.NodeDetails.TimeUTC;
+				document.getElementById("HASH").innerHTML = data.Data.LastLedgerInfo.Hash;
+				document.getElementById("INDEX").innerHTML = data.Data.LastLedgerInfo.Index;
+				document.getElementById("CLOSETIME").innerHTML = data.Data.LastLedgerInfo.CloseTime;
             }); 
 	} //end function        
 	
@@ -67,14 +75,14 @@
 	<div id="extra" class="container">
 		<div class="title">
 			<div class="boxA">
-				<div class="box"> <span class="fa fa-cloud-download"></span>
+				<div class="box">
 					<p style="display:inline-block;" align="left"><b><i>Organisation &nbsp; : &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="ORGANISATION">Loading..</div>
 					<br>
-					<p style="display:inline-block;" align="left"><b><i>TimeUTC &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="TIMEUTC">Loading..</div>
+					<p style="display:inline-block;" align="left"><b><i>Version &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="VERSION">Loading..</div>
 				</div>
 			</div>
 			<div class="boxB">
-				<div class="box"> <span class="fa fa-user"></span>
+				<div class="box">
 					<p style="display:inline-block;" align="left"><b><i>Email &nbsp; :&nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="EMAIL">Loading..</div>
 					<br>
 					<p style="display:inline-block;" align="left"><b><i>Name &nbsp;  :&nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="NAME">Loading..</div>
@@ -83,7 +91,31 @@
 				</div>
 			</div>
 			<div class="boxC">
-				<div class="box"> <span class="fa fa-cogs"></span>
+				<div class="box">
+					<p style="display:inline-block;" align="left"><b><i>Transactions Proposed &nbsp; : &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="TRANSACTIONSPROCESSED">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Transactions Accepted &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="TRANSACTIONSACCEPTED">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Transactions Validated &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="TRANSACTIONSVALIDATED">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Requests Processed &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="REQUESTSPROCESSED">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Load Level &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="LOADLEVEL">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Time UTC &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="TIMEUTC">Loading..</div>
+				</div>
+			</div>
+			<div class="boxD">
+				<div class="box">
+					<p style="display:inline-block;" align="left"><b><i>Hash &nbsp; : &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="HASH">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Index &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="INDEX">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Close Time &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="CLOSETIME">Loading..</div>
+				</div>
+			</div>
+			<div class="boxE">
+				<div class="box">
 					<p style="display:inline-block;" align="left"><b><i>Platform &nbsp; : &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="PLATFORM">Loading..</div>
 					<br>
 					<p style="display:inline-block;" align="left"><b><i>PublicKey &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="PUBLICKEY">Loading..</div>

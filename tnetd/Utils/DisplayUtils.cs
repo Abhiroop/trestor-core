@@ -12,7 +12,38 @@ using System.Windows.Media;
 
 namespace TNetD
 {
-    public enum DisplayType { Info, Warning, Exception, AuthFailure, BadData };
+    public enum DisplayType 
+    {
+        /// <summary>
+        /// [0] : General Messages
+        /// </summary>
+        Info,
+
+        /// <summary>
+        /// [1] : Important Status Messages
+        /// </summary>
+        ImportantInfo,
+
+        /// <summary>
+        /// [2] :
+        /// </summary>
+        Warning,
+
+        /// <summary>
+        ///  [3] : Exception Caught / Thrown. 
+        /// </summary>        
+        Exception,
+
+        /// <summary>
+        /// [4] : Authentication Failure / Bad Signature
+        /// </summary>
+        AuthFailure, 
+
+        /// <summary>
+        /// [5] : Invalid Transactions / Malformed Packets.
+        /// </summary>
+        BadData 
+    };
 
     static class DisplayUtils
     {
@@ -34,11 +65,15 @@ namespace TNetD
             switch (type)
             {
                 case DisplayType.Info:
-                    DisplayText((WriteHeader ? " INFO: " : "") + Message, Colors.LawnGreen, type);
+                    DisplayText((WriteHeader ? " Info: " : "") + Message, Colors.LawnGreen, type);
+                    break;
+
+                case DisplayType.ImportantInfo:
+                    DisplayText((WriteHeader ? " Info: " : "") + Message, Colors.CornflowerBlue, type);
                     break;
 
                 case DisplayType.Warning:
-                    DisplayText((WriteHeader ? " WARNING: " : "") + Message, Colors.Yellow, type);
+                    DisplayText((WriteHeader ? " Warning: " : "") + Message, Colors.Yellow, type);
                     break;
 
                 case DisplayType.Exception:

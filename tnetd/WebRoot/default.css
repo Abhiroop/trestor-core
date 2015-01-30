@@ -265,12 +265,16 @@
 
 	.boxA,
 	.boxB,
-	.boxC
+	.boxC,
+	.boxD,
+	.boxE
 	{
 		width: 760px;
 	}
 	.boxB,
-	.boxC
+	.boxC,
+	.boxD,
+	.boxE
 	{
 		margin-top : 20px;
 	}

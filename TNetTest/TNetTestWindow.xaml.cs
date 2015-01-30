@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -35,11 +36,22 @@ namespace TNetTest
 
         List<GenesisAccountData> GAD = new List<GenesisAccountData>();
 
+        Queue<string> Log = new Queue<string>();
+
+
         void WriteLog(string data)
         {
-            textBlock_StatusLog.Text += "\n" + data;
-            if (textBlock_Status.Text.Length > Common.UI_TextBox_Max_Length) 
-                textBlock_Status.Text = "";
+            Log.Enqueue(data);
+        }
+
+        void WriteLog_Internal(string data)
+        {
+            this.Dispatcher.Invoke(new Action(delegate
+            {
+                textBlock_StatusLog.Text += "\n" + data;
+                if (textBlock_StatusLog.Text.Length > Common.UI_TextBox_Max_Length)
+                    textBlock_StatusLog.Text = "";
+            }));
         }
 
         public TNetTestWindow()
@@ -50,6 +62,19 @@ namespace TNetTest
 
             GenesisFileParser gfp = new GenesisFileParser("ACCOUNTS.GEN_SECRET");
             gfp.GetAccounts(out GAD);
+
+            Timer tmr = new Timer();
+            tmr.Interval = 100;
+            tmr.Elapsed += tmr_Elapsed;
+            tmr.Start();
+        }
+
+        void tmr_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            while (Log.Count > 0)
+            {
+                WriteLog_Internal(Log.Dequeue());
+            }
         }
 
         Hash SentTransactionRequest(GenesisAccountData Src, GenesisAccountData Dest)
@@ -60,7 +85,7 @@ namespace TNetTest
             Common.rngCsp.GetBytes(_rand_1);
             Common.rngCsp.GetBytes(_rand_2);
 
-            long fee = 10000; // Common.random.Next(Common.NETWORK_Min_Transaction_Fee, Common.NETWORK_Min_Transaction_Fee * 2);
+            long fee = 0; // Common.random.Next(Common.NETWORK_Min_Transaction_Fee, Common.NETWORK_Min_Transaction_Fee * 2);
             long value = Common.random.Next(1000, 50000000);
 
             byte[] PrivSeedSender = Src.RandomPrivate;
@@ -156,8 +181,8 @@ namespace TNetTest
         {
             Rig2_Native rn = new Rig2_Native();
             byte[] data = new byte[64];
-            ReturnTypes ret =  rn.Rig2(ref data, new byte[16] ,new byte[10], 8, 10);
-            
+            ReturnTypes ret = rn.Rig2(ref data, new byte[16], new byte[10], 8, 10);
+
             WriteLog("\nHASH:" + HexUtil.ToString(data));
         }
 
