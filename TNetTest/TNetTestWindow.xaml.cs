@@ -77,7 +77,7 @@ namespace TNetTest
             }
         }
 
-        Hash SentTransactionRequest(GenesisAccountData Src, GenesisAccountData Dest)
+        async Task<Hash> SentTransactionRequest(GenesisAccountData Src, GenesisAccountData Dest)
         {
             byte[] _rand_1 = new byte[32];
             byte[] _rand_2 = new byte[32];
@@ -116,17 +116,24 @@ namespace TNetTest
 
             if (rslt == TransactionProcessingResult.Accepted)
             {
-                string SER_DATA = JsonConvert.SerializeObject(new JS_TransactionReply(tc), Common.JsonSerializerSettings);
+                TaskFactory tf = new TaskFactory();
 
-                WriteLog("\nSending:" + SER_DATA);
+                await tf.StartNew(new Action(delegate {
 
-                RESTRequest request = new RESTRequest("propagate", Grapevine.HttpMethod.POST, Grapevine.ContentType.JSON);
+                    string SER_DATA = JsonConvert.SerializeObject(new JS_TransactionReply(tc), Common.JsonSerializerSettings);
 
-                request.Payload = SER_DATA;
+                    WriteLog("\nSending:" + SER_DATA);
 
-                RESTResponse response = client.Execute(request);
+                    RESTRequest request = new RESTRequest("propagate", Grapevine.HttpMethod.POST, Grapevine.ContentType.JSON);
 
-                WriteLog(response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n");
+                    request.Payload = SER_DATA;
+
+                    RESTResponse response = client.Execute(request);
+
+                    WriteLog(response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n");
+
+                }));
+                
             }
             else
             {
@@ -138,7 +145,7 @@ namespace TNetTest
 
         List<Hash> TX_IDs = new List<Hash>();
 
-        private void button_TransactionsStart_Click(object sender, RoutedEventArgs e)
+        private async void button_TransactionsStart_Click(object sender, RoutedEventArgs e)
         {
             Stopwatch sw = new Stopwatch();
 
@@ -151,8 +158,10 @@ namespace TNetTest
                 // TEST CODE
                 int[] sdIndex = Utils.GenerateNonRepeatingDistribution(GAD.Count, 2);
 
+                await SentTransactionRequest(GAD[sdIndex[0]], GAD[sdIndex[1]]);
+
                 //sdIndex[0] = 6250;
-                TX_IDs.Add(SentTransactionRequest(GAD[sdIndex[0]], GAD[sdIndex[1]]));
+                //TX_IDs.Add(SentTransactionRequest(GAD[sdIndex[0]], GAD[sdIndex[1]]));
 
                 // RESTResponse response = client.Execute(new RESTRequest("info"));
                 // textBlock_StatusLog.Text += "\n" + response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n";
@@ -179,9 +188,8 @@ namespace TNetTest
 
         private void button_MEM_HARD_Start_Click(object sender, RoutedEventArgs e)
         {
-            Rig2_Native rn = new Rig2_Native();
             byte[] data = new byte[64];
-            ReturnTypes ret = rn.Rig2(ref data, new byte[16], new byte[10], 8, 10);
+            ReturnTypes ret = Rig2.Compute(ref data, new byte[16], new byte[10], 8, 10);
 
             WriteLog("\nHASH:" + HexUtil.ToString(data));
         }
@@ -190,6 +198,13 @@ namespace TNetTest
         {
             RESTResponse response = client.Execute(new RESTRequest("info"));
             WriteLog(response.Content);
+        }
+
+        private void menuItem_Benchmark_Click(object sender, RoutedEventArgs e)
+        {
+            Benchmarks bm = new Benchmarks();
+
+            bm.Show();
         }
 
     }

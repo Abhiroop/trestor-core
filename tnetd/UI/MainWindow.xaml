@@ -109,8 +109,6 @@
             <MenuItem Header="TOOLS">
                 <MenuItem Name="menu_CreateTransaction" Click="menu_CreateTransaction_Click" Header="Create Transaction"/>
                 <MenuItem Name="menu_CreateAccount" Click="menu_CreateAccount_Click"  Header="Create Account"/>
-                <MenuItem Name="menu_Benchmarks" Header="Benchmarks" Click="menu_Benchmarks_Click"/>
-
             </MenuItem>
             <MenuItem Header="HELP">
                 <MenuItem Header="Topics"/>

@@ -102,7 +102,7 @@ namespace TNetD
                     }));
                 }
                 catch { }
-            }           
+            }
         }
 
         void LocalLedger_LedgerEvent(Ledgers.Ledger.LedgerEventType ledgerEvent, string Message)
@@ -118,7 +118,7 @@ namespace TNetD
             catch { }
             //throw new NotImplementedException();
         }
-        
+
         void LoadNodes()
         {
             AddNode(0);
@@ -142,7 +142,7 @@ namespace TNetD
                     }));
                 }
                 catch { }
-            }           
+            }
         }
 
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
@@ -311,12 +311,6 @@ namespace TNetD
         {
             CreateAccount ca = new CreateAccount();
             ca.Show();
-        }
-
-        private void menu_Benchmarks_Click(object sender, RoutedEventArgs e)
-        {
-            Benchmarks bm = new Benchmarks();
-            bm.Show();
         }
 
         private void menu_Reset_Ledger_To_Genesis_Click(object sender, RoutedEventArgs e)

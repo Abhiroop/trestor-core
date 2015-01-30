@@ -1,23 +1,32 @@
-﻿<Window x:Class="TNetD.UI.Benchmarks"
+﻿<Window x:Class="TNetTest.Benchmarks"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="TNetD - Benchmarks" Height="404" Width="746">
+        Title="TNetTest - Benchmarks" Height="404" Width="746">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
-            <RowDefinition Height="110"/>            
+            <RowDefinition Height="110"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Menu>
             <MenuItem Header="File">
                 <MenuItem Name="menu_Close" Click="menu_Close_Click" Header="Close"></MenuItem>
             </MenuItem>
-            <MenuItem Header="Methods">
+            <MenuItem Header="Hash Methods">
                 <MenuItem Name="menu_Method_BLAKE2" Header="BLAKE2" Click="menu_Method_BLAKE2_Click"></MenuItem>
-                <MenuItem Name="menu_Method_SHA512" Header="SHA-512" Click="menu_Method_SHA512_Click"></MenuItem>               
+                <MenuItem Name="menu_Method_SHA512" Header="SHA-512" Click="menu_Method_SHA512_Click"></MenuItem>
                 <MenuItem Name="menu_Method_SHA256" Header="SHA-256" Click="menu_Method_SHA256_Click" ></MenuItem>
                 <MenuItem Name="menu_Method_SHA1" Header="SHA-1" Click="menu_Method_SHA1_Click" ></MenuItem>
                 <MenuItem Name="menu_Method_MD5" Header="MD5" Click="menu_Method_MD5_Click"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="Signature Methods">
+                <MenuItem Name="menu_Method_Ed25519_Sign" Header="Ed25519 Sign" Click="menu_Method_Ed25519_Sign_Click"></MenuItem>
+                <MenuItem Name="menu_Method_Ed25519_Verify" Header="Ed25519 Verify" Click="menu_Method_Ed25519_Verify_Click"></MenuItem>
+
+                <MenuItem Name="menu_Method_Ed25519_Sign_Native" Header="Ed25519 Sign_Native" Click="menu_Method_Ed25519_Sign_Native_Click"></MenuItem>
+                <MenuItem Name="menu_Method_Ed25519_Verify_Native" Header="Ed25519 Verify_Native" Click="menu_Method_Ed25519_Verify_Native_Click"></MenuItem>
+
+                <MenuItem Name="menu_Method_Curve25519" Header="Curve25519 DH" Click="menu_Method_Curve25519_Click"></MenuItem>
             </MenuItem>
         </Menu>
 
