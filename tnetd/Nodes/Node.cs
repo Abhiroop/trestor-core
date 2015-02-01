@@ -144,7 +144,7 @@ namespace TNetD.Nodes
             TimerMinute.Interval = 60000;
             TimerMinute.Start();
 
-            restServer = new RESTServer("localhost", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
+            restServer = new RESTServer("+", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
 
             restServer.Start();
 
@@ -817,28 +817,39 @@ namespace TNetD.Nodes
                                 AddressData addressData;
                                 if (AddressFactory.VerfiyAddress(out addressData, request.Address, request.PublicKey, request.Name))
                                 {
-                                    AccountInfo newAccountInfo = new AccountInfo(new Hash(request.PublicKey), 0, request.Name, AccountState.Normal,
+                                    if(addressData.ValidateAccountType())
+                                    {
+                                        AccountInfo newAccountInfo = new AccountInfo(new Hash(request.PublicKey), 0, request.Name, AccountState.Normal,
                                         addressData.NetworkType, addressData.AccountType, nodeState.network_time);
 
-                                    bool ExistsPK = PersistentAccountStore.AccountExists(new Hash(request.PublicKey));
-                                    bool ExistsName = PersistentAccountStore.AccountExists(request.Name);
+                                        bool ExistsPK = PersistentAccountStore.AccountExists(new Hash(request.PublicKey));
+                                        bool ExistsName = PersistentAccountStore.AccountExists(request.Name);
 
-                                    if (!ExistsPK && !ExistsName)
-                                    {
-                                        if (PersistentAccountStore.AddUpdate(newAccountInfo) == DBResponse.InsertSuccess)
+                                        if (!ExistsPK && !ExistsName)
                                         {
-                                            ledger.AddUpdateBatch(new AccountInfo[] { newAccountInfo });
-                                            msg = new JS_Msg("Account Successfully Added", RPCStatus.Success);
+                                            if (PersistentAccountStore.AddUpdate(newAccountInfo) == DBResponse.InsertSuccess)
+                                            {
+                                                ledger.AddUpdateBatch(new AccountInfo[] { newAccountInfo });
+                                                msg = new JS_Msg("Account Successfully Added", RPCStatus.Success);
+                                            }
+                                            else
+                                            {
+                                                msg = new JS_Msg("Server Database Busy", RPCStatus.Exception);
+                                            }
                                         }
                                         else
                                         {
-                                            msg = new JS_Msg("Server Database Busy", RPCStatus.Exception);
+                                            msg = new JS_Msg("Account Already Exists", RPCStatus.Failure);
                                         }
                                     }
                                     else
                                     {
-                                        msg = new JS_Msg("Account Already Exists", RPCStatus.Failure);
-                                    }
+                                        msg = new JS_Msg("Invalid Network or Account Type", RPCStatus.Failure);
+                                    }                                    
+                                }
+                                else
+                                {
+                                    msg = new JS_Msg("Invalid Address Format", RPCStatus.Failure);
                                 }
                             }
                         }
