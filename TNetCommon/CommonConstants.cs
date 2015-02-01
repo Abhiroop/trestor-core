@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using TNetD.Address;
 using TNetD.Json.REST;
 
 namespace TNetD
@@ -30,6 +31,9 @@ namespace TNetD
 
 
         public static readonly int UI_TextBox_Max_Length = 20000;
+
+
+        public static readonly NetworkType NetworkType = Address.NetworkType.TestNet;
         
         /// <summary>
         ///  TODO: BAD/ REMOVE STATIC METHOD

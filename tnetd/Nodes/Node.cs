@@ -743,7 +743,7 @@ namespace TNetD.Nodes
 
                             bool TypesFine = true;
 
-                            if (Constants.IsMainNet)
+                            if (Common.NetworkType == NetworkType.MainNet)
                             {
                                 if (AD.NetworkType != NetworkType.MainNet)
                                 {

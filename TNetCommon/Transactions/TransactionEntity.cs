@@ -23,7 +23,7 @@ namespace TNetD.Transactions
         string name;
         string address;
         long _value;
-                
+
         /// <summary>
         /// Public key for the account.
         /// </summary>
@@ -93,9 +93,15 @@ namespace TNetD.Transactions
             Deserialize(entity);
         }
 
+        /// <summary>
+        /// Returns True if the Address is valid and AccountType and NetworkType is correct. 
+        /// </summary>
+        /// <returns></returns>
         public bool ValidateEntity()
         {
-            return AddressFactory.VerfiyAddress(address, publicKey, name);
+            AddressData AD;
+            bool OK = AddressFactory.VerfiyAddress(out AD, address, publicKey, name);
+            return AD.ValidateAccountType() && OK;
         }
 
         public byte[] Serialize()
@@ -110,7 +116,7 @@ namespace TNetD.Transactions
 
         public void Deserialize(JS_TransactionEntity entity)
         {
-            publicKey=entity.PublicKey;
+            publicKey = entity.PublicKey;
             name = entity.Name;
             address = entity.Address;
             _value = entity.Value;

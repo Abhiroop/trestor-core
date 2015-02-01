@@ -127,8 +127,6 @@ namespace TNetD
         /// </summary>
         public static readonly DisplayType DebugLevel = DisplayType.ImportantInfo;
         
-        public static readonly bool IsMainNet = false;
-
         /// <summary>
         /// Number of pending work proofs, before new entries are rejected.
         /// </summary>

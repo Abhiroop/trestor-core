@@ -72,14 +72,16 @@ namespace TNetD.Address
 
             Ed25519.KeyPairFromSeed(out PublicKey, out SecretKeyExpanded, PrivateSecretSeed);
 
-            byte[] Address = GetAddress(PublicKey, Name, NetworkType.MainNet, AccountType.MainNormal);
+            byte[] Address = GetAddress(PublicKey, Name, Common.NetworkType,
+                (Common.NetworkType == NetworkType.MainNet) ? 
+                AccountType.MainNormal : AccountType.TestNormal);
 
             string ADD = Base58Encoding.EncodeWithCheckSum(Address);
 
             return new Tuple<AccountIdentifier, byte[]>(new AccountIdentifier(PublicKey, Name, ADD), PrivateSecretSeed);
         }
 
-        public static AccountIdentifier PrivateKeyToAccount(byte[] PrivateSecretSeed, string Name = "", 
+        public static AccountIdentifier PrivateKeyToAccount(byte[] PrivateSecretSeed, string Name = "",
             NetworkType NetworkType = NetworkType.MainNet, AccountType AccountType = AccountType.MainNormal)
         {
             byte[] PublicKey;
@@ -87,8 +89,8 @@ namespace TNetD.Address
             Ed25519.KeyPairFromSeed(out PublicKey, out SecretKeyExpanded, PrivateSecretSeed);
             return PublicKeyToAccount(PublicKey, Name, NetworkType, AccountType);
         }
-        
-        public static AccountIdentifier PublicKeyToAccount(byte[] PublicKey, string Name = "", 
+
+        public static AccountIdentifier PublicKeyToAccount(byte[] PublicKey, string Name = "",
             NetworkType NetworkType = NetworkType.MainNet, AccountType AccountType = AccountType.MainNormal)
         {
             byte[] Address = GetAddress(PublicKey, Name, NetworkType, AccountType);
@@ -183,7 +185,7 @@ namespace TNetD.Address
         {
             AddressData address = new AddressData(Address);
 
-            byte [] ExpectedAddress = GetAddress(PublicKey, UserName, address.NetworkType, address.AccountType);
+            byte[] ExpectedAddress = GetAddress(PublicKey, UserName, address.NetworkType, address.AccountType);
 
             if (Utils.ByteArrayEquals(address.AddressBinary, ExpectedAddress))
             {
