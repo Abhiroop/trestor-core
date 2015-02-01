@@ -24,7 +24,7 @@ namespace TNetD.PersistentStore
         /// </summary>
         /// <param name="transactionContent"></param>
         /// <returns></returns>
-        DBResponse AddUpdate(TransactionContent transactionContent);
+        //DBResponse AddUpdate(TransactionContent transactionContent);
 
         /// <summary>
         /// Deletes the transaction to the Persistent Store [Must not be used in practice !!!]

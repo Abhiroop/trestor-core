@@ -13,6 +13,7 @@ namespace TNetD.Tree
 {
 
     public enum TreeResponseType { Added, Removed, Updated, Failed, NothingDone };
+    public delegate TreeResponseType LeafDataFetchEventHandler(LeafDataType[] accountInfo);
 
     /// <summary>
     /// This represents a Merkle Hash tree, each node has 16 child nodes.
@@ -196,25 +197,25 @@ namespace TNetD.Tree
                 TreeResponseType.Failed; // NO
         }
 
-        public int TraverseNodes()
+        public void TraverseAllNodes(ref long FoundLeafDataCount, ref long FoundNodesCount, LeafDataFetchEventHandler leafDataFetch)
         {
-            int nodes = 0;
-            int elements = 0;
-            int depth = 0;
-            _TraversedNodes = 0;
-            TotalMoney = 0;
-            TraverseTree(Root, ref elements, ref nodes, depth);
-            _TraversedNodes = nodes;
-            _TraversedElements = elements;
+            //int nodes = 0;
+            //int elements = 0;
+            //int depth = 0;
+            //_TraversedNodes = 0;
+            //TotalMoney = 0;
+            TraverseTree(Root, ref FoundLeafDataCount, ref FoundNodesCount, leafDataFetch);
+            //_TraversedNodes = nodes;
+            //_TraversedElements = elements;
             //TraverseLevelOrder(Root, ref nodes);
-            return nodes;
+            //return nodes;
         }
 
-        private List<LeafDataType> TraverseTree(ListTreeNode Root, ref int FoundElementCount, ref int FoundNodesCount, int _depth)
+        private List<LeafDataType> TraverseTree(ListTreeNode Root, ref long FoundLeafDataCount, ref long FoundNodesCount, LeafDataFetchEventHandler leafDataFetch)
         {
             List<LeafDataType> foundElements = new List<LeafDataType>();
 
-            int depth = _depth + 1;
+           // int depth = _depth + 1;
 
             for (int i = 0; i < 16; i++)
             {
@@ -236,14 +237,16 @@ namespace TNetD.Tree
 
                     if (!Root.Children[i].IsLeaf)
                     {
-                        TraverseTree(Root.Children[i], ref FoundElementCount, ref FoundNodesCount, depth);
+                        TraverseTree(Root.Children[i], ref FoundLeafDataCount, ref FoundNodesCount, leafDataFetch);
                     }
-
-                    if (Root.Children[i].IsLeaf)
+                    else
                     {
                         ListTreeLeafNode Leaf = (ListTreeLeafNode)Root.Children[i];
 
                         LeafDataType[] ldts = Leaf.GetAllItems();
+
+                        if (leafDataFetch != null)
+                            leafDataFetch(ldts);
 
                         foundElements.AddRange(ldts);
 
@@ -251,13 +254,13 @@ namespace TNetD.Tree
                         //DisplayUtils.Display("\nNode Traversed: " + HexUtil.ToString(Leaf.GetHash().Hex) + " - " +
                         //AccountInfo.CalculateTotalMoney(ldts));
 
-                        foreach (LeafDataType ld in ldts)
+                        /*foreach (LeafDataType ld in ldts)
                         {
                             //DisplayUtils.Display("          --- ID: " + HexUtil.ToString(ld.GetID().Hex) + " - Money " + ((AccountInfo)ld).Money);
                             TotalMoney += ((AccountInfo)ld).Money;
-                        }
+                        }*/
 
-                        FoundElementCount += ldts.Length;
+                        FoundLeafDataCount += ldts.Length;
                     }
                 }
             }

@@ -189,7 +189,7 @@ namespace TNetD
             //     received_takas += ai.Money;
             // }
 
-            DisplayUtils.Display("Initial Money : " + taka);
+            /*DisplayUtils.Display("Initial Money : " + taka);
 
             DisplayUtils.Display("\nTraversing ... ");
             lht.TraverseNodes();
@@ -213,7 +213,7 @@ namespace TNetD
 
             DisplayUtils.Display("Traversed Money : " + lht.TotalMoney);
             DisplayUtils.Display("Traversed Nodes : " + lht.TraversedNodes);
-            DisplayUtils.Display("Traversed Elements : " + lht.TraversedElements);
+            DisplayUtils.Display("Traversed Elements : " + lht.TraversedElements);*/
         }
 
         private void menuItem_File_Exit_Click(object sender, RoutedEventArgs e)
@@ -359,8 +359,11 @@ namespace TNetD
 
         async private void menu_Server_RecalculateTotalBalances_Click(object sender, RoutedEventArgs e)
         {
-            long Value = await nodes[0].CalculateTotalMoneyInPersistentStoreAsync();
-            MessageBox.Show("Total Balances: " + Value);
+            long Value_Persistent = await nodes[0].CalculateTotalMoneyInPersistentStoreAsync();
+            long Value_Tree = await nodes[0].CalculateTotalMoneyFromLedgerTreeAsync();
+
+            MessageBox.Show("Total Balances\n\nPersistent: " + Value_Persistent +
+                "\n\nTree: " + Value_Tree);
         }
 
 

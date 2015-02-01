@@ -190,6 +190,7 @@
     <Compile Include="Transactions\TransactionFactory.cs" />
     <Compile Include="Types\JS_Structs.cs" />
     <Compile Include="Types\LeafDataType.cs" />
+    <Compile Include="Types\CommonStructs.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,7 @@
 ﻿
 // @Author: Arpan Jati
 // @Date: 6-7 Jan / 2015 | 15 Jan 2015
+// 31 Jan 2015 : Oops !! Added Transactions
 
 using System;
 using System.Collections.Generic;
@@ -152,7 +153,7 @@ namespace TNetD.PersistentStore
 
             foreach (KeyValuePair<Hash, TransactionContent> kvp in accountInfoData)
             {
-                DBResponse resp = AddUpdate(kvp.Value);
+                DBResponse resp = AddUpdate(kvp.Value, st);
                 if ((resp == DBResponse.InsertSuccess) || (resp == DBResponse.UpdateSuccess))
                 {
                     Successes++;
@@ -171,11 +172,11 @@ namespace TNetD.PersistentStore
         /// </summary>
         /// <param name="transactionContent"></param>
         /// <returns></returns>
-        public DBResponse AddUpdate(TransactionContent transactionContent)
+        public DBResponse AddUpdate(TransactionContent transactionContent, SQLiteTransaction transaction)
         {
             bool doUpdate = false;
 
-            using (SQLiteCommand cmd = new SQLiteCommand("SELECT TransactionID FROM Transactions WHERE TransactionID = @transactionID;", sqliteConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT TransactionID FROM Transactions WHERE TransactionID = @transactionID;", sqliteConnection, transaction))
             {
                 cmd.Parameters.Add(new SQLiteParameter("@transactionID", transactionContent.TransactionID.Hex));
                 SQLiteDataReader reader = cmd.ExecuteReader();
@@ -237,12 +238,12 @@ namespace TNetD.PersistentStore
 
                     foreach (TransactionEntity entity in transactionContent.Sources)
                     {
-                        InsertToHistoryTable(transactionContent.TransactionID, transactionContent.Timestamp, entity);
+                        InsertToHistoryTable(transactionContent.TransactionID, transactionContent.Timestamp, entity, transaction);
                     }
 
                     foreach (TransactionEntity entity in transactionContent.Destinations)
                     {
-                        InsertToHistoryTable(transactionContent.TransactionID, transactionContent.Timestamp, entity);
+                        InsertToHistoryTable(transactionContent.TransactionID, transactionContent.Timestamp, entity, transaction);
                     }
                 }
             }
@@ -250,11 +251,11 @@ namespace TNetD.PersistentStore
             return response;
         }
 
-        private DBResponse InsertToHistoryTable(Hash transactionID, long timeStamp, TransactionEntity entity)
+        private DBResponse InsertToHistoryTable(Hash transactionID, long timeStamp, TransactionEntity entity, SQLiteTransaction transaction)
         {
             DBResponse response = DBResponse.Exception;
 
-            using (SQLiteCommand cmd = new SQLiteCommand("INSERT INTO TransactionHistory VALUES(@transactionID, @publicKey, @timeStamp);", sqliteConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand("INSERT INTO TransactionHistory VALUES(@transactionID, @publicKey, @timeStamp);", sqliteConnection, transaction))
             {
                 cmd.Parameters.Add(new SQLiteParameter("@transactionID", transactionID.Hex));
                 cmd.Parameters.Add(new SQLiteParameter("@publicKey", entity.PublicKey));

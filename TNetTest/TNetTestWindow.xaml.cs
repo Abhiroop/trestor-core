@@ -37,8 +37,7 @@ namespace TNetTest
         List<GenesisAccountData> GAD = new List<GenesisAccountData>();
 
         Queue<string> Log = new Queue<string>();
-
-
+        
         void WriteLog(string data)
         {
             Log.Enqueue(data);
@@ -86,7 +85,7 @@ namespace TNetTest
             Common.rngCsp.GetBytes(_rand_2);
 
             long fee = 0; // Common.random.Next(Common.NETWORK_Min_Transaction_Fee, Common.NETWORK_Min_Transaction_Fee * 2);
-            long value = Common.random.Next(1000, 50000000);
+            long value = /*(long)(10000000000000L * Common.random.NextDouble());*/  Common.random.Next(1000, 50000000);
 
             byte[] PrivSeedSender = Src.RandomPrivate;
             string SenderName = Src.Name;
@@ -118,7 +117,8 @@ namespace TNetTest
             {
                 TaskFactory tf = new TaskFactory();
 
-                await tf.StartNew(new Action(delegate {
+                await tf.StartNew(new Action(delegate
+                {
 
                     string SER_DATA = JsonConvert.SerializeObject(new JS_TransactionReply(tc), Common.JsonSerializerSettings);
 
@@ -133,7 +133,7 @@ namespace TNetTest
                     WriteLog(response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n");
 
                 }));
-                
+
             }
             else
             {
@@ -155,18 +155,24 @@ namespace TNetTest
 
             for (int i = 0; i < Count; i++)
             {
-                // TEST CODE
-                int[] sdIndex = Utils.GenerateNonRepeatingDistribution(GAD.Count, 2);
+                try
+                {
+                    // TEST CODE
+                    int[] sdIndex = Utils.GenerateNonRepeatingDistribution(GAD.Count, 2);
 
-                await SentTransactionRequest(GAD[sdIndex[0]], GAD[sdIndex[1]]);
+                    await SentTransactionRequest(GAD[sdIndex[0]], GAD[sdIndex[1]]);
 
-                //sdIndex[0] = 6250;
-                //TX_IDs.Add(SentTransactionRequest(GAD[sdIndex[0]], GAD[sdIndex[1]]));
+                    //sdIndex[0] = 6250;
+                    //TX_IDs.Add(SentTransactionRequest(GAD[sdIndex[0]], GAD[sdIndex[1]]));
 
-                // RESTResponse response = client.Execute(new RESTRequest("info"));
-                // textBlock_StatusLog.Text += "\n" + response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n";
+                    // RESTResponse response = client.Execute(new RESTRequest("info"));
+                    // textBlock_StatusLog.Text += "\n" + response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n";
+                }
+                catch (Exception ex)
+                {
+                    WriteLog("TransactionsStart():" + ex.Message);
+                }
             }
-
         }
 
         private void button_TransactionsVerify_Click(object sender, RoutedEventArgs e)

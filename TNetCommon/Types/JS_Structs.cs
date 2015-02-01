@@ -1,7 +1,7 @@
 ﻿/*
  *  @Author: Arpan Jati
  *  @Version: 1.0
- *  @Date: 9 Jan 2015 | 10 Jan 2015 | 14 Jan 2015
+ *  @Date: 9 Jan 2015 | 10 Jan 2015 | 14 Jan 2015 | 1 Feb 2015
  *  @Description: Json Structs for serialization
  */
 
@@ -14,10 +14,11 @@ using System.Text;
 using System.Threading.Tasks;
 using TNetD.Address;
 using TNetD.Transactions;
+using TNetD.Types;
 
 namespace TNetD.Json.JS_Structs
 {
-    public enum RPCStatus { Failure, Success, Exception, ServerNotReady, ServerBusy, InvalidAPIUsage }
+    public enum RPCStatus { Failure, Success, Exception, ServerNotReady, ServerBusy, InvalidAPIUsage, Undefined }
 
     public class JS_Resp
     {
@@ -293,6 +294,49 @@ namespace TNetD.Json.JS_Structs
 
             AccountState = accountInfo.AccountState;
             LastTransactionTime = accountInfo.LastTransactionTime;
+        }
+
+        public JS_Resp GetResponse()
+        {
+            return new JS_Resp(RPCStatus.Success, this);
+        }
+    }
+
+    public class JS_WorkProofRequest : JS_Response
+    {    
+        public byte[] ProofRequest = new byte[16];
+        public DateTime IssueTime; // Consider changing it to long.
+        public int Difficulty;
+
+        public JS_WorkProofRequest(DifficultyTimeData difficultyTimeData)
+        {
+            Common.rngCsp.GetBytes(ProofRequest);
+            Difficulty = difficultyTimeData.Difficulty;
+            IssueTime = difficultyTimeData.IssueTime;
+        }
+
+        public JS_Resp GetResponse()
+        {
+            return new JS_Resp(RPCStatus.Success, this);
+        }
+    }
+
+    public class JS_AccountRegisterRequest : JS_Response
+    {
+        public byte[] PublicKey;
+        public string Name;
+        public string Address;
+
+        public byte[] ProofRequest;
+        public byte[] ProofResponse;
+
+        public JS_AccountRegisterRequest(byte[] publicKey, string name, string address, byte[] proofRequest, byte[] proofResponse)
+        {
+            PublicKey = publicKey;
+            Name = name;
+            Address = address;
+            ProofRequest = proofRequest;
+            ProofResponse = proofResponse;
         }
 
         public JS_Resp GetResponse()

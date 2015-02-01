@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TNetCommon")]
+[assembly: AssemblyTitle("TNet Common Library")]
 [assembly: AssemblyDescription("TNet Common Library")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Trestor Foundation")]

@@ -4,11 +4,13 @@
 // @Date: 1-2-3-6 Jan 2015
 // 15 Jan 2015 : Adding : NetworkType / AccountType
 // 22 Jan 2015 : IPersistentAccountStore.BatchFetch
+// 31 Jan 2015 : Oops !! Added Transactions
 
 // TODO: ASYNC/AWAIT
 
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Data.SQLite;
 using System.Linq;
 using System.Text;
@@ -39,6 +41,22 @@ namespace TNetD.PersistentStore
             using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE PublicKey = @publicKey;", sqliteConnection))
             {
                 cmd.Parameters.Add(new SQLiteParameter("@publicKey", publicKey.Hex));
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        public bool AccountExists(string name)
+        {
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE UserName = @userName;", sqliteConnection))
+            {
+                cmd.Parameters.Add(new SQLiteParameter("@userName", name));
                 using (SQLiteDataReader reader = cmd.ExecuteReader())
                 {
                     if (reader.HasRows)
@@ -156,14 +174,13 @@ namespace TNetD.PersistentStore
         }
 
         ////////////////////////
-
-
+        
         public DBResponse FetchAccount(out AccountInfo accountInfo, string UserName)
         {
             DBResponse response = DBResponse.FetchFailed;
             accountInfo = default(AccountInfo);
 
-            if(UserName.Length >= Constants.Pref_MinNameLength)
+            if (UserName.Length >= Constants.Pref_MinNameLength)
             {
                 using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE UserName = @userName;", sqliteConnection))
                 {
@@ -225,7 +242,7 @@ namespace TNetD.PersistentStore
 
             foreach (AccountInfo ai in accountInfoData)
             {
-                DBResponse resp = AddUpdate(ai);
+                DBResponse resp = AddUpdate(ai, st);
                 if ((resp == DBResponse.InsertSuccess) || (resp == DBResponse.UpdateSuccess))
                 {
                     Successes++;
@@ -236,13 +253,38 @@ namespace TNetD.PersistentStore
             return Successes;
         }
 
+        public int AddUpdateBatch(IEnumerable<AccountInfo> accountInfoData, DbTransaction transaction)
+        {
+            int Successes = 0;
+
+            foreach (AccountInfo ai in accountInfoData)
+            {
+                DBResponse resp = AddUpdate(ai, transaction);
+                if ((resp == DBResponse.InsertSuccess) || (resp == DBResponse.UpdateSuccess))
+                {
+                    Successes++;
+                }
+            }
+
+            return Successes;
+        }
+
         // //////////////////////////////////////
 
         public DBResponse AddUpdate(AccountInfo accountInfo)
         {
+            SQLiteTransaction st = sqliteConnection.BeginTransaction();
+            DBResponse resp = AddUpdate(accountInfo, st);
+            st.Commit();
+            return resp;
+        }
+
+        public DBResponse AddUpdate(AccountInfo accountInfo, DbTransaction transaction)
+        {
             bool doUpdate = false;
 
-            using (SQLiteCommand cmd = new SQLiteCommand("SELECT PublicKey FROM Ledger WHERE PublicKey = @publicKey;", sqliteConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT PublicKey FROM Ledger WHERE PublicKey = @publicKey;", 
+                sqliteConnection, (SQLiteTransaction)transaction))
             {
                 cmd.Parameters.Add(new SQLiteParameter("@publicKey", accountInfo.PublicKey.Hex));
                 using (SQLiteDataReader reader = cmd.ExecuteReader())
@@ -260,7 +302,8 @@ namespace TNetD.PersistentStore
             {
                 // /////////////  Perform the UPDATE  ///////////////
 
-                using (SQLiteCommand cmd = new SQLiteCommand("UPDATE Ledger SET UserName = @userName, Balance = @balance, AccountState = @accountState, NetworkType=@networkType, AccountType=@accountType, LastTransactionTime = @lastTransactionTime WHERE PublicKey = @publicKey;", sqliteConnection))
+                using (SQLiteCommand cmd = new SQLiteCommand("UPDATE Ledger SET UserName = @userName, Balance = @balance, AccountState = @accountState, NetworkType=@networkType, AccountType=@accountType, LastTransactionTime = @lastTransactionTime WHERE PublicKey = @publicKey;",
+                    sqliteConnection, (SQLiteTransaction)transaction))
                 {
                     cmd.Parameters.Add(new SQLiteParameter("@publicKey", accountInfo.PublicKey.Hex));
                     cmd.Parameters.Add(new SQLiteParameter("@userName", accountInfo.Name));
@@ -284,7 +327,8 @@ namespace TNetD.PersistentStore
             {
                 // /////////////  Perform the INSERT  ///////////////
 
-                using (SQLiteCommand cmd = new SQLiteCommand("INSERT INTO Ledger VALUES(@publicKey, @userName, @balance, @accountState, @networkType, @accountType, @lastTransactionTime);", sqliteConnection))
+                using (SQLiteCommand cmd = new SQLiteCommand("INSERT INTO Ledger VALUES(@publicKey, @userName, @balance, @accountState, @networkType, @accountType, @lastTransactionTime);",
+                    sqliteConnection, (SQLiteTransaction)transaction))
                 {
                     cmd.Parameters.Add(new SQLiteParameter("@publicKey", accountInfo.PublicKey.Hex));
                     cmd.Parameters.Add(new SQLiteParameter("@userName", accountInfo.Name));
@@ -316,7 +360,7 @@ namespace TNetD.PersistentStore
                 {
                     DBUtils.ExecuteNonQuery("CREATE TABLE Ledger (PublicKey BLOB PRIMARY KEY, UserName TEXT, Balance INTEGER, AccountState INTEGER, NetworkType INTEGER, AccountType INTEGER, LastTransactionTime INTEGER);", sqliteConnection);
 
-                    // Add an indes to have faster UserName fetches during transaction processing.
+                    // Add an index to have faster UserName fetches during transaction processing.
                     DBUtils.ExecuteNonQuery("CREATE INDEX Idx1 ON Ledger(PublicKey, UserName);", sqliteConnection);
                 }
 

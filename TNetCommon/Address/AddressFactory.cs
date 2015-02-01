@@ -193,6 +193,20 @@ namespace TNetD.Address
             return false;
         }
 
+        public static bool VerfiyAddress(out AddressData addressData, string Address, byte[] PublicKey, string UserName)
+        {
+            addressData = new AddressData(Address);
+
+            byte[] ExpectedAddress = GetAddress(PublicKey, UserName, addressData.NetworkType, addressData.AccountType);
+
+            if (Utils.ByteArrayEquals(addressData.AddressBinary, ExpectedAddress))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public static bool VerfiyAddress(string Address, byte[] PublicKey, string UserName, NetworkType networkType, AccountType accountType)
         {
             if (Address == Base58Encoding.EncodeWithCheckSum(GetAddress(PublicKey, UserName, networkType, accountType)))

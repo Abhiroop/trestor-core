@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,9 +32,32 @@ namespace TNetD.PersistentStore
         /// <summary>
         /// Adds or updates elements to the PersistentStore
         /// </summary>
+        /// <param name="accountInfoData"></param>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
+        int AddUpdateBatch(IEnumerable<AccountInfo> accountInfoData, DbTransaction transaction);
+
+        /// <summary>
+        /// Adds or updates elements to the PersistentStore
+        /// </summary>
         /// <param name="accountInfo"></param>
         /// <returns></returns>
         DBResponse AddUpdate(AccountInfo accountInfo);
+
+        /// <summary>
+        /// Adds or updates elements to the PersistentStore
+        /// </summary>
+        /// <param name="accountInfo"></param>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
+        DBResponse AddUpdate(AccountInfo accountInfo, DbTransaction transaction);
+
+        /// <summary>
+        /// Adds or updates elements to the PersistentStore
+        /// </summary>
+        /// <param name="accountInfo"></param>
+        /// <returns></returns>
+        //DBResponse AddUpdate(AccountInfo accountInfo);
 
         /// <summary>
         /// Deletes an element from the PersistentStore
@@ -71,14 +95,22 @@ namespace TNetD.PersistentStore
         /// <param name="publicKey"></param>
         /// <returns></returns>
         bool AccountExists(Hash publicKey);
-        
+
+
+        /// <summary>
+        /// Returns true if the account exists.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        bool AccountExists(string name);
+
         /// <summary>
         /// Deletes everything in the DB. Returns 'DeleteFailed' if already empty.
         /// ONLY FOR TEST. DO NOT USE.
         /// </summary>
         /// <returns></returns>
         Tuple<DBResponse, long> DeleteEverything();
-        
+
         DBResponse FetchAccount(out AccountInfo accountInfo, string UserName);
 
         int BatchFetch(out Dictionary<string, AccountInfo> accountInfoList, IEnumerable<string> AccountNames);

@@ -28,6 +28,7 @@ using TNetD.Network.Networking;
 using TNetD.PersistentStore;
 using TNetD.Transactions;
 using TNetD.Tree;
+using TNetD.Types;
 
 namespace TNetD.Nodes
 {
@@ -36,7 +37,6 @@ namespace TNetD.Nodes
 
     internal class Node : Responder
     {
-
         public event NodeStatusEventHandler NodeStatusEvent;
 
         bool TimerEventProcessed = true;
@@ -58,12 +58,17 @@ namespace TNetD.Nodes
         // public int InCandidatesCount;
         // public int InTransactionCount;
 
+        public Dictionary<Hash, DifficultyTimeData> WorkProofMap = new Dictionary<Hash, DifficultyTimeData>();
+
         public AccountInfo AI;
 
         public IPersistentAccountStore PersistentAccountStore;
         public IPersistentTransactionStore PersistentTransactionStore;
 
         Ledger ledger;
+
+        #region ConstructorsAndTimers
+
 
         public Ledger LocalLedger
         {
@@ -144,6 +149,9 @@ namespace TNetD.Nodes
             nodeState.NodeInfo.NodeDetails.TimeUTC = DateTime.UtcNow;
             nodeState.NodeInfo.LastLedgerInfo.Hash = ledger.GetRootHash().Hex;
 
+            nodeState.system_time = DateTime.UtcNow.ToFileTimeUtc();
+            nodeState.network_time = DateTime.UtcNow.ToFileTimeUtc();
+
             if (NodeStatusEvent != null)
             {
                 var json = JsonConvert.SerializeObject(nodeState.NodeInfo.GetResponse(), Common.JsonSerializerSettings);
@@ -178,6 +186,8 @@ namespace TNetD.Nodes
 
             });
         }
+
+        #endregion
 
         #region RPC HANDLING
 
@@ -238,13 +248,66 @@ namespace TNetD.Nodes
                     return true;
                 }
             }
+            else if (context.Request.RawUrl.Matches(@"^/request")) // Request a work proof
+            {
+                HandleWorkProofRequest(context);
+                return true;
+            }
+            else if (context.Request.RawUrl.Matches(@"^/register")) // Register Account
+            {
+                HandleAccountRegister(context);
+                return true;
+            }
 
             return false;
         }
 
+        private void HandleWorkProofRequest(HttpListenerContext context)
+        {
+            JS_Response resp = new JS_Msg("Starting Handler", RPCStatus.Undefined);
+
+            try
+            {
+                if (context.Request.QueryString.AllKeys.Length == 0)
+                {
+                    if (WorkProofMap.Count < Constants.WorkProofQueueLength)
+                    {
+                        DifficultyTimeData difficultyTimeData = new DifficultyTimeData(Constants.Difficulty, DateTime.UtcNow);
+
+                        resp = new JS_WorkProofRequest(difficultyTimeData);
+
+                        Hash Work = new Hash(((JS_WorkProofRequest)resp).ProofRequest);
+
+                        WorkProofMap.Add(Work,
+                            new DifficultyTimeData(((JS_WorkProofRequest)resp).Difficulty,
+                                ((JS_WorkProofRequest)resp).IssueTime));                        
+                    }
+                    else
+                    {
+                        resp = new JS_Msg("Server Busy.", RPCStatus.ServerBusy);
+                    }
+
+                }
+                else
+                {
+                    resp = new JS_Msg("Invalid API Usage.", RPCStatus.InvalidAPIUsage);
+                }
+
+                return;
+            }
+            catch
+            {
+                resp = new JS_Msg("Exception During Parsing", RPCStatus.Exception);
+            }
+            finally
+            {
+                this.SendJsonResponse(context, resp.GetResponse());
+            }
+        }
+
         private void HandleWalletQuery(HttpListenerContext context)
         {
-            JS_Msg msg = new JS_Msg("Exception During Parsing", RPCStatus.Exception);
+            JS_Response msg = new JS_Msg("Starting Handler", RPCStatus.Undefined);
 
             try
             {
@@ -271,14 +334,11 @@ namespace TNetD.Nodes
 
                 Tuple<AccountIdentifier, byte[]> accountData = AddressFactory.CreateNewAccount(NAME);
 
-                JS_Address addr = new JS_Address(accountData.Item1, accountData.Item2);
-
-                this.SendJsonResponse(context, addr.GetResponse());
-                return;
+                msg = new JS_Address(accountData.Item1, accountData.Item2);
             }
             catch
             {
-
+                msg = new JS_Msg("Exception During Parsing", RPCStatus.Exception);
             }
             finally
             {
@@ -346,7 +406,14 @@ namespace TNetD.Nodes
                     }
                 }
 
-                msg = new JS_Msg("History Fetch Success.", RPCStatus.Success);
+                if (replies.Transactions.Count > 0)
+                {
+                    msg = new JS_Msg("History Fetch Success.", RPCStatus.Success);
+                }
+                else
+                {
+                    msg = new JS_Msg("No Records Found.", RPCStatus.Failure);
+                }
             }
             catch
             {
@@ -360,7 +427,7 @@ namespace TNetD.Nodes
                 }
                 else
                 {
-                    this.SendJsonResponse(context, msg);
+                    this.SendJsonResponse(context, msg.GetResponse());
                 }
             }
         }
@@ -456,10 +523,6 @@ namespace TNetD.Nodes
                     TransactionProcessingResult.Accepted));
                 return;
             }
-
-
-
-
         }
 
         private void HandleAccountQuery(HttpListenerContext context)
@@ -651,6 +714,119 @@ namespace TNetD.Nodes
             this.SendJsonResponse(context, msg.GetResponse());
         }
 
+        private void HandleAccountRegister(HttpListenerContext context)
+        {
+            JS_Msg msg = new JS_Msg("Processing Initiated.", RPCStatus.Undefined);
+
+            if (context.Request.HttpMethod.ToUpper().Equals("POST") && context.Request.HasEntityBody &&
+                context.Request.ContentLength64 < Constants.PREFS_MAX_RPC_POST_CONTENT_LENGTH)
+            {
+                StreamReader inputStream = new StreamReader(context.Request.InputStream);
+
+                try
+                {
+                    TransactionContent transactionContent = new TransactionContent();
+
+                    string json = inputStream.ReadToEnd();
+                    JS_AccountRegisterRequest request = JsonConvert.DeserializeObject<JS_AccountRegisterRequest>(json,
+                        Common.JsonSerializerSettings);
+
+                    Hash proofRequest = new Hash(request.ProofRequest);
+
+                    if (WorkProofMap.ContainsKey(proofRequest))
+                    {
+                        int diff = WorkProofMap[proofRequest].Difficulty;
+
+                        if (WorkProof.VerifyProof(proofRequest.Hex, request.ProofResponse, diff))
+                        {
+                            AddressData AD = AddressFactory.DecodeAddressString(request.Address);
+
+                            bool TypesFine = true;
+
+                            if (Constants.IsMainNet)
+                            {
+                                if (AD.NetworkType != NetworkType.MainNet)
+                                {
+                                    msg = new JS_Msg("Invalid Network Type", RPCStatus.InvalidAPIUsage);
+                                    TypesFine = false;
+                                }
+
+                                if ((AD.AccountType != AccountType.MainNormal))
+                                {
+                                    msg = new JS_Msg("Invalid Account Type", RPCStatus.InvalidAPIUsage);
+                                    TypesFine = false;
+                                }
+                            }
+                            else
+                            {
+                                if (AD.NetworkType != NetworkType.TestNet)
+                                {
+                                    msg = new JS_Msg("Invalid Network Type", RPCStatus.InvalidAPIUsage);
+                                    TypesFine = false;
+                                }
+
+                                if ((AD.AccountType != AccountType.TestNormal))
+                                {
+                                    msg = new JS_Msg("Invalid Account Type", RPCStatus.InvalidAPIUsage);
+                                    TypesFine = false;
+                                }
+                            }
+
+                            if (TypesFine)
+                            {
+                                AddressData addressData;
+                                if (AddressFactory.VerfiyAddress(out addressData, request.Address, request.PublicKey, request.Name))
+                                {
+                                    AccountInfo newAccountInfo = new AccountInfo(new Hash(request.PublicKey), 0, request.Name, AccountState.Normal,
+                                        addressData.NetworkType, addressData.AccountType, nodeState.network_time);
+
+                                    bool ExistsPK = PersistentAccountStore.AccountExists(new Hash(request.PublicKey));
+                                    bool ExistsName = PersistentAccountStore.AccountExists(request.Name);
+
+                                    if (!ExistsPK && !ExistsName)
+                                    {
+                                        if (PersistentAccountStore.AddUpdate(newAccountInfo) == DBResponse.InsertSuccess)
+                                        {
+                                            ledger.AddUpdateBatch(new AccountInfo[] { newAccountInfo });
+                                            msg = new JS_Msg("Account Successfully Added", RPCStatus.Success);
+                                        }
+                                        else
+                                        {
+                                            msg = new JS_Msg("Server Database Busy", RPCStatus.Exception);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        msg = new JS_Msg("Account Already Exists", RPCStatus.Failure);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            msg = new JS_Msg("Proof Verification Failed", RPCStatus.Failure);
+                        }
+
+                    } // End IF - workproofmap      
+                    else
+                    {
+                        msg = new JS_Msg("No Such Request Issued", RPCStatus.Failure);
+                    }
+                }
+                catch
+                {
+                    msg = new JS_Msg("Malformed Request.", RPCStatus.Failure);
+                }
+
+            }
+            else
+            {
+                msg = new JS_Msg("Improper usage. Need to use HTTP POST with 'Account Register Request' as Content.", RPCStatus.InvalidAPIUsage);
+            }
+
+            this.SendJsonResponse(context, msg.GetResponse());
+        }
+
         #endregion
 
         void network_PacketReceived(Hash publicKey, NetworkPacket packet)
@@ -664,14 +840,6 @@ namespace TNetD.Nodes
 
             network.Stop();
             restServer.Stop();
-
-            /*if (background_Load != null)
-            {
-                if (background_Load.IsAlive)
-                {
-                    background_Load.Abort();
-                }
-            }*/
         }
 
         async Task SendInitialize(Hash publicKey)
@@ -789,7 +957,6 @@ namespace TNetD.Nodes
                                                 }
                                             }
                                         }
-
 
                                         totalTransactionFees += transactionContent.TransactionFee;
 
@@ -934,10 +1101,15 @@ namespace TNetD.Nodes
                                         {
                                             //TODO: LOG THIS and Display properly.
                                             DisplayUtils.Display("BAD Transaction : " + HexUtil.ToString(transactionContent.TransactionID.Hex) + "\n" +
-                                              "badSource= " + badSource + "badAccountCreationValue= " + badAccountCreationValue +
-                                              "badAccountState= " + badAccountState + "insufficientFunds= " + insufficientFunds +
-                                              "badAccountName_inTransaction= " + badAccountName_inTransaction +
-                                              "badAccountAddress_inTransaction= " + badAccountAddress_inTransaction + "\n", DisplayType.BadData);
+                                                (badSource ? "\nbadSource" : "") +
+                                                (badAccountCreationValue ? "\nbadAccountCreationValue" : "") +
+                                                (insufficientFunds ? "\ninsufficientFunds" : "") +
+                                                (badAccountName_inTransaction ? "\nbadAccountName_inTransaction" : "") +
+                                                (badAccountAddress_inTransaction ? "\nbadAccountAddress_inTransaction" : "") + "\n" +
+
+                                                JsonConvert.SerializeObject(transactionContent, Common.JsonSerializerSettings)
+
+                                                + "\n", DisplayType.BadData);
                                         }
                                     }
                                 }
@@ -1003,12 +1175,16 @@ namespace TNetD.Nodes
 
                                 if (ledgerAccount.LastTransactionTime != persistentAccount.LastTransactionTime)
                                 {
-                                    throw new Exception("Persistent DB or Ledger unauthorized overwrite Time. #1");
+                                    throw new Exception("Persistent DB or Ledger unauthorized overwrite Time. #1 : \nLedgerAccount : " +
+                                     JsonConvert.SerializeObject(ledgerAccount, Common.JsonSerializerSettings) + "\nPersistentAccount :" +
+                                     JsonConvert.SerializeObject(persistentAccount, Common.JsonSerializerSettings) + "\n");
                                 }
 
                                 if (ledgerAccount.Money != persistentAccount.Money)
                                 {
-                                    throw new Exception("Persistent DB or Ledger unauthorized overwrite Value. #1");
+                                    throw new Exception("Persistent DB or Ledger unauthorized overwrite Value. #1 : \nLedgerAccount : " +
+                                     JsonConvert.SerializeObject(ledgerAccount, Common.JsonSerializerSettings) + "\nPersistentAccount :" +
+                                     JsonConvert.SerializeObject(persistentAccount, Common.JsonSerializerSettings) + "\n");
                                 }
                             }
                             else
@@ -1024,6 +1200,8 @@ namespace TNetD.Nodes
 
                         // This essentially gets values from Ledger Tree and updates the Persistent-DB
 
+                        DateTime TimeNow = DateTime.UtcNow;
+
                         foreach (KeyValuePair<Hash, TreeDiffData> kvp in pendingDifferenceData)
                         {
                             TreeDiffData diffData = kvp.Value;
@@ -1037,6 +1215,7 @@ namespace TNetD.Nodes
 
                             ledgerAccount.Money += diffData.AddValue;
                             ledgerAccount.Money -= diffData.RemoveValue;
+                            ledgerAccount.LastTransactionTime = TimeNow.ToFileTimeUtc();
 
                             ledger[diffData.PublicKey] = ledgerAccount;
 
@@ -1076,7 +1255,7 @@ namespace TNetD.Nodes
             }
             else
             {
-                DisplayUtils.Display("Timer Expired : Node", DisplayType.Warning);
+                DisplayUtils.Display("Timer Expired : Consensus / Node", DisplayType.Warning);
             }
 
             TimerEventProcessed = true;
@@ -1116,9 +1295,27 @@ namespace TNetD.Nodes
             return Tres;
         }
 
-        void InitializeValuesFromGlobalLedger()
-        {
 
+        public async Task<long> CalculateTotalMoneyFromLedgerTreeAsync()
+        {
+            long Tres = 0;
+
+            await Task.Run(() =>
+            {
+                long LeafDataCount = 0;
+                long FoundNodes = 0;
+
+                ledger.LedgerTree.TraverseAllNodes(ref LeafDataCount, ref FoundNodes, (X) =>
+                {
+                    foreach (AccountInfo AI in X)
+                    {
+                        Tres += AI.Money;
+                    }
+                    return TreeResponseType.NothingDone;
+                });
+            });
+
+            return Tres;
         }
 
         public long Money

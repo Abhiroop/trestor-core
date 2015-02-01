@@ -83,7 +83,7 @@ namespace TNetD
         public static byte TransportVersion = 1;
         public static byte ProtocolVersion = 1;
 
-        public static int Difficulty = 0; // 17;
+        public static int Difficulty = 5; // 17;
               
         // ////////////////////// Counters ////////////////
 
@@ -126,6 +126,15 @@ namespace TNetD
         /// Minimum Level to be displayed.
         /// </summary>
         public static readonly DisplayType DebugLevel = DisplayType.ImportantInfo;
+        
+        public static readonly bool IsMainNet = false;
+
+        /// <summary>
+        /// Number of pending work proofs, before new entries are rejected.
+        /// </summary>
+        public static readonly int WorkProofQueueLength = 50000;
+        
+        
         
     }
 }
