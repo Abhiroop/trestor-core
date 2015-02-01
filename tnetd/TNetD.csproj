@@ -172,7 +172,6 @@
     <Compile Include="Tree\TreeNode.cs" />
     <Compile Include="Network\Networking\StructsAndEnums.cs" />
     <Compile Include="Utils\TNetUtils.cs" />
-    <Compile Include="Network\Networking\WorkProof.cs" />
     <Page Include="UI\ColoredTB.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

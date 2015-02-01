@@ -37,7 +37,7 @@ namespace TNetTest
         List<GenesisAccountData> GAD = new List<GenesisAccountData>();
 
         Queue<string> Log = new Queue<string>();
-        
+
         void WriteLog(string data)
         {
             Log.Enqueue(data);
@@ -90,7 +90,7 @@ namespace TNetTest
             byte[] PrivSeedSender = Src.RandomPrivate;
             string SenderName = Src.Name;
 
-            AccountIdentifier identifierSrc = AddressFactory.PrivateKeyToAccount(PrivSeedSender, SenderName);
+            AccountIdentifier identifierSrc = AddressFactory.PrivateKeyToAccount(PrivSeedSender, SenderName, NetworkType.TestNet, AccountType.TestGenesis);
 
             byte[] PubSrc;
             byte[] PrivSrcExpanded;
@@ -177,7 +177,43 @@ namespace TNetTest
 
         private void button_TransactionsVerify_Click(object sender, RoutedEventArgs e)
         {
-            foreach (Hash txid in TX_IDs)
+
+            RESTRequest request = new RESTRequest("request", Grapevine.HttpMethod.GET);
+
+            RESTResponse response = client.Execute(request);
+
+            string json = response.Content;
+            
+            WriteLog("\n ACC_WORK:" + json + " \n");
+
+            JS_Resp_WorkProofRequest_Outer jwr_ = JsonConvert.DeserializeObject<JS_Resp_WorkProofRequest_Outer>(json, Common.JsonSerializerSettings);
+
+            JS_WorkProofRequest jwr = jwr_.Data;
+
+            byte[] Proof = WorkProof.CalculateProof(jwr.ProofRequest, jwr.Difficulty);
+
+            byte[] AID = new byte[8];
+
+            Common.rngCsp.GetBytes(AID);
+
+            var acc = AddressFactory.CreateNewAccount("punisher_" + HexUtil.ToString(AID));
+
+            JS_AccountRegisterRequest jarr = new JS_AccountRegisterRequest(acc.Item1.PublicKey, acc.Item1.Name,
+                acc.Item1.AddressData.AddressString, jwr.ProofRequest, Proof);
+
+            RESTRequest registerRequest = new RESTRequest("register", Grapevine.HttpMethod.POST);
+
+            registerRequest.ContentType = Grapevine.ContentType.JSON;
+            registerRequest.Payload = JsonConvert.SerializeObject(jarr, Common.JsonSerializerSettings);
+
+            WriteLog("\n PAYLOAD:" + registerRequest.Payload + " \n");
+
+            RESTResponse acc_resp = client.Execute(registerRequest);
+            
+            WriteLog("\n ACC_RESPONSE:" + acc_resp.Content + " \n");
+
+
+            /*foreach (Hash txid in TX_IDs)
             {
                 WriteLog("Sending TxStatus:" + txid.ToString());
 
@@ -189,7 +225,7 @@ namespace TNetTest
 
                 WriteLog(response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n");
 
-            }
+            }*/
         }
 
         private void button_MEM_HARD_Start_Click(object sender, RoutedEventArgs e)

@@ -192,6 +192,7 @@
     <Compile Include="Types\LeafDataType.cs" />
     <Compile Include="Types\CommonStructs.cs" />
     <Compile Include="Utils.cs" />
+    <Compile Include="WorkProof.cs" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Chaos.NaCl\Internal\Salsa\replace regex.txt" />

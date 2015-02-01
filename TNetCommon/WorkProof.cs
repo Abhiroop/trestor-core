@@ -10,9 +10,9 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace TNetD.Network.Networking
+namespace TNetD
 {
-    static class WorkProof
+    public static class WorkProof
     {
         // Specifies the number of zeros in increasing order
 

@@ -85,6 +85,7 @@ namespace TNetD.Nodes
 
         System.Timers.Timer TimerConsensus;
         System.Timers.Timer TimerSecond;
+        System.Timers.Timer TimerMinute;
 
         // TODO: MAKE PRIVATE : AND FAST
         public NodeConfig nodeConfig = default(NodeConfig);
@@ -137,12 +138,50 @@ namespace TNetD.Nodes
             TimerSecond.Interval = 100;
             TimerSecond.Start();
 
+            TimerMinute = new System.Timers.Timer();
+            TimerMinute.Elapsed += TimerMinute_Elapsed;
+            TimerMinute.Enabled = true;
+            TimerMinute.Interval = 60000;
+            TimerMinute.Start();
+
             restServer = new RESTServer("localhost", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
 
             restServer.Start();
 
             DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
         }
+
+        void TimerMinute_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            Hash[] Kys = WorkProofMap.Keys.ToArray();
+
+            try
+            {
+                DateTime NOW = DateTime.UtcNow;
+
+                // Clean temporary proof of work Queue
+                // TODO : CRITICAL : Make sure the valid ones are removed, and not the critical ones.
+
+                foreach (Hash key in Kys)
+                {
+                    DifficultyTimeData dtd;
+                    if (WorkProofMap.TryGetValue(key, out dtd))
+                    {
+                        TimeSpan span = (NOW - dtd.IssueTime);
+                        if (span.TotalSeconds > 90) // 1.5 Minutes
+                        {
+                            WorkProofMap.Remove(key);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                DisplayUtils.Display("TimerMinute_Elapsed", ex);
+            }
+        }
+
+        //WorkProofMap
 
         void TimerSecond_Elapsed(object sender, ElapsedEventArgs e)
         {
@@ -275,12 +314,13 @@ namespace TNetD.Nodes
                         DifficultyTimeData difficultyTimeData = new DifficultyTimeData(Constants.Difficulty, DateTime.UtcNow);
 
                         resp = new JS_WorkProofRequest(difficultyTimeData);
+                        ((JS_WorkProofRequest)resp).InitRequest();
 
                         Hash Work = new Hash(((JS_WorkProofRequest)resp).ProofRequest);
 
                         WorkProofMap.Add(Work,
                             new DifficultyTimeData(((JS_WorkProofRequest)resp).Difficulty,
-                                ((JS_WorkProofRequest)resp).IssueTime));                        
+                                ((JS_WorkProofRequest)resp).IssueTime));
                     }
                     else
                     {

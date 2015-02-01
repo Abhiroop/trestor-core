@@ -82,7 +82,7 @@ namespace TNetD.Address
         }
 
         public static AccountIdentifier PrivateKeyToAccount(byte[] PrivateSecretSeed, string Name = "",
-            NetworkType NetworkType = NetworkType.MainNet, AccountType AccountType = AccountType.MainNormal)
+            NetworkType NetworkType =  NetworkType.MainNet, AccountType AccountType = AccountType.MainNormal)
         {
             byte[] PublicKey;
             byte[] SecretKeyExpanded;

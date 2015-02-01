@@ -302,6 +302,28 @@ namespace TNetD.Json.JS_Structs
         }
     }
 
+    /// <summary>
+    /// Ugly Hack, fix ME !!!
+    /// TODO: Only used to receive json, but still !!! fix me !!!
+    /// </summary>
+    public class JS_Resp_WorkProofRequest_Outer
+    {
+        public RPCStatus Status = RPCStatus.Failure;
+        public JS_WorkProofRequest Data;
+
+        public JS_Resp_WorkProofRequest_Outer()
+        {
+
+        }
+
+        public JS_Resp_WorkProofRequest_Outer(RPCStatus status, JS_WorkProofRequest Data)
+        {
+            this.Status = status;
+            this.Data = Data;
+        }
+    }
+
+
     public class JS_WorkProofRequest : JS_Response
     {    
         public byte[] ProofRequest = new byte[16];
@@ -310,9 +332,14 @@ namespace TNetD.Json.JS_Structs
 
         public JS_WorkProofRequest(DifficultyTimeData difficultyTimeData)
         {
-            Common.rngCsp.GetBytes(ProofRequest);
+            
             Difficulty = difficultyTimeData.Difficulty;
             IssueTime = difficultyTimeData.IssueTime;
+        }
+
+        public void InitRequest()
+        {
+            Common.rngCsp.GetBytes(ProofRequest);
         }
 
         public JS_Resp GetResponse()
