@@ -60,7 +60,7 @@ namespace TNetD.Nodes
             WorkDirectory = /*AppDomain.CurrentDomain.BaseDirectory +*/ "NODE_" + NodeID;
 
             // TODO: FIX THIS, TAKE THIS FROM, DB
-            Name = WorkDirectory;
+            Name = WorkDirectory.ToLowerInvariant();
 
             this.NodeID = NodeID;
             this.GlobalConfiguration = GlobalConfiguration;
@@ -379,7 +379,7 @@ namespace TNetD.Nodes
             info.Organisation = Organisation;
             info.Platform = Platform;
             info.PublicKey = PublicKey.Hex;
-            info.Version = "0.1 pre-release (development)";
+            info.Version = "0.2 alpha-release (development)";
 
             return info;
         }

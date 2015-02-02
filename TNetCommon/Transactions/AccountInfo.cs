@@ -142,6 +142,8 @@ namespace TNetD.Transactions
         public AccountInfo(Hash publicKey, long money, string name, AccountState accountState,
             NetworkType networkType, AccountType accountType, long lastTransactionTime)
         {
+            if (name != name.ToLowerInvariant()) throw new ArgumentException("Usernames should have lowercase.");
+
             this.publicKey = publicKey;
             this.money = money;
             this.name = name;

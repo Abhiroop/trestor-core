@@ -115,6 +115,8 @@ namespace TNetD.Address
         /// </summary>
         public static byte[] GetAddress(byte[] PublicKey, string UserName, NetworkType networkType, AccountType accountType)
         {
+            if (UserName != UserName.ToLowerInvariant()) throw new ArgumentException("Usernames should have lowercase.");
+
             //Contract.Requires<ArgumentException>(PublicKey != null);
             //Contract.Requires<ArgumentException>(UserName != null);
             //Contract.Requires<ArgumentException>(PublicKey.Length == 32, "Public key length must be 32 bytes.");
@@ -185,6 +187,8 @@ namespace TNetD.Address
         {
             AddressData address = new AddressData(Address);
 
+            if (UserName != UserName.ToLowerInvariant()) return false;
+
             byte[] ExpectedAddress = GetAddress(PublicKey, UserName, address.NetworkType, address.AccountType);
 
             if (Utils.ByteArrayEquals(address.AddressBinary, ExpectedAddress))
@@ -199,6 +203,8 @@ namespace TNetD.Address
         {
             addressData = new AddressData(Address);
 
+            if (UserName != UserName.ToLowerInvariant()) return false;            
+
             byte[] ExpectedAddress = GetAddress(PublicKey, UserName, addressData.NetworkType, addressData.AccountType);
 
             if (Utils.ByteArrayEquals(addressData.AddressBinary, ExpectedAddress))
@@ -211,6 +217,8 @@ namespace TNetD.Address
 
         public static bool VerfiyAddress(string Address, byte[] PublicKey, string UserName, NetworkType networkType, AccountType accountType)
         {
+            if (UserName != UserName.ToLowerInvariant()) return false;  
+
             if (Address == Base58Encoding.EncodeWithCheckSum(GetAddress(PublicKey, UserName, networkType, accountType)))
             {
                 return true;

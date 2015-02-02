@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -66,7 +67,7 @@ namespace TNetD.Protocol
 
         public static byte[] Encode(long value)
         {
-            long val = value;
+            long val = value;// ; (value << 1) ^ (value >> 63);
 
             int bitLength = GetBitLength(value);
 
@@ -198,8 +199,8 @@ namespace TNetD.Protocol
 
                 if ((Long != Decoded))
                 {
-                    Console.Write(Long + " - " + " - " + HexUtil.ToString(enc));
-                    Console.WriteLine(" TEST FAIL ---------------------------");
+                    Debug.Write(Long + " - " + " - " + HexUtil.ToString(enc));
+                    Debug.WriteLine(" TEST FAIL ---------------------------");
                     return;
                 }
 
@@ -212,7 +213,7 @@ namespace TNetD.Protocol
 
             watch.Stop();
 
-            Console.WriteLine(" TEST FINISHED ---------------------------\n Varint :" + varintBytes + "\n Varint 2: " + varint2Bytes +
+            Debug.WriteLine(" TEST FINISHED ---------------------------\n Varint :" + varintBytes + "\n Varint 2: " + varint2Bytes +
                 "\n\n Time Taken: " + watch.ElapsedMilliseconds  + " (ms)"      
                 );
         }

@@ -21,7 +21,7 @@ namespace TNetD
         /// <summary>
         /// Minimum allowable Account Name Length
         /// </summary>
-        public static readonly int Pref_MinNameLength = 3;
+        public static readonly int Pref_MinNameLength = 2;
 
         public static readonly int GlobalNodes = 100;
 
@@ -49,7 +49,7 @@ namespace TNetD
         ///  Minimum 10 trest balance.
         ///  [CRITICAL: FIX ME !!!]
         /// </summary>
-        public static readonly long FIN_MIN_BALANCE = 0; //10000000;
+        public static readonly long FIN_MIN_BALANCE = 1; //10000000;
 
         public static readonly long DB_HISTORY_LIMIT = 1000;
        
@@ -65,9 +65,9 @@ namespace TNetD
         /// <summary>
         /// Number of Tre's per Genesis Account. Currently equivalent to 100,000 USD (1 T = 1 US Cent).
         /// </summary>
-        public static readonly long FIN_TRE_PER_GENESIS_ACCOUNT = 10000000000000;
+        public static readonly long FIN_TRE_PER_GENESIS_ACCOUNT = 1000000000000000;
 
-        ///////////////////////////////////////////////////////   10000000000000 = 100 Billion * [10^6] / 10000 Genesis Accounts
+        ///////////////////////////////////////////////////////   1000000000000000 = 100 Billion * [10^6] / 100 Genesis Accounts
 
         public static readonly int Network_UpdateFrequencyMS = 100;
         public static readonly int Network_DefaultListenPort = 2015;

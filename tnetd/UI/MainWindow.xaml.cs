@@ -24,6 +24,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TNetD.Address;
+using TNetD.Ledgers;
 using TNetD.Network.Networking;
 using TNetD.Nodes;
 using TNetD.PersistentStore;
@@ -59,6 +60,8 @@ namespace TNetD
             background_Load = new Thread(LoadNodes);
 
             background_Load.Start();
+
+            Title += " | " + Common.NetworkType.ToString();
 
 
             //System.Timers.Timer tmr_UI = new System.Timers.Timer(100);
@@ -287,24 +290,6 @@ namespace TNetD
         {
             CreateTransaction ct = new CreateTransaction();
             ct.Show();
-
-            /*StringBuilder sb = new StringBuilder();
-            AddressFactory af = new AddressFactory();
-
-            for (int j = 0; j < 256; j++)
-            {
-                for (int i = 0; i < 256; i++)
-                {
-                    af.NetworkType = (byte)j;
-                    af.AccountType = (byte)i;
-
-                    byte[] Address = af.GetAddress(nodes[0].PublicKey.Hex, "arpan");
-                    sb.AppendLine("" + i + " - " + j + " - " + af.GetAddressString(Address));
-                }
-            }
-
-            File.WriteAllText("tk.txt", sb.ToString());
-            DisplayUtils.Display("DONE.");*/
         }
 
         private void menu_CreateAccount_Click(object sender, RoutedEventArgs e)
@@ -318,31 +303,25 @@ namespace TNetD
             if (MessageBoxResult.Yes == MessageBox.Show("Do you really want to reset the current state. All state information will be lost.",
                 "Ledger State Reset !!!", MessageBoxButton.YesNo))
             {
-                GenesisFileParser gfp = new GenesisFileParser("ACCOUNTS.GEN_PUBLIC");
-
                 List<AccountInfo> aiData = new List<AccountInfo>();
-                List<GenesisAccountData> gData;
 
-                gfp.GetAccounts(out gData);
+                string[] Accs = Common.NetworkType == NetworkType.MainNet ? GenesisRawData.MainNet : GenesisRawData.TestNet;
 
-                // Fetch Genesis Data / TEMP
-                foreach (GenesisAccountData gad in gData)
+                foreach (string acc in Accs)
                 {
-                    AccountInfo ai = new AccountInfo(new Hash(gad.Public), Constants.FIN_TRE_PER_GENESIS_ACCOUNT);
+                    AccountIdentifier AI = new AccountIdentifier();
+                    AI.Deserialize(Convert.FromBase64String(acc));
 
-                    byte[] Address = Base58Encoding.DecodeWithCheckSum(gad.Address);
+                    AccountInfo ai = new AccountInfo(new Hash(AI.PublicKey), Constants.FIN_TRE_PER_GENESIS_ACCOUNT);
+                    
+                    ai.NetworkType = AI.AddressData.NetworkType;
+                    ai.AccountType = AI.AddressData.AccountType;
 
-                    if (Address.Length == 22)
-                    {
-                        ai.NetworkType = (NetworkType)Address[0];
-                        ai.AccountType = (AccountType)Address[1];
+                    ai.AccountState = AccountState.Normal;
+                    ai.LastTransactionTime = 0;
+                    ai.Name = AI.Name;
 
-                        ai.AccountState = AccountState.Normal;
-                        ai.LastTransactionTime = 0;
-                        ai.Name = gad.Name;
-
-                        aiData.Add(ai);
-                    }
+                    aiData.Add(ai);
                 }
 
                 // Write to nodes
@@ -350,10 +329,11 @@ namespace TNetD
                 {
                     var resp = n.PersistentAccountStore.DeleteEverything();
 
-                    n.PersistentAccountStore.AddUpdateBatch(aiData);
+                    n.PersistentAccountStore.AddUpdateBatch(aiData);                   
                 }
 
-                MessageBox.Show("ACCOUNTS RESET. It will take some time to synchronise with the network to resume normal operation.");
+                MessageBox.Show("ACCOUNTS RESET. It will take some time to synchronise with the network to resume normal operation." + 
+                    "\nApplication restart needed for proper operation.");
             }
         }
 
@@ -365,7 +345,6 @@ namespace TNetD
             MessageBox.Show("Total Balances\n\nPersistent: " + Value_Persistent +
                 "\n\nTree: " + Value_Tree);
         }
-
 
     }
 }

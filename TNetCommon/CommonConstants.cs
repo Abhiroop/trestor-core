@@ -24,16 +24,14 @@ namespace TNetD
         
         public static readonly int NETWORK_Min_Transaction_Fee = 0;//100000; // ~ 0.1 US Cent, approx, initial value.
 
-        public static readonly int NETWORK_Min_Transaction_Value_SrcDest = 0;
-        public static readonly int NETWORK_Min_Transaction_TotalValue = 0;
+        public static readonly int NETWORK_Min_Transaction_Value_SrcDest = 1;
+        public static readonly int NETWORK_Min_Transaction_TotalValue = 1;
 
         public static JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings();
-
-
+        
         public static readonly int UI_TextBox_Max_Length = 20000;
-
-
-        public static readonly NetworkType NetworkType = Address.NetworkType.TestNet;
+        
+        public static readonly NetworkType NetworkType = Address.NetworkType.MainNet;
         
         /// <summary>
         ///  TODO: BAD/ REMOVE STATIC METHOD

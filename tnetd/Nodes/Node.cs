@@ -621,9 +621,9 @@ namespace TNetD.Nodes
 
                             foreach (string name in names)
                             {
-                                if (ledger.NameAccountInfoMap.ContainsKey(name))
+                                if (ledger.NameAccountInfoMap.ContainsKey(name.ToLowerInvariant()))
                                 {
-                                    AccountInfo _ai = ledger.NameAccountInfoMap[name];
+                                    AccountInfo _ai = ledger.NameAccountInfoMap[name.ToLowerInvariant()];
                                     replies.Accounts.Add(new JS_AccountReply(_ai));
                                 }
                             }
@@ -972,6 +972,12 @@ namespace TNetD.Nodes
 
                                         foreach (TransactionEntity te in transactionContent.Destinations)
                                         {
+                                            if(te.Name != te.Name.ToLowerInvariant())
+                                            {
+                                                badAccountName_inTransaction = true; // Names should be lowercase.
+                                                break;
+                                            }
+
                                             AccountInfo ai;
                                             if (PersistentAccountStore.FetchAccount(out ai, new Hash(te.PublicKey)) == DBResponse.FetchSuccess)
                                             {
@@ -981,9 +987,9 @@ namespace TNetD.Nodes
                                                     badAccountName_inTransaction = true;
                                                     break;
                                                 }
-
+                                                
                                                 string Addr = ai.GetAddress();
-
+                                                
                                                 if (Addr != te.Address)
                                                 {
                                                     badAccountAddress_inTransaction = true;
@@ -1078,6 +1084,7 @@ namespace TNetD.Nodes
                                                 // Need to create Account
                                                 if (destination.Value >= Constants.FIN_MIN_BALANCE)
                                                 {
+
                                                     AddressData ad = AddressFactory.DecodeAddressString(destination.Address);
 
                                                     AccountInfo ai = new AccountInfo(PK, 0, destination.Name, AccountState.Normal,
