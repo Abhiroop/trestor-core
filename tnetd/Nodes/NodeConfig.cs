@@ -39,6 +39,7 @@ namespace TNetD.Nodes
 
         public string Path_AccountDB;
         public string Path_TransactionDB;
+        public string Path_BannedNamesDB;
 
         public NetworkConfig NetworkConfig = new NetworkConfig();
 
@@ -59,8 +60,7 @@ namespace TNetD.Nodes
 
             WorkDirectory = /*AppDomain.CurrentDomain.BaseDirectory +*/ "NODE_" + NodeID;
 
-            // TODO: FIX THIS, TAKE THIS FROM, DB
-            Name = WorkDirectory.ToLowerInvariant();
+            
 
             this.NodeID = NodeID;
             this.GlobalConfiguration = GlobalConfiguration;
@@ -111,11 +111,22 @@ namespace TNetD.Nodes
             UpdateFrequencyConsensusMS = Constants.Node_UpdateFrequencyConsensusMS;
             UpdateFrequencyPacketProcessMS = Constants.Node_UpdateFrequencyPacketProcessMS;
 
+            Path_BannedNamesDB = GetInitString("PersistentDatabase", "BannedNamesDB", WorkDirectory + "\\BannedNames.sqlite3");
+
+            DisplayUtils.Display(" Node " + NodeID + " | Banned Names DB Path    : " + Path_BannedNamesDB);
+
             // /////////////////////
 
             Organisation = GetInitString("Info", "Organisation", "_unspecified_");
             Email = GetInitString("Info", "Email", "_unspecified_");
             Platform = GetInitString("Info", "Platform", "_unspecified_");
+
+            byte[] RAND_PART = new byte[8];
+
+            Common.rngCsp.GetBytes(RAND_PART);
+
+            // TODO: FIX THIS, TAKE THIS FROM, DB
+            Name = GetInitString("Info", "Name", "name" + HexUtil.ToString(RAND_PART).ToLowerInvariant());
         }
 
         /// <summary>

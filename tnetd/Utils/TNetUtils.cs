@@ -10,7 +10,9 @@ namespace TNetD
     public enum Verbosity { NoDisplay, Errors, Warning, Info, ExtraInfo };
 
     class TNetUtils
-    { 
+    {
+        
+
 
         public static Hash GenerateNewToken()
         {

@@ -65,6 +65,8 @@ namespace TNetD.Nodes
         public IPersistentAccountStore PersistentAccountStore;
         public IPersistentTransactionStore PersistentTransactionStore;
 
+        public SQLiteBannedNames PersistentBannedNameStore;
+
         Ledger ledger;
 
         #region ConstructorsAndTimers
@@ -117,6 +119,7 @@ namespace TNetD.Nodes
 
             PersistentAccountStore = new SQLiteAccountStore(nodeConfig);
             PersistentTransactionStore = new SQLiteTransactionStore(nodeConfig);
+            PersistentBannedNameStore = new SQLiteBannedNames(nodeConfig);
 
             AI = new AccountInfo(PublicKey, Money);
 
@@ -144,7 +147,7 @@ namespace TNetD.Nodes
             TimerMinute.Interval = 60000;
             TimerMinute.Start();
 
-            restServer = new RESTServer("localhost", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
+            restServer = new RESTServer("+", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
 
             restServer.Start();
 
@@ -297,9 +300,57 @@ namespace TNetD.Nodes
                 HandleAccountRegister(context);
                 return true;
             }
+            /*else if (context.Request.RawUrl.Matches(@"^/validname")) // Register Account
+            {
+                HandleValidName(context);
+                return true;
+            }*/
 
             return false;
         }
+
+        /*private void HandleValidName(HttpListenerContext context)
+        {
+            JS_Response msg = new JS_Msg("Starting Handler", RPCStatus.Undefined);
+
+            try
+            {
+                string NAME = "";
+                string name = context.Request.QueryString["n"];
+
+                if (!String.IsNullOrEmpty(name))
+                {
+                    string[] _name = name.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (_name.Length == 1)
+                    {
+                        if (_name[0].Length >= Constants.Pref_MinNameLength)
+                        {
+                            NAME = name;
+                        }
+                        else
+                        {
+                            msg = new JS_Msg("Invalid Name Length.", RPCStatus.Exception);
+                        }
+                    }
+                    else
+                    {
+                        msg = new JS_Msg("Invalid Name Length.", RPCStatus.Exception);
+                    }
+                }
+                else
+                {
+                    msg = new JS_Msg("Invalid Arguments", RPCStatus.Exception);
+                }
+            }
+            catch
+            {
+                msg = new JS_Msg("Exception During Parsing", RPCStatus.Exception);
+            }
+            finally
+            {
+                this.SendJsonResponse(context, msg);
+            }
+        }*/
 
         private void HandleWorkProofRequest(HttpListenerContext context)
         {
@@ -754,6 +805,20 @@ namespace TNetD.Nodes
             this.SendJsonResponse(context, msg.GetResponse());
         }
 
+
+        bool IsGoodValidUserName(string Name)
+        {
+            if ((Name.Length <= Constants.Pref_MinNameLength)) return false;
+
+            if ((Name.Length >= Constants.Pref_MaxNameLength)) return false;
+            
+            if (!Utils.ValidateUserName(Name)) return false;
+
+            if (PersistentBannedNameStore.Contains(Name)) return false;
+
+            return true;
+        }
+
         private void HandleAccountRegister(HttpListenerContext context)
         {
             JS_Msg msg = new JS_Msg("Processing Initiated.", RPCStatus.Undefined);
@@ -817,35 +882,44 @@ namespace TNetD.Nodes
                                 AddressData addressData;
                                 if (AddressFactory.VerfiyAddress(out addressData, request.Address, request.PublicKey, request.Name))
                                 {
-                                    if(addressData.ValidateAccountType())
+                                    if (addressData.ValidateAccountType())
                                     {
                                         AccountInfo newAccountInfo = new AccountInfo(new Hash(request.PublicKey), 0, request.Name, AccountState.Normal,
                                         addressData.NetworkType, addressData.AccountType, nodeState.network_time);
 
-                                        bool ExistsPK = PersistentAccountStore.AccountExists(new Hash(request.PublicKey));
-                                        bool ExistsName = PersistentAccountStore.AccountExists(request.Name);
+                                        bool GoodName = IsGoodValidUserName(request.Name);
 
-                                        if (!ExistsPK && !ExistsName)
+                                        if (GoodName)
                                         {
-                                            if (PersistentAccountStore.AddUpdate(newAccountInfo) == DBResponse.InsertSuccess)
+                                            bool ExistsPK = PersistentAccountStore.AccountExists(new Hash(request.PublicKey));
+                                            bool ExistsName = PersistentAccountStore.AccountExists(request.Name);
+
+                                            if (!ExistsPK && !ExistsName)
                                             {
-                                                ledger.AddUpdateBatch(new AccountInfo[] { newAccountInfo });
-                                                msg = new JS_Msg("Account Successfully Added", RPCStatus.Success);
+                                                if (PersistentAccountStore.AddUpdate(newAccountInfo) == DBResponse.InsertSuccess)
+                                                {
+                                                    ledger.AddUpdateBatch(new AccountInfo[] { newAccountInfo });
+                                                    msg = new JS_Msg("Account Successfully Added", RPCStatus.Success);
+                                                }
+                                                else
+                                                {
+                                                    msg = new JS_Msg("Server Database Busy", RPCStatus.Exception);
+                                                }
                                             }
                                             else
                                             {
-                                                msg = new JS_Msg("Server Database Busy", RPCStatus.Exception);
+                                                msg = new JS_Msg("Account Already Exists", RPCStatus.Failure);
                                             }
                                         }
                                         else
                                         {
-                                            msg = new JS_Msg("Account Already Exists", RPCStatus.Failure);
+                                            msg = new JS_Msg("Invalid or Banned Name", RPCStatus.Failure);
                                         }
                                     }
                                     else
                                     {
                                         msg = new JS_Msg("Invalid Network or Account Type", RPCStatus.Failure);
-                                    }                                    
+                                    }
                                 }
                                 else
                                 {
@@ -858,14 +932,16 @@ namespace TNetD.Nodes
                             msg = new JS_Msg("Proof Verification Failed", RPCStatus.Failure);
                         }
 
-                    } // End IF - workproofmap      
+                    } // End IF - workproofmap   
                     else
                     {
                         msg = new JS_Msg("No Such Request Issued", RPCStatus.Failure);
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    DisplayUtils.Display("HandleAccountRegister", ex);
+
                     msg = new JS_Msg("Malformed Request.", RPCStatus.Failure);
                 }
 
@@ -972,11 +1048,13 @@ namespace TNetD.Nodes
 
                                         foreach (TransactionEntity te in transactionContent.Destinations)
                                         {
-                                            if(te.Name != te.Name.ToLowerInvariant())
+
+                                            if (!Utils.ValidateUserName(te.Name))
                                             {
                                                 badAccountName_inTransaction = true; // Names should be lowercase.
                                                 break;
                                             }
+
 
                                             AccountInfo ai;
                                             if (PersistentAccountStore.FetchAccount(out ai, new Hash(te.PublicKey)) == DBResponse.FetchSuccess)
@@ -987,9 +1065,9 @@ namespace TNetD.Nodes
                                                     badAccountName_inTransaction = true;
                                                     break;
                                                 }
-                                                
+
                                                 string Addr = ai.GetAddress();
-                                                
+
                                                 if (Addr != te.Address)
                                                 {
                                                     badAccountAddress_inTransaction = true;
@@ -1070,7 +1148,6 @@ namespace TNetD.Nodes
                                             if (ledger.AccountExists(PK))
                                             {
                                                 // Perfect
-
                                                 AccountInfo ai = ledger[PK];
 
                                                 if (ai.AccountState != AccountState.Normal)
@@ -1078,13 +1155,13 @@ namespace TNetD.Nodes
                                                     badAccountState = true;
                                                     break;
                                                 }
+
                                             }
                                             else
                                             {
                                                 // Need to create Account
                                                 if (destination.Value >= Constants.FIN_MIN_BALANCE)
                                                 {
-
                                                     AddressData ad = AddressFactory.DecodeAddressString(destination.Address);
 
                                                     AccountInfo ai = new AccountInfo(PK, 0, destination.Name, AccountState.Normal,
@@ -1097,6 +1174,13 @@ namespace TNetD.Nodes
                                                     badAccountCreationValue = true;
                                                     break;
                                                 }
+
+                                                if (IsGoodValidUserName(destination.Name) == false)
+                                                {
+                                                    badAccountName_inTransaction = true;
+                                                    break;
+                                                }
+
                                             }
                                         }
 

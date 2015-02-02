@@ -11,6 +11,26 @@ namespace TNetD
     {
         public static Encoding Encoding88591 = Encoding.GetEncoding(28591);
 
+        public readonly static string Allowed = "abcdefghijklmnopqrstuvwxyz0123456789_";
+
+        public static bool ValidateUserName(string userName)
+        {
+            if (userName != userName.ToLowerInvariant()) return false;
+
+            foreach (char x in userName)
+            {
+                bool exists = false;
+                
+                foreach(char a in Allowed)
+                {
+                    if (x == a) { exists = true; break; }
+                }
+
+                if (!exists) return false;
+            }
+            return true;
+        }
+
         public static DateTime FromUnixTime(this long unixTime)
         {
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);

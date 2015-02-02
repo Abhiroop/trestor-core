@@ -33,6 +33,7 @@ namespace TNetTest
     {
         //RESTClient client = new RESTClient("http://54.69.239.153:2015");
         RESTClient client = new RESTClient("http://localhost:2015");
+        //RESTClient client = new RESTClient("http://54.200.152.214:2015"); // LIVE
 
         List<GenesisAccountData> GAD = new List<GenesisAccountData>();
 
@@ -196,7 +197,7 @@ namespace TNetTest
 
             Common.rngCsp.GetBytes(AID);
 
-            var acc = AddressFactory.CreateNewAccount("punisher_" + HexUtil.ToString(AID));
+            var acc = AddressFactory.CreateNewAccount(/*"punisher_" + HexUtil.ToString(AID).ToLowerInvariant()*/ "arpan" );
 
             JS_AccountRegisterRequest jarr = new JS_AccountRegisterRequest(acc.Item1.PublicKey, acc.Item1.Name,
                 acc.Item1.AddressData.AddressString, jwr.ProofRequest, Proof);
@@ -226,6 +227,57 @@ namespace TNetTest
                 WriteLog(response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n");
 
             }*/
+            
+
+            /*
+            byte[] PubSrc;
+            byte[] PrivSrcExpanded;
+            Ed25519.KeyPairFromSeed(out PubSrc, out PrivSrcExpanded, HexUtil.GetBytes("<PUT PRIVATE KEY HERE>"));
+
+            AccountIdentifier identifierSrc = AddressFactory.PublicKeyToAccount(PubSrc, "<PUT SENDER NAME HERE>", NetworkType.MainNet, AccountType.MainGenesis);
+            
+            byte[] PK_dest = HexUtil.GetBytes("<PK Destination>");
+
+            AccountIdentifier identifierDest = AddressFactory.PublicKeyToAccount(PK_dest, "<Destination Name>", NetworkType.MainNet, AccountType.MainNormal);
+
+            SingleTransactionFactory stf = new SingleTransactionFactory(identifierSrc, identifierDest, 0, 1000000000);
+
+            byte[] dd = stf.GetTransactionData();
+
+            Hash sig = new Hash(Ed25519.Sign(dd, PrivSrcExpanded));
+
+            TransactionContent tc;
+
+            TransactionProcessingResult rslt = stf.Create(sig, out tc);
+
+            if (rslt == TransactionProcessingResult.Accepted)
+            {
+                TaskFactory tf = new TaskFactory();
+
+
+
+                string SER_DATA = JsonConvert.SerializeObject(new JS_TransactionReply(tc), Common.JsonSerializerSettings);
+
+                WriteLog("\nSending:" + SER_DATA);
+
+                RESTRequest request = new RESTRequest("propagate", Grapevine.HttpMethod.POST, Grapevine.ContentType.JSON);
+
+                request.Payload = SER_DATA;
+
+                RESTResponse response = client.Execute(request);
+
+                WriteLog(response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n");
+
+
+            }
+            else
+            {
+                WriteLog("INVALID DATA : " + rslt.ToString());
+            }
+            */
+
+
+
         }
 
         private void button_MEM_HARD_Start_Click(object sender, RoutedEventArgs e)

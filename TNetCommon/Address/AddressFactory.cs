@@ -73,7 +73,7 @@ namespace TNetD.Address
             Ed25519.KeyPairFromSeed(out PublicKey, out SecretKeyExpanded, PrivateSecretSeed);
 
             byte[] Address = GetAddress(PublicKey, Name, Common.NetworkType,
-                (Common.NetworkType == NetworkType.MainNet) ? 
+                (Common.NetworkType == NetworkType.MainNet) ?
                 AccountType.MainNormal : AccountType.TestNormal);
 
             string ADD = Base58Encoding.EncodeWithCheckSum(Address);
@@ -82,7 +82,7 @@ namespace TNetD.Address
         }
 
         public static AccountIdentifier PrivateKeyToAccount(byte[] PrivateSecretSeed, string Name = "",
-            NetworkType NetworkType =  NetworkType.MainNet, AccountType AccountType = AccountType.MainNormal)
+            NetworkType NetworkType = NetworkType.MainNet, AccountType AccountType = AccountType.MainNormal)
         {
             byte[] PublicKey;
             byte[] SecretKeyExpanded;
@@ -107,15 +107,15 @@ namespace TNetD.Address
         {
             return new AccountIdentifier(publicKey, name, addressDataString);
         }
-
+        
         /// <summary>
         /// Returns the 
         /// H = SHA512, 
         /// Address Format : Address = NetType || AccountType || [H(H(PK) || PK || NAME || NetType || AccountType)], Take first 20 bytes}
         /// </summary>
         public static byte[] GetAddress(byte[] PublicKey, string UserName, NetworkType networkType, AccountType accountType)
-        {
-            if (UserName != UserName.ToLowerInvariant()) throw new ArgumentException("Usernames should have lowercase.");
+        {            
+            if (!Utils.ValidateUserName(UserName)) throw new ArgumentException("Usernames should be lowercase and alphanumeric, _ is allowed");
 
             //Contract.Requires<ArgumentException>(PublicKey != null);
             //Contract.Requires<ArgumentException>(UserName != null);
@@ -186,8 +186,8 @@ namespace TNetD.Address
         public static bool VerfiyAddress(string Address, byte[] PublicKey, string UserName)
         {
             AddressData address = new AddressData(Address);
-
-            if (UserName != UserName.ToLowerInvariant()) return false;
+                        
+            if (!Utils.ValidateUserName(UserName)) return false;
 
             byte[] ExpectedAddress = GetAddress(PublicKey, UserName, address.NetworkType, address.AccountType);
 
@@ -203,7 +203,7 @@ namespace TNetD.Address
         {
             addressData = new AddressData(Address);
 
-            if (UserName != UserName.ToLowerInvariant()) return false;            
+            if (!Utils.ValidateUserName(UserName)) return false;
 
             byte[] ExpectedAddress = GetAddress(PublicKey, UserName, addressData.NetworkType, addressData.AccountType);
 
@@ -217,7 +217,7 @@ namespace TNetD.Address
 
         public static bool VerfiyAddress(string Address, byte[] PublicKey, string UserName, NetworkType networkType, AccountType accountType)
         {
-            if (UserName != UserName.ToLowerInvariant()) return false;  
+            if (!Utils.ValidateUserName(UserName)) return false;
 
             if (Address == Base58Encoding.EncodeWithCheckSum(GetAddress(PublicKey, UserName, networkType, accountType)))
             {

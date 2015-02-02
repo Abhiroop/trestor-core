@@ -5,6 +5,7 @@
 
 using Grapevine;
 using Grapevine.Server;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -313,7 +314,7 @@ namespace TNetD
                     AI.Deserialize(Convert.FromBase64String(acc));
 
                     AccountInfo ai = new AccountInfo(new Hash(AI.PublicKey), Constants.FIN_TRE_PER_GENESIS_ACCOUNT);
-                    
+
                     ai.NetworkType = AI.AddressData.NetworkType;
                     ai.AccountType = AI.AddressData.AccountType;
 
@@ -329,10 +330,10 @@ namespace TNetD
                 {
                     var resp = n.PersistentAccountStore.DeleteEverything();
 
-                    n.PersistentAccountStore.AddUpdateBatch(aiData);                   
+                    n.PersistentAccountStore.AddUpdateBatch(aiData);
                 }
 
-                MessageBox.Show("ACCOUNTS RESET. It will take some time to synchronise with the network to resume normal operation." + 
+                MessageBox.Show("ACCOUNTS RESET. It will take some time to synchronise with the network to resume normal operation." +
                     "\nApplication restart needed for proper operation.");
             }
         }
@@ -345,6 +346,51 @@ namespace TNetD
             MessageBox.Show("Total Balances\n\nPersistent: " + Value_Persistent +
                 "\n\nTree: " + Value_Tree);
         }
+
+        private void menu_BannedNames_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+
+            if (ofd.ShowDialog().Value)
+            {
+                StreamReader sr = new StreamReader(ofd.FileName);
+
+                SQLiteBannedNames sbn = new SQLiteBannedNames( nodes[0].nodeConfig );
+
+                List<string> BN = new List<string>();
+
+                while(!sr.EndOfStream)
+                {
+                    string line = sr.ReadLine();
+
+                    line = line.ToLowerInvariant();
+
+                    string[] parts = line.Split(',');
+
+                    if(parts.Length == 2)
+                    {
+                        string Name = parts[1];
+
+                        string[] nameparts = Name.Split('.');
+
+                        if(nameparts.Length > 0)
+                        {
+                            string _part = nameparts[0];
+                            BN.Add(_part);                            
+                        }
+                    }
+                }
+
+                sbn.AddUpdateBatch(BN);
+                sr.Close();
+                MessageBox.Show("DONE.");
+
+            }
+
+            
+        }
+
+
 
     }
 }

@@ -23,6 +23,8 @@ namespace TNetD
         /// </summary>
         public static readonly int Pref_MinNameLength = 2;
 
+        public static readonly int Pref_MaxNameLength = 15;
+
         public static readonly int GlobalNodes = 100;
 
         public static readonly int Connections_PerNode_Max = 20;
@@ -49,7 +51,7 @@ namespace TNetD
         ///  Minimum 10 trest balance.
         ///  [CRITICAL: FIX ME !!!]
         /// </summary>
-        public static readonly long FIN_MIN_BALANCE = 1; //10000000;
+        public static readonly long FIN_MIN_BALANCE = 1000; //10000000;
 
         public static readonly long DB_HISTORY_LIMIT = 1000;
        
@@ -83,7 +85,7 @@ namespace TNetD
         public static byte TransportVersion = 1;
         public static byte ProtocolVersion = 1;
 
-        public static int Difficulty = 5; // 17;
+        public static int Difficulty = 8; // 17;
               
         // ////////////////////// Counters ////////////////
 
