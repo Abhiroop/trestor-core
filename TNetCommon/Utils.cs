@@ -53,6 +53,11 @@ namespace TNetD
             return ByteArrayEquals(x, 0, y, 0, x.Length);
         }
         
+        /// <summary>
+        /// Little Endian Byte Order
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
         public static byte[] GetLengthAsBytes(int length)
         {
             byte[] len = new byte[4];

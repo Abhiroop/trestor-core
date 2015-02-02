@@ -144,7 +144,7 @@ namespace TNetD.Nodes
             TimerMinute.Interval = 60000;
             TimerMinute.Start();
 
-            restServer = new RESTServer("+", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
+            restServer = new RESTServer("localhost", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
 
             restServer.Start();
 

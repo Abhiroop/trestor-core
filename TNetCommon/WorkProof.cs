@@ -36,13 +36,13 @@ namespace TNetD
 
             Array.Copy(Initial, Content, InitialLength);
 
-            UInt32 counter = 0;
+            int counter = 0;
 
             if (zeroBytes < 30)
             {
                 while (!Found)
                 {
-                    byte[] CountBytes = BitConverter.GetBytes(counter);  // Get bytes from counter
+                    byte[] CountBytes = Utils.GetLengthAsBytes(counter);  // Get bytes from counter | Changed Little Endian
 
                     Array.Copy(CountBytes, 0, Content, InitialLength, 4); // Copy to the end.
 
