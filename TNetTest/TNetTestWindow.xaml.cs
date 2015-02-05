@@ -178,7 +178,6 @@ namespace TNetTest
 
         private void button_TransactionsVerify_Click(object sender, RoutedEventArgs e)
         {
-
             RESTRequest request = new RESTRequest("request", Grapevine.HttpMethod.GET);
 
             RESTResponse response = client.Execute(request);
@@ -197,7 +196,7 @@ namespace TNetTest
 
             Common.rngCsp.GetBytes(AID);
 
-            var acc = AddressFactory.CreateNewAccount(/*"punisher_" + HexUtil.ToString(AID).ToLowerInvariant()*/ "arpan" );
+            var acc = AddressFactory.CreateNewAccount( "arpan" );
 
             JS_AccountRegisterRequest jarr = new JS_AccountRegisterRequest(acc.Item1.PublicKey, acc.Item1.Name,
                 acc.Item1.AddressData.AddressString, jwr.ProofRequest, Proof);
@@ -228,8 +227,8 @@ namespace TNetTest
 
             }*/
             
-
             /*
+            
             byte[] PubSrc;
             byte[] PrivSrcExpanded;
             Ed25519.KeyPairFromSeed(out PubSrc, out PrivSrcExpanded, HexUtil.GetBytes("<PUT PRIVATE KEY HERE>"));
@@ -253,9 +252,7 @@ namespace TNetTest
             if (rslt == TransactionProcessingResult.Accepted)
             {
                 TaskFactory tf = new TaskFactory();
-
-
-
+            
                 string SER_DATA = JsonConvert.SerializeObject(new JS_TransactionReply(tc), Common.JsonSerializerSettings);
 
                 WriteLog("\nSending:" + SER_DATA);
@@ -274,8 +271,8 @@ namespace TNetTest
             {
                 WriteLog("INVALID DATA : " + rslt.ToString());
             }
+            
             */
-
 
 
         }

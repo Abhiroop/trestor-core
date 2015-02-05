@@ -21,6 +21,10 @@ namespace TNetD
         public static readonly int KEYLEN_PRIVATE = 32;
         public static readonly int KEYLEN_PRIVATE_EXPANDED = 64;
         public static readonly int KEYLEN_SIGNATURE = 64;
+
+        public static readonly bool IsTransactionFeeEnabled = false;
+
+        public static readonly int TransactionStaleTimer_Minutes = 1; // Deviation of 1 minute.
         
         public static readonly int NETWORK_Min_Transaction_Fee = 0;//100000; // ~ 0.1 US Cent, approx, initial value.
 

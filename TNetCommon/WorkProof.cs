@@ -12,6 +12,8 @@ using System.Text;
 
 namespace TNetD
 {
+    public enum ProofOfWorkType { DOUBLE_SHA256, SCRYPT, BCRYPT, RIG, RIG2 };
+
     public static class WorkProof
     {
         // Specifies the number of zeros in increasing order

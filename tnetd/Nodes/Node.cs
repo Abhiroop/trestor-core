@@ -147,7 +147,7 @@ namespace TNetD.Nodes
             TimerMinute.Interval = 60000;
             TimerMinute.Start();
 
-            restServer = new RESTServer("+", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
+            restServer = new RESTServer("localhost", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
 
             restServer.Start();
 
@@ -171,7 +171,7 @@ namespace TNetD.Nodes
                     if (WorkProofMap.TryGetValue(key, out dtd))
                     {
                         TimeSpan span = (NOW - dtd.IssueTime);
-                        if (span.TotalSeconds > 90) // 1.5 Minutes
+                        if (span.TotalSeconds > 60) // 1 Minute
                         {
                             WorkProofMap.Remove(key);
                         }
@@ -191,6 +191,8 @@ namespace TNetD.Nodes
             nodeState.NodeInfo.NodeDetails.TimeUTC = DateTime.UtcNow;
             nodeState.NodeInfo.LastLedgerInfo.Hash = ledger.GetRootHash().Hex;
 
+            nodeState.NodeInfo.NodeDetails.ProofOfWorkQueueLength = WorkProofMap.Count;
+
             nodeState.system_time = DateTime.UtcNow.ToFileTimeUtc();
             nodeState.network_time = DateTime.UtcNow.ToFileTimeUtc();
 
@@ -208,7 +210,9 @@ namespace TNetD.Nodes
         {
             await Task.Run(async () =>
             {
-                ledger.InitializeLedger();
+                long records = await ledger.InitializeLedger();
+
+                Interlocked.Add(ref nodeState.NodeInfo.NodeDetails.TotalAccounts, records);
 
                 // Connect to TrustedNodes
                 List<Task> tasks = new List<Task>();
@@ -244,7 +248,7 @@ namespace TNetD.Nodes
 
                 return true;
             }
-            else if (context.Request.RawUrl.Matches(@"^/wallet")) // ProcessInfo 
+            else if (context.Request.RawUrl.Matches(@"^/wallet")) // Create Wallet 
             {
                 HandleWalletQuery(context);
 
@@ -362,16 +366,16 @@ namespace TNetD.Nodes
                 {
                     if (WorkProofMap.Count < Constants.WorkProofQueueLength)
                     {
-                        DifficultyTimeData difficultyTimeData = new DifficultyTimeData(Constants.Difficulty, DateTime.UtcNow);
+                        DifficultyTimeData difficultyTimeData = new DifficultyTimeData(Constants.Difficulty,
+                            nodeState.NodeInfo.NodeDetails.TimeUTC, 0, 0, ProofOfWorkType.DOUBLE_SHA256);
 
                         resp = new JS_WorkProofRequest(difficultyTimeData);
+
                         ((JS_WorkProofRequest)resp).InitRequest();
 
                         Hash Work = new Hash(((JS_WorkProofRequest)resp).ProofRequest);
 
-                        WorkProofMap.Add(Work,
-                            new DifficultyTimeData(((JS_WorkProofRequest)resp).Difficulty,
-                                ((JS_WorkProofRequest)resp).IssueTime));
+                        WorkProofMap.Add(Work, ((JS_WorkProofRequest)resp).GetDifficultyTimeData());
                     }
                     else
                     {
@@ -781,15 +785,24 @@ namespace TNetD.Nodes
                         transactionContent.Deserialize(jtr);
                     }
 
-                    TransactionProcessingResult tpResult = incomingTransactionMap.HandlePropagationRequest(transactionContent);
+                    long StaleSeconds = (long)Math.Abs((DateTime.FromFileTimeUtc(transactionContent.Timestamp) - nodeState.NodeInfo.NodeDetails.TimeUTC).TotalSeconds);
 
-                    if (tpResult == TransactionProcessingResult.Accepted)
+                    if (StaleSeconds < (Common.TransactionStaleTimer_Minutes * 60))
                     {
-                        msg = new JS_Msg("Transaction Added to propagation queue.", RPCStatus.Success);
+                        TransactionProcessingResult tpResult = incomingTransactionMap.HandlePropagationRequest(transactionContent);
+
+                        if (tpResult == TransactionProcessingResult.Accepted)
+                        {
+                            msg = new JS_Msg("Transaction Added to propagation queue.", RPCStatus.Success);
+                        }
+                        else
+                        {
+                            msg = new JS_Msg("Transaction Processing Error: " + tpResult, RPCStatus.Failure);
+                        }
                     }
                     else
                     {
-                        msg = new JS_Msg("Transaction Processing Error: " + tpResult, RPCStatus.Failure);
+                        msg = new JS_Msg("Transaction time is stale by " + StaleSeconds + " seconds. Your clock may be set incorrectly or the program may need upgradation.", RPCStatus.Failure);
                     }
                 }
                 catch
@@ -811,7 +824,7 @@ namespace TNetD.Nodes
             if ((Name.Length <= Constants.Pref_MinNameLength)) return false;
 
             if ((Name.Length >= Constants.Pref_MaxNameLength)) return false;
-            
+
             if (!Utils.ValidateUserName(Name)) return false;
 
             if (PersistentBannedNameStore.Contains(Name)) return false;
@@ -826,6 +839,8 @@ namespace TNetD.Nodes
             if (context.Request.HttpMethod.ToUpper().Equals("POST") && context.Request.HasEntityBody &&
                 context.Request.ContentLength64 < Constants.PREFS_MAX_RPC_POST_CONTENT_LENGTH)
             {
+                Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.AccountCreationRequests);
+
                 StreamReader inputStream = new StreamReader(context.Request.InputStream);
 
                 try
@@ -899,6 +914,7 @@ namespace TNetD.Nodes
                                                 if (PersistentAccountStore.AddUpdate(newAccountInfo) == DBResponse.InsertSuccess)
                                                 {
                                                     ledger.AddUpdateBatch(new AccountInfo[] { newAccountInfo });
+                                                    Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.TotalAccounts);
                                                     msg = new JS_Msg("Account Successfully Added", RPCStatus.Success);
                                                 }
                                                 else
@@ -1040,6 +1056,7 @@ namespace TNetD.Nodes
                                         bool badAccountAddress_inTransaction = false;
                                         bool badAccountCreationValue = false;
                                         bool badAccountState = false;
+                                        bool badTransactionFee = false;
                                         bool insufficientFunds = false;
 
                                         List<AccountInfo> temp_NewAccounts = new List<AccountInfo>();
@@ -1090,6 +1107,14 @@ namespace TNetD.Nodes
 
                                                     }
                                                 }
+                                            }
+                                        }
+
+                                        if (!Common.IsTransactionFeeEnabled) // Transaction Fee not allowed here !!
+                                        {
+                                            if (transactionContent.TransactionFee > 0)
+                                            {
+                                                badTransactionFee = true;
                                             }
                                         }
 
@@ -1184,11 +1209,12 @@ namespace TNetD.Nodes
                                             }
                                         }
 
+
                                         // TODO: ALL WELL / Check for Transaction FEE.
                                         // TEMPORARY SINGLE NODE STUFF // DIRECT DB WRITE.
                                         // Make a list of updated accounts.
                                         if (!badSource && !badAccountCreationValue && !badAccountState && !insufficientFunds
-                                            && !badAccountName_inTransaction && !badAccountAddress_inTransaction)
+                                            && !badAccountName_inTransaction && !badAccountAddress_inTransaction & !badTransactionFee)
                                         {
                                             newAccounts.AddRange(temp_NewAccounts);
 
@@ -1247,6 +1273,7 @@ namespace TNetD.Nodes
                                                 (badAccountCreationValue ? "\nbadAccountCreationValue" : "") +
                                                 (insufficientFunds ? "\ninsufficientFunds" : "") +
                                                 (badAccountName_inTransaction ? "\nbadAccountName_inTransaction" : "") +
+                                                (badTransactionFee ? "\nbadTransactionFee" : "") +
                                                 (badAccountAddress_inTransaction ? "\nbadAccountAddress_inTransaction" : "") + "\n" +
 
                                                 JsonConvert.SerializeObject(transactionContent, Common.JsonSerializerSettings)
@@ -1266,6 +1293,8 @@ namespace TNetD.Nodes
                         ///////////////////////////////////////////////////////////////////////////////////////////
                         //  TODO: MAKE A RETRY QUEUE in case of Failures.                                        //
                         //  CRITICAL: REWRITE TO APPLY ONE TRANSACTION AT A TIME TO THE LEDGERS.                 //    
+                        ///////////////////////////////////////////////////////////////////////////////////////////
+                        // CRITICAL: In case of some failure we should try again with the remaining transactions. /
                         ///////////////////////////////////////////////////////////////////////////////////////////
 
                         ////// Create the accounts in the Ledger  /////
@@ -1289,6 +1318,8 @@ namespace TNetD.Nodes
                         ////// Create the new accounts in the PersistentDatabase  /////
 
                         int newDBAccountCount = PersistentAccountStore.AddUpdateBatch(newAccounts);
+
+                        Interlocked.Add(ref nodeState.NodeInfo.NodeDetails.TotalAccounts, newDBAccountCount);
 
                         if (newDBAccountCount != newAccounts.Count)
                         {

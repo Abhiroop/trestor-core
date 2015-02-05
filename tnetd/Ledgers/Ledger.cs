@@ -65,15 +65,17 @@ namespace TNetD.Ledgers
 
         }
 
-        async public void InitializeLedger()
+        async public Task<long> InitializeLedger()
         {
             initialLoading = true;
 
-            await ReloadFromPersistentStore();
+            long records = await ReloadFromPersistentStore();
 
             LedgerEvent(LedgerEventType.Progress, "Ready");
 
             initialLoading = false;
+
+            return records;
         }
 
         /// <summary>
@@ -85,8 +87,8 @@ namespace TNetD.Ledgers
             _load_stats = 0;
             AddressAccountInfoMap.Clear();
             NameAccountInfoMap.Clear();
-            await persistentStore.FetchAllAccountsAsync(AddUserToLedger);
-            return _load_stats;
+            Tuple<DBResponse,long> result = await persistentStore.FetchAllAccountsAsync(AddUserToLedger);
+            return result.Item2;
         }
 
         /// <summary>

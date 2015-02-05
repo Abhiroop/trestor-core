@@ -10,10 +10,17 @@ namespace TNetD.Types
     {
         public int Difficulty;
         public DateTime IssueTime;
-        public DifficultyTimeData(int difficulty, DateTime issueTime)
+        public int MemoryCost;
+        public int TimeCost;
+        public ProofOfWorkType Type;
+
+        public DifficultyTimeData(int difficulty, DateTime issueTime, int memoryCost, int timeCost, ProofOfWorkType type)
         {
             Difficulty = difficulty;
             IssueTime = issueTime;
+            MemoryCost = memoryCost;
+            TimeCost = timeCost;
+            Type = type;
         }
     }
 }

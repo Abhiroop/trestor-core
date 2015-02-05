@@ -112,10 +112,16 @@ namespace TNetD.Json.JS_Structs
     {
         [JsonIgnore]
         public int ConnectedPeers = 1;
-        public int TransactionsProcessed = 0;
-        public int TransactionsAccepted = 0;
-        public int TransactionsValidated = 0;
-        public int RequestsProcessed = 0;
+        public long TransactionsProcessed = 0;
+        public long TransactionsAccepted = 0;
+        public long TransactionsValidated = 0;
+        public long RequestsProcessed = 0;
+
+        public long AccountCreationRequests = 0;
+        public long TotalAccounts = 0;
+
+        public long ProofOfWorkQueueLength = 0;
+
         public int LoadLevel = 1;
         public DateTime TimeUTC = DateTime.UtcNow;
 
@@ -326,17 +332,28 @@ namespace TNetD.Json.JS_Structs
     }
 
 
+
     public class JS_WorkProofRequest : JS_Response
     {    
         public byte[] ProofRequest = new byte[16];
         public DateTime IssueTime; // Consider changing it to long.
         public int Difficulty;
+        public int MemoryCost;
+        public int TimeCost;
+        public ProofOfWorkType Type;
 
         public JS_WorkProofRequest(DifficultyTimeData difficultyTimeData)
         {
-            
+            Type = difficultyTimeData.Type;
+            MemoryCost = difficultyTimeData.MemoryCost;
+            TimeCost = difficultyTimeData.TimeCost;
             Difficulty = difficultyTimeData.Difficulty;
             IssueTime = difficultyTimeData.IssueTime;
+        }
+
+        public DifficultyTimeData GetDifficultyTimeData()
+        {
+            return new DifficultyTimeData(Difficulty, IssueTime, MemoryCost, TimeCost, Type);
         }
 
         public void InitRequest()
