@@ -46,7 +46,7 @@ namespace TNetD.PersistentStore
 
         public bool LCLExists(Hash ledgerHash)
         {
-            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE LedgerHash = @ledgerHash;", sqliteConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM LedgerInfo WHERE LedgerHash = @ledgerHash;", sqliteConnection))
             {
                 cmd.Parameters.Add(new SQLiteParameter("@ledgerHash", ledgerHash.Hex));
                 using (SQLiteDataReader reader = cmd.ExecuteReader())
@@ -62,7 +62,7 @@ namespace TNetD.PersistentStore
 
         public bool LCLExists(long sequenceNumber)
         {
-            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE SequenceNumber = @sequenceNumber;", sqliteConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM LedgerInfo WHERE SequenceNumber = @sequenceNumber;", sqliteConnection))
             {
                 cmd.Parameters.Add(new SQLiteParameter("@sequenceNumber", sequenceNumber));
                 using (SQLiteDataReader reader = cmd.ExecuteReader())
@@ -80,7 +80,7 @@ namespace TNetD.PersistentStore
         {
             DBResponse response = DBResponse.FetchFailed;
 
-            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE LedgerHash = @ledgerHash;", sqliteConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM LedgerInfo WHERE LedgerHash = @ledgerHash;", sqliteConnection))
             {
                 cmd.Parameters.Add(new SQLiteParameter("@ledgerHash", ledgerHash.Hex));
                 using (SQLiteDataReader reader = cmd.ExecuteReader())
@@ -111,7 +111,7 @@ namespace TNetD.PersistentStore
         {
             DBResponse response = DBResponse.FetchFailed;
 
-            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE SequenceNumber = @sequenceNumber;", sqliteConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM LedgerInfo WHERE SequenceNumber = @sequenceNumber;", sqliteConnection))
             {
                 cmd.Parameters.Add(new SQLiteParameter("@sequenceNumber", sequenceNumber));
                 using (SQLiteDataReader reader = cmd.ExecuteReader())
@@ -186,7 +186,7 @@ namespace TNetD.PersistentStore
         {
             bool doUpdate = false;
 
-            using (SQLiteCommand cmd = new SQLiteCommand("SELECT PublicKey FROM LedgerInfo WHERE LedgerHash = @ledgerHash;",
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT LedgerHash FROM LedgerInfo WHERE LedgerHash = @ledgerHash;",
                 sqliteConnection, (SQLiteTransaction)transaction))
             {
                 cmd.Parameters.Add(new SQLiteParameter("@ledgerHash", ledgerCloseData.LedgerHash));
@@ -228,7 +228,7 @@ namespace TNetD.PersistentStore
             {
                 // /////////////  Perform the INSERT  ///////////////
 
-                using (SQLiteCommand cmd = new SQLiteCommand("INSERT INTO Ledger VALUES(@sequenceNumber, @ledgerHash, @transactions, @totalTransactions, @closeTime);",
+                using (SQLiteCommand cmd = new SQLiteCommand("INSERT INTO LedgerInfo VALUES(@sequenceNumber, @ledgerHash, @transactions, @totalTransactions, @closeTime);",
                     sqliteConnection, (SQLiteTransaction)transaction))
                 {
                     cmd.Parameters.Add(new SQLiteParameter("@sequenceNumber", ledgerCloseData.SequenceNumber));
