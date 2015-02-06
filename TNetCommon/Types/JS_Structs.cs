@@ -139,12 +139,23 @@ namespace TNetD.Json.JS_Structs
     public class JS_LedgerInfo : JS_Response
     {
         public byte[] Hash;
-        public int Index = 0;
+        public long SequenceNumber = 0;
         public DateTime CloseTime = DateTime.UtcNow;
+        public long TotalTransactions = 0;
+        public long Transactions = 0;
 
         public JS_LedgerInfo()
         {
             Hash = new byte[0];
+        }
+
+        public JS_LedgerInfo(LedgerCloseData ledgerCloseData)
+        {
+            Hash = ledgerCloseData.LedgerHash;
+            TotalTransactions = ledgerCloseData.TotalTransactions;
+            Transactions = ledgerCloseData.Transactions;
+            CloseTime = DateTime.FromFileTimeUtc(ledgerCloseData.CloseTime);
+            SequenceNumber = ledgerCloseData.SequenceNumber;
         }
 
         public JS_Resp GetResponse()
@@ -334,7 +345,7 @@ namespace TNetD.Json.JS_Structs
 
 
     public class JS_WorkProofRequest : JS_Response
-    {    
+    {
         public byte[] ProofRequest = new byte[16];
         public DateTime IssueTime; // Consider changing it to long.
         public int Difficulty;

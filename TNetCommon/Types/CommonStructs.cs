@@ -23,4 +23,16 @@ namespace TNetD.Types
             Type = type;
         }
     }
+
+    public class LedgerCloseData
+    {
+        // DBUtils.ExecuteNonQuery("CREATE TABLE LedgerInfo (SequenceNumber INTEGER PRIMARY KEY AUTOINCREMENT, 
+        //         LedgerHash BLOB, Transactions INTEGER, CloseTime INTEGER);", sqliteConnection);
+
+        public long SequenceNumber;
+        public byte[] LedgerHash;
+        public long Transactions;
+        public long TotalTransactions;
+        public long CloseTime;
+    }
 }

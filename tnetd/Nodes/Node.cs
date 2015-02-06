@@ -149,9 +149,7 @@ namespace TNetD.Nodes
             TimerMinute.Start();
 
             restServer = new RESTServer("localhost", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
-
-           
-
+            
             restServer.Start();
 
             DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
@@ -233,6 +231,9 @@ namespace TNetD.Nodes
 
                 await Task.WhenAll(tasks);
 
+                LedgerCloseData ledgerCloseData;
+                PersistentCloseHistory.GetLastRowData(out ledgerCloseData);
+                nodeState.NodeInfo.LastLedgerInfo = new JS_LedgerInfo(ledgerCloseData);
             });
         }
 
@@ -1405,22 +1406,22 @@ namespace TNetD.Nodes
 
                         // Apply to persistent DB.
 
-                        LedgerCloseData lcd;
-                        bool ok = PersistentCloseHistory.GetLastRowData(out lcd);
+                        LedgerCloseData ledgerCloseData;
+                        bool ok = PersistentCloseHistory.GetLastRowData(out ledgerCloseData);
 
-                        lcd.CloseTime = CloseTime.ToFileTimeUtc();
-                        lcd.SequenceNumber++;
-                        lcd.Transactions = acceptedTransactions.Count;
-                        lcd.TotalTransactions += lcd.Transactions;
-                        lcd.LedgerHash = ledger.GetRootHash().Hex;
+                        ledgerCloseData.CloseTime = CloseTime.ToFileTimeUtc();
+                        ledgerCloseData.SequenceNumber++;
+                        ledgerCloseData.Transactions = acceptedTransactions.Count;
+                        ledgerCloseData.TotalTransactions += ledgerCloseData.Transactions;
+                        ledgerCloseData.LedgerHash = ledger.GetRootHash().Hex;
 
-                        PersistentCloseHistory.AddUpdate(lcd);
+                        PersistentCloseHistory.AddUpdate(ledgerCloseData);
 
                         PersistentAccountStore.AddUpdateBatch(finalPersistentDBUpdateList);
 
-                        PersistentTransactionStore.AddUpdateBatch(acceptedTransactions, lcd.SequenceNumber);
+                        PersistentTransactionStore.AddUpdateBatch(acceptedTransactions, ledgerCloseData.SequenceNumber);
 
-                        Interlocked.Increment(ref nodeState.NodeInfo.LastLedgerInfo.Index);
+                        nodeState.NodeInfo.LastLedgerInfo = new JS_LedgerInfo(ledgerCloseData);
 
                         // Apply the transactions to the PersistentDatabase.
 
