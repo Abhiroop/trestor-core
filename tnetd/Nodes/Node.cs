@@ -66,11 +66,11 @@ namespace TNetD.Nodes
         public IPersistentTransactionStore PersistentTransactionStore;
 
         public SQLiteBannedNames PersistentBannedNameStore;
+        public SQLiteCloseHistory PersistentCloseHistory;
 
         Ledger ledger;
 
         #region ConstructorsAndTimers
-
 
         public Ledger LocalLedger
         {
@@ -120,6 +120,7 @@ namespace TNetD.Nodes
             PersistentAccountStore = new SQLiteAccountStore(nodeConfig);
             PersistentTransactionStore = new SQLiteTransactionStore(nodeConfig);
             PersistentBannedNameStore = new SQLiteBannedNames(nodeConfig);
+            PersistentCloseHistory = new SQLiteCloseHistory(nodeConfig);
 
             AI = new AccountInfo(PublicKey, Money);
 
@@ -614,7 +615,8 @@ namespace TNetD.Nodes
 
             // Check if the transaction is processed.
             TransactionContent transactionContent;
-            if (PersistentTransactionStore.FetchTransaction(out transactionContent, transactionID) == DBResponse.FetchSuccess)
+            long sequenceNumber;
+            if (PersistentTransactionStore.FetchTransaction(out transactionContent, out sequenceNumber, transactionID) == DBResponse.FetchSuccess)
             {
                 replies.TransactionState.Add(new JS_TransactionState_Reply(transactionContent, TransactionStatusType.Processed,
                     TransactionProcessingResult.Accepted));
@@ -731,10 +733,11 @@ namespace TNetD.Nodes
 
                             if (transactionID_Bytes.Length == 32)
                             {
-                                TransactionContent tcxo;
-                                if (PersistentTransactionStore.FetchTransaction(out tcxo, new Hash(transactionID_Bytes)) == DBResponse.FetchSuccess)
+                                TransactionContent transactionContent;
+                                long sequenceNumber;
+                                if (PersistentTransactionStore.FetchTransaction(out transactionContent, out sequenceNumber, new Hash(transactionID_Bytes)) == DBResponse.FetchSuccess)
                                 {
-                                    replies.Transactions.Add(new JS_TransactionReply(tcxo));
+                                    replies.Transactions.Add(new JS_TransactionReply(transactionContent));
                                 }
                             }
                         }
@@ -1041,9 +1044,9 @@ namespace TNetD.Nodes
                                 if (transactionContent.VerifySignature() == TransactionProcessingResult.Accepted)
                                 {
                                     TransactionContent transactionFromPersistentDB;
-
-                                    if (PersistentTransactionStore.FetchTransaction(out transactionFromPersistentDB, transactionContent.TransactionID)
-                                        == DBResponse.FetchSuccess)
+                                    long sequenceNumber;
+                                    if (PersistentTransactionStore.FetchTransaction(out transactionFromPersistentDB, out sequenceNumber,
+                                        transactionContent.TransactionID) == DBResponse.FetchSuccess)
                                     {
                                         //TODO: LOG THIS and Display properly.
                                         DisplayUtils.Display("Transaction Processed. Improbable because of previous checks.", DisplayType.BadData);
@@ -1375,7 +1378,7 @@ namespace TNetD.Nodes
 
                         // This essentially gets values from Ledger Tree and updates the Persistent-DB
 
-                        DateTime TimeNow = DateTime.UtcNow;
+                        DateTime CloseTime = DateTime.UtcNow;
 
                         foreach (KeyValuePair<Hash, TreeDiffData> kvp in pendingDifferenceData)
                         {
@@ -1390,7 +1393,7 @@ namespace TNetD.Nodes
 
                             ledgerAccount.Money += diffData.AddValue;
                             ledgerAccount.Money -= diffData.RemoveValue;
-                            ledgerAccount.LastTransactionTime = TimeNow.ToFileTimeUtc();
+                            ledgerAccount.LastTransactionTime = CloseTime.ToFileTimeUtc();
 
                             ledger[diffData.PublicKey] = ledgerAccount;
 
@@ -1402,9 +1405,20 @@ namespace TNetD.Nodes
 
                         // Apply to persistent DB.
 
+                        LedgerCloseData lcd;
+                        bool ok = PersistentCloseHistory.GetLastRowData(out lcd);
+
+                        lcd.CloseTime = CloseTime.ToFileTimeUtc();
+                        lcd.SequenceNumber++;
+                        lcd.Transactions = acceptedTransactions.Count;
+                        lcd.TotalTransactions += lcd.Transactions;
+                        lcd.LedgerHash = ledger.GetRootHash().Hex;
+
+                        PersistentCloseHistory.AddUpdate(lcd);
+
                         PersistentAccountStore.AddUpdateBatch(finalPersistentDBUpdateList);
 
-                        PersistentTransactionStore.AddUpdateBatch(acceptedTransactions);
+                        PersistentTransactionStore.AddUpdateBatch(acceptedTransactions, lcd.SequenceNumber);
 
                         Interlocked.Increment(ref nodeState.NodeInfo.LastLedgerInfo.Index);
 

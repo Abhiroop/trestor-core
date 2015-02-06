@@ -40,6 +40,7 @@ namespace TNetD.Nodes
         public string Path_AccountDB;
         public string Path_TransactionDB;
         public string Path_BannedNamesDB;
+        public string Path_CloseHistoryDB;
 
         public NetworkConfig NetworkConfig = new NetworkConfig();
 
@@ -112,9 +113,11 @@ namespace TNetD.Nodes
             UpdateFrequencyPacketProcessMS = Constants.Node_UpdateFrequencyPacketProcessMS;
 
             Path_BannedNamesDB = GetInitString("PersistentDatabase", "BannedNamesDB", WorkDirectory + "\\BannedNames.sqlite3");
-
             DisplayUtils.Display(" Node " + NodeID + " | Banned Names DB Path    : " + Path_BannedNamesDB);
 
+            Path_CloseHistoryDB = GetInitString("PersistentDatabase", "CloseHistoryDB", WorkDirectory + "\\CloseHistory.sqlite3");
+            DisplayUtils.Display(" Node " + NodeID + " | Close History DB Path    : " + Path_CloseHistoryDB);
+            
             // /////////////////////
 
             Organisation = GetInitString("Info", "Organisation", "_unspecified_");

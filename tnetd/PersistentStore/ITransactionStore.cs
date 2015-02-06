@@ -17,7 +17,7 @@ namespace TNetD.PersistentStore
     /// </summary>
     interface IPersistentTransactionStore
     {
-        int AddUpdateBatch(Dictionary<Hash,TransactionContent> accountInfoData);
+        int AddUpdateBatch(Dictionary<Hash,TransactionContent> accountInfoData, long sequenceNumber);
 
         /// <summary>
         /// Adds or updates elements to the PersistentStore
@@ -39,7 +39,7 @@ namespace TNetD.PersistentStore
         /// <param name="transactionContent"></param>
         /// <param name="transactionID"></param>
         /// <returns></returns>
-        DBResponse FetchTransaction(out TransactionContent transactionContent, Hash transactionID);
+        DBResponse FetchTransaction(out TransactionContent transactionContent, out long sequenceNumber, Hash transactionID);
 
         /// <summary>
         /// Fetches transaction history from the database. 

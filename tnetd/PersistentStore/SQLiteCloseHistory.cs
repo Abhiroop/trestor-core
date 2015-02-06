@@ -1,5 +1,4 @@
-﻿
-//
+﻿//
 // @Author: Arpan Jati
 // @Date: 6 Feb 2015
 
@@ -16,7 +15,6 @@ using TNetD.Transactions;
 
 namespace TNetD.PersistentStore
 {
-
     public class LedgerCloseData
     {
         // DBUtils.ExecuteNonQuery("CREATE TABLE LedgerInfo (SequenceNumber INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -30,7 +28,7 @@ namespace TNetD.PersistentStore
     }
 
     /// <summary>
-    /// Stores  Ledger Close History in an SQLite database.
+    /// Stores Ledger Close History in an SQLite database.
     /// </summary>
     class SQLiteCloseHistory
     {
@@ -38,7 +36,7 @@ namespace TNetD.PersistentStore
 
         public SQLiteCloseHistory(NodeConfig config)
         {
-            sqliteConnection = new SQLiteConnection("Data Source=" + config.Path_AccountDB + ";Version=3;");
+            sqliteConnection = new SQLiteConnection("Data Source=" + config.Path_CloseHistoryDB + ";Version=3;");
             sqliteConnection.Open();
 
             VerifyTables();
@@ -174,6 +172,11 @@ namespace TNetD.PersistentStore
 
         // //////////////////////////////////////
 
+        /// <summary>
+        /// Update not allowed for Close History.
+        /// </summary>
+        /// <param name="ledgerCloseData"></param>
+        /// <returns></returns>
         public DBResponse AddUpdate(LedgerCloseData ledgerCloseData)
         {
             SQLiteTransaction st = sqliteConnection.BeginTransaction();
@@ -204,7 +207,7 @@ namespace TNetD.PersistentStore
             if (doUpdate)
             {
                 // /////////////  Perform the UPDATE  ///////////////
-
+                /*
                 using (SQLiteCommand cmd = new SQLiteCommand("UPDATE LedgerInfo SET SequenceNumber = @sequenceNumber, Transactions = @transactions, TotalTransactions = @totalTransactions, CloseTime=@closeTime WHERE LedgerHash = @ledgerHash;",
                     sqliteConnection, (SQLiteTransaction)transaction))
                 {
@@ -222,7 +225,7 @@ namespace TNetD.PersistentStore
                     {
                         response = DBResponse.UpdateSuccess;
                     }
-                }
+                }*/
             }
             else
             {

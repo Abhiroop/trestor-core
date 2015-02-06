@@ -47,9 +47,11 @@ namespace TNetD.PersistentStore
             return false;
         }
 
-        public DBResponse FetchTransaction(out TransactionContent transactionContent, Hash transactionID)
+        public DBResponse FetchTransaction(out TransactionContent transactionContent, out long sequenceNumber, Hash transactionID)
         {
             DBResponse response = DBResponse.FetchFailed;
+
+            sequenceNumber = -1;
 
             using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Transactions WHERE TransactionID = @transactionID;", sqliteConnection))
             {
@@ -63,12 +65,13 @@ namespace TNetD.PersistentStore
                         if (reader.Read())
                         {
                             Hash _transactionID = new Hash((byte[])reader[0]);
-                            byte[] SerializedContent = (byte[])reader[1];
-
+                            
                             if (_transactionID == transactionID) // Proper row returned.
                             {
+                                sequenceNumber = (long)reader[1];
+                                
                                 transactionContent = new TransactionContent();
-                                transactionContent.Deserialize(SerializedContent);
+                                transactionContent.Deserialize((byte[])reader[2]);
 
                                 if (transactionContent.TransactionID == transactionID) // De-Serialization Suceeded.
                                 {
@@ -130,8 +133,9 @@ namespace TNetD.PersistentStore
                         {
                             Hash transactionID = new Hash((byte[])reader[0]);
 
+                            long sequenceNumber;
                             TransactionContent transactionContent;
-                            if (FetchTransaction(out transactionContent, transactionID) == DBResponse.FetchSuccess)
+                            if (FetchTransaction(out transactionContent, out sequenceNumber, transactionID) == DBResponse.FetchSuccess)
                             {
                                 transactions.Add(transactionContent);
                             }
@@ -146,21 +150,21 @@ namespace TNetD.PersistentStore
 
         //CRITICAL: HANDLE CASE WHEN ENTRY ALREADY EXISTS GRACEFULLY
 
-        public int AddUpdateBatch(Dictionary<Hash, TransactionContent> accountInfoData)
+        public int AddUpdateBatch(Dictionary<Hash, TransactionContent> accountInfoData, long sequenceNumber)
         {
             int Successes = 0;
-            SQLiteTransaction st = sqliteConnection.BeginTransaction();
+            SQLiteTransaction transaction = sqliteConnection.BeginTransaction();
 
             foreach (KeyValuePair<Hash, TransactionContent> kvp in accountInfoData)
             {
-                DBResponse resp = AddUpdate(kvp.Value, st);
+                DBResponse resp = AddUpdate(kvp.Value, transaction, sequenceNumber);
                 if ((resp == DBResponse.InsertSuccess) || (resp == DBResponse.UpdateSuccess))
                 {
                     Successes++;
                 }
             }
 
-            st.Commit();
+            transaction.Commit();
                         
             return Successes;
         }
@@ -172,7 +176,7 @@ namespace TNetD.PersistentStore
         /// </summary>
         /// <param name="transactionContent"></param>
         /// <returns></returns>
-        public DBResponse AddUpdate(TransactionContent transactionContent, SQLiteTransaction transaction)
+        DBResponse AddUpdate(TransactionContent transactionContent, SQLiteTransaction transaction, long sequenceNumber)
         {
             bool doUpdate = false;
 
@@ -217,9 +221,10 @@ namespace TNetD.PersistentStore
             {
                 ///////////////  Perform the INSERT  ///////////////
 
-                using (SQLiteCommand cmd = new SQLiteCommand("INSERT INTO Transactions VALUES(@transactionID, @serializedContent);", sqliteConnection))
+                using (SQLiteCommand cmd = new SQLiteCommand("INSERT INTO Transactions VALUES(@transactionID, @sequenceNumber, @serializedContent);", sqliteConnection))
                 {
                     cmd.Parameters.Add(new SQLiteParameter("@transactionID", transactionContent.TransactionID.Hex));
+                    cmd.Parameters.Add(new SQLiteParameter("@sequenceNumber", sequenceNumber));
                     cmd.Parameters.Add(new SQLiteParameter("@serializedContent", transactionContent.Serialize()));
 
                     if (cmd.ExecuteNonQuery() != 1)
@@ -283,13 +288,17 @@ namespace TNetD.PersistentStore
             {
                 if (!DBUtils.TableExists("Transactions", sqliteConnection))
                 {
-                    DBUtils.ExecuteNonQuery("CREATE TABLE Transactions (TransactionID BLOB PRIMARY KEY, SerializedContent BLOB);", sqliteConnection);
+                    DBUtils.ExecuteNonQuery("CREATE TABLE Transactions (TransactionID BLOB PRIMARY KEY, SequenceNumber INTEGER, SerializedContent BLOB);", sqliteConnection);
+
+                    // Make an index to improve Sequence Number based lookups.
+                    DBUtils.ExecuteNonQuery("CREATE INDEX Idx2 ON Transactions(TransactionID, SequenceNumber);", sqliteConnection);                
                 }
 
                 ///  Extra Table for Transaction History : OPTIONAL FOR NODES
                 if (!DBUtils.TableExists("TransactionHistory", sqliteConnection))
                 {
                     DBUtils.ExecuteNonQuery("CREATE TABLE TransactionHistory (TransactionID BLOB, PublicKey BLOB, TimeStamp Integer);", sqliteConnection);
+                    
                     // Make an index table to make history lookups much faster.
                     DBUtils.ExecuteNonQuery("CREATE INDEX Idx1 ON TransactionHistory(PublicKey, TimeStamp);", sqliteConnection);
                 }
@@ -305,6 +314,18 @@ namespace TNetD.PersistentStore
         public DBResponse Delete(Hash transactionID)
         {
             DBResponse response = DBResponse.DeleteFailed;
+
+            using (SQLiteCommand cmd = new SQLiteCommand("DELETE FROM TransactionHistory WHERE (TransactionID = @transactionID);", sqliteConnection))
+            {
+                cmd.Parameters.Add(new SQLiteParameter("@transactionID", transactionID.Hex));
+
+                // There should be a single entry for a TransactionID.
+                if (cmd.ExecuteNonQuery() == 1)
+                {
+                    response = DBResponse.DeleteSuccess;
+                }
+            }
+
             using (SQLiteCommand cmd = new SQLiteCommand("DELETE FROM Transactions WHERE (TransactionID = @transactionID);", sqliteConnection))
             {
                 cmd.Parameters.Add(new SQLiteParameter("@transactionID", transactionID.Hex));
@@ -315,6 +336,7 @@ namespace TNetD.PersistentStore
                     response = DBResponse.DeleteSuccess;
                 }
             }
+
             return response;
         }
 
@@ -330,7 +352,16 @@ namespace TNetD.PersistentStore
 
             using (SQLiteCommand cmd = new SQLiteCommand("DELETE FROM Transactions;", sqliteConnection))
             {
-                removed = cmd.ExecuteNonQuery();
+                removed += cmd.ExecuteNonQuery();
+                if (removed > 0) // There should be atleast single entry for a PublicKey.
+                {
+                    response = DBResponse.DeleteSuccess;
+                }
+            }
+
+            using (SQLiteCommand cmd = new SQLiteCommand("DELETE FROM TransactionHistory;", sqliteConnection))
+            {
+                removed += cmd.ExecuteNonQuery();
                 if (removed > 0) // There should be atleast single entry for a PublicKey.
                 {
                     response = DBResponse.DeleteSuccess;
