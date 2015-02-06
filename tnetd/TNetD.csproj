@@ -141,6 +141,7 @@
     <Compile Include="PersistentStore\DBUtils.cs" />
     <Compile Include="PersistentStore\IPersistentAccountStore.cs" />
     <Compile Include="PersistentStore\ITransactionStore.cs" />
+    <Compile Include="PersistentStore\SQLiteCloseHistory.cs" />
     <Compile Include="PersistentStore\SQLiteBannedNames.cs" />
     <Compile Include="PersistentStore\SQLiteAccountStore.cs" />
     <Compile Include="PersistentStore\SQLiteTransactionStore.cs" />

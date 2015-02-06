@@ -14,6 +14,8 @@ namespace TNetD
     {
         public static RNGCryptoServiceProvider rngCsp = new RNGCryptoServiceProvider();
 
+        public static readonly Encoding Encoding28591 = Encoding.GetEncoding(28591);
+
         public static Random random = new Random();
 
         public static readonly int LEN_TRANSACTION_ID = 32;

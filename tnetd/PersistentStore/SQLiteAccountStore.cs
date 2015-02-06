@@ -362,12 +362,7 @@ namespace TNetD.PersistentStore
 
                     // Add an index to have faster UserName fetches during transaction processing.
                     DBUtils.ExecuteNonQuery("CREATE INDEX Idx1 ON Ledger(PublicKey, UserName);", sqliteConnection);
-                }
-
-                if (!DBUtils.TableExists("LedgerInfo", sqliteConnection))
-                {
-                    DBUtils.ExecuteNonQuery("CREATE TABLE LedgerInfo (LedgerHash BLOB PRIMARY KEY, LastLedgerHash BLOB, LCLTime INTEGER, SequenceNumber INTEGER);", sqliteConnection);
-                }
+                }                
             }
         }
 

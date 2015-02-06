@@ -159,6 +159,7 @@
     <Compile Include="Crypto\BLAKE2\Blake2IvBuilder.cs" />
     <Compile Include="Crypto\BLAKE2\Hasher.cs" />
     <Compile Include="Crypto\ISymmCipher.cs" />
+    <Compile Include="Crypto\PrivateKeyStore.cs" />
     <Compile Include="Crypto\RC4.cs" />
     <Compile Include="Crypto\Salsa20.cs" />
     <Compile Include="Curve25519.cs" />

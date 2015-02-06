@@ -19,6 +19,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TNetD;
 using TNetD.Address;
+using TNetD.Crypto;
 using TNetD.Json.JS_Structs;
 using TNetD.Transactions;
 using TNetNative;
@@ -67,6 +68,8 @@ namespace TNetTest
             tmr.Interval = 100;
             tmr.Elapsed += tmr_Elapsed;
             tmr.Start();
+
+            PrivateKeyStore pk = new PrivateKeyStore();
         }
 
         void tmr_Elapsed(object sender, ElapsedEventArgs e)
