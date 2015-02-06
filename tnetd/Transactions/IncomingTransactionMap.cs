@@ -21,6 +21,9 @@ namespace TNetD.Transactions
         NodeConfig nodeConfig;
         bool TimerEventProcessed = true;
 
+        // Makeshift :P
+        public Object transactionLock = new Object();
+
         //[Transaction ID] -> [[Transaction Content] -> [vector of sender address]]
         ConcurrentDictionary<Hash, TransactionContentData> TransactionMap = new ConcurrentDictionary<Hash, TransactionContentData>();
 
@@ -56,6 +59,8 @@ namespace TNetD.Transactions
             Tmr.Start();
         }
         
+
+
         void Tmr_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             if(TimerEventProcessed) // Lock to prevent multiple invocations 
@@ -66,18 +71,29 @@ namespace TNetD.Transactions
 
                 try
                 {
-                    // Add the propafations to the transactions list.
-                    foreach(KeyValuePair<Hash, TransactionContent> kvp in IncomingPropagations)
+
+                    lock (transactionLock)
                     {
-                        if(!IncomingTransactions.ContainsKey(kvp.Key))
+
+                        // Add the propagations to the transactions list.
+                        foreach (KeyValuePair<Hash, TransactionContent> kvp in IncomingPropagations)
                         {
-                            IncomingTransactions.TryAdd(kvp.Value.TransactionID, kvp.Value);
-
-                            
+                            if (!IncomingTransactions.ContainsKey(kvp.Key))
+                            {
+                                if (!IncomingTransactions.TryAdd(kvp.Value.TransactionID, kvp.Value))
+                                {
+                                    DisplayUtils.Display("IncomingTransactionMap : Tmr_Elapsed : IncomingTransactions.TryAdd Failed", DisplayType.Warning);
+                                }
+                                else
+                                {
+                                    Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.TransactionsAccepted);
+                                }
+                            }
                         }
-                    }
 
-                    IncomingPropagations.Clear();
+                        IncomingPropagations.Clear();
+
+                    }
 
                     // TODO: Forward to connected peers.
                     // More processing.
@@ -198,13 +214,24 @@ namespace TNetD.Transactions
             
             if (rslt == TransactionProcessingResult.Accepted)
             {
-                // Insert if the transaction does not already exist.
-                if (!IncomingPropagations.ContainsKey(transactionContent.TransactionID))
+
+                lock (transactionLock)
                 {
-                    Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.TransactionsAccepted);                   
-                    IncomingPropagations.TryAdd(transactionContent.TransactionID, transactionContent);
-                }               
-            }        
+                    // Insert if the transaction does not already exist.
+                    if (!IncomingPropagations.ContainsKey(transactionContent.TransactionID))
+                    {
+                        if (IncomingPropagations.TryAdd(transactionContent.TransactionID, transactionContent))
+                        {
+
+                        }
+                        else
+                        {
+                            DisplayUtils.Display("IncomingTransactionMap : HandlePropagationRequest : IncomingPropagations.TryAdd Failed", DisplayType.Warning);
+                        }
+                    }
+                }
+
+            }
 
             return rslt;
         }

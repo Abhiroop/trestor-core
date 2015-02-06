@@ -148,7 +148,7 @@ namespace TNetD.Nodes
             TimerMinute.Interval = 60000;
             TimerMinute.Start();
 
-            restServer = new RESTServer("localhost", nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
+            restServer = new RESTServer(Common.RpcHost, nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
             
             restServer.Start();
 
@@ -1021,14 +1021,20 @@ namespace TNetD.Nodes
                     {
                         Queue<TransactionContent> transactionContentStack = new Queue<TransactionContent>();
 
-                        foreach (KeyValuePair<Hash, TransactionContent> kvp in incomingTransactionMap.IncomingTransactions)
+                        lock (incomingTransactionMap.transactionLock)
                         {
-                            transactionContentStack.Enqueue(kvp.Value);
+                            foreach (KeyValuePair<Hash, TransactionContent> kvp in incomingTransactionMap.IncomingTransactions)
+                            {
+                                transactionContentStack.Enqueue(kvp.Value);
+
+                                Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.TransactionsVerified);
+                            }
+
+                            incomingTransactionMap.IncomingTransactions.Clear();
+                            incomingTransactionMap.ClearTransactionProcessingMap();
+                            incomingTransactionMap.IncomingPropagations_ALL.Clear();
                         }
 
-                        incomingTransactionMap.IncomingTransactions.Clear();
-                        incomingTransactionMap.ClearTransactionProcessingMap();
-                        incomingTransactionMap.IncomingPropagations_ALL.Clear();
 
                         Dictionary<Hash, TreeDiffData> pendingDifferenceData = new Dictionary<Hash, TreeDiffData>();
                         Dictionary<Hash, TransactionContent> acceptedTransactions = new Dictionary<Hash, TransactionContent>();
@@ -1044,6 +1050,8 @@ namespace TNetD.Nodes
                             {
                                 if (transactionContent.VerifySignature() == TransactionProcessingResult.Accepted)
                                 {
+                                    
+
                                     TransactionContent transactionFromPersistentDB;
                                     long sequenceNumber;
                                     if (PersistentTransactionStore.FetchTransaction(out transactionFromPersistentDB, out sequenceNumber,
@@ -1403,9 +1411,7 @@ namespace TNetD.Nodes
 
                             finalPersistentDBUpdateList.Add(ledgerAccount);
                         }
-
-                        // Apply to persistent DB.
-
+                        
                         LedgerCloseData ledgerCloseData;
                         bool ok = PersistentCloseHistory.GetLastRowData(out ledgerCloseData);
 
@@ -1415,12 +1421,12 @@ namespace TNetD.Nodes
                         ledgerCloseData.TotalTransactions += ledgerCloseData.Transactions;
                         ledgerCloseData.LedgerHash = ledger.GetRootHash().Hex;
 
-                        PersistentCloseHistory.AddUpdate(ledgerCloseData);
+                        // Apply to persistent DB.
 
+                        PersistentCloseHistory.AddUpdate(ledgerCloseData);                        
                         PersistentAccountStore.AddUpdateBatch(finalPersistentDBUpdateList);
-
                         PersistentTransactionStore.AddUpdateBatch(acceptedTransactions, ledgerCloseData.SequenceNumber);
-
+                        
                         nodeState.NodeInfo.LastLedgerInfo = new JS_LedgerInfo(ledgerCloseData);
 
                         // Apply the transactions to the PersistentDatabase.
@@ -1452,26 +1458,7 @@ namespace TNetD.Nodes
         }
 
         #endregion
-
-        void CreateArbitraryTransactionAndSendToTrustedNodes()
-        {
-            //List<TransactionSink> tsks = new List<TransactionSink>();
-
-            //Node destNode = Constants.GlobalNodeList[Constants.random.Next(0, Constants.GlobalNodeList.Count)];
-
-            //if (destNode.PublicKey != PublicKey)
-            //{
-            //    int Amount = Constants.random.Next(0, (int)(Money / 2));
-
-            //    TransactionSink tsk = new TransactionSink(destNode.PublicKey, Amount);
-            //    tsks.Add(tsk);
-
-            //    TransactionContent tco = new TransactionContent(PublicKey, 0, tsks.ToArray(), new byte[0]);
-
-            //    OutTransactionCount++;
-            //}
-        }
-
+        
         public async Task<long> CalculateTotalMoneyInPersistentStoreAsync()
         {
             long Tres = 0;

@@ -147,6 +147,7 @@
     <Compile Include="Chaos.NaCl\Sha512.cs" />
     <Compile Include="Chaos.NaCl\XSalsa20Poly1305.cs" />
     <Compile Include="CommonConstants.cs" />
+    <Compile Include="Compression\QuickLZ.cs" />
     <Compile Include="Crypto\BLAKE2\Blake2B.cs" />
     <Compile Include="Crypto\BLAKE2\Blake2BConfig.cs" />
     <Compile Include="Crypto\BLAKE2\Blake2BCore-FullyUnrolled.cs" />

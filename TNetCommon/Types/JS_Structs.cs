@@ -114,6 +114,7 @@ namespace TNetD.Json.JS_Structs
         public int ConnectedPeers = 1;
         public long TransactionsProcessed = 0;
         public long TransactionsAccepted = 0;
+        public long TransactionsVerified = 0;
         public long TransactionsValidated = 0;
         public long RequestsProcessed = 0;
 

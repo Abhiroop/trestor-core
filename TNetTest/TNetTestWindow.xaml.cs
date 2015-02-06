@@ -136,6 +136,8 @@ namespace TNetTest
 
                     WriteLog(response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n");
 
+                    
+
                 }));
 
             }
@@ -165,6 +167,8 @@ namespace TNetTest
                     int[] sdIndex = Utils.GenerateNonRepeatingDistribution(GAD.Count, 2);
 
                     await SentTransactionRequest(GAD[sdIndex[0]], GAD[sdIndex[1]]);
+
+                    //await Task.Delay(500); 
 
                     //sdIndex[0] = 6250;
                     //TX_IDs.Add(SentTransactionRequest(GAD[sdIndex[0]], GAD[sdIndex[1]]));

@@ -5,6 +5,7 @@
 // 15 Jan 2015 : Adding : NetworkType / AccountType
 // 22 Jan 2015 : IPersistentAccountStore.BatchFetch
 // 31 Jan 2015 : Oops !! Added Transactions
+// 6 Feb 2015 : Separate out Close History
 
 // TODO: ASYNC/AWAIT
 
