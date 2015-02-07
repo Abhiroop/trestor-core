@@ -185,7 +185,7 @@ namespace TNetTest
 
         private void button_TransactionsVerify_Click(object sender, RoutedEventArgs e)
         {
-            RESTRequest request = new RESTRequest("request", Grapevine.HttpMethod.GET);
+            /*RESTRequest request = new RESTRequest("request", Grapevine.HttpMethod.GET);
 
             RESTResponse response = client.Execute(request);
 
@@ -217,7 +217,7 @@ namespace TNetTest
 
             RESTResponse acc_resp = client.Execute(registerRequest);
             
-            WriteLog("\n ACC_RESPONSE:" + acc_resp.Content + " \n");
+            WriteLog("\n ACC_RESPONSE:" + acc_resp.Content + " \n");*/
 
 
             /*foreach (Hash txid in TX_IDs)
@@ -234,7 +234,7 @@ namespace TNetTest
 
             }*/
             
-            /*
+            
             
             byte[] PubSrc;
             byte[] PrivSrcExpanded;
@@ -279,7 +279,7 @@ namespace TNetTest
                 WriteLog("INVALID DATA : " + rslt.ToString());
             }
             
-            */
+            
 
 
         }

@@ -342,9 +342,7 @@ namespace TNetD.Json.JS_Structs
             this.Data = Data;
         }
     }
-
-
-
+    
     public class JS_WorkProofRequest : JS_Response
     {
         public byte[] ProofRequest = new byte[16];

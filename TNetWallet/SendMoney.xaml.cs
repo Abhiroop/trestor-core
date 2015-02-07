@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TNetD;
 using TNetD.Protocol;
-using TNetD.Transaction;
+using TNetD.Transactions;
 using TNetWallet.WalletOperations;
 
 namespace TNetWallet
