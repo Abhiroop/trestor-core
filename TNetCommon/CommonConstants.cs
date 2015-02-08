@@ -26,7 +26,7 @@ namespace TNetD
 
         public static readonly bool IsTransactionFeeEnabled = false;
 
-        public static readonly int TransactionStaleTimer_Minutes = 20; // Deviation of 1 minute. //CRITICAL FIX
+        public static readonly int TransactionStaleTimer_Minutes = 20; // Deviation of 1 minute. // CRITICAL FIX
 
         public static readonly int TransactionStatus_Persist_Seconds = 60;
         
@@ -39,9 +39,9 @@ namespace TNetD
         
         public static readonly int UI_TextBox_Max_Length = 20000;
         
-        public static readonly NetworkType NetworkType = Address.NetworkType.TestNet;
+        public static readonly NetworkType NetworkType = Address.NetworkType.MainNet;
         
-        public static readonly string RpcHost =  "localhost" ;// "localhost";
+        public static readonly string RpcHost =  "+" ; //"localhost";
         
         /// <summary>
         ///  TODO: BAD/ REMOVE STATIC METHOD

@@ -1,6 +1,7 @@
 ﻿
 // @Author : Arpan Jati
 // @Date: 23th Dec 2014 | 12th Jan 2015 | 16th Jan 2015 | 20th Jan 2015 | 22nd Jan 2015 
+// 9th Feb 2015 : Full transaction overhaul.
 
 using Chaos.NaCl;
 using System;
@@ -18,53 +19,120 @@ namespace TNetD.Transactions
 
     public enum TransactionProcessingResult
     {
-        Unprocessed, Accepted, InsufficientFunds, SourceSinkValueMismatch, SignatureInvalid,
-        InsufficientSignatureCount, InsufficientFees, InvalidTime, SourceDestinationTypeMismatch,
-        NoProperSources, NoProperDestinations, InvalidVersion, InvalidExecutionData, 
+        /// <summary>
+        /// The transaction is yet to be processed.
+        /// </summary>
+        Unprocessed = 0x00,
+
+        /// <summary>
+        /// Initial integrity checks passed. Queued for further processing.
+        /// </summary>
+        Accepted = 0x01,
+
+        /// <summary>
+        /// Insufficient funds in sources. This is an integrity check, not considering the actual accounts.
+        /// </summary>
+        InsufficientFunds = 0x02,
+
+        /// <summary>
+        /// The value in sources and destinations don't match.
+        /// </summary>
+        SourceSinkValueMismatch = 0x03,
+
+        /// <summary>
+        /// Invalid signature. Now that's bad !!!
+        /// </summary>
+        SignatureInvalid = 0x04,
+
+        /// <summary>
+        /// All the sources don't have their associated signatures.
+        /// </summary>
+        InsufficientSignatureCount = 0x05,
+
+        /// <summary>
+        /// Insifficient network fees. For now its ZERO.
+        /// </summary>
+        InsufficientFees = 0x06,
+
+        /// <summary>
+        /// Proposal time for the transaction is invalid (Should be in limits).
+        /// </summary>
+        InvalidTime = 0x07,
+
+        /// <summary>
+        /// Invalid Source/Destination Entity or Main/Test Net Mismatch.
+        /// </summary>
+        InvalidTransactionEntity = 0x08,
+
+        /// <summary>
+        /// A Source providing less number of tre's than network minimum for any transaction.
+        /// </summary>
+        NoProperSources = 0x09,
+
+        /// <summary>
+        /// A Destination having less number of tre's than network minimum for any transaction.
+        /// </summary>
+        NoProperDestinations = 0x0A,
+
+        /// <summary>
+        /// Invalid transaction packet version.
+        /// </summary>
+        InvalidVersion = 0x0B,
+
+        /// <summary>
+        /// Invalid execution Data for any transaction.
+        /// </summary>
+        InvalidExecutionData = 0x0C,
+
         /// <summary>
         /// The Source entity is also present as one of the Destinations.
         /// </summary>
-        SourceDestinationRepeat, InvalidTransactionEntity,
+        SourceDestinationRepeat = 0x0D,
 
         /// <summary>
         /// Processing Result: Source does not exist.
         /// </summary>
-        PR_SourceDoesNotExist, 
+        PR_SourceDoesNotExist = 0x20,
 
         /// <summary>
         /// Processing Result: Invalid / Banned account name in destination.
         /// </summary>
-        PR_BadAccountName, 
+        PR_BadAccountName = 0x21,
 
         /// <summary>
         /// Processing Result: Destination account address validation failure.
         /// </summary>
-        PR_BadAccountAddress,
+        PR_BadAccountAddress = 0x22,
 
         /// <summary>
         /// Processing Result: Insufficient amount to create new account.
         /// </summary>
-        PR_BadAccountCreationValue,
+        PR_BadAccountCreationValue = 0x23,
 
         /// <summary>
         /// Processing Result: Invalid Account state banned/disabled.
         /// </summary>
-        PR_BadAccountState, 
+        PR_BadAccountState = 0x24,
 
         /// <summary>
         /// Processing Result: Invalid transaction fee.
         /// </summary>
-        PR_BadTransactionFee,
+        PR_BadTransactionFee = 0x25,
 
         /// <summary>
-        /// Processing Result: Not enough funds or double spending.
+        /// Processing Result: Not enough funds in account or double spending.
         /// </summary>
-        PR_BadInsufficientFunds,
+        PR_BadInsufficientFunds = 0x26,
 
         /// <summary>
         /// Processing Result: OMG !!! Its all good !!!
         /// </summary>
-        PR_Validated
+        PR_Validated = 0x40, // 64 in decimal.
+
+        /// <summary>
+        /// Processing Result: The transaction is successfully processed and account balances reflect the result of the transaction.
+        /// </summary>
+        PR_Success = 0x50, // 80 in decimal.
 
     };
 
@@ -105,9 +173,9 @@ namespace TNetD.Transactions
 
         public List<TransactionEntity> Sources { get; set; }
 
-        public List<TransactionEntity> Destinations { get; set; }        
+        public List<TransactionEntity> Destinations { get; set; }
 
-        public List<Hash> Signatures { get; set; }        
+        public List<Hash> Signatures { get; set; }
 
         /// <summary>
         /// This is the Transaction ID. Unique identifier for a transaction.
@@ -138,17 +206,17 @@ namespace TNetD.Transactions
 
         public long Value
         {
-            get 
+            get
             {
                 long val = 0;
-                foreach(TransactionEntity te in Sources)
+                foreach (TransactionEntity te in Sources)
                 {
                     val += te.Value;
                 }
                 return val;
             }
         }
-        
+
         void Init()
         {
             Sources = new List<TransactionEntity>();
@@ -160,7 +228,7 @@ namespace TNetD.Transactions
             intTransactionID = new Hash();
         }
 
-        public TransactionContent(TransactionEntity[] Sources, TransactionEntity[] Destinations, long TransactionFee, 
+        public TransactionContent(TransactionEntity[] Sources, TransactionEntity[] Destinations, long TransactionFee,
             List<Hash> Signatures, long Timestamp)
         {
             this.Destinations = Destinations.ToList();
@@ -174,12 +242,12 @@ namespace TNetD.Transactions
 
         public TransactionContent(TransactionEntity[] Sources, TransactionEntity[] Destinations, long TransactionFee, long Timestamp)
         {
-            this.Destinations = Destinations.ToList();            
+            this.Destinations = Destinations.ToList();
             this.Sources = Sources.ToList();
             this.transactionFee = TransactionFee;
             this.timeStamp = Timestamp;
         }
-        
+
         /// <summary>
         /// Manually set the signatures. This also updates the TransactionID after hashing.
         /// </summary>
@@ -195,7 +263,7 @@ namespace TNetD.Transactions
         {
             Init();
         }
-                        
+
         /// <summary>
         /// Returns the transaction data which needs to be signed by
         /// all the individual sources.
@@ -236,8 +304,6 @@ namespace TNetD.Transactions
             return transactionData.ToArray();
         }
 
-
-
         /// <summary>
         /// Checks the general integrity of the transaction. 
         /// Does not gurantee that the signatures are valid.
@@ -248,12 +314,29 @@ namespace TNetD.Transactions
             long incoming = 0;
             long outgoing = 0;
 
+            // Version and execution data checks.
+
+            if (versionData.Length != 2)
+            {
+                return TransactionProcessingResult.InvalidVersion;
+            }
+
+            if (!((versionData[0] == 0) && (versionData[1] == 0))) // Currently only supporting [0,0] as version.
+            {
+                return TransactionProcessingResult.InvalidVersion;
+            }
+
+            if (executionData.Length != 0)
+            {
+                return TransactionProcessingResult.InvalidExecutionData;
+            }
+
             HashSet<Hash> srcDest = new HashSet<Hash>();
-           
-            foreach(TransactionEntity src in Sources)
+
+            foreach (TransactionEntity src in Sources)
             {
                 Hash sr = new Hash(src.PublicKey);
-                if(!srcDest.Contains(sr))
+                if (!srcDest.Contains(sr))
                 {
                     srcDest.Add(sr);
                 }
@@ -262,7 +345,7 @@ namespace TNetD.Transactions
                     return TransactionProcessingResult.SourceDestinationRepeat;
                 }
 
-                if(!src.ValidateEntity())
+                if (!src.ValidateEntity())
                 {
                     return TransactionProcessingResult.InvalidTransactionEntity;
                 }
@@ -289,7 +372,7 @@ namespace TNetD.Transactions
             if (Sources.Count != Signatures.Count)
                 return TransactionProcessingResult.InsufficientSignatureCount;
 
-            if(transactionFee < Common.NETWORK_Min_Transaction_Fee)
+            if (transactionFee < Common.NETWORK_Min_Transaction_Fee)
             {
                 return TransactionProcessingResult.InsufficientFees;
             }
@@ -367,7 +450,7 @@ namespace TNetD.Transactions
             else
             {
                 return TransactionProcessingResult.InsufficientSignatureCount; // Kindof redundant / #THINK
-            }            
+            }
         }
 
         byte[] GetTransactionDataAndSignature()
@@ -395,7 +478,7 @@ namespace TNetD.Transactions
 
             intTransactionID = new Hash(output);
         }
-                
+
         bool IsSource(Hash SourcePublicKey)
         {
             for (int i = 0; i < (int)Sources.Count; i++)
@@ -451,7 +534,7 @@ namespace TNetD.Transactions
             foreach (Hash te in Signatures)
             {
                 PDTs[cnt++] = (ProtocolPackager.Pack(te, 6));
-            }            
+            }
 
             if (cnt != PDTs.Length) throw new Exception("Invalid pack entries");
 
@@ -465,13 +548,13 @@ namespace TNetD.Transactions
             Init();
 
             versionData = Data.VersionData;
-            executionData =  Data.ExecutionData;
+            executionData = Data.ExecutionData;
             timeStamp = Data.Timestamp;
 
             Sources = (from src in Data.Sources select new TransactionEntity(src)).ToList();
             Destinations = (from dst in Data.Destinations select new TransactionEntity(dst)).ToList();
-            
-            transactionFee = Data.TransactionFee;           
+
+            transactionFee = Data.TransactionFee;
 
             Signatures = (from sig in Data.Signatures select new Hash(sig)).ToList();
 
@@ -565,7 +648,7 @@ namespace TNetD.Transactions
                             }
                         }
                         break;
-                                   
+
                 }
             }
 
