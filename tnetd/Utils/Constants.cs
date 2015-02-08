@@ -17,14 +17,7 @@ namespace TNetD
         /// Cannot be changed once the network starts working.
         /// </summary>
         public static readonly int HashTree_NodeListDepth = 8;
-
-        /// <summary>
-        /// Minimum allowable Account Name Length
-        /// </summary>
-        public static readonly int Pref_MinNameLength = 2;
-
-        public static readonly int Pref_MaxNameLength = 15;
-
+               
         public static readonly int GlobalNodes = 100;
 
         public static readonly int Connections_PerNode_Max = 20;

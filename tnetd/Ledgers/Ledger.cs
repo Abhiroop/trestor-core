@@ -134,7 +134,7 @@ namespace TNetD.Ledgers
                     AddressAccountInfoMap.Add(address, userInfo); // Add
                 }
 
-                if (userInfo.Name.Length >= Constants.Pref_MinNameLength)
+                if (Utils.ValidateUserName( userInfo.Name))
                 {
                     if (NameAccountInfoMap.ContainsKey(userInfo.Name))
                     {

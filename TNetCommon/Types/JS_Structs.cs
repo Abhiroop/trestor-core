@@ -292,7 +292,11 @@ namespace TNetD.Json.JS_Structs
         //public JS_TransactionReply Transaction;
         public TransactionStatusType TransactionStatusType;
         public TransactionProcessingResult TransactionProcessingResult;
+
+        [JsonIgnore] // For now not needed.
         public int ValidationsCount;
+
+        [JsonIgnore] // For now not needed.
         public long LedgerSequence;
 
         public JS_TransactionState_Reply(TransactionStatusType transactionStatusType,

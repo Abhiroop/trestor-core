@@ -15,6 +15,10 @@ namespace TNetD
 
         public static bool ValidateUserName(string userName)
         {
+            if ((userName.Length <= Common.Pref_MinNameLength)) return false;
+
+            if ((userName.Length > Common.Pref_MaxNameLength)) return false;
+
             if (userName != userName.ToLowerInvariant()) return false;
 
             foreach (char x in userName)

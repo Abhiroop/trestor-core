@@ -405,7 +405,6 @@ namespace TNetD.Transactions
             {
                 return TransactionProcessingResult.InsufficientFunds;
             }
-
         }
 
         /// <summary>

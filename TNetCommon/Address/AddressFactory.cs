@@ -117,11 +117,6 @@ namespace TNetD.Address
         {            
             if (!Utils.ValidateUserName(UserName)) throw new ArgumentException("Usernames should be lowercase and alphanumeric, _ is allowed");
 
-            //Contract.Requires<ArgumentException>(PublicKey != null);
-            //Contract.Requires<ArgumentException>(UserName != null);
-            //Contract.Requires<ArgumentException>(PublicKey.Length == 32, "Public key length must be 32 bytes.");
-            //Contract.Requires<ArgumentException>(UserName.Length < 64, "Username length should be less than 64.");
-
             if (networkType == NetworkType.MainNet)
             {
                 if (accountType == AccountType.TestGenesis ||

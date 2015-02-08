@@ -442,13 +442,13 @@ namespace TNetD.Nodes
                     string[] _name = name.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     if (_name.Length == 1)
                     {
-                        if (_name[0].Length >= Constants.Pref_MinNameLength)
+                        if (Utils.ValidateUserName(_name[0]))
                         {
-                            NAME = name;
+                            NAME = _name[0];
                         }
                         else
                         {
-                            msg = new JS_Msg("Invalid Name Length.", RPCStatus.Exception);
+                            msg = new JS_Msg("Invalid Name", RPCStatus.Exception);
                             throw new ArgumentException("RPC: Invalid Name Length.");
                         }
                     }
@@ -827,10 +827,6 @@ namespace TNetD.Nodes
 
         bool IsGoodValidUserName(string Name)
         {
-            if ((Name.Length <= Constants.Pref_MinNameLength)) return false;
-
-            if ((Name.Length >= Constants.Pref_MaxNameLength)) return false;
-
             if (!Utils.ValidateUserName(Name)) return false;
 
             if (PersistentBannedNameStore.Contains(Name)) return false;
@@ -1033,7 +1029,7 @@ namespace TNetD.Nodes
                             incomingTransactionMap.IncomingTransactions.Clear();
                             incomingTransactionMap.IncomingPropagations_ALL.Clear();
                         }
-                        
+
                         Dictionary<Hash, TreeDiffData> pendingDifferenceData = new Dictionary<Hash, TreeDiffData>();
                         Dictionary<Hash, TransactionContent> acceptedTransactions = new Dictionary<Hash, TransactionContent>();
                         List<AccountInfo> newAccounts = new List<AccountInfo>();
@@ -1079,8 +1075,7 @@ namespace TNetD.Nodes
                                                 badTX_AccountName = true; // Names should be lowercase.
                                                 break;
                                             }
-
-
+                                            
                                             AccountInfo ai;
                                             if (PersistentAccountStore.FetchAccount(out ai, new Hash(te.PublicKey)) == DBResponse.FetchSuccess)
                                             {
@@ -1101,7 +1096,7 @@ namespace TNetD.Nodes
                                             }
                                             else
                                             {
-                                                if (te.Name.Length >= Constants.Pref_MinNameLength)
+                                                if (!badTX_AccountName)
                                                 {
                                                     // Check if same named account exists. When, public key could not be fetched.
                                                     if (PersistentAccountStore.FetchAccount(out ai, te.Name) == DBResponse.FetchSuccess)
@@ -1118,7 +1113,7 @@ namespace TNetD.Nodes
                                             }
                                         }
 
-                                        if (!Common.IsTransactionFeeEnabled) // Transaction Fee not allowed here !!
+                                        if (!Common.IsTransactionFeeEnabled) // Transaction fee not allowed here !!
                                         {
                                             if (transactionContent.TransactionFee > 0)
                                             {
@@ -1188,7 +1183,6 @@ namespace TNetD.Nodes
                                                     badTX_AccountState = true;
                                                     break;
                                                 }
-
                                             }
                                             else
                                             {
@@ -1213,10 +1207,8 @@ namespace TNetD.Nodes
                                                     badTX_AccountName = true;
                                                     break;
                                                 }
-
                                             }
                                         }
-
 
                                         // TODO: ALL WELL / Check for Transaction FEE.
                                         // TEMPORARY SINGLE NODE STUFF // DIRECT DB WRITE.

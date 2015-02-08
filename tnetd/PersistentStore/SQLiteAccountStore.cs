@@ -175,13 +175,13 @@ namespace TNetD.PersistentStore
         }
 
         ////////////////////////
-        
+
         public DBResponse FetchAccount(out AccountInfo accountInfo, string UserName)
         {
             DBResponse response = DBResponse.FetchFailed;
             accountInfo = default(AccountInfo);
 
-            if (UserName.Length >= Constants.Pref_MinNameLength)
+            if (Utils.ValidateUserName(UserName))
             {
                 using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger WHERE UserName = @userName;", sqliteConnection))
                 {
@@ -284,7 +284,7 @@ namespace TNetD.PersistentStore
         {
             bool doUpdate = false;
 
-            using (SQLiteCommand cmd = new SQLiteCommand("SELECT PublicKey FROM Ledger WHERE PublicKey = @publicKey;", 
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT PublicKey FROM Ledger WHERE PublicKey = @publicKey;",
                 sqliteConnection, (SQLiteTransaction)transaction))
             {
                 cmd.Parameters.Add(new SQLiteParameter("@publicKey", accountInfo.PublicKey.Hex));
@@ -363,7 +363,7 @@ namespace TNetD.PersistentStore
 
                     // Add an index to have faster UserName fetches during transaction processing.
                     DBUtils.ExecuteNonQuery("CREATE INDEX Idx1 ON Ledger(PublicKey, UserName);", sqliteConnection);
-                }                
+                }
             }
         }
 
