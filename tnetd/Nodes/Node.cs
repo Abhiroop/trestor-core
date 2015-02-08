@@ -619,7 +619,7 @@ namespace TNetD.Nodes
             long sequenceNumber;
             if (PersistentTransactionStore.FetchTransaction(out transactionContent, out sequenceNumber, transactionID) == DBResponse.FetchSuccess)
             {
-                replies.TransactionState.Add(new JS_TransactionState_Reply(TransactionStatusType.Processed,
+                replies.TransactionState.Add(new JS_TransactionState_Reply(TransactionStatusType.Success,
                     TransactionProcessingResult.PR_Success));
                 return;
             }
