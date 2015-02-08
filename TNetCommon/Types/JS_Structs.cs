@@ -200,6 +200,28 @@ namespace TNetD.Json.JS_Structs
         }
     }
 
+    public class JS_Time : JS_Response
+    {
+        public DateTime Description;
+        public long Time;
+
+        public JS_Time()
+        {
+            //Time = DateTime.UtcNow;
+        }
+
+        public JS_Time(long time)
+        {
+            Time = time;
+            Description = DateTime.FromFileTimeUtc(time);
+        }
+
+        public JS_Resp GetResponse()
+        {
+            return new JS_Resp(RPCStatus.Success, this);
+        }
+    }
+
     public class JS_TransactionEntity : JS_Response
     {
         public byte[] PublicKey;
@@ -267,17 +289,17 @@ namespace TNetD.Json.JS_Structs
 
     public class JS_TransactionState_Reply : JS_Response
     {
-        public JS_TransactionReply Transaction;
+        //public JS_TransactionReply Transaction;
         public TransactionStatusType TransactionStatusType;
         public TransactionProcessingResult TransactionProcessingResult;
         public int ValidationsCount;
         public long LedgerSequence;
 
-        public JS_TransactionState_Reply(TransactionContent transactionContent, TransactionStatusType transactionStatusType,
+        public JS_TransactionState_Reply(TransactionStatusType transactionStatusType,
          TransactionProcessingResult transactionProcessingResult,
             int validationsCount = 0, long ledgerSequence = 0)
         {
-            Transaction = new JS_TransactionReply(transactionContent);
+            //Transaction = new JS_TransactionReply(transactionContent);
             TransactionStatusType = transactionStatusType;
             TransactionProcessingResult = transactionProcessingResult;
             ValidationsCount = validationsCount;

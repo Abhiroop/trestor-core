@@ -14,7 +14,7 @@ using TNetD.Protocol;
 
 namespace TNetD.Transactions
 {
-    public enum TransactionStatusType { Proposed, InProcessingQueue, Processed, VoteInProgress, Success, Failure, InPreProcessing };
+    public enum TransactionStatusType { Proposed, InProcessingQueue, Processed, VoteInProgress, Success, Failure, InPreProcessing, Unprocessed };
 
     public enum TransactionProcessingResult
     {
@@ -24,7 +24,48 @@ namespace TNetD.Transactions
         /// <summary>
         /// The Source entity is also present as one of the Destinations.
         /// </summary>
-        SourceDestinationRepeat, InvalidTransactionEntity
+        SourceDestinationRepeat, InvalidTransactionEntity,
+
+        /// <summary>
+        /// Processing Result: Source does not exist.
+        /// </summary>
+        PR_SourceDoesNotExist, 
+
+        /// <summary>
+        /// Processing Result: Invalid / Banned account name in destination.
+        /// </summary>
+        PR_BadAccountName, 
+
+        /// <summary>
+        /// Processing Result: Destination account address validation failure.
+        /// </summary>
+        PR_BadAccountAddress,
+
+        /// <summary>
+        /// Processing Result: Insufficient amount to create new account.
+        /// </summary>
+        PR_BadAccountCreationValue,
+
+        /// <summary>
+        /// Processing Result: Invalid Account state banned/disabled.
+        /// </summary>
+        PR_BadAccountState, 
+
+        /// <summary>
+        /// Processing Result: Invalid transaction fee.
+        /// </summary>
+        PR_BadTransactionFee,
+
+        /// <summary>
+        /// Processing Result: Not enough funds or double spending.
+        /// </summary>
+        PR_BadInsufficientFunds,
+
+        /// <summary>
+        /// Processing Result: OMG !!! Its all good !!!
+        /// </summary>
+        PR_Validated
+
     };
 
     /// <summary>

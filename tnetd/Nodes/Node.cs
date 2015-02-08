@@ -40,6 +40,7 @@ namespace TNetD.Nodes
         public event NodeStatusEventHandler NodeStatusEvent;
 
         bool TimerEventProcessed = true;
+        bool MinuteEventProcessed = true;
 
         SecureNetwork network = default(SecureNetwork);
 
@@ -47,6 +48,7 @@ namespace TNetD.Nodes
 
         NodeState nodeState;
 
+        TransactionStateManager transactionStateManager;
         IncomingTransactionMap incomingTransactionMap;
 
         /// <summary>
@@ -108,7 +110,8 @@ namespace TNetD.Nodes
             //nodeState.NodeInfo.NodeDetails = new JS_NodeDetails();
             //nodeState.NodeInfo.LastLedgerInfo = new JS_LedgerInfo();            
 
-            incomingTransactionMap = new IncomingTransactionMap(nodeState, nodeConfig);
+            transactionStateManager = new TransactionStateManager();
+            incomingTransactionMap = new IncomingTransactionMap(nodeState, nodeConfig, transactionStateManager);
 
             network = new SecureNetwork(nodeConfig);
             network.PacketReceived += network_PacketReceived;
@@ -145,11 +148,11 @@ namespace TNetD.Nodes
             TimerMinute = new System.Timers.Timer();
             TimerMinute.Elapsed += TimerMinute_Elapsed;
             TimerMinute.Enabled = true;
-            TimerMinute.Interval = 60000;
+            TimerMinute.Interval = 30000;
             TimerMinute.Start();
 
             restServer = new RESTServer(Common.RpcHost, nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
-            
+
             restServer.Start();
 
             DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
@@ -157,32 +160,46 @@ namespace TNetD.Nodes
 
         void TimerMinute_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Hash[] Kys = WorkProofMap.Keys.ToArray();
-
-            try
+            if (MinuteEventProcessed) // Lock to prevent multiple invocations
             {
-                DateTime NOW = DateTime.UtcNow;
+                MinuteEventProcessed = false;
 
-                // Clean temporary proof of work Queue
-                // TODO : CRITICAL : Make sure the valid ones are removed, and not the critical ones.
-
-                foreach (Hash key in Kys)
+                try
                 {
-                    DifficultyTimeData dtd;
-                    if (WorkProofMap.TryGetValue(key, out dtd))
+                    DateTime NOW = DateTime.UtcNow;
+
+                    // Clean temporary proof of work Queue
+                    // TODO : CRITICAL : Make sure the valid ones are removed, and not the critical ones.
+
+                    Hash[] Kys = WorkProofMap.Keys.ToArray();
+
+                    foreach (Hash key in Kys)
                     {
-                        TimeSpan span = (NOW - dtd.IssueTime);
-                        if (span.TotalSeconds > 60) // 1 Minute
+                        DifficultyTimeData dtd;
+                        if (WorkProofMap.TryGetValue(key, out dtd))
                         {
-                            WorkProofMap.Remove(key);
+                            TimeSpan span = (NOW - dtd.IssueTime);
+                            if (span.TotalSeconds > 60) // 1 Minute
+                            {
+                                WorkProofMap.Remove(key);
+                            }
                         }
                     }
+
+                    transactionStateManager.ProcessAndClear();
+
+                }
+                catch (Exception ex)
+                {
+                    DisplayUtils.Display("TimerMinute_Elapsed", ex);
                 }
             }
-            catch (Exception ex)
+            else
             {
-                DisplayUtils.Display("TimerMinute_Elapsed", ex);
+                DisplayUtils.Display("Timer Expired : TimerMinute", DisplayType.Warning);
             }
+
+            MinuteEventProcessed = true;
         }
 
         //WorkProofMap
@@ -206,7 +223,7 @@ namespace TNetD.Nodes
 
         /// <summary>
         /// Add more content to be loaded in background here.
-        /// </summary>       
+        /// </summary>
         async public void BeginBackgroundLoad()
         {
             await Task.Run(async () =>
@@ -249,6 +266,12 @@ namespace TNetD.Nodes
             if (context.Request.RawUrl.Matches(@"^/info")) // ProcessInfo
             {
                 this.SendJsonResponse(context, nodeState.NodeInfo.GetResponse());
+
+                return true;
+            }
+            if (context.Request.RawUrl.Matches(@"^/time")) // ProcessInfo
+            {
+                this.SendJsonResponse(context, new JS_Time(nodeState.network_time).GetResponse());
 
                 return true;
             }
@@ -582,17 +605,15 @@ namespace TNetD.Nodes
 
         private void HandleTransactionStatusQuery_Internal(ref JS_TransactionStateReplies replies, Hash transactionID)
         {
-
-            TransactionProcessingResult result = TransactionProcessingResult.Unprocessed;
+            /*TransactionProcessingResult result = TransactionProcessingResult.Unprocessed;
             if (incomingTransactionMap.TransactionProcessingMap.ContainsKey(transactionID))
             {
                 result = incomingTransactionMap.TransactionProcessingMap[transactionID];
-
+             * 
                 TransactionContent tc;
                 if (incomingTransactionMap.IncomingPropagations_ALL.ContainsKey(transactionID))
                 {
                     tc = incomingTransactionMap.IncomingPropagations_ALL[transactionID];
-
                     replies.TransactionState.Add(new JS_TransactionState_Reply(tc, TransactionStatusType.InPreProcessing, result));
                     return;
                 }
@@ -612,6 +633,15 @@ namespace TNetD.Nodes
             {
                 replies.TransactionState.Add(new JS_TransactionState_Reply(response_queue.Item1, TransactionStatusType.InProcessingQueue, TransactionProcessingResult.Accepted));
                 return;
+            }*/
+
+            TransactionState transactionState;
+            if (transactionStateManager.Fetch(out transactionState, transactionID))
+            {
+                replies.TransactionState.Add(new JS_TransactionState_Reply(transactionState.StatusType,
+                    transactionState.ProcessingResult));
+
+                return;
             }
 
             // Check if the transaction is processed.
@@ -619,7 +649,7 @@ namespace TNetD.Nodes
             long sequenceNumber;
             if (PersistentTransactionStore.FetchTransaction(out transactionContent, out sequenceNumber, transactionID) == DBResponse.FetchSuccess)
             {
-                replies.TransactionState.Add(new JS_TransactionState_Reply(transactionContent, TransactionStatusType.Processed,
+                replies.TransactionState.Add(new JS_TransactionState_Reply(TransactionStatusType.Processed,
                     TransactionProcessingResult.Accepted));
                 return;
             }
@@ -1002,7 +1032,7 @@ namespace TNetD.Nodes
         #region TRANSACTION PROCESSING
 
         /// <summary>
-        /// Timer now fast. Actual/Final timer would depend on consensus rate.
+        /// Timer now fast. Actual / Final timer would depend on consensus rate.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -1031,7 +1061,6 @@ namespace TNetD.Nodes
                             }
 
                             incomingTransactionMap.IncomingTransactions.Clear();
-                            incomingTransactionMap.ClearTransactionProcessingMap();
                             incomingTransactionMap.IncomingPropagations_ALL.Clear();
                         }
 
@@ -1050,8 +1079,6 @@ namespace TNetD.Nodes
                             {
                                 if (transactionContent.VerifySignature() == TransactionProcessingResult.Accepted)
                                 {
-                                    
-
                                     TransactionContent transactionFromPersistentDB;
                                     long sequenceNumber;
                                     if (PersistentTransactionStore.FetchTransaction(out transactionFromPersistentDB, out sequenceNumber,
@@ -1062,16 +1089,14 @@ namespace TNetD.Nodes
                                     }
                                     else
                                     {
-                                        // Check Sources
-                                        bool badSource = false;
-
-                                        // True if account
-                                        bool badAccountName_inTransaction = false;
-                                        bool badAccountAddress_inTransaction = false;
-                                        bool badAccountCreationValue = false;
-                                        bool badAccountState = false;
-                                        bool badTransactionFee = false;
-                                        bool insufficientFunds = false;
+                                        // True if BAD
+                                        bool badTX_SourceDoesNotExist = false;
+                                        bool badTX_AccountName = false;
+                                        bool badTX_AccountAddress = false;
+                                        bool badTX_AccountCreationValue = false;
+                                        bool badTX_AccountState = false;
+                                        bool badTX_TransactionFee = false;
+                                        bool badTX_InsufficientFunds = false;
 
                                         List<AccountInfo> temp_NewAccounts = new List<AccountInfo>();
 
@@ -1082,7 +1107,7 @@ namespace TNetD.Nodes
 
                                             if (!Utils.ValidateUserName(te.Name))
                                             {
-                                                badAccountName_inTransaction = true; // Names should be lowercase.
+                                                badTX_AccountName = true; // Names should be lowercase.
                                                 break;
                                             }
 
@@ -1093,7 +1118,7 @@ namespace TNetD.Nodes
                                                 // Account Exists
                                                 if (ai.Name != te.Name)
                                                 {
-                                                    badAccountName_inTransaction = true;
+                                                    badTX_AccountName = true;
                                                     break;
                                                 }
 
@@ -1101,7 +1126,7 @@ namespace TNetD.Nodes
 
                                                 if (Addr != te.Address)
                                                 {
-                                                    badAccountAddress_inTransaction = true;
+                                                    badTX_AccountAddress = true;
                                                     break;
                                                 }
                                             }
@@ -1114,7 +1139,7 @@ namespace TNetD.Nodes
                                                     {
                                                         // Thats too bad, transaction cannot happen, 
                                                         // new wallet has invalid Name (name already used).
-                                                        badAccountName_inTransaction = true;
+                                                        badTX_AccountName = true;
                                                     }
                                                     else
                                                     {
@@ -1128,7 +1153,7 @@ namespace TNetD.Nodes
                                         {
                                             if (transactionContent.TransactionFee > 0)
                                             {
-                                                badTransactionFee = true;
+                                                badTX_TransactionFee = true;
                                             }
                                         }
 
@@ -1161,19 +1186,19 @@ namespace TNetD.Nodes
                                                     }
                                                     else
                                                     {
-                                                        insufficientFunds = true;
+                                                        badTX_InsufficientFunds = true;
                                                         break;
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    badAccountState = true;
+                                                    badTX_AccountState = true;
                                                     break;
                                                 }
                                             }
                                             else
                                             {
-                                                badSource = true;
+                                                badTX_SourceDoesNotExist = true;
                                                 break;
                                             }
                                         }
@@ -1191,7 +1216,7 @@ namespace TNetD.Nodes
 
                                                 if (ai.AccountState != AccountState.Normal)
                                                 {
-                                                    badAccountState = true;
+                                                    badTX_AccountState = true;
                                                     break;
                                                 }
 
@@ -1210,13 +1235,13 @@ namespace TNetD.Nodes
                                                 }
                                                 else
                                                 {
-                                                    badAccountCreationValue = true;
+                                                    badTX_AccountCreationValue = true;
                                                     break;
                                                 }
 
                                                 if (IsGoodValidUserName(destination.Name) == false)
                                                 {
-                                                    badAccountName_inTransaction = true;
+                                                    badTX_AccountName = true;
                                                     break;
                                                 }
 
@@ -1227,8 +1252,8 @@ namespace TNetD.Nodes
                                         // TODO: ALL WELL / Check for Transaction FEE.
                                         // TEMPORARY SINGLE NODE STUFF // DIRECT DB WRITE.
                                         // Make a list of updated accounts.
-                                        if (!badSource && !badAccountCreationValue && !badAccountState && !insufficientFunds
-                                            && !badAccountName_inTransaction && !badAccountAddress_inTransaction & !badTransactionFee)
+                                        if (!badTX_SourceDoesNotExist && !badTX_AccountCreationValue && !badTX_AccountState && !badTX_InsufficientFunds
+                                            && !badTX_AccountName && !badTX_AccountAddress & !badTX_TransactionFee)
                                         {
                                             newAccounts.AddRange(temp_NewAccounts);
 
@@ -1278,22 +1303,40 @@ namespace TNetD.Nodes
 
                                             DisplayUtils.Display("Transaction added to intermediate list : " +
                                                 HexUtil.ToString(transactionContent.TransactionID.Hex), DisplayType.Info);
+
+                                            transactionStateManager.Set(transactionContent.TransactionID, TransactionProcessingResult.PR_Validated);
                                         }
                                         else
                                         {
+                                            TransactionProcessingResult rs = TransactionProcessingResult.Unprocessed;
+
+                                            if (badTX_SourceDoesNotExist) rs = TransactionProcessingResult.PR_SourceDoesNotExist;
+                                            if (badTX_AccountCreationValue) rs = TransactionProcessingResult.PR_BadAccountCreationValue;
+                                            if (badTX_AccountState) rs = TransactionProcessingResult.PR_BadAccountState;
+                                            if (badTX_InsufficientFunds) rs = TransactionProcessingResult.PR_BadInsufficientFunds;
+                                            if (badTX_AccountName) rs = TransactionProcessingResult.PR_BadAccountName;
+                                            if (badTX_TransactionFee) rs = TransactionProcessingResult.PR_BadTransactionFee;
+                                            if (badTX_AccountAddress) rs = TransactionProcessingResult.PR_BadAccountAddress;
+
+                                            transactionStateManager.Set(transactionContent.TransactionID, rs);
+
                                             //TODO: LOG THIS and Display properly.
                                             DisplayUtils.Display("BAD Transaction : " + HexUtil.ToString(transactionContent.TransactionID.Hex) + "\n" +
-                                                (badSource ? "\nbadSource" : "") +
-                                                (badAccountCreationValue ? "\nbadAccountCreationValue" : "") +
-                                                (insufficientFunds ? "\ninsufficientFunds" : "") +
-                                                (badAccountName_inTransaction ? "\nbadAccountName_inTransaction" : "") +
-                                                (badTransactionFee ? "\nbadTransactionFee" : "") +
-                                                (badAccountAddress_inTransaction ? "\nbadAccountAddress_inTransaction" : "") + "\n" +
+                                                (badTX_SourceDoesNotExist ? "\nbadTX_SourceDoesNotExist" : "") +
+                                                (badTX_AccountCreationValue ? "\nbadTX_AccountCreationValue" : "") +
+                                                (badTX_AccountState ? "\nbadTX_AccountState" : "") +
+                                                (badTX_InsufficientFunds ? "\nbadTX_InsufficientFunds" : "") +
+                                                (badTX_AccountName ? "\nbadTX_AccountName" : "") +
+                                                (badTX_TransactionFee ? "\nbadTX_TransactionFee" : "") +
+                                                (badTX_AccountAddress ? "\nbadTX_AccountAddress" : "") + "\n" +
 
                                                 JsonConvert.SerializeObject(transactionContent, Common.JsonSerializerSettings)
 
                                                 + "\n", DisplayType.BadData);
                                         }
+
+                                        transactionStateManager.Set(transactionContent.TransactionID, TransactionStatusType.Processed);
+
                                     }
                                 }
                             }
@@ -1411,7 +1454,7 @@ namespace TNetD.Nodes
 
                             finalPersistentDBUpdateList.Add(ledgerAccount);
                         }
-                        
+
                         LedgerCloseData ledgerCloseData;
                         bool ok = PersistentCloseHistory.GetLastRowData(out ledgerCloseData);
 
@@ -1423,10 +1466,10 @@ namespace TNetD.Nodes
 
                         // Apply to persistent DB.
 
-                        PersistentCloseHistory.AddUpdate(ledgerCloseData);                        
+                        PersistentCloseHistory.AddUpdate(ledgerCloseData);
                         PersistentAccountStore.AddUpdateBatch(finalPersistentDBUpdateList);
                         PersistentTransactionStore.AddUpdateBatch(acceptedTransactions, ledgerCloseData.SequenceNumber);
-                        
+
                         nodeState.NodeInfo.LastLedgerInfo = new JS_LedgerInfo(ledgerCloseData);
 
                         // Apply the transactions to the PersistentDatabase.
@@ -1458,7 +1501,7 @@ namespace TNetD.Nodes
         }
 
         #endregion
-        
+
         public async Task<long> CalculateTotalMoneyInPersistentStoreAsync()
         {
             long Tres = 0;

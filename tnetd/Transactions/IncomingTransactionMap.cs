@@ -2,6 +2,7 @@
 //@Author: Arpan Jati
 //@Date: 16th January 2015
 // 21st Jan 2015 : IncomingPropagations / Single node TEST_MODE.
+// 8th Feb 2015 : TransactionStateManager
 
 using System;
 using System.Collections.Concurrent;
@@ -11,6 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TNetD.Nodes;
+using TNetD.Types;
 
 namespace TNetD.Transactions
 {
@@ -19,6 +21,8 @@ namespace TNetD.Transactions
     {
         NodeState nodeState;
         NodeConfig nodeConfig;
+        TransactionStateManager transactionStateManager;
+
         bool TimerEventProcessed = true;
 
         // Makeshift :P
@@ -41,14 +45,12 @@ namespace TNetD.Transactions
         ConcurrentDictionary<Hash, TransactionContent> IncomingPropagations = new ConcurrentDictionary<Hash, TransactionContent>();
 
         public ConcurrentDictionary<Hash, TransactionContent> IncomingPropagations_ALL = new ConcurrentDictionary<Hash, TransactionContent>();
-
-        // For status:
-        public ConcurrentDictionary<Hash, TransactionProcessingResult> TransactionProcessingMap = new ConcurrentDictionary<Hash, TransactionProcessingResult>();
-
-        public IncomingTransactionMap(NodeState nodeState, NodeConfig nodeConfig)
+        
+        public IncomingTransactionMap(NodeState nodeState, NodeConfig nodeConfig, TransactionStateManager transactionStateManager)
         {
             this.nodeState = nodeState;
             this.nodeConfig = nodeConfig;
+            this.transactionStateManager = transactionStateManager;
 
             IncomingTransactions = new ConcurrentDictionary<Hash, TransactionContent>();
 
@@ -86,6 +88,7 @@ namespace TNetD.Transactions
                                 }
                                 else
                                 {
+                                    transactionStateManager.Set(kvp.Value.TransactionID, TransactionStatusType.InProcessingQueue);
                                     Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.TransactionsAccepted);
                                 }
                             }
@@ -202,11 +205,9 @@ namespace TNetD.Transactions
 
             TransactionProcessingResult rslt = transactionContent.VerifySignature();
 
-            if (!TransactionProcessingMap.ContainsKey(transactionContent.TransactionID))
-            {
-                TransactionProcessingMap.TryAdd(transactionContent.TransactionID, rslt);
-            }
-
+            transactionStateManager.Set(transactionContent.TransactionID, rslt);
+            transactionStateManager.Set(transactionContent.TransactionID, TransactionStatusType.Proposed);
+                      
             if (!IncomingPropagations_ALL.ContainsKey(transactionContent.TransactionID))
             {
                 IncomingPropagations_ALL.TryAdd(transactionContent.TransactionID, transactionContent);
@@ -214,7 +215,6 @@ namespace TNetD.Transactions
             
             if (rslt == TransactionProcessingResult.Accepted)
             {
-
                 lock (transactionLock)
                 {
                     // Insert if the transaction does not already exist.
@@ -222,7 +222,7 @@ namespace TNetD.Transactions
                     {
                         if (IncomingPropagations.TryAdd(transactionContent.TransactionID, transactionContent))
                         {
-
+                            transactionStateManager.Set(transactionContent.TransactionID, TransactionStatusType.InPreProcessing);
                         }
                         else
                         {
@@ -235,15 +235,7 @@ namespace TNetD.Transactions
 
             return rslt;
         }
-
-        /// <summary>
-        /// Clears the map for transaction status queries, do after consensus.
-        /// </summary>
-        public void ClearTransactionProcessingMap()
-        {
-            TransactionProcessingMap.Clear();
-        }
-
+        
         /*
         void IncomingTransactionMap::GetEligibleTransactionForConsensus(vector<Hash> connectedValidators, vector<Hash>& transactionIDtoMigrate)
         {

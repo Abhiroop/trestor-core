@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TNetD.SyncFramework
 {
-    class TransactionSynchronizer
+    class TransactionSink
     {
 
 

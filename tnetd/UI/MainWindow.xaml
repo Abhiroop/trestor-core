@@ -286,7 +286,16 @@
                 </Grid>
 
             </TabItem>
-            <TabItem Header="Settings"/>
+            <TabItem Header="Settings">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="54*"/>
+                        <RowDefinition Height="365*"/>
+                    </Grid.RowDefinitions>
+                    <CheckBox Name="checkBox_Settings_RunAsSyncNode" Content="Run As Sync Node" HorizontalAlignment="Left" Margin="93,20,0,0" Grid.Row="1" VerticalAlignment="Top"/>
+
+                </Grid>
+            </TabItem>
             <TabItem Header="Log"/>
         </TabControl>
 

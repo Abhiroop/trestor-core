@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TNetD.Transactions;
 
 namespace TNetD.Types
 {
@@ -35,4 +36,7 @@ namespace TNetD.Types
         public long TotalTransactions;
         public long CloseTime;
     }
+
+   
+
 }

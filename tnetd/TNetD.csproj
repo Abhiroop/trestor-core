@@ -146,7 +146,8 @@
     <Compile Include="PersistentStore\SQLiteAccountStore.cs" />
     <Compile Include="PersistentStore\SQLiteTransactionStore.cs" />
     <Compile Include="Consensus\CandidateSet.cs" />
-    <Compile Include="SyncFramework\TransactionSynchronizer.cs" />
+    <Compile Include="SyncFramework\TransactionSink.cs" />
+    <Compile Include="SyncFramework\TransactionSource.cs" />
     <Compile Include="Time\TimeSync.cs" />
     <Compile Include="Transactions\IncomingTransactionMap.cs" />
     <Compile Include="Tree\FlatNodeStore.cs" />
