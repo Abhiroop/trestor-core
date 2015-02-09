@@ -76,7 +76,7 @@ namespace Grapevine
         /// </summary>
         public static void Log(String message)
         {
-            //DisplayUtils.Display(message, DisplayType.Exception);
+            DisplayUtils.Display(message, DisplayType.Exception);
 
             /*if (!object.ReferenceEquals(EventLog, null))
             {

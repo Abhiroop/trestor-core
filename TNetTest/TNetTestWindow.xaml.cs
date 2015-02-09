@@ -24,7 +24,6 @@ using TNetD.Json.JS_Structs;
 using TNetD.Transactions;
 using TNetNative;
 
-
 namespace TNetTest
 {
     /// <summary>

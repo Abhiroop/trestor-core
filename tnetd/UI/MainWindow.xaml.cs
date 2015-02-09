@@ -328,9 +328,9 @@ namespace TNetD
                 // Write to nodes
                 foreach (Node n in nodes)
                 {
-                    var resp = n.PersistentAccountStore.DeleteEverything();
+                    var resp = n.nodeState.PersistentAccountStore.DeleteEverything();
 
-                    n.PersistentAccountStore.AddUpdateBatch(aiData);
+                    n.nodeState.PersistentAccountStore.AddUpdateBatch(aiData);
                 }
 
                 MessageBox.Show("ACCOUNTS RESET. It will take some time to synchronise with the network to resume normal operation." +

@@ -28,8 +28,7 @@ namespace TNetD.Network.Networking
         NodeConfig nodeConfig;
 
         TcpListener listener;
-        static Timer timer;
-        static Timer timer_hello;
+        Timer timer;
 
         List<Hash> KeysGlobal = new List<Hash>();
 

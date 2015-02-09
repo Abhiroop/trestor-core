@@ -195,15 +195,14 @@
     <Compile Include="Types\JS_Structs.cs" />
     <Compile Include="Types\LeafDataType.cs" />
     <Compile Include="Types\CommonStructs.cs" />
+    <Compile Include="UI\DisplayUtils.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="WorkProof.cs" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Chaos.NaCl\Internal\Salsa\replace regex.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="UI\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

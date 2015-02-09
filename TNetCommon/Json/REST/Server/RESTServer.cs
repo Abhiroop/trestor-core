@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Threading;
+using TNetD;
 //using TNetD.Nodes;
 
 namespace Grapevine.Server
@@ -282,6 +283,22 @@ namespace Grapevine.Server
             }
         }
 
+        public string BaseUrlHttp
+        {
+            get
+            {
+                return String.Format("{0}://{1}:{2}/", "http", this.Host, 80);
+            }
+        }
+
+        public string BaseUrlHttps
+        {
+            get
+            {
+                return String.Format("{0}://{1}:{2}/", "https", this.Host, 2016);
+            }
+        }
+
         /// <summary>
         /// The number of threads that will be started to respond to queued requests
         /// </summary>
@@ -360,6 +377,12 @@ namespace Grapevine.Server
 
                     this.IsListening = true;
                     this._listener.Prefixes.Add(this.BaseUrl);
+
+                    if(Common.NetworkType == TNetD.Address.NetworkType.MainNet)
+                    {
+                        this._listener.Prefixes.Add(this.BaseUrlHttp);
+                        this._listener.Prefixes.Add(this.BaseUrlHttps);
+                    }
 
                     this._listener.Start();
                     this._listenerThread.Start();

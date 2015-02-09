@@ -1,8 +1,9 @@
 ﻿/*
  *  @Author: Arpan Jati
- *  @Version: 1.0
- *  @Date: Oct 2015 | Jan 2015
+ *  @Version: 1.0  
  *  @Description: Node: It represents a full fledged transaction processor / validator / the complete thing.
+ *  @Date: Oct 2015 | Jan-Feb 2015
+ *  FEB 10 2015 - Separate out the RPC Handlers
  */
 
 using Chaos.NaCl;
@@ -32,11 +33,12 @@ using TNetD.Types;
 
 namespace TNetD.Nodes
 {
-
     public delegate void NodeStatusEventHandler(string Status, int NodeID);
 
-    internal class Node : Responder
+    internal class Node
     {
+        #region Locals
+
         public event NodeStatusEventHandler NodeStatusEvent;
 
         bool TimerEventProcessed = true;
@@ -44,39 +46,28 @@ namespace TNetD.Nodes
 
         SecureNetwork network = default(SecureNetwork);
 
-        RESTServer restServer = default(RESTServer);
+        // TODO: MAKE PRIVATE : AND FAST
+        public NodeConfig nodeConfig = default(NodeConfig);
 
-        NodeState nodeState;
+        // TODO: MAKE PRIVATE : AND FAST
+        public NodeState nodeState = default(NodeState);
 
-        TransactionStateManager transactionStateManager;
-        IncomingTransactionMap incomingTransactionMap;
+        RpcHandlers rpcHandlers = default(RpcHandlers);        
 
         /// <summary>
         /// A dictionary of Trusted nodes, stored by PublicKey
         /// </summary>
         public Dictionary<Hash, NodeSocketData> TrustedNodes;
 
-        public int OutTransactionCount = 0;
-        // public int InCandidatesCount;
-        // public int InTransactionCount;
-
-        public Dictionary<Hash, DifficultyTimeData> WorkProofMap = new Dictionary<Hash, DifficultyTimeData>();
-
         public AccountInfo AI;
 
-        public IPersistentAccountStore PersistentAccountStore;
-        public IPersistentTransactionStore PersistentTransactionStore;
-
-        public SQLiteBannedNames PersistentBannedNameStore;
-        public SQLiteCloseHistory PersistentCloseHistory;
-
-        Ledger ledger;
+        #endregion
 
         #region ConstructorsAndTimers
 
         public Ledger LocalLedger
         {
-            get { return ledger; }
+            get { return nodeState.Ledger; }
         }
 
         public Hash PublicKey
@@ -90,10 +81,7 @@ namespace TNetD.Nodes
         System.Timers.Timer TimerConsensus;
         System.Timers.Timer TimerSecond;
         System.Timers.Timer TimerMinute;
-
-        // TODO: MAKE PRIVATE : AND FAST
-        public NodeConfig nodeConfig = default(NodeConfig);
-
+        
         /// <summary>
         /// Initializes a node. Node ID is 0 for most cases.
         /// Only other use is hosting multiple validators from an IP (bad-idea) and simulation.
@@ -103,16 +91,13 @@ namespace TNetD.Nodes
         {
             nodeConfig = new NodeConfig(ID, globalConfiguration);
 
-            nodeState = new NodeState();
+            nodeState = new NodeState(nodeConfig);
 
             nodeState.NodeInfo = nodeConfig.Get_JS_Info();
 
             //nodeState.NodeInfo.NodeDetails = new JS_NodeDetails();
             //nodeState.NodeInfo.LastLedgerInfo = new JS_LedgerInfo();            
-
-            transactionStateManager = new TransactionStateManager();
-            incomingTransactionMap = new IncomingTransactionMap(nodeState, nodeConfig, transactionStateManager);
-
+            
             network = new SecureNetwork(nodeConfig);
             network.PacketReceived += network_PacketReceived;
 
@@ -120,14 +105,9 @@ namespace TNetD.Nodes
 
             TrustedNodes = globalConfiguration.TrustedNodes;
 
-            PersistentAccountStore = new SQLiteAccountStore(nodeConfig);
-            PersistentTransactionStore = new SQLiteTransactionStore(nodeConfig);
-            PersistentBannedNameStore = new SQLiteBannedNames(nodeConfig);
-            PersistentCloseHistory = new SQLiteCloseHistory(nodeConfig);
+            rpcHandlers = new RpcHandlers(nodeConfig, nodeState);
 
             AI = new AccountInfo(PublicKey, Money);
-
-            ledger = new Ledger(PersistentAccountStore);
 
             //ledger.AddUserToLedger(AI);
 
@@ -151,9 +131,6 @@ namespace TNetD.Nodes
             TimerMinute.Interval = 30000;
             TimerMinute.Start();
 
-            restServer = new RESTServer(Common.RpcHost, nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
-
-            restServer.Start();
 
             DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
         }
@@ -171,22 +148,22 @@ namespace TNetD.Nodes
                     // Clean temporary proof of work Queue
                     // TODO : CRITICAL : Make sure the valid ones are removed, and not the critical ones.
 
-                    Hash[] Kys = WorkProofMap.Keys.ToArray();
+                    Hash[] Kys = nodeState.WorkProofMap.Keys.ToArray();
 
                     foreach (Hash key in Kys)
                     {
                         DifficultyTimeData dtd;
-                        if (WorkProofMap.TryGetValue(key, out dtd))
+                        if (nodeState.WorkProofMap.TryGetValue(key, out dtd))
                         {
                             TimeSpan span = (NOW - dtd.IssueTime);
                             if (span.TotalSeconds > 60) // 1 Minute
                             {
-                                WorkProofMap.Remove(key);
+                                nodeState.WorkProofMap.Remove(key);
                             }
                         }
                     }
 
-                    transactionStateManager.ProcessAndClear();
+                    nodeState.TransactionStateManager.ProcessAndClear();
 
                 }
                 catch (Exception ex)
@@ -207,12 +184,12 @@ namespace TNetD.Nodes
         void TimerSecond_Elapsed(object sender, ElapsedEventArgs e)
         {
             nodeState.NodeInfo.NodeDetails.TimeUTC = DateTime.UtcNow;
-            nodeState.NodeInfo.LastLedgerInfo.Hash = ledger.GetRootHash().Hex;
+            nodeState.NodeInfo.LastLedgerInfo.Hash = nodeState.Ledger.GetRootHash().Hex;
 
-            nodeState.NodeInfo.NodeDetails.ProofOfWorkQueueLength = WorkProofMap.Count;
+            nodeState.NodeInfo.NodeDetails.ProofOfWorkQueueLength = nodeState.WorkProofMap.Count;
 
-            nodeState.system_time = DateTime.UtcNow.ToFileTimeUtc();
-            nodeState.network_time = DateTime.UtcNow.ToFileTimeUtc();
+            nodeState.SystemTime = DateTime.UtcNow.ToFileTimeUtc();
+            nodeState.NetworkTime = DateTime.UtcNow.ToFileTimeUtc();
 
             if (NodeStatusEvent != null)
             {
@@ -228,7 +205,7 @@ namespace TNetD.Nodes
         {
             await Task.Run(async () =>
             {
-                long records = await ledger.InitializeLedger();
+                long records = await nodeState.Ledger.InitializeLedger();
 
                 Interlocked.Add(ref nodeState.NodeInfo.NodeDetails.TotalAccounts, records);
 
@@ -249,727 +226,9 @@ namespace TNetD.Nodes
                 await Task.WhenAll(tasks);
 
                 LedgerCloseData ledgerCloseData;
-                PersistentCloseHistory.GetLastRowData(out ledgerCloseData);
+                nodeState.PersistentCloseHistory.GetLastRowData(out ledgerCloseData);
                 nodeState.NodeInfo.LastLedgerInfo = new JS_LedgerInfo(ledgerCloseData);
             });
-        }
-
-        #endregion
-
-        #region RPC HANDLING
-
-        // RPCRequestHandler rpcRequestHandler;
-        bool RPCRequestHandler(HttpListenerContext context)
-        {
-            Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.RequestsProcessed);
-
-            if (context.Request.RawUrl.Matches(@"^/info")) // ProcessInfo
-            {
-                this.SendJsonResponse(context, nodeState.NodeInfo.GetResponse());
-
-                return true;
-            }
-            if (context.Request.RawUrl.Matches(@"^/time")) // ProcessInfo
-            {
-                this.SendJsonResponse(context, new JS_Time(nodeState.network_time).GetResponse());
-
-                return true;
-            }
-            else if (context.Request.RawUrl.Matches(@"^/wallet")) // Create Wallet 
-            {
-                HandleWalletQuery(context);
-
-                return true;
-            }
-            else if (context.Request.RawUrl.Matches(@"^/propagateraw")) // Propagate RAW 
-            {
-                HandlePropagate(context, true);
-
-                return true;
-            }
-            else if (context.Request.RawUrl.Matches(@"^/propagate")) // Propagate JSON 
-            {
-                HandlePropagate(context, false);
-
-                return true;
-            }
-            else if (context.Request.RawUrl.Matches(@"^/txstatus")) // Handle Transaction Status Query
-            {
-                HandleTransactionStatusQuery(context);
-
-                return true;
-            }
-            else if (context.Request.RawUrl.Matches(@"^/transactions")) // Fetch Transactions
-            {
-                if (context.Request.RawUrl.StartsWith("/transactions"))
-                {
-                    HandleTransactionQuery(context);
-                    return true;
-                }
-            }
-            else if (context.Request.RawUrl.Matches(@"^/history")) // Handle Transaction History Fetch
-            {
-                HandleTransactionHistoryQuery(context);
-
-                return true;
-            }
-            else if (context.Request.RawUrl.Matches(@"^/accounts")) // Fetch Transactions
-            {
-                if (context.Request.RawUrl.StartsWith("/accounts"))
-                {
-                    HandleAccountQuery(context);
-                    return true;
-                }
-            }
-            else if (context.Request.RawUrl.Matches(@"^/request")) // Request a work proof
-            {
-                HandleWorkProofRequest(context);
-                return true;
-            }
-            else if (context.Request.RawUrl.Matches(@"^/register")) // Register Account
-            {
-                HandleAccountRegister(context);
-                return true;
-            }
-            /*else if (context.Request.RawUrl.Matches(@"^/validname")) // Register Account
-            {
-                HandleValidName(context);
-                return true;
-            }*/
-
-            return false;
-        }
-
-        /*private void HandleValidName(HttpListenerContext context)
-        {
-            JS_Response msg = new JS_Msg("Starting Handler", RPCStatus.Undefined);
-
-            try
-            {
-                string NAME = "";
-                string name = context.Request.QueryString["n"];
-
-                if (!String.IsNullOrEmpty(name))
-                {
-                    string[] _name = name.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (_name.Length == 1)
-                    {
-                        if (_name[0].Length >= Constants.Pref_MinNameLength)
-                        {
-                            NAME = name;
-                        }
-                        else
-                        {
-                            msg = new JS_Msg("Invalid Name Length.", RPCStatus.Exception);
-                        }
-                    }
-                    else
-                    {
-                        msg = new JS_Msg("Invalid Name Length.", RPCStatus.Exception);
-                    }
-                }
-                else
-                {
-                    msg = new JS_Msg("Invalid Arguments", RPCStatus.Exception);
-                }
-            }
-            catch
-            {
-                msg = new JS_Msg("Exception During Parsing", RPCStatus.Exception);
-            }
-            finally
-            {
-                this.SendJsonResponse(context, msg);
-            }
-        }*/
-
-        private void HandleWorkProofRequest(HttpListenerContext context)
-        {
-            JS_Response resp = new JS_Msg("Starting Handler", RPCStatus.Undefined);
-
-            try
-            {
-                if (context.Request.QueryString.AllKeys.Length == 0)
-                {
-                    if (WorkProofMap.Count < Constants.WorkProofQueueLength)
-                    {
-                        DifficultyTimeData difficultyTimeData = new DifficultyTimeData(Constants.Difficulty,
-                            nodeState.NodeInfo.NodeDetails.TimeUTC, 0, 0, ProofOfWorkType.DOUBLE_SHA256);
-
-                        resp = new JS_WorkProofRequest(difficultyTimeData);
-
-                        ((JS_WorkProofRequest)resp).InitRequest();
-
-                        Hash Work = new Hash(((JS_WorkProofRequest)resp).ProofRequest);
-
-                        WorkProofMap.Add(Work, ((JS_WorkProofRequest)resp).GetDifficultyTimeData());
-                    }
-                    else
-                    {
-                        resp = new JS_Msg("Server Busy.", RPCStatus.ServerBusy);
-                    }
-
-                }
-                else
-                {
-                    resp = new JS_Msg("Invalid API Usage.", RPCStatus.InvalidAPIUsage);
-                }
-
-                return;
-            }
-            catch
-            {
-                resp = new JS_Msg("Exception During Parsing", RPCStatus.Exception);
-            }
-            finally
-            {
-                this.SendJsonResponse(context, resp.GetResponse());
-            }
-        }
-
-        private void HandleWalletQuery(HttpListenerContext context)
-        {
-            JS_Response msg = new JS_Msg("Starting Handler", RPCStatus.Undefined);
-
-            try
-            {
-                string NAME = "";
-
-                string name = context.Request.QueryString["name"];
-
-                if (!String.IsNullOrEmpty(name))
-                {
-                    string[] _name = name.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (_name.Length == 1)
-                    {
-                        if (Utils.ValidateUserName(_name[0]))
-                        {
-                            NAME = _name[0];
-                        }
-                        else
-                        {
-                            msg = new JS_Msg("Invalid Name", RPCStatus.Exception);
-                            throw new ArgumentException("RPC: Invalid Name Length.");
-                        }
-                    }
-                }
-
-                Tuple<AccountIdentifier, byte[]> accountData = AddressFactory.CreateNewAccount(NAME);
-
-                msg = new JS_Address(accountData.Item1, accountData.Item2);
-            }
-            catch
-            {
-                msg = new JS_Msg("Exception During Parsing", RPCStatus.Exception);
-            }
-            finally
-            {
-                this.SendJsonResponse(context, msg);
-            }
-        }
-
-        private void HandleTransactionHistoryQuery(HttpListenerContext context)
-        {
-            JS_TransactionReplies replies = new JS_TransactionReplies();
-            JS_Msg msg = new JS_Msg("Processing Starting", RPCStatus.Exception);
-
-            try
-            {
-                string tran = context.Request.QueryString["pk"];
-
-                if (tran != "")
-                {
-                    string[] publicKey = tran.Split(',');
-
-                    if (publicKey.Length == 1)
-                    {
-                        byte[] publicKey_Bytes = new byte[0];
-
-                        try
-                        {
-                            publicKey_Bytes = HexUtil.GetBytes(publicKey[0]);
-                        }
-                        catch { }
-
-                        if (publicKey_Bytes.Length == Common.LEN_TRANSACTION_ID)
-                        {
-                            string _limit = context.Request.QueryString["limit"];
-                            int limit = 0;
-                            if (!String.IsNullOrEmpty(_limit))
-                            {
-                                string[] __limit = _limit.Split(new char[] { ',' }, 1, StringSplitOptions.RemoveEmptyEntries);
-                                if (__limit.Length == 1)
-                                {
-                                    int.TryParse(__limit[0], out limit);
-                                }
-                            }
-
-                            string _timeStamp = context.Request.QueryString["time"];
-                            long timeStamp = 0;
-                            if (!String.IsNullOrEmpty(_timeStamp))
-                            {
-                                string[] __timeStamp = _timeStamp.Split(new char[] { ',' }, 1, StringSplitOptions.RemoveEmptyEntries);
-                                if (__timeStamp.Length == 1)
-                                {
-                                    long.TryParse(__timeStamp[0], out timeStamp);
-                                }
-                            }
-
-                            List<TransactionContent> transactionContents;
-
-                            PersistentTransactionStore.FetchTransactionHistory(out transactionContents, new Hash(publicKey_Bytes), timeStamp, limit);
-
-                            foreach (TransactionContent transactionContent in transactionContents)
-                            {
-                                replies.Transactions.Add(new JS_TransactionReply(transactionContent));
-                            }
-
-                        }
-                    }
-                }
-
-                if (replies.Transactions.Count > 0)
-                {
-                    msg = new JS_Msg("History Fetch Success.", RPCStatus.Success);
-                }
-                else
-                {
-                    msg = new JS_Msg("No Records Found.", RPCStatus.Failure);
-                }
-            }
-            catch
-            {
-                msg = new JS_Msg("Exception During Parsing.", RPCStatus.Exception);
-            }
-            finally
-            {
-                if (replies.Transactions.Count > 0)
-                {
-                    this.SendJsonResponse(context, replies.GetResponse());
-                }
-                else
-                {
-                    this.SendJsonResponse(context, msg.GetResponse());
-                }
-            }
-        }
-
-        private void HandleTransactionStatusQuery(HttpListenerContext context)
-        {
-            JS_TransactionStateReplies replies = new JS_TransactionStateReplies();
-
-            foreach (string key in context.Request.QueryString.AllKeys)
-            {
-                switch (key)
-                {
-                    case "id":
-
-                        string[] transactionIDs = context.Request.QueryString["id"].Split(',');
-
-                        foreach (string transactionID in transactionIDs)
-                        {
-                            byte[] transactionID_Bytes = new byte[0];
-
-                            try
-                            {
-                                transactionID_Bytes = HexUtil.GetBytes(transactionID);
-                            }
-                            catch { }
-
-                            if (transactionID_Bytes.Length == Common.LEN_TRANSACTION_ID)
-                            {
-                                HandleTransactionStatusQuery_Internal(ref replies, new Hash(transactionID_Bytes));
-                            }
-                        }
-
-                        break;
-
-                    default:
-
-                        break;
-                }
-            }
-
-            // // /////////////////////////////////////////////////////////////////////
-
-            if (replies.TransactionState.Count > 0)
-            {
-                this.SendJsonResponse(context, replies.GetResponse());
-            }
-            else
-            {
-                JS_Resp resp = new JS_Resp();
-                this.SendJsonResponse(context, resp);
-            }
-        }
-
-        private void HandleTransactionStatusQuery_Internal(ref JS_TransactionStateReplies replies, Hash transactionID)
-        {
-            TransactionState transactionState;
-            if (transactionStateManager.Fetch(out transactionState, transactionID))
-            {
-                replies.TransactionState.Add(new JS_TransactionState_Reply(transactionState.StatusType,
-                    transactionState.ProcessingResult));
-
-                return;
-            }
-
-            // Check if the transaction is processed.
-            TransactionContent transactionContent;
-            long sequenceNumber;
-            if (PersistentTransactionStore.FetchTransaction(out transactionContent, out sequenceNumber, transactionID) == DBResponse.FetchSuccess)
-            {
-                replies.TransactionState.Add(new JS_TransactionState_Reply(TransactionStatusType.Success,
-                    TransactionProcessingResult.PR_Success));
-                return;
-            }
-        }
-
-        private void HandleAccountQuery(HttpListenerContext context)
-        {
-            JS_AccountReplies replies = new JS_AccountReplies();
-
-            foreach (string key in context.Request.QueryString.AllKeys)
-            {
-                switch (key)
-                {
-                    case "p":
-                        {
-                            string[] publicKeys = context.Request.QueryString["p"].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-                            foreach (string publicKey in publicKeys)
-                            {
-                                byte[] publicKey_Bytes = new byte[0];
-
-                                try
-                                {
-                                    publicKey_Bytes = HexUtil.GetBytes(publicKey);
-                                }
-                                catch { }
-
-                                if (publicKey_Bytes.Length == 32)
-                                {
-                                    Hash h_publicKey = new Hash(publicKey_Bytes);
-                                    if (ledger.AccountExists(h_publicKey))
-                                    {
-                                        replies.Accounts.Add(new JS_AccountReply(ledger[h_publicKey]));
-                                    }
-                                }
-                            }
-                        }
-                        break;
-
-                    case "a":
-                        {
-                            string[] adresses = context.Request.QueryString["a"].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-                            foreach (string address in adresses)
-                            {
-                                if (ledger.AddressAccountInfoMap.ContainsKey(address))
-                                {
-                                    AccountInfo _ai = ledger.AddressAccountInfoMap[address];
-                                    replies.Accounts.Add(new JS_AccountReply(_ai));
-                                }
-                            }
-                        }
-
-                        break;
-
-                    case "n":
-                        {
-                            string[] names = context.Request.QueryString["n"].Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-                            foreach (string name in names)
-                            {
-                                if (ledger.NameAccountInfoMap.ContainsKey(name.ToLowerInvariant()))
-                                {
-                                    AccountInfo _ai = ledger.NameAccountInfoMap[name.ToLowerInvariant()];
-                                    replies.Accounts.Add(new JS_AccountReply(_ai));
-                                }
-                            }
-                        }
-
-                        break;
-
-                    default:
-
-                        break;
-                }
-            }
-
-            // // /////////////////////////////////////////////////////////////////////
-
-            if (replies.Accounts.Count > 0)
-            {
-                this.SendJsonResponse(context, replies.GetResponse());
-            }
-            else
-            {
-                JS_Resp resp = new JS_Resp();
-                this.SendJsonResponse(context, resp);
-            }
-        }
-
-        private void HandleTransactionQuery(HttpListenerContext context)
-        {
-            JS_TransactionReplies replies = new JS_TransactionReplies();
-
-            foreach (string key in context.Request.QueryString.AllKeys)
-            {
-                switch (key)
-                {
-                    case "id":
-
-                        string[] transactionIDs = context.Request.QueryString["id"].Split(',');
-
-                        foreach (string transactionID in transactionIDs)
-                        {
-                            byte[] transactionID_Bytes = new byte[0];
-
-                            try
-                            {
-                                transactionID_Bytes = HexUtil.GetBytes(transactionID);
-                            }
-                            catch { }
-
-                            if (transactionID_Bytes.Length == 32)
-                            {
-                                TransactionContent transactionContent;
-                                long sequenceNumber;
-                                if (PersistentTransactionStore.FetchTransaction(out transactionContent, out sequenceNumber, new Hash(transactionID_Bytes)) == DBResponse.FetchSuccess)
-                                {
-                                    replies.Transactions.Add(new JS_TransactionReply(transactionContent));
-                                }
-                            }
-                        }
-
-                        break;
-
-                    default:
-
-                        break;
-                }
-            }
-
-            // // /////////////////////////////////////////////////////////////////////
-
-            if (replies.Transactions.Count > 0)
-            {
-                this.SendJsonResponse(context, replies.GetResponse());
-            }
-            else
-            {
-                JS_Resp resp = new JS_Resp();
-                this.SendJsonResponse(context, resp);
-            }
-        }
-
-        private void HandlePropagate(HttpListenerContext context, bool IsRaw)
-        {
-            JS_Msg msg;
-
-            if (context.Request.HttpMethod.ToUpper().Equals("POST") && context.Request.HasEntityBody &&
-                context.Request.ContentLength64 < Constants.PREFS_MAX_RPC_POST_CONTENT_LENGTH)
-            {
-                StreamReader inputStream = new StreamReader(context.Request.InputStream);
-
-                try
-                {
-                    TransactionContent transactionContent = new TransactionContent();
-
-                    if (IsRaw)
-                    {
-                        byte[] data = HexUtil.GetBytes(inputStream.ReadToEnd());
-                        transactionContent.Deserialize(data);
-                    }
-                    else
-                    {
-                        string json = inputStream.ReadToEnd();
-                        JS_TransactionReply jtr = JsonConvert.DeserializeObject<JS_TransactionReply>(json,
-                            Common.JsonSerializerSettings);
-
-                        transactionContent.Deserialize(jtr);
-                    }
-
-                    long StaleSeconds = (long)Math.Abs((DateTime.FromFileTimeUtc(transactionContent.Timestamp) - nodeState.NodeInfo.NodeDetails.TimeUTC).TotalSeconds);
-
-                    if (StaleSeconds < (Common.TransactionStaleTimer_Minutes * 60))
-                    {
-                        TransactionProcessingResult tpResult = incomingTransactionMap.HandlePropagationRequest(transactionContent);
-
-                        if (tpResult == TransactionProcessingResult.Accepted)
-                        {
-                            msg = new JS_Msg("Transaction Added to propagation queue.", RPCStatus.Success);
-                        }
-                        else
-                        {
-                            msg = new JS_Msg("Transaction Processing Error: " + tpResult, RPCStatus.Failure);
-                        }
-                    }
-                    else
-                    {
-                        msg = new JS_Msg("Transaction time is stale by " + StaleSeconds + " seconds. Your clock may be set incorrectly or the program may need upgradation.", RPCStatus.Failure);
-                    }
-                }
-                catch
-                {
-                    msg = new JS_Msg("Malformed Transaction.", RPCStatus.Failure);
-                }
-            }
-            else
-            {
-                msg = new JS_Msg("Improper usage. Need to use HTTP POST with 'Transaction Proposal' as Content.", RPCStatus.InvalidAPIUsage);
-            }
-
-            this.SendJsonResponse(context, msg.GetResponse());
-        }
-
-
-        bool IsGoodValidUserName(string Name)
-        {
-            if (!Utils.ValidateUserName(Name)) return false;
-
-            if (PersistentBannedNameStore.Contains(Name)) return false;
-
-            return true;
-        }
-
-        private void HandleAccountRegister(HttpListenerContext context)
-        {
-            JS_Msg msg = new JS_Msg("Processing Initiated.", RPCStatus.Undefined);
-
-            if (context.Request.HttpMethod.ToUpper().Equals("POST") && context.Request.HasEntityBody &&
-                context.Request.ContentLength64 < Constants.PREFS_MAX_RPC_POST_CONTENT_LENGTH)
-            {
-                Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.AccountCreationRequests);
-
-                StreamReader inputStream = new StreamReader(context.Request.InputStream);
-
-                try
-                {
-                    TransactionContent transactionContent = new TransactionContent();
-
-                    string json = inputStream.ReadToEnd();
-                    JS_AccountRegisterRequest request = JsonConvert.DeserializeObject<JS_AccountRegisterRequest>(json,
-                        Common.JsonSerializerSettings);
-
-                    Hash proofRequest = new Hash(request.ProofRequest);
-
-                    if (WorkProofMap.ContainsKey(proofRequest))
-                    {
-                        int diff = WorkProofMap[proofRequest].Difficulty;
-
-                        if (WorkProof.VerifyProof(proofRequest.Hex, request.ProofResponse, diff))
-                        {
-                            AddressData AD = AddressFactory.DecodeAddressString(request.Address);
-
-                            bool TypesFine = true;
-
-                            if (Common.NetworkType == NetworkType.MainNet)
-                            {
-                                if (AD.NetworkType != NetworkType.MainNet)
-                                {
-                                    msg = new JS_Msg("Invalid Network Type", RPCStatus.InvalidAPIUsage);
-                                    TypesFine = false;
-                                }
-
-                                if ((AD.AccountType != AccountType.MainNormal))
-                                {
-                                    msg = new JS_Msg("Invalid Account Type", RPCStatus.InvalidAPIUsage);
-                                    TypesFine = false;
-                                }
-                            }
-                            else
-                            {
-                                if (AD.NetworkType != NetworkType.TestNet)
-                                {
-                                    msg = new JS_Msg("Invalid Network Type", RPCStatus.InvalidAPIUsage);
-                                    TypesFine = false;
-                                }
-
-                                if ((AD.AccountType != AccountType.TestNormal))
-                                {
-                                    msg = new JS_Msg("Invalid Account Type", RPCStatus.InvalidAPIUsage);
-                                    TypesFine = false;
-                                }
-                            }
-
-                            if (TypesFine)
-                            {
-                                AddressData addressData;
-                                if (AddressFactory.VerfiyAddress(out addressData, request.Address, request.PublicKey, request.Name))
-                                {
-                                    if (addressData.ValidateAccountType())
-                                    {
-                                        AccountInfo newAccountInfo = new AccountInfo(new Hash(request.PublicKey), 0, request.Name, AccountState.Normal,
-                                        addressData.NetworkType, addressData.AccountType, nodeState.network_time);
-
-                                        bool GoodName = IsGoodValidUserName(request.Name);
-
-                                        if (GoodName)
-                                        {
-                                            bool ExistsPK = PersistentAccountStore.AccountExists(new Hash(request.PublicKey));
-                                            bool ExistsName = PersistentAccountStore.AccountExists(request.Name);
-
-                                            if (!ExistsPK && !ExistsName)
-                                            {
-                                                if (PersistentAccountStore.AddUpdate(newAccountInfo) == DBResponse.InsertSuccess)
-                                                {
-                                                    ledger.AddUpdateBatch(new AccountInfo[] { newAccountInfo });
-                                                    Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.TotalAccounts);
-                                                    msg = new JS_Msg("Account Successfully Added", RPCStatus.Success);
-                                                }
-                                                else
-                                                {
-                                                    msg = new JS_Msg("Server Database Busy", RPCStatus.Exception);
-                                                }
-                                            }
-                                            else
-                                            {
-                                                msg = new JS_Msg("Account Already Exists", RPCStatus.Failure);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            msg = new JS_Msg("Invalid or Banned Name", RPCStatus.Failure);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        msg = new JS_Msg("Invalid Network or Account Type", RPCStatus.Failure);
-                                    }
-                                }
-                                else
-                                {
-                                    msg = new JS_Msg("Invalid Address Format", RPCStatus.Failure);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            msg = new JS_Msg("Proof Verification Failed", RPCStatus.Failure);
-                        }
-
-                    } // End IF - workproofmap   
-                    else
-                    {
-                        msg = new JS_Msg("No Such Request Issued", RPCStatus.Failure);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    DisplayUtils.Display("HandleAccountRegister", ex);
-
-                    msg = new JS_Msg("Malformed Request.", RPCStatus.Failure);
-                }
-
-            }
-            else
-            {
-                msg = new JS_Msg("Improper usage. Need to use HTTP POST with 'Account Register Request' as Content.", RPCStatus.InvalidAPIUsage);
-            }
-
-            this.SendJsonResponse(context, msg.GetResponse());
         }
 
         #endregion
@@ -984,7 +243,7 @@ namespace TNetD.Nodes
             Constants.ApplicationRunning = false;
 
             network.Stop();
-            restServer.Stop();
+            rpcHandlers.StopServer();
         }
 
         async Task SendInitialize(Hash publicKey)
@@ -1012,22 +271,21 @@ namespace TNetD.Nodes
 
                 try
                 {
-
-                    if (incomingTransactionMap.IncomingTransactions.Count > 0)
+                    if (nodeState.IncomingTransactionMap.IncomingTransactions.Count > 0)
                     {
                         Queue<TransactionContent> transactionContentStack = new Queue<TransactionContent>();
 
-                        lock (incomingTransactionMap.transactionLock)
+                        lock (nodeState.IncomingTransactionMap.transactionLock)
                         {
-                            foreach (KeyValuePair<Hash, TransactionContent> kvp in incomingTransactionMap.IncomingTransactions)
+                            foreach (KeyValuePair<Hash, TransactionContent> kvp in nodeState.IncomingTransactionMap.IncomingTransactions)
                             {
                                 transactionContentStack.Enqueue(kvp.Value);
 
                                 Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.TransactionsVerified);
                             }
 
-                            incomingTransactionMap.IncomingTransactions.Clear();
-                            incomingTransactionMap.IncomingPropagations_ALL.Clear();
+                            nodeState.IncomingTransactionMap.IncomingTransactions.Clear();
+                            nodeState.IncomingTransactionMap.IncomingPropagations_ALL.Clear();
                         }
 
                         Dictionary<Hash, TreeDiffData> pendingDifferenceData = new Dictionary<Hash, TreeDiffData>();
@@ -1046,7 +304,7 @@ namespace TNetD.Nodes
                                 {
                                     TransactionContent transactionFromPersistentDB;
                                     long sequenceNumber;
-                                    if (PersistentTransactionStore.FetchTransaction(out transactionFromPersistentDB, out sequenceNumber,
+                                    if (nodeState.PersistentTransactionStore.FetchTransaction(out transactionFromPersistentDB, out sequenceNumber,
                                         transactionContent.TransactionID) == DBResponse.FetchSuccess)
                                     {
                                         //TODO: LOG THIS and Display properly.
@@ -1077,7 +335,7 @@ namespace TNetD.Nodes
                                             }
                                             
                                             AccountInfo ai;
-                                            if (PersistentAccountStore.FetchAccount(out ai, new Hash(te.PublicKey)) == DBResponse.FetchSuccess)
+                                            if (nodeState.PersistentAccountStore.FetchAccount(out ai, new Hash(te.PublicKey)) == DBResponse.FetchSuccess)
                                             {
                                                 // Account Exists
                                                 if (ai.Name != te.Name)
@@ -1099,7 +357,7 @@ namespace TNetD.Nodes
                                                 if (!badTX_AccountName)
                                                 {
                                                     // Check if same named account exists. When, public key could not be fetched.
-                                                    if (PersistentAccountStore.FetchAccount(out ai, te.Name) == DBResponse.FetchSuccess)
+                                                    if (nodeState.PersistentAccountStore.FetchAccount(out ai, te.Name) == DBResponse.FetchSuccess)
                                                     {
                                                         // Thats too bad, transaction cannot happen, 
                                                         // new wallet has invalid Name (name already used).
@@ -1127,9 +385,9 @@ namespace TNetD.Nodes
                                         {
                                             Hash pkSource = new Hash(source.PublicKey);
 
-                                            if (ledger.AccountExists(pkSource))
+                                            if (nodeState.Ledger.AccountExists(pkSource))
                                             {
-                                                AccountInfo account = ledger[pkSource];
+                                                AccountInfo account = nodeState.Ledger[pkSource];
 
                                                 long PendingValueDifference = 0;
 
@@ -1173,10 +431,10 @@ namespace TNetD.Nodes
                                         {
                                             Hash PK = new Hash(destination.PublicKey);
 
-                                            if (ledger.AccountExists(PK))
+                                            if (nodeState.Ledger.AccountExists(PK))
                                             {
                                                 // Perfect
-                                                AccountInfo ai = ledger[PK];
+                                                AccountInfo ai = nodeState.Ledger[PK];
 
                                                 if (ai.AccountState != AccountState.Normal)
                                                 {
@@ -1192,7 +450,7 @@ namespace TNetD.Nodes
                                                     AddressData ad = AddressFactory.DecodeAddressString(destination.Address);
 
                                                     AccountInfo ai = new AccountInfo(PK, 0, destination.Name, AccountState.Normal,
-                                                        ad.NetworkType, ad.AccountType, nodeState.network_time);
+                                                        ad.NetworkType, ad.AccountType, nodeState.NetworkTime);
 
                                                     temp_NewAccounts.Add(ai);
                                                 }
@@ -1202,7 +460,7 @@ namespace TNetD.Nodes
                                                     break;
                                                 }
 
-                                                if (IsGoodValidUserName(destination.Name) == false)
+                                                if (nodeState.IsGoodValidUserName(destination.Name) == false)
                                                 {
                                                     badTX_AccountName = true;
                                                     break;
@@ -1265,7 +523,7 @@ namespace TNetD.Nodes
                                             DisplayUtils.Display("Transaction added to intermediate list : " +
                                                 HexUtil.ToString(transactionContent.TransactionID.Hex), DisplayType.Info);
 
-                                            transactionStateManager.Set(transactionContent.TransactionID, TransactionProcessingResult.PR_Validated);
+                                            nodeState.TransactionStateManager.Set(transactionContent.TransactionID, TransactionProcessingResult.PR_Validated);
                                         }
                                         else
                                         {
@@ -1279,7 +537,7 @@ namespace TNetD.Nodes
                                             if (badTX_TransactionFee) rs = TransactionProcessingResult.PR_BadTransactionFee;
                                             if (badTX_AccountAddress) rs = TransactionProcessingResult.PR_BadAccountAddress;
 
-                                            transactionStateManager.Set(transactionContent.TransactionID, rs);
+                                            nodeState.TransactionStateManager.Set(transactionContent.TransactionID, rs);
 
                                             //TODO: LOG THIS and Display properly.
                                             DisplayUtils.Display("BAD Transaction : " + HexUtil.ToString(transactionContent.TransactionID.Hex) + "\n" +
@@ -1296,7 +554,7 @@ namespace TNetD.Nodes
                                                 + "\n", DisplayType.BadData);
                                         }
 
-                                        transactionStateManager.Set(transactionContent.TransactionID, TransactionStatusType.Processed);
+                                        nodeState.TransactionStateManager.Set(transactionContent.TransactionID, TransactionStatusType.Processed);
 
                                     }
                                 }
@@ -1317,7 +575,7 @@ namespace TNetD.Nodes
 
                         ////// Create the accounts in the Ledger  /////
 
-                        int newLedgerAccountCount = ledger.AddUpdateBatch(newAccounts);
+                        int newLedgerAccountCount = nodeState.Ledger.AddUpdateBatch(newAccounts);
 
                         if (newLedgerAccountCount != newAccounts.Count)
                         {
@@ -1326,7 +584,7 @@ namespace TNetD.Nodes
 
                         Dictionary<Hash, AccountInfo> accountsInLedger;
 
-                        int fetchedLedgerAccountsCount = ledger.BatchFetch(out accountsInLedger, pendingDifferenceData.Keys);
+                        int fetchedLedgerAccountsCount = nodeState.Ledger.BatchFetch(out accountsInLedger, pendingDifferenceData.Keys);
 
                         if (fetchedLedgerAccountsCount != pendingDifferenceData.Count)
                         {
@@ -1335,7 +593,7 @@ namespace TNetD.Nodes
 
                         ////// Create the new accounts in the PersistentDatabase  /////
 
-                        int newDBAccountCount = PersistentAccountStore.AddUpdateBatch(newAccounts);
+                        int newDBAccountCount = nodeState.PersistentAccountStore.AddUpdateBatch(newAccounts);
 
                         Interlocked.Add(ref nodeState.NodeInfo.NodeDetails.TotalAccounts, newDBAccountCount);
 
@@ -1346,7 +604,7 @@ namespace TNetD.Nodes
 
                         Dictionary<Hash, AccountInfo> accountsInDB;
 
-                        int fetchedAccountsCount = PersistentAccountStore.BatchFetch(out accountsInDB, pendingDifferenceData.Keys);
+                        int fetchedAccountsCount = nodeState.PersistentAccountStore.BatchFetch(out accountsInDB, pendingDifferenceData.Keys);
 
                         if (fetchedAccountsCount != pendingDifferenceData.Count)
                         {
@@ -1399,7 +657,7 @@ namespace TNetD.Nodes
 
                             // Apply to ledger
 
-                            AccountInfo ledgerAccount = ledger[diffData.PublicKey];
+                            AccountInfo ledgerAccount = nodeState.Ledger[diffData.PublicKey];
 
                             DisplayUtils.Display("\nFor Account : '" + ledgerAccount.Name + "' : " + HexUtil.ToString(ledgerAccount.PublicKey.Hex), DisplayType.Info);
                             DisplayUtils.Display("Balance: " + ledgerAccount.Money + ", Added:" + diffData.AddValue + ", Removed:" + diffData.RemoveValue, DisplayType.Info);
@@ -1408,7 +666,7 @@ namespace TNetD.Nodes
                             ledgerAccount.Money -= diffData.RemoveValue;
                             ledgerAccount.LastTransactionTime = CloseTime.ToFileTimeUtc();
 
-                            ledger[diffData.PublicKey] = ledgerAccount;
+                            nodeState.Ledger[diffData.PublicKey] = ledgerAccount;
 
                             // This is good enough as we have previously checked for correctness and matching
                             // values in both locations.
@@ -1417,19 +675,19 @@ namespace TNetD.Nodes
                         }
 
                         LedgerCloseData ledgerCloseData;
-                        bool ok = PersistentCloseHistory.GetLastRowData(out ledgerCloseData);
+                        bool ok = nodeState.PersistentCloseHistory.GetLastRowData(out ledgerCloseData);
 
                         ledgerCloseData.CloseTime = CloseTime.ToFileTimeUtc();
                         ledgerCloseData.SequenceNumber++;
                         ledgerCloseData.Transactions = acceptedTransactions.Count;
                         ledgerCloseData.TotalTransactions += ledgerCloseData.Transactions;
-                        ledgerCloseData.LedgerHash = ledger.GetRootHash().Hex;
+                        ledgerCloseData.LedgerHash = nodeState.Ledger.GetRootHash().Hex;
 
                         // Apply to persistent DB.
 
-                        PersistentCloseHistory.AddUpdate(ledgerCloseData);
-                        PersistentAccountStore.AddUpdateBatch(finalPersistentDBUpdateList);
-                        PersistentTransactionStore.AddUpdateBatch(acceptedTransactions, ledgerCloseData.SequenceNumber);
+                        nodeState.PersistentCloseHistory.AddUpdate(ledgerCloseData);
+                        nodeState.PersistentAccountStore.AddUpdateBatch(finalPersistentDBUpdateList);
+                        nodeState.PersistentTransactionStore.AddUpdateBatch(acceptedTransactions, ledgerCloseData.SequenceNumber);
 
                         nodeState.NodeInfo.LastLedgerInfo = new JS_LedgerInfo(ledgerCloseData);
 
@@ -1467,7 +725,7 @@ namespace TNetD.Nodes
         {
             long Tres = 0;
 
-            await PersistentAccountStore.FetchAllAccountsAsync((X) =>
+            await nodeState.PersistentAccountStore.FetchAllAccountsAsync((X) =>
             {
                 Tres += X.Money;
                 return TreeResponseType.NothingDone;
@@ -1486,7 +744,7 @@ namespace TNetD.Nodes
                 long LeafDataCount = 0;
                 long FoundNodes = 0;
 
-                ledger.LedgerTree.TraverseAllNodes(ref LeafDataCount, ref FoundNodes, (X) =>
+                nodeState.Ledger.LedgerTree.TraverseAllNodes(ref LeafDataCount, ref FoundNodes, (X) =>
                 {
                     foreach (AccountInfo AI in X)
                     {
@@ -1503,9 +761,9 @@ namespace TNetD.Nodes
         {
             get
             {
-                if (ledger != null)
-                    if (ledger.AccountExists(PublicKey))
-                        return ledger[PublicKey].Money;
+                if (nodeState.Ledger != null)
+                    if (nodeState.Ledger.AccountExists(PublicKey))
+                        return nodeState.Ledger[PublicKey].Money;
                     else return -1;
 
                 return -1;

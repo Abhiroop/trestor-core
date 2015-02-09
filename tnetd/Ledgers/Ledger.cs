@@ -3,7 +3,6 @@
  *  @Version: 1.0
  *  @Date: Initial Versions: Oct - Jan 2015
  *  22 Jan 2015 : AddUpdateBatch
- *  
  */
 
 using System;
@@ -49,12 +48,7 @@ namespace TNetD.Ledgers
         {
             get { return _load_stats; }
         }
-
-        /// <summary>
-        /// List of public nodes which have sent bad transactions.
-        /// </summary>
-        public HashSet<Hash> BlackList = new HashSet<Hash>();
-
+        
         public Ledger(IPersistentAccountStore persistentStore)
         {
             this.LedgerTree = new ListHashTree();

@@ -12,6 +12,9 @@ using TNetD.Types;
 
 namespace TNetD.Transactions
 {
+    /// <summary> 
+    /// Manages the status results for current transactions; helps to reply queries about transaction progress and result.
+    /// </summary>
     public class TransactionStateManager
     {
         // For status:

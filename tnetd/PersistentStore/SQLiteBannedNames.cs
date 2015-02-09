@@ -37,7 +37,11 @@ namespace TNetD.PersistentStore
         }
 
         ////////////////////////
-
+        /// <summary>
+        /// Contains no input validations. Make sure input is good.
+        /// </summary>
+        /// <param name="UserName"></param>
+        /// <returns></returns>
         public bool Contains(string UserName)
         {
             bool Found = false;

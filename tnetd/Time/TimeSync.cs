@@ -29,15 +29,15 @@ namespace TNetD.Time
 		        Hash token =  TNetUtils.GenerateNewToken();
 		
 
-		        if (!nodeState.timeMap.ContainsKey(ValidatorPK))
+		        if (!nodeState.TimeMap.ContainsKey(ValidatorPK))
 		        {
                     TimeStruct ts;
-                    ts.sendTime = nodeState.system_time;
+                    ts.sendTime = nodeState.SystemTime;
 			        ts.receivedTime = 0;
 			        ts.TimeFromValidator = 0;
 			        ts.timeDifference = 0;
 			        ts.token = token;
-                    nodeState.timeMap.AddOrUpdate(ValidatorPK, ts, (oldkey, oldvalue) => ts);
+                    nodeState.TimeMap.AddOrUpdate(ValidatorPK, ts, (oldkey, oldvalue) => ts);
 		        }
 	         }
         }
@@ -53,13 +53,13 @@ namespace TNetD.Time
                 long myTime_i = kvp.Key;
                 long otherTime_i = kvp.Value;
 
-                long offSet = (nodeState.system_time - myTime_i);
+                long offSet = (nodeState.SystemTime - myTime_i);
                 long offSetBalancedOtherTime_i = offSet + otherTime_i;
 
                 timeVector.Add(offSetBalancedOtherTime_i);
             }
 
-            Int64 timeSum = nodeState.system_time;
+            Int64 timeSum = nodeState.SystemTime;
 
             int total = timeVector.Count;
 
@@ -78,21 +78,21 @@ namespace TNetD.Time
         */
         public bool SetTime(Hash PublicKey, Hash token, Int64 time)
         {
-	        if (nodeState.timeMap.ContainsKey(PublicKey))
+	        if (nodeState.TimeMap.ContainsKey(PublicKey))
 	        {
                 TimeStruct ts; 
-                nodeState.timeMap.TryGetValue(PublicKey, out ts);
+                nodeState.TimeMap.TryGetValue(PublicKey, out ts);
 		        Hash _token = ts.token;
 		        if (token != _token)
 			         return false;
 
-		        ts.receivedTime = nodeState.system_time;
+		        ts.receivedTime = nodeState.SystemTime;
 
-		        Int64 RTT_one_way = (nodeState.system_time - ts.sendTime) / 2;
+		        Int64 RTT_one_way = (nodeState.SystemTime - ts.sendTime) / 2;
 		        Int64 RTT_corrrected_time = time + RTT_one_way;
 
 		        ts.TimeFromValidator = RTT_corrrected_time;
-		        ts.timeDifference = (RTT_corrrected_time - nodeState.system_time);
+		        ts.timeDifference = (RTT_corrrected_time - nodeState.SystemTime);
 
 		         return true;
 	        }
@@ -104,7 +104,7 @@ namespace TNetD.Time
 	        Int64 total_diff = 0;
 	        int counter = 0;
 
-             IEnumerator<KeyValuePair<Hash, TimeStruct>> it =  nodeState.timeMap.GetEnumerator();
+             IEnumerator<KeyValuePair<Hash, TimeStruct>> it =  nodeState.TimeMap.GetEnumerator();
 
              while (it.MoveNext())
              {

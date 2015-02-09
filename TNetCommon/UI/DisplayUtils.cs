@@ -45,7 +45,7 @@ namespace TNetD
         BadData 
     };
 
-    static class DisplayUtils
+    public static class DisplayUtils
     {
         public delegate void DisplayHandler(string Text, Color color, DisplayType type);
         public static event DisplayHandler DisplayText;

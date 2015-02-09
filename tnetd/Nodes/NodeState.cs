@@ -1,6 +1,7 @@
 ﻿//
 // @Author: Arpan Jati
 // C++ Vesion: @Date: 22th Oct 2014 : To C# : 16th Jan 2015
+// 10 Feb 2015: Added most of the common classes.
 //
 
 using System;
@@ -10,6 +11,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TNetD.Json.JS_Structs;
+using TNetD.Ledgers;
+using TNetD.PersistentStore;
+using TNetD.Transactions;
+using TNetD.Types;
 
 namespace TNetD.Nodes
 {
@@ -18,39 +23,63 @@ namespace TNetD.Nodes
     /// </summary>
     class NodeState
     {
+        public Dictionary<Hash, DifficultyTimeData> WorkProofMap = new Dictionary<Hash, DifficultyTimeData>();
+
+        public Ledger Ledger;
+
+        public IPersistentAccountStore PersistentAccountStore;
+        public IPersistentTransactionStore PersistentTransactionStore;
+        public SQLiteBannedNames PersistentBannedNameStore;
+        public SQLiteCloseHistory PersistentCloseHistory;
+
+        public IncomingTransactionMap IncomingTransactionMap;
+
+        public TransactionStateManager TransactionStateManager;
+        
         public ConcurrentBag<Hash> GlobalBlacklistedValidators { get; set; }
 
         public ConcurrentBag<Hash> GlobalBlacklistedUsers { get; set; }
 
-        public ConcurrentDictionary<Hash, TimeStruct> timeMap { get; set; }
+        public ConcurrentDictionary<Hash, TimeStruct> TimeMap { get; set; }
 
         public ConcurrentBag<Hash> ConnectedValidators { get; set; }
 
-        public long system_time{ get; set; }
-        public long network_time{ get; set; }
+        public long SystemTime{ get; set; }
+
+        public long NetworkTime{ get; set; }
         
-        // //////////////////////
-        /*public int ConnectedPeers;
-        public int TransactionsProcessed;
-        public int TransactionsAccepted;
-        public int TransactionsValidated;
-        public int RequestsProcessed;
-        public int LoadLevel = 1;*/
-
         public JS_NodeInfo NodeInfo;
-
-        // //////////////////////
-
-        public NodeState()
+    
+        public NodeState(NodeConfig nodeConfig)
         {
+            PersistentAccountStore = new SQLiteAccountStore(nodeConfig);
+            PersistentTransactionStore = new SQLiteTransactionStore(nodeConfig);
+            PersistentBannedNameStore = new SQLiteBannedNames(nodeConfig);
+            PersistentCloseHistory = new SQLiteCloseHistory(nodeConfig);
+
+            Ledger = new Ledger(PersistentAccountStore);
+
+            TransactionStateManager = new TransactionStateManager();
+            IncomingTransactionMap = new IncomingTransactionMap(this, nodeConfig, TransactionStateManager);
+            
             GlobalBlacklistedValidators = new ConcurrentBag<Hash>();
             GlobalBlacklistedUsers = new ConcurrentBag<Hash>();
-            timeMap = new ConcurrentDictionary<Hash, TimeStruct>();
+            TimeMap = new ConcurrentDictionary<Hash, TimeStruct>();
             
             ConnectedValidators = new ConcurrentBag<Hash>();
-            system_time = DateTime.UtcNow.ToFileTimeUtc();
-            network_time = DateTime.UtcNow.ToFileTimeUtc();
+            SystemTime = DateTime.UtcNow.ToFileTimeUtc();
+            NetworkTime = DateTime.UtcNow.ToFileTimeUtc();
         }
+
+        public bool IsGoodValidUserName(string Name)
+        {
+            if (!Utils.ValidateUserName(Name)) return false;
+
+            if (PersistentBannedNameStore.Contains(Name)) return false;
+
+            return true;
+        }
+
 
         public void SetNodeInfo(JS_NodeInfo NodeInfo)
         {

@@ -137,6 +137,7 @@
     <Compile Include="Nodes\GlobalConfiguration.cs" />
     <Compile Include="Nodes\NodeConfig.cs" />
     <Compile Include="Nodes\NodeState.cs" />
+    <Compile Include="Nodes\RpcHandlers.cs" />
     <Compile Include="Nodes\TreeDiffData.cs" />
     <Compile Include="PersistentStore\DBUtils.cs" />
     <Compile Include="PersistentStore\IPersistentAccountStore.cs" />
@@ -146,8 +147,8 @@
     <Compile Include="PersistentStore\SQLiteAccountStore.cs" />
     <Compile Include="PersistentStore\SQLiteTransactionStore.cs" />
     <Compile Include="Consensus\CandidateSet.cs" />
-    <Compile Include="SyncFramework\TransactionSink.cs" />
-    <Compile Include="SyncFramework\TransactionSource.cs" />
+    <Compile Include="SyncFramework\TransactionSinkStream.cs" />
+    <Compile Include="SyncFramework\TransactionSourceStream.cs" />
     <Compile Include="Time\TimeSync.cs" />
     <Compile Include="Transactions\IncomingTransactionMap.cs" />
     <Compile Include="Tree\FlatNodeStore.cs" />
@@ -166,7 +167,6 @@
       <DependentUpon>CreateTransaction.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utils\Constants.cs" />
-    <Compile Include="Utils\DisplayUtils.cs" />
     <Compile Include="Ledgers\Ledger.cs" />
     <Compile Include="Nodes\Node.cs" />
     <Compile Include="Utils\INIFile.cs" />
