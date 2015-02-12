@@ -1,7 +1,7 @@
 ﻿/*
  *  @Author: Arpan Jati
  *  @Version: 1.0
- *  @Date: 9 Jan 2015 | 10 Jan 2015 | 14 Jan 2015 | 1 Feb 2015
+ *  @Date: 9 Jan 2015 | 10 Jan 2015 | 14 Jan 2015 | 1 Feb 2015 | 13 Feb 2013
  *  @Description: Json Structs for serialization
  */
 
@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TNetD.Address;
+using TNetD.Protocol;
 using TNetD.Transactions;
 using TNetD.Types;
 
@@ -129,34 +130,6 @@ namespace TNetD.Json.JS_Structs
         public JS_NodeDetails()
         {
 
-        }
-
-        public JS_Resp GetResponse()
-        {
-            return new JS_Resp(RPCStatus.Success, this);
-        }
-    }
-
-    public class JS_LedgerInfo : JS_Response
-    {
-        public byte[] Hash;
-        public long SequenceNumber = 0;
-        public DateTime CloseTime = DateTime.UtcNow;
-        public long TotalTransactions = 0;
-        public long Transactions = 0;
-
-        public JS_LedgerInfo()
-        {
-            Hash = new byte[0];
-        }
-
-        public JS_LedgerInfo(LedgerCloseData ledgerCloseData)
-        {
-            Hash = ledgerCloseData.LedgerHash;
-            TotalTransactions = ledgerCloseData.TotalTransactions;
-            Transactions = ledgerCloseData.Transactions;
-            CloseTime = DateTime.FromFileTimeUtc(ledgerCloseData.CloseTime);
-            SequenceNumber = ledgerCloseData.SequenceNumber;
         }
 
         public JS_Resp GetResponse()
@@ -368,7 +341,7 @@ namespace TNetD.Json.JS_Structs
             this.Data = Data;
         }
     }
-    
+
     public class JS_WorkProofRequest : JS_Response
     {
         public byte[] ProofRequest = new byte[16];

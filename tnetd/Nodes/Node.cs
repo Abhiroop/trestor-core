@@ -236,6 +236,9 @@ namespace TNetD.Nodes
         void network_PacketReceived(Hash publicKey, NetworkPacket packet)
         {
             DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + publicKey + " | Data Length : " + packet.Data.Length);
+
+            //packet.PublicKey_Src
+
         }
 
         public void StopNode()

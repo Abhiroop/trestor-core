@@ -135,7 +135,7 @@ namespace TNetTest
 
                     WriteLog(response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n");
 
-                    
+
 
                 }));
 
@@ -232,8 +232,8 @@ namespace TNetTest
                 WriteLog(response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n");
 
             }*/
-            
-            
+
+
             
             byte[] PubSrc;
             byte[] PrivSrcExpanded;
@@ -277,9 +277,17 @@ namespace TNetTest
             {
                 WriteLog("INVALID DATA : " + rslt.ToString());
             }
-            
-            
 
+            //Name - shila
+
+            //Address - TNpsWwc1H6SuSXEmQLUn2SyTe328xZh2crL
+
+            //Public - 9c263b6310eac539462818484d8db6c828ec6efb4b1d5951d9e5dc036568fdea
+            /*
+            bool OK = AddressFactory.VerfiyAddress("TNTBzsiitLGe7cN4HDBDjUTVi6Tp3SkVMKb",
+                HexUtil.GetBytes("062160b53d81fd7b49a18842e8522e89d864d351fe2a8841369a8d782198d5da"), "ashish");
+            
+            WriteLog("OKAY:" + OK);*/
 
         }
 

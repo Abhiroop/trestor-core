@@ -8,8 +8,8 @@ namespace TNetD.Network.Networking
 {
     public enum TransportPacketType
     {
-        Initialize = 0, Control = 1, WorkProofRequest = 2, WorkProofKeyResponse = 3, ServerPublicTransfer = 4, 
-        KeyExComplete_1 = 5, KeyExComplete_2 = 6,  DataCrypted = 7, Stream = 8, StreamCrypted = 9, 
+        Initialize = 0, Control = 1, WorkProofRequest = 2, WorkProofKeyResponse = 3, ServerPublicTransfer = 4,
+        KeyExComplete_1 = 5, KeyExComplete_2 = 6, DataCrypted = 7, Stream = 8, StreamCrypted = 9,
         InvalidAuthDisconnect = 10, KeepAlive = 11
     };
 
@@ -40,7 +40,7 @@ namespace TNetD.Network.Networking
     }
 
     /////////////////////////////////////
-    
+
     class ConnectConfig
     {
         /// <summary>
@@ -135,7 +135,38 @@ namespace TNetD.Network.Networking
         TPT_CONS_VOTES = 0x34, TPT_CONS_TIME_SYNC = 0x35, TPT_CONS_DOUBLESPENDERS = 0x36,
 
         TPT_LSYNC_FETCH_ROOT = 0x40, TPT_LSYNC_FETCH_LAYER_DATA = 0x41,
-        TPT_LSYNC_REPLY_ROOT = 0x42, TPT_LSYNC_REPLY_LAYER_DATA = 0x43
+        TPT_LSYNC_REPLY_ROOT = 0x42, TPT_LSYNC_REPLY_LAYER_DATA = 0x43,
+
+        /// <summary>
+        /// Request transaction data for a range of Ledger Sequence Numbers
+        /// FORMAT: TransactionSyncRequest
+        /// </summary>
+        TPT_TX_SYNC_REQUEST = 0x50,
+
+        /// <summary>
+        /// Response to a Transaction Data Request [TransactionSyncResponse[]]
+        /// </summary>
+        TPT_TX_SYNC_RESPONSE = 0x51,
+
+        /// <summary>
+        /// Request transaction ID's for a given Ledger Sequence Number 
+        /// </summary>
+        TPT_TX_SYNC_REQUEST_ID = 0x52,
+
+        /// <summary>
+        /// Response to a Transactio Data ID Request
+        /// </summary>
+        TPT_TX_SYNC_RESPONSE_ID = 0x53,
+        
+        /// <summary>
+        /// Queries for current ledger sequence and TransactionCount
+        /// </summary>
+        TPT_TX_SYNC_QUERY_CURRENT = 0x54,
+
+        /// <summary>
+        /// Response for TPT_TX_SYNC_QUERY_CURRENT 
+        /// </summary>
+        TPT_TX_SYNC_RESPONSE_CURRENT = 0x55
 
     };
 

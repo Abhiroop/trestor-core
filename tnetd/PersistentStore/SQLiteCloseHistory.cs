@@ -16,8 +16,6 @@ using TNetD.Types;
 
 namespace TNetD.PersistentStore
 {
-    
-
     /// <summary>
     /// Stores Ledger Close History in an SQLite database.
     /// </summary>
