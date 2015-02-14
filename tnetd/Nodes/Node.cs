@@ -44,7 +44,6 @@ namespace TNetD.Nodes
         bool TimerEventProcessed = true;
         bool MinuteEventProcessed = true;
 
-        SecureNetwork network = default(SecureNetwork);
 
         // TODO: MAKE PRIVATE : AND FAST
         public NodeConfig nodeConfig = default(NodeConfig);
@@ -52,13 +51,9 @@ namespace TNetD.Nodes
         // TODO: MAKE PRIVATE : AND FAST
         public NodeState nodeState = default(NodeState);
 
-        RpcHandlers rpcHandlers = default(RpcHandlers);        
-
-        /// <summary>
-        /// A dictionary of Trusted nodes, stored by PublicKey
-        /// </summary>
-        public Dictionary<Hash, NodeSocketData> TrustedNodes;
-
+        RpcHandlers rpcHandlers = default(RpcHandlers);
+        NetworkHandlers networkHandlers = default(NetworkHandlers); 
+        
         public AccountInfo AI;
 
         #endregion
@@ -95,21 +90,10 @@ namespace TNetD.Nodes
 
             nodeState.NodeInfo = nodeConfig.Get_JS_Info();
 
-            //nodeState.NodeInfo.NodeDetails = new JS_NodeDetails();
-            //nodeState.NodeInfo.LastLedgerInfo = new JS_LedgerInfo();            
-            
-            network = new SecureNetwork(nodeConfig);
-            network.PacketReceived += network_PacketReceived;
-
-            network.Initialize();
-
-            TrustedNodes = globalConfiguration.TrustedNodes;
-
             rpcHandlers = new RpcHandlers(nodeConfig, nodeState);
+            networkHandlers = new NetworkHandlers(nodeConfig, nodeState, globalConfiguration);
 
             AI = new AccountInfo(PublicKey, Money);
-
-            //ledger.AddUserToLedger(AI);
 
             TimerConsensus = new System.Timers.Timer();
             TimerConsensus.Elapsed += TimerConsensus_Elapsed;
@@ -201,59 +185,30 @@ namespace TNetD.Nodes
         /// <summary>
         /// Add more content to be loaded in background here.
         /// </summary>
-        async public void BeginBackgroundLoad()
+        async public Task BeginBackgroundLoad()
         {
             await Task.Run(async () =>
             {
                 long records = await nodeState.Ledger.InitializeLedger();
 
                 Interlocked.Add(ref nodeState.NodeInfo.NodeDetails.TotalAccounts, records);
-
-                // Connect to TrustedNodes
-                List<Task> tasks = new List<Task>();
-
-                foreach (KeyValuePair<Hash, NodeSocketData> kvp in TrustedNodes)
-                {
-                    if (kvp.Key != PublicKey) // Make sure we are not connecting to self !!
-                    {
-                        if (!network.IsConnected(kvp.Key))
-                        {
-                            tasks.Add(SendInitialize(kvp.Key));
-                        }
-                    }
-                }
-
-                await Task.WhenAll(tasks);
-
+                
+                await networkHandlers.InitialConnectAsync();
+                
                 LedgerCloseData ledgerCloseData;
                 nodeState.PersistentCloseHistory.GetLastRowData(out ledgerCloseData);
                 nodeState.NodeInfo.LastLedgerInfo = new JS_LedgerInfo(ledgerCloseData);
             });
         }
 
-        #endregion
-
-        void network_PacketReceived(Hash publicKey, NetworkPacket packet)
-        {
-            DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + publicKey + " | Data Length : " + packet.Data.Length);
-
-            //packet.PublicKey_Src
-
-        }
+        #endregion        
 
         public void StopNode()
         {
             Constants.ApplicationRunning = false;
 
-            network.Stop();
+            networkHandlers.Stop();
             rpcHandlers.StopServer();
-        }
-
-        async Task SendInitialize(Hash publicKey)
-        {
-            await Task.Delay(Common.random.Next(500, 1000)); // Wait a random delay before connecting.
-            NetworkPacketQueueEntry npqe = new NetworkPacketQueueEntry(publicKey, new NetworkPacket(PublicKey, PacketType.TPT_HELLO, new byte[0]));
-            network.AddToQueue(npqe);
         }
 
 

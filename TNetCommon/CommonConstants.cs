@@ -39,7 +39,7 @@ namespace TNetD
 
         public static readonly int UI_TextBox_Max_Length = 20000;
 
-        public static readonly NetworkType NetworkType = Address.NetworkType.MainNet;
+        public static readonly NetworkType NetworkType = Address.NetworkType.TestNet;
 
         public static readonly string RpcHost = "localhost";// "localhost";
 

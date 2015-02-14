@@ -134,6 +134,7 @@
     <Compile Include="Network\NetworkPacketQueueEntry.cs" />
     <Compile Include="Network\Networking\OutgoingConnection.cs" />
     <Compile Include="Network\Networking\IncomingClient.cs" />
+    <Compile Include="Nodes\NetworkHandlers.cs" />
     <Compile Include="SyncFramework\Packets\TransactionContentSet.cs" />
     <Compile Include="SyncFramework\Packets\TransactionSyncRequest.cs" />
     <Compile Include="SyncFramework\Packets\TransactionSyncResponse.cs" />
