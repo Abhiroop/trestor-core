@@ -299,6 +299,14 @@ namespace Grapevine.Server
             }
         }
 
+        public string BaseUrlHttps443
+        {
+            get
+            {
+                return String.Format("{0}://{1}:{2}/", "https", this.Host, 443);
+            }
+        }
+
         /// <summary>
         /// The number of threads that will be started to respond to queued requests
         /// </summary>
@@ -382,6 +390,7 @@ namespace Grapevine.Server
                     {
                         this._listener.Prefixes.Add(this.BaseUrlHttp);
                         this._listener.Prefixes.Add(this.BaseUrlHttps);
+                        this._listener.Prefixes.Add(this.BaseUrlHttps443);                        
                     }
 
                     this._listener.Start();

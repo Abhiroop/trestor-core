@@ -14,12 +14,28 @@ namespace TNetD.SyncFramework.Packets
 {
     class TransactionContentSet : ISerializableBase
     {
-        long SequenceNumber;
-        List<TransactionContent> TxContent = new List<TransactionContent>();
+        public long SequenceNumber;
+        public List<TransactionContent> TxContent = new List<TransactionContent>();
+
+        public TransactionContentSet(long sequenceNumber, TransactionContent transactionContent)
+        {
+            TxContent.Add(transactionContent);
+            SequenceNumber = sequenceNumber;
+        }
+
+        public TransactionContentSet(long sequenceNumber)
+        {
+            SequenceNumber = sequenceNumber;
+        }
 
         public TransactionContentSet()
         {
+            SequenceNumber = 0;
+        }
 
+        public void Add(TransactionContent transactionContent)
+        {
+            TxContent.Add(transactionContent);
         }
 
         public byte[] Serialize()

@@ -428,7 +428,7 @@
 	#banner .title
 	{
 		margin-bottom: 1em;
-		text-transform: uppercase !important;
+		text-transform: inherit !important;
 	
 		/* border-radius: 8px; */
 }
@@ -514,7 +514,7 @@
 {
 	padding: 3em 2em 2em 2em;
 	border: 1px solid rgba(0,0,0,0.1);
-	text-align: center;
+	text-align: left;
 	border-radius: 2px;
 	background: #f6f6f6;
 }

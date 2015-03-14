@@ -1,6 +1,6 @@
 ﻿
 // @Author: Arpan Jati
-// @Date: 6-7 Jan / 2015 | 15 Jan 2015
+// @Date: 6-7 Jan / 2015 | 15 Jan 2015 | 21 Feb 2015
 // 31 Jan 2015 : Oops !! Added Transactions
 
 using System;
@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TNetD.Nodes;
+using TNetD.SyncFramework.Packets;
 using TNetD.Transactions;
 
 namespace TNetD.PersistentStore
@@ -65,11 +66,11 @@ namespace TNetD.PersistentStore
                         if (reader.Read())
                         {
                             Hash _transactionID = new Hash((byte[])reader[0]);
-                            
+
                             if (_transactionID == transactionID) // Proper row returned.
                             {
                                 sequenceNumber = (long)reader[1];
-                                
+
                                 transactionContent = new TransactionContent();
                                 transactionContent.Deserialize((byte[])reader[2]);
 
@@ -85,6 +86,63 @@ namespace TNetD.PersistentStore
                         }
                     }
 
+                }
+            }
+
+            return response;
+        }
+
+        public DBResponse FetchBySequenceNumber(out List<TransactionContentSet> transactions, long sequenceNumber, long Count)
+        {
+
+            DBResponse response = DBResponse.NonDBError;
+
+            long sequenceMax = sequenceNumber + Count;
+
+            string LIMIT_CLAUSE = "LIMIT " + Constants.DB_HISTORY_TX_LIMIT;
+
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Transactions WHERE (SequenceNumber >= @sequenceNumber AND SequenceNumber < @sequenceMax ) ORDER BY TimeStamp DESC " + LIMIT_CLAUSE + ";", sqliteConnection))
+            {
+                cmd.Parameters.Add(new SQLiteParameter("@sequenceNumber", sequenceNumber));
+                cmd.Parameters.Add(new SQLiteParameter("@sequenceMax", sequenceMax));
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
+                {
+                    transactions = new List<TransactionContentSet>();
+
+                    if (reader.HasRows)
+                    {
+                        Dictionary<long, TransactionContentSet> transactionContentSet = new Dictionary<long, TransactionContentSet>();
+
+                        while (reader.Read())
+                        {
+                            Hash _transactionID = new Hash((byte[])reader[0]);
+
+                            sequenceNumber = (long)reader[1];
+
+                            TransactionContent transactionContent = new TransactionContent();
+                            transactionContent.Deserialize((byte[])reader[2]);
+
+                            if (_transactionID == transactionContent.TransactionID)
+                            {
+                                if (transactionContentSet.ContainsKey(sequenceNumber))
+                                {
+                                    transactionContentSet[sequenceNumber].Add(transactionContent);
+                                }
+                                else
+                                {
+                                    transactionContentSet.Add(sequenceNumber, new TransactionContentSet(sequenceNumber, transactionContent));
+                                }
+
+                                response = DBResponse.FetchSuccess;
+                            }
+                            else // BAD TRANSACTION DECODE. Real Bad. Should not happen !!! 
+                            {
+                                return DBResponse.Exception;
+                            }
+                        }
+
+                        transactions.AddRange(transactionContentSet.Values);
+                    }
                 }
             }
 
@@ -150,12 +208,12 @@ namespace TNetD.PersistentStore
 
         //CRITICAL: HANDLE CASE WHEN ENTRY ALREADY EXISTS GRACEFULLY
 
-        public int AddUpdateBatch(Dictionary<Hash, TransactionContent> accountInfoData, long sequenceNumber)
+        public int AddUpdateBatch(Dictionary<Hash, TransactionContent> transactionContents, long sequenceNumber)
         {
             int Successes = 0;
             SQLiteTransaction transaction = sqliteConnection.BeginTransaction();
 
-            foreach (KeyValuePair<Hash, TransactionContent> kvp in accountInfoData)
+            foreach (KeyValuePair<Hash, TransactionContent> kvp in transactionContents)
             {
                 DBResponse resp = AddUpdate(kvp.Value, transaction, sequenceNumber);
                 if ((resp == DBResponse.InsertSuccess) || (resp == DBResponse.UpdateSuccess))
@@ -165,7 +223,39 @@ namespace TNetD.PersistentStore
             }
 
             transaction.Commit();
-                        
+
+            return Successes;
+        }
+
+        /// <summary>
+        /// Add multiple transactions to the transaction history.
+        /// </summary>
+        /// <param name="transactionContentSets"></param>
+        /// <returns></returns>
+        public int AddUpdateBatch(List<TransactionContentSet> transactionContentSets)
+        {
+            int Successes = 0;
+            SQLiteTransaction transaction = sqliteConnection.BeginTransaction();
+            
+            foreach(TransactionContentSet transactionContentSet in transactionContentSets)
+            {
+                // CRITICAL: VERIFY that the transactions are actually valid. Or from fully trusted sources.
+                foreach (TransactionContent transactionContent in transactionContentSet.TxContent)
+                {
+                    try
+                    {
+                        DBResponse resp = AddUpdate(transactionContent, transaction, transactionContentSet.SequenceNumber);
+                        if ((resp == DBResponse.InsertSuccess) || (resp == DBResponse.UpdateSuccess))
+                        {
+                            Successes++;
+                        }
+                    }
+                    catch (Exception ex) { DisplayUtils.Display("AddUpdateBatch()", ex); }
+                }
+            }
+
+            transaction.Commit();
+
             return Successes;
         }
 
@@ -291,14 +381,14 @@ namespace TNetD.PersistentStore
                     DBUtils.ExecuteNonQuery("CREATE TABLE Transactions (TransactionID BLOB PRIMARY KEY, SequenceNumber INTEGER, SerializedContent BLOB);", sqliteConnection);
 
                     // Make an index to improve Sequence Number based lookups.
-                    DBUtils.ExecuteNonQuery("CREATE INDEX Idx2 ON Transactions(TransactionID, SequenceNumber);", sqliteConnection);                
+                    DBUtils.ExecuteNonQuery("CREATE INDEX Idx2 ON Transactions(TransactionID, SequenceNumber);", sqliteConnection);
                 }
 
                 ///  Extra Table for Transaction History : OPTIONAL FOR NODES
                 if (!DBUtils.TableExists("TransactionHistory", sqliteConnection))
                 {
                     DBUtils.ExecuteNonQuery("CREATE TABLE TransactionHistory (TransactionID BLOB, PublicKey BLOB, TimeStamp Integer);", sqliteConnection);
-                    
+
                     // Make an index table to make history lookups much faster.
                     DBUtils.ExecuteNonQuery("CREATE INDEX Idx1 ON TransactionHistory(PublicKey, TimeStamp);", sqliteConnection);
                 }

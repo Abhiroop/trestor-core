@@ -196,6 +196,7 @@
     <Compile Include="Types\JS_Structs.cs" />
     <Compile Include="Types\LeafDataType.cs" />
     <Compile Include="Types\CommonStructs.cs" />
+    <Compile Include="Types\LedgerCloseData.cs" />
     <Compile Include="UI\DisplayUtils.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="WorkProof.cs" />

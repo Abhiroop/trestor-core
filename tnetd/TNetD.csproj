@@ -135,7 +135,9 @@
     <Compile Include="Network\Networking\OutgoingConnection.cs" />
     <Compile Include="Network\Networking\IncomingClient.cs" />
     <Compile Include="Nodes\NetworkHandlers.cs" />
+    <Compile Include="Nodes\TransactionHandler.cs" />
     <Compile Include="SyncFramework\Packets\TransactionContentSet.cs" />
+    <Compile Include="SyncFramework\Packets\TransactionSyncQueryResponse.cs" />
     <Compile Include="SyncFramework\Packets\TransactionSyncRequest.cs" />
     <Compile Include="SyncFramework\Packets\TransactionSyncResponse.cs" />
     <Compile Include="Nodes\GlobalConfiguration.cs" />
@@ -145,7 +147,7 @@
     <Compile Include="Nodes\TreeDiffData.cs" />
     <Compile Include="PersistentStore\DBUtils.cs" />
     <Compile Include="PersistentStore\IPersistentAccountStore.cs" />
-    <Compile Include="PersistentStore\ITransactionStore.cs" />
+    <Compile Include="PersistentStore\IPersistentTransactionStore.cs" />
     <Compile Include="PersistentStore\SQLiteCloseHistory.cs" />
     <Compile Include="PersistentStore\SQLiteBannedNames.cs" />
     <Compile Include="PersistentStore\SQLiteAccountStore.cs" />

@@ -141,32 +141,42 @@ namespace TNetD.Network.Networking
         /// Request transaction data for a range of Ledger Sequence Numbers
         /// FORMAT: TransactionSyncRequest
         /// </summary>
-        TPT_TX_SYNC_REQUEST = 0x50,
+        TPT_TX_SYNC_FETCH_REQUEST = 0x50,
 
         /// <summary>
         /// Response to a Transaction Data Request [TransactionSyncResponse[]]
         /// </summary>
-        TPT_TX_SYNC_RESPONSE = 0x51,
+        TPT_TX_SYNC_FETCH_RESPONSE = 0x51,
 
         /// <summary>
         /// Request transaction ID's for a given Ledger Sequence Number 
         /// </summary>
-        TPT_TX_SYNC_REQUEST_ID = 0x52,
+        TPT_TX_SYNC_ID_REQUEST = 0x52,
 
         /// <summary>
         /// Response to a Transactio Data ID Request
         /// </summary>
-        TPT_TX_SYNC_RESPONSE_ID = 0x53,
+        TPT_TX_SYNC_ID_RESPONSE = 0x53,
         
         /// <summary>
         /// Queries for current ledger sequence and TransactionCount
         /// </summary>
-        TPT_TX_SYNC_QUERY_CURRENT = 0x54,
+        TPT_TX_SYNC_QUERY_REQUEST = 0x54,
 
         /// <summary>
         /// Response for TPT_TX_SYNC_QUERY_CURRENT 
         /// </summary>
-        TPT_TX_SYNC_RESPONSE_CURRENT = 0x55
+        TPT_TX_SYNC_QUERY_RESPONSE = 0x55,
+
+        /// <summary>
+        /// Queries for CLOSEHISTORY
+        /// </summary>
+        TPT_TX_SYNC_CLOSEHISTORY_REQUEST = 0x56,
+
+        /// <summary>
+        /// Response for TPT_TX_SYNC_CLOSEHISTORY_REQUEST 
+        /// </summary>
+        TPT_TX_SYNC_CLOSEHISTORY_RESPONSE = 0x57
 
     };
 

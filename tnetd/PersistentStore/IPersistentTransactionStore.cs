@@ -1,12 +1,13 @@
 ﻿//
 // @Author: Arpan Jati
-// @Date: Jan 5, 2015
+// @Date: Jan 5, 2015 | 21 Feb 2015 
 //
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TNetD.SyncFramework.Packets;
 using TNetD.Transactions;
 
 namespace TNetD.PersistentStore
@@ -17,7 +18,9 @@ namespace TNetD.PersistentStore
     /// </summary>
     interface IPersistentTransactionStore
     {
-        int AddUpdateBatch(Dictionary<Hash,TransactionContent> accountInfoData, long sequenceNumber);
+        int AddUpdateBatch(Dictionary<Hash, TransactionContent> transactionContents, long sequenceNumber);
+
+        int AddUpdateBatch(List<TransactionContentSet> transactionContentSets);
 
         /// <summary>
         /// Adds or updates elements to the PersistentStore
@@ -50,6 +53,15 @@ namespace TNetD.PersistentStore
         /// <param name="Limit">Max result count, 0 means all (Bounded by system limit.)</param>
         /// <returns></returns>
         DBResponse FetchTransactionHistory(out List<TransactionContent> transactions, Hash publicKey, long timeStamp, int Limit);
+
+        /// <summary>
+        /// Returns an object that can be sent over network so that the transaction history can be rebuild.
+        /// </summary>
+        /// <param name="transactions"></param>
+        /// <param name="sequenceNumber"></param>
+        /// <param name="Count"></param>
+        /// <returns></returns>
+        DBResponse FetchBySequenceNumber(out List<TransactionContentSet> transactions, long sequenceNumber, long Count);
 
         /// <summary>
         /// Returns true if the transaction exists in the database.

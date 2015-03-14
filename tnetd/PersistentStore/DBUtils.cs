@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace TNetD.PersistentStore
 {
     public enum DBResponse { InsertSuccess, UpdateSuccess, DeleteSuccess, InsertFailed, UpdateFailed, 
-        DeleteFailed, FetchSuccess, FetchFailed, NonDBError, Exception }
+        DeleteFailed, FetchSuccess, FetchFailed, NonDBError, Exception, NothingDone }
     
     class DBUtils
     {
