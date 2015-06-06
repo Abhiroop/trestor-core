@@ -21,6 +21,7 @@ using TNetD;
 using TNetD.Address;
 using TNetD.Crypto;
 using TNetD.Json.JS_Structs;
+using TNetD.Protocol;
 using TNetD.Transactions;
 using TNetNative;
 
@@ -310,6 +311,11 @@ namespace TNetTest
             Benchmarks bm = new Benchmarks();
 
             bm.Show();
+        }
+
+        private void menuItem_File_TestVarint_Click(object sender, RoutedEventArgs e)
+        {
+            //Varint2.TestSingle();
         }
 
     }

@@ -20,6 +20,7 @@
             <MenuItem Header="FILE">
                 <MenuItem Name="menuItem_File_Exit" Header="EXIT" />
                 <MenuItem Name="menuItem_Benchmark" Header="BENCHMARK" Click="menuItem_Benchmark_Click"></MenuItem>
+                <MenuItem Name="menuItem_File_TestVarint" Header="TestVarint" Click="menuItem_File_TestVarint_Click" />
             </MenuItem>
             <MenuItem Header="TRANSACTIONS">
                 <MenuItem Header="Intialize" Name="button_TransactionsInitialize" Click="button_TransactionsInitialize_Click" />
