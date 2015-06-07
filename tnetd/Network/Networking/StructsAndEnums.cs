@@ -176,7 +176,12 @@ namespace TNetD.Network.Networking
         /// <summary>
         /// Response for TPT_TX_SYNC_CLOSEHISTORY_REQUEST 
         /// </summary>
-        TPT_TX_SYNC_CLOSEHISTORY_RESPONSE = 0x57
+        TPT_TX_SYNC_CLOSEHISTORY_RESPONSE = 0x57,
+
+        TPT_TIMESYNC_REQUEST = 0x60,
+
+        TPT_TIMESYNC_RESPONSE = 0x61
+
 
     };
 
