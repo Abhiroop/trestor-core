@@ -155,6 +155,8 @@
     <Compile Include="Consensus\CandidateSet.cs" />
     <Compile Include="SyncFramework\TransactionStreamHandler.cs" />
     <Compile Include="Time\TimeSync.cs" />
+    <Compile Include="Time\TimeSyncRqMsg.cs" />
+    <Compile Include="Time\TimeSyncRsMsg.cs" />
     <Compile Include="Transactions\IncomingTransactionMap.cs" />
     <Compile Include="Tree\FlatNodeStore.cs" />
     <Compile Include="Tree\ListHashTree.cs" />

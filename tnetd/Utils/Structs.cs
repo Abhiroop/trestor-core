@@ -62,7 +62,7 @@ namespace TNetD
         public long receivedTime;
         public long TimeFromValidator;
         public Hash token;
-        public long timeDifference; //my time - other time
+        public long timeDifference;
     };
 
 
