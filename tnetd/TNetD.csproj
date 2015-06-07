@@ -136,6 +136,7 @@
     <Compile Include="Network\Networking\IncomingClient.cs" />
     <Compile Include="Nodes\NetworkHandlers.cs" />
     <Compile Include="Nodes\TransactionHandler.cs" />
+    <Compile Include="SyncFramework\Packets\LedgerSyncRequest.cs" />
     <Compile Include="SyncFramework\Packets\TransactionContentSet.cs" />
     <Compile Include="SyncFramework\Packets\TransactionSyncQueryResponse.cs" />
     <Compile Include="SyncFramework\Packets\TransactionSyncRequest.cs" />

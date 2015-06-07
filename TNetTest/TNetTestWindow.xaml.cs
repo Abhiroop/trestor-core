@@ -23,6 +23,7 @@ using TNetD.Crypto;
 using TNetD.Json.JS_Structs;
 using TNetD.Protocol;
 using TNetD.Transactions;
+using TNetD.Tree;
 using TNetNative;
 
 namespace TNetTest
@@ -317,6 +318,25 @@ namespace TNetTest
         {
             //Varint2.TestSingle();
         }
+
+
+
+        private void menuItem_File_TestTree_Click(object sender, RoutedEventArgs e)
+        {
+
+            //ListHashTree LHT = new ListHashTree();
+
+            //LHT.
+
+
+
+
+        }
+
+
+
+
+
 
     }
 }

@@ -125,7 +125,7 @@ namespace TNetD
 
         void LoadNodes()
         {
-            AddNode(0);
+           // AddNode(0);
             //AddNode(1);
         }
 
@@ -158,7 +158,7 @@ namespace TNetD
 
             ListHashTree lht = new ListHashTree();
 
-            int ACCOUNTS = 2000;
+            int ACCOUNTS = 10;
 
             long taka = 0;
 
@@ -166,9 +166,9 @@ namespace TNetD
 
             for (int i = 0; i < ACCOUNTS; i++)
             {
-                N_H[5] = (byte)(i * 3);
+                N_H[0] = (byte)(i);
 
-                Common.rngCsp.GetBytes(N_H);
+                //Common.rngCsp.GetBytes(N_H);
 
                 accounts.Add(new Hash(N_H));
 
@@ -180,7 +180,7 @@ namespace TNetD
                 lht.AddUpdate(ai);
             }
 
-            ////lht.TraverseNodes();
+            //lht.TraverseNodes();
 
             //long received_takas = 0;
 
@@ -193,12 +193,26 @@ namespace TNetD
             //     received_takas += ai.Money;
             // }
 
-            /*DisplayUtils.Display("Initial Money : " + taka);
+            DisplayUtils.Display("Initial Money : " + taka);
 
             DisplayUtils.Display("\nTraversing ... ");
-            lht.TraverseNodes();
 
-            DisplayUtils.Display("Traversed Money : " + lht.TotalMoney);
+            long Tres = 0;
+            
+            long LeafDataCount = 0;
+            long FoundNodes = 0;
+
+            lht.TraverseAllNodes(ref LeafDataCount, ref FoundNodes, (X) =>
+            {
+                foreach (AccountInfo AI in X)
+                {
+                    Tres += AI.Money;
+                }
+                return TreeResponseType.NothingDone;
+            });
+
+
+            DisplayUtils.Display("Traversed Money : " + Tres);
             DisplayUtils.Display("Traversed Nodes : " + lht.TraversedNodes);
             DisplayUtils.Display("Traversed Elements : " + lht.TraversedElements);
 
@@ -213,11 +227,11 @@ namespace TNetD
             }
 
             DisplayUtils.Display("\nTraversing After Delete ... ");
-            lht.TraverseNodes();
+            // lht.TraverseNodes();
 
             DisplayUtils.Display("Traversed Money : " + lht.TotalMoney);
             DisplayUtils.Display("Traversed Nodes : " + lht.TraversedNodes);
-            DisplayUtils.Display("Traversed Elements : " + lht.TraversedElements);*/
+            DisplayUtils.Display("Traversed Elements : " + lht.TraversedElements);
         }
 
         private void menuItem_File_Exit_Click(object sender, RoutedEventArgs e)
@@ -355,11 +369,11 @@ namespace TNetD
             {
                 StreamReader sr = new StreamReader(ofd.FileName);
 
-                SQLiteBannedNames sbn = new SQLiteBannedNames( nodes[0].nodeConfig );
+                SQLiteBannedNames sbn = new SQLiteBannedNames(nodes[0].nodeConfig);
 
                 List<string> BN = new List<string>();
 
-                while(!sr.EndOfStream)
+                while (!sr.EndOfStream)
                 {
                     string line = sr.ReadLine();
 
@@ -367,16 +381,16 @@ namespace TNetD
 
                     string[] parts = line.Split(',');
 
-                    if(parts.Length == 2)
+                    if (parts.Length == 2)
                     {
                         string Name = parts[1];
 
                         string[] nameparts = Name.Split('.');
 
-                        if(nameparts.Length > 0)
+                        if (nameparts.Length > 0)
                         {
                             string _part = nameparts[0];
-                            BN.Add(_part);                            
+                            BN.Add(_part);
                         }
                     }
                 }
@@ -387,7 +401,7 @@ namespace TNetD
 
             }
 
-            
+
         }
 
 
