@@ -77,7 +77,7 @@ namespace TNetD.Network
                         break;
 
                     case 2:
-                        ProtocolPackager.UnpackByteVector(PDT, 2, ref Data);
+                        ProtocolPackager.UnpackByteVector(PDT, 2, ref this.Data);
                         break;
 
                     case 3:

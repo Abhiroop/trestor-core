@@ -62,8 +62,10 @@ namespace TNetD.Network.Networking
                     while (outgoingQueue.Count > 0)
                     {
                         NetworkPacket np;
+                        
                         if (outgoingQueue.TryDequeue(out np))
                         {
+                            //DisplayUtils.Display("SENDING OC Packet: " + np.Type + " | From: " + np.PublicKeySource + " | Data Length : " + np.Data.Length);
                             SendData(np.Serialize());
                         }
                     }

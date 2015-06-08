@@ -100,6 +100,7 @@ namespace TNetD.Network.Networking
 
                 if (IncomingConnections.ContainsKey(npqe.PublicKeyDestination))
                 {
+                    //DisplayUtils.Display("SENDING IC Packet: " + npqe.Packet.Type + " | From: " + npqe.Packet.PublicKeySource + " | Data Length : " + npqe.Packet.Data.Length);
                     await SendData(npqe.Packet.Serialize(), IncomingConnections[npqe.PublicKeyDestination]);
                 }
             }
@@ -180,7 +181,6 @@ namespace TNetD.Network.Networking
             {
                 DisplayUtils.Display("TimerCallback()", ex);
             }
-
         }
 
         private async void ClientHandler(object oTcpClient)

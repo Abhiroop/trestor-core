@@ -132,9 +132,7 @@ namespace TNetD.Network.Networking
                         }
                     }
                 }
-
                 
-
                 foreach(KeyValuePair<Hash, IncomingClient> kvp in incomingConnectionHander.IncomingConnections)
                 {
                     if (kvp.Value.KeyExchanged)
@@ -144,11 +142,7 @@ namespace TNetD.Network.Networking
                             nodeState.ConnectedValidators.Add(kvp.Value.PublicKey);
                         }
                     }
-
-
                 }
-
-
 
             }
             catch (System.Exception ex)
