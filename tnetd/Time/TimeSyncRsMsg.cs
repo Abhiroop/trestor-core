@@ -26,7 +26,7 @@ namespace TNetD.Time
         {
             List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
             ProtocolPackager.UnpackInt64(PDTs[0], 0, ref senderTime);
-            ProtocolPackager.UnpackInt64(PDTs[1], 1, ref senderTime);
+            ProtocolPackager.UnpackInt64(PDTs[1], 1, ref responderTime);
         }
     }
 }
