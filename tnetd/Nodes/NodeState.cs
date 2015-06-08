@@ -35,21 +35,21 @@ namespace TNetD.Nodes
         public IncomingTransactionMap IncomingTransactionMap;
 
         public TransactionStateManager TransactionStateManager;
-        
+
         public ConcurrentBag<Hash> GlobalBlacklistedValidators { get; set; }
 
         public ConcurrentBag<Hash> GlobalBlacklistedUsers { get; set; }
 
         public ConcurrentBag<Hash> ConnectedValidators { get; set; }
 
-        public long SystemTime{ get; set; }
+        public long SystemTime { get; set; }
 
-        public long NetworkTime{ get; set; }
+        public long NetworkTime { get; set; }
 
-        private long diff=0;
-        
         public JS_NodeInfo NodeInfo;
-    
+
+        private long timeDifference = 0;
+
         public NodeState(NodeConfig nodeConfig)
         {
             PersistentAccountStore = new SQLiteAccountStore(nodeConfig);
@@ -61,10 +61,10 @@ namespace TNetD.Nodes
 
             TransactionStateManager = new TransactionStateManager();
             IncomingTransactionMap = new IncomingTransactionMap(this, nodeConfig, TransactionStateManager);
-            
+
             GlobalBlacklistedValidators = new ConcurrentBag<Hash>();
             GlobalBlacklistedUsers = new ConcurrentBag<Hash>();
-            
+
             ConnectedValidators = new ConcurrentBag<Hash>();
             SystemTime = DateTime.UtcNow.ToFileTimeUtc();
             NetworkTime = DateTime.UtcNow.ToFileTimeUtc();
@@ -72,12 +72,12 @@ namespace TNetD.Nodes
 
         public void updateNetworkTime()
         {
-            NetworkTime = SystemTime + diff;
+            NetworkTime = SystemTime + timeDifference;
         }
 
-        public void updateDiff(long diff)
+        public void updateTimeDifference(long timeDifference)
         {
-            this.diff = diff;
+            this.timeDifference = timeDifference;
         }
 
         public bool IsGoodValidUserName(string Name)
