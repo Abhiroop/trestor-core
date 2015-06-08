@@ -41,13 +41,13 @@ namespace TNetD.Tree
         }
 
         /// <summary>
-        /// Gets the numebr of Elements in the leaf.
+        /// Gets the number of Elements in the leaf.
         /// </summary>
         public int Count
         {
             get { return Values.Count; }
         }
-
+        
         /// <summary>
         /// Deletes the element if it exists in the Dictionary.
         /// </summary>

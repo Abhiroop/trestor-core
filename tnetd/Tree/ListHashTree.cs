@@ -100,6 +100,7 @@ namespace TNetD.Tree
             ListTreeNode TempRoot = Root;
 
             Stack<ListTreeNode> PathStack = new Stack<ListTreeNode>();
+            List<byte> addressNibbleList = new List<byte>();
 
             PathStack.Push(TempRoot);
 
@@ -108,11 +109,13 @@ namespace TNetD.Tree
             for (int i = 0; i < LeafDepth; i++)
             {
                 byte Nibble = ID.GetNibble(i);
+                addressNibbleList.Add(Nibble);
 
                 // Insert new node
                 if ((TempRoot.Children[Nibble] == null) && (i < (LeafDepth - 1)))
                 {
                     TempRoot.Children[Nibble] = new ListTreeNode();
+                    TempRoot.Children[Nibble].addressNibbles = new Hash(addressNibbleList.ToArray());
                     _TraversedNodes++;
                 }
 
@@ -132,13 +135,16 @@ namespace TNetD.Tree
                         Dictionary<Hash, LeafDataType> _Values = new Dictionary<Hash, LeafDataType>();
                         _Values.Add(Value.GetID(), Value);
                         TempRoot.Children[Nibble] = new ListTreeLeafNode(_Values);
+                        TempRoot.Children[Nibble].addressNibbles = new Hash(addressNibbleList.ToArray());
                         _TraversedNodes++;
                         Add = true;
                         Good = true;
                     } // Add to current leaf node
                     else if (TempRoot.Children[Nibble].GetType() == typeof(ListTreeLeafNode))
                     {
-                        Add = ((ListTreeLeafNode)TempRoot.Children[Nibble]).AddUpdate(Value.GetID(), Value);
+                        var ltln = (ListTreeLeafNode)TempRoot.Children[Nibble];
+                        Add = ltln.AddUpdate(Value.GetID(), Value);
+
                         Good = true;
                     }
                     else
@@ -155,19 +161,22 @@ namespace TNetD.Tree
             {
                 ListTreeNode val = PathStack.Pop();
                 Hash NodeHash = null;
+                long entityCount = 0;
 
                 if (!LeafDone)
                 {
                     // Do the hashing for the leaf.
                     List<byte> _tempHash = new List<byte>();
+                    
                     for (int i = 0; i < 16; i++)
                     {
                         if (val.Children[i] != null)
                         {
                             var ai = (ListTreeLeafNode)val.Children[i];
+                            entityCount += ai.Count;
                             Hash hsh = ai.GetHash();
                             _tempHash.AddRange(hsh.Hex);
-                             //DisplayUtils.Display("CH : - " + i.ToString("X") + " : " + HexUtil.ToString(hsh.Hex));
+                            //DisplayUtils.Display("CH : - " + i.ToString("X") + " : " + HexUtil.ToString(hsh.Hex));
                         }
                     }
                     NodeHash = new Hash((new SHA512Cng()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
@@ -182,12 +191,16 @@ namespace TNetD.Tree
                         if (val.Children[i] != null)
                         {
                             var ai = (ListTreeNode)val.Children[i];
+                            entityCount += ai.LeafCount;
                             _tempHash.AddRange(ai.Hash.Hex);
-                             //DisplayUtils.Display("- " + i.ToString("X") + " : " + HexUtil.ToString(ai.Hash.Hex) );
+                            //DisplayUtils.Display("- " + i.ToString("X") + " : " + HexUtil.ToString(ai.Hash.Hex));
                         }
                     }
                     NodeHash = new Hash((new SHA512Cng()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
                 }
+
+                val.SetLeafCount(entityCount);
+               // val.LeafCount = entityCount;
 
                 val.SetHash(NodeHash);
             }
@@ -201,21 +214,21 @@ namespace TNetD.Tree
         {
             //int nodes = 0;
             //int elements = 0;
-            //int depth = 0;
+            int depth = 0;
             //_TraversedNodes = 0;
             //TotalMoney = 0;
-            TraverseTree(Root, ref FoundLeafDataCount, ref FoundNodesCount, leafDataFetch);
+            TraverseTree(Root, ref FoundLeafDataCount, ref FoundNodesCount, leafDataFetch, depth);
             //_TraversedNodes = nodes;
             //_TraversedElements = elements;
             //TraverseLevelOrder(Root, ref nodes);
             //return nodes;
         }
 
-        private List<LeafDataType> TraverseTree(ListTreeNode Root, ref long FoundLeafDataCount, ref long FoundNodesCount, LeafDataFetchEventHandler leafDataFetch)
+        private List<LeafDataType> TraverseTree(ListTreeNode Root, ref long FoundLeafDataCount, ref long FoundNodesCount, LeafDataFetchEventHandler leafDataFetch, long depth)
         {
             List<LeafDataType> foundElements = new List<LeafDataType>();
 
-           // int depth = _depth + 1;
+            // int depth = _depth + 1;
 
             for (int i = 0; i < 16; i++)
             {
@@ -223,10 +236,11 @@ namespace TNetD.Tree
                 {
                     /////////////////////////////////////
 
+                    FoundNodesCount++;
+                  
                     if (Root.Hash != null)
                     {
-                        //DisplayUtils.Display("ID : " + HexUtil.ToString(Root.Hash.Hex) + " : " + depth);
-                        FoundNodesCount++;
+                        //DisplayUtils.Display("ID : " + HexUtil.ToString(Root.Hash.Hex) + " : " + depth);                  
                     }
                     else
                     {
@@ -237,7 +251,9 @@ namespace TNetD.Tree
 
                     if (!Root.Children[i].IsLeaf)
                     {
-                        TraverseTree(Root.Children[i], ref FoundLeafDataCount, ref FoundNodesCount, leafDataFetch);
+                        //DisplayUtils.Display("Intermediate Traversed : " + Root.Children[i].Hash.ToString() + " : " + depth);
+
+                        TraverseTree(Root.Children[i], ref FoundLeafDataCount, ref FoundNodesCount, leafDataFetch, depth+1);
                     }
                     else
                     {
@@ -251,7 +267,7 @@ namespace TNetD.Tree
                         foundElements.AddRange(ldts);
 
                         // TotalMoney += ((AccountInfo)Leaf.).Money;
-                        //DisplayUtils.Display("\nNode Traversed: " + HexUtil.ToString(Leaf.GetHash().Hex) + " - " +
+                        //DisplayUtils.Display("\nLeaf Node Traversed: " + HexUtil.ToString(Leaf.GetHash().Hex) + " - " +
                         //AccountInfo.CalculateTotalMoney(ldts));
 
                         /*foreach (LeafDataType ld in ldts)
@@ -600,12 +616,12 @@ namespace TNetD.Tree
                     break;
                 }
 
-                if (other[i].address.Hex.Length != me[j].address.Hex.Length)
+                if (other[i].addressNibbles.Hex.Length != me[j].addressNibbles.Hex.Length)
                 {
                     return new List<TreeSyncData>();
                 }
 
-                int compare = other[i].address.CompareTo(me[j].address);
+                int compare = other[i].addressNibbles.CompareTo(me[j].addressNibbles);
 
                 if (compare == 0)
                 {
@@ -636,10 +652,10 @@ namespace TNetD.Tree
         {
             List<ListTreeNode> outInternal = new List<ListTreeNode>();
             List<LeafDataType> outLeaves = new List<LeafDataType>();
-            for(int i = 0; i < incoming.Count; i++)
+            for (int i = 0; i < incoming.Count; i++)
             {
                 TreeSyncData TSD = incoming[i];
-                if(TSD.getAll)
+                if (TSD.getAll)
                 {
                     ListTreeNode LTN = TSD.LTN;
                     List<LeafDataType> temp = new List<LeafDataType>();

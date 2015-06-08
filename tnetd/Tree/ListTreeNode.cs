@@ -14,7 +14,7 @@ namespace TNetD.Tree
     /// <typeparam name="LeafDataType"></typeparam>
     class ListTreeNode
     {
-        public Hash address;
+        public Hash addressNibbles;
         protected long leafCount;
         protected Hash hash = new Hash();
         protected bool isLeaf;
@@ -31,6 +31,23 @@ namespace TNetD.Tree
                 leafCount = value;
             }*/
         }
+
+        public void SetLeafCount(long leafCount)
+        {
+            this.leafCount = leafCount;
+        }
+
+        /*void updateLeafCount()
+        {
+            leafCount = 0;
+            for (int i = 0; i < 16; i++)
+            {
+                if (Children[i] != null)
+                {
+                    leafCount += Children[i].LeafCount;
+                }
+            }
+        }*/
 
         public Hash Hash
         {
