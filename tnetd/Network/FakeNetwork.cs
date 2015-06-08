@@ -28,9 +28,9 @@ namespace TNetD.Network
                 NetworkPacketQueueEntry npqe;
                 if (QueuedPackets.TryDequeue(out npqe))
                 {
-                    if (Listeners.ContainsKey(npqe.PublicKey_Dest))
+                    if (Listeners.ContainsKey(npqe.PublicKeyDestination))
                     {
-                        Listeners[npqe.PublicKey_Dest].Invoke(npqe.Packet);
+                        Listeners[npqe.PublicKeyDestination].Invoke(npqe.Packet);
                     }
                 }
                 else break;

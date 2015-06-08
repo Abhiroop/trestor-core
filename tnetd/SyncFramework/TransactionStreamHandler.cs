@@ -80,7 +80,7 @@ namespace TNetD.SyncFramework
             NetworkPacket np = new NetworkPacket(new Hash(nodeState.NodeInfo.PublicKey), PacketType.TPT_TX_SYNC_QUERY_RESPONSE,
                         transactionSyncQueryResponse.Serialize(), packet.Token);
 
-            network.AddToQueue(new NetworkPacketQueueEntry(packet.PublicKey_Src, np)); // Send the reply.
+            network.AddToQueue(new NetworkPacketQueueEntry(packet.PublicKeySource, np)); // Send the reply.
 
         }
 
@@ -113,7 +113,7 @@ namespace TNetD.SyncFramework
                     NetworkPacket np = new NetworkPacket(new Hash(nodeState.NodeInfo.PublicKey), PacketType.TPT_TX_SYNC_FETCH_RESPONSE,
                         transactionSyncResponse.Serialize(), packet.Token);
 
-                    network.AddToQueue(new NetworkPacketQueueEntry(packet.PublicKey_Src, np)); // Send the reply.
+                    network.AddToQueue(new NetworkPacketQueueEntry(packet.PublicKeySource, np)); // Send the reply.
                 }
 
             }

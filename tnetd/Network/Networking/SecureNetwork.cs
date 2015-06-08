@@ -67,35 +67,35 @@ namespace TNetD.Network.Networking
                     NetworkPacketQueueEntry npqe;
                     if (outgoingPacketQueue.TryDequeue(out npqe))
                     {
-                        if (outgoingConnections.ContainsKey(npqe.PublicKey_Dest)) // Already Connected (outgoing), Just send a packet.
+                        if (outgoingConnections.ContainsKey(npqe.PublicKeyDestination)) // Already Connected (outgoing), Just send a packet.
                         {
-                            outgoingConnections[npqe.PublicKey_Dest].EnqueuePacket(npqe.Packet);
+                            outgoingConnections[npqe.PublicKeyDestination].EnqueuePacket(npqe.Packet);
                         }
 
-                        else if (incomingConnectionHander.IsConnected(npqe.PublicKey_Dest))  // Already Connected (incoming), Just send a packet.
+                        else if (incomingConnectionHander.IsConnected(npqe.PublicKeyDestination))  // Already Connected (incoming), Just send a packet.
                         {
                             incomingConnectionHander.EnqueuePacket(npqe);
                         }
 
                         else // Create a new outgoing connection and queue a packet.
                         {
-                            if (nodeConfig.GlobalConfiguration.TrustedNodes.ContainsKey(npqe.PublicKey_Dest))
+                            if (nodeConfig.GlobalConfiguration.TrustedNodes.ContainsKey(npqe.PublicKeyDestination))
                             {
-                                var socketInfo = nodeConfig.GlobalConfiguration.TrustedNodes[npqe.PublicKey_Dest];
+                                var socketInfo = nodeConfig.GlobalConfiguration.TrustedNodes[npqe.PublicKeyDestination];
 
                                 OutgoingConnection oc = new OutgoingConnection(socketInfo, nodeConfig);
                                 oc.PacketReceived += process_PacketReceived;
 
                                 oc.EnqueuePacket(npqe.Packet);
 
-                                outgoingConnections.Add(npqe.PublicKey_Dest, oc);
+                                outgoingConnections.Add(npqe.PublicKeyDestination, oc);
                             }
                             else
                             {
                                 // The public key is not described / no-connection information. 
                                 // Fetch information from other nodes and try again.
 
-                                DisplayUtils.Display("Could not find " + npqe.PublicKey_Dest.ToString());
+                                DisplayUtils.Display("Could not find " + npqe.PublicKeyDestination.ToString());
                             }
                         }
                     }
@@ -125,10 +125,10 @@ namespace TNetD.Network.Networking
             }
         }
 
-        void process_PacketReceived(Hash PublicKey, NetworkPacket packet)
+        void process_PacketReceived(NetworkPacket packet)
         {
             if (PacketReceived != null) // Relay the packet to the outer event.
-                PacketReceived(PublicKey, packet);
+                PacketReceived(packet);
         }
 
         public NetworkResult AddToQueue(NetworkPacketQueueEntry npqe)
@@ -138,6 +138,12 @@ namespace TNetD.Network.Networking
             return NetworkResult.Queued;
         }
 
+        public NetworkResult AddToQueue(Hash publicKeyDestination, NetworkPacket packet)
+        {
+            outgoingPacketQueue.Enqueue(new NetworkPacketQueueEntry(publicKeyDestination, packet));
+
+            return NetworkResult.Queued;
+        }
 
     }
 }

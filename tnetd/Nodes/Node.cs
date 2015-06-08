@@ -44,8 +44,7 @@ namespace TNetD.Nodes
 
         bool TimerEventProcessed = true;
         bool MinuteEventProcessed = true;
-
-
+        
         // TODO: MAKE PRIVATE : AND FAST
         public NodeConfig nodeConfig = default(NodeConfig);
 
@@ -53,7 +52,7 @@ namespace TNetD.Nodes
         public NodeState nodeState = default(NodeState);
 
         RpcHandlers rpcHandlers = default(RpcHandlers);
-        NetworkHandlers networkHandlers = default(NetworkHandlers);
+        NetworkHandler networkHandler = default(NetworkHandler);
         TransactionHandler transactionHandler = default(TransactionHandler);
         TimeSync timeSync = default(TimeSync);
 
@@ -95,9 +94,9 @@ namespace TNetD.Nodes
             nodeState.NodeInfo = nodeConfig.Get_JS_Info();
 
             rpcHandlers = new RpcHandlers(nodeConfig, nodeState);
-            networkHandlers = new NetworkHandlers(nodeConfig, nodeState, globalConfiguration);
+            networkHandler = new NetworkHandler(nodeConfig, nodeState, globalConfiguration);
             transactionHandler = new TransactionHandler(nodeConfig, nodeState);
-            timeSync = new TimeSync(nodeState, nodeConfig, network)
+            timeSync = new TimeSync(nodeState, nodeConfig, networkHandler);
 
             AI = new AccountInfo(PublicKey, Money);
 
@@ -126,7 +125,6 @@ namespace TNetD.Nodes
             TimerTimeSync.Enabled = true;
             TimerTimeSync.Interval = 10000;
             TimerTimeSync.Start();
-
 
             DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
         }
@@ -211,7 +209,7 @@ namespace TNetD.Nodes
 
                 Interlocked.Add(ref nodeState.NodeInfo.NodeDetails.TotalAccounts, records);
 
-                await networkHandlers.InitialConnectAsync();
+                await networkHandler.InitialConnectAsync();
 
                 LedgerCloseData ledgerCloseData;
                 nodeState.PersistentCloseHistory.GetLastRowData(out ledgerCloseData);
@@ -225,7 +223,7 @@ namespace TNetD.Nodes
         {
             Constants.ApplicationRunning = false;
 
-            networkHandlers.Stop();
+            networkHandler.Stop();
             rpcHandlers.StopServer();
         }
 

@@ -84,7 +84,7 @@ namespace TNetD.Network.Networking
         /// <returns></returns>
         public bool EnqueuePacket(NetworkPacketQueueEntry npqe)
         {
-            if (IncomingConnections.ContainsKey(npqe.PublicKey_Dest))
+            if (IncomingConnections.ContainsKey(npqe.PublicKeyDestination))
             {
                 outgoingQueue.Enqueue(npqe);
                 return true;
@@ -98,9 +98,9 @@ namespace TNetD.Network.Networking
             {
                 NetworkPacketQueueEntry npqe = outgoingQueue.Dequeue();
 
-                if (IncomingConnections.ContainsKey(npqe.PublicKey_Dest))
+                if (IncomingConnections.ContainsKey(npqe.PublicKeyDestination))
                 {
-                    await SendData(npqe.Packet.Serialize(), IncomingConnections[npqe.PublicKey_Dest]);
+                    await SendData(npqe.Packet.Serialize(), IncomingConnections[npqe.PublicKeyDestination]);
                 }
             }
 
@@ -468,8 +468,16 @@ namespace TNetD.Network.Networking
 
                             np.Deserialize(rec_data);
 
-                            if (PacketReceived != null)
-                                PacketReceived(iClient.PublicKey, np);
+                            if (iClient.PublicKey == np.PublicKeySource)
+                            {
+                                if (PacketReceived != null)
+                                    PacketReceived( np);
+                            }
+                            else
+                            {
+                                DisplayUtils.Display("Packet Source Incoming Mismatch", DisplayType.Warning);
+                            }
+
                         }
                         else
                         {

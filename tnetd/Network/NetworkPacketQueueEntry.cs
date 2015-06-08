@@ -1,6 +1,6 @@
 ﻿
 // @Author : Arpan Jati
-// @Date: 25th Dec 2014
+// @Date: 25th Dec 2014 + 8 June 2015
 
 using System;
 using System.Collections.Generic;
@@ -12,13 +12,13 @@ namespace TNetD.Network
 {
     class NetworkPacketQueueEntry
     {
-        public Hash PublicKey_Dest;
+        public Hash PublicKeyDestination;
         public NetworkPacket Packet;
         public int TransmitAttempts;
 
-        public NetworkPacketQueueEntry(Hash publicKey_Dest, NetworkPacket packet)
+        public NetworkPacketQueueEntry(Hash publicKeyDestination, NetworkPacket packet)
         {
-            PublicKey_Dest = publicKey_Dest;
+            PublicKeyDestination = publicKeyDestination;
             Packet = packet;
             TransmitAttempts = 0;
         }

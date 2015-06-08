@@ -16,25 +16,26 @@ namespace TNetD.Time
     {
         private NodeState nodeState;
         private NodeConfig nodeConfig;
-        private SecureNetwork network;
+        private NetworkHandler networkHandler;
         private ConcurrentDictionary<Hash, TimeStruct> timeMap;
 
         // time to sleep after sending out time sync requests
         // in milliseconds
         private readonly int TIME_TO_SLEEP = 5000;
-
-
-
-
-        public TimeSync(NodeState nodeState, NodeConfig nodeConfig, SecureNetwork network)
+                
+        public TimeSync(NodeState nodeState, NodeConfig nodeConfig, NetworkHandler networkHandler)
         {
             this.nodeState = nodeState;
             this.nodeConfig = nodeConfig;
-            this.network = network;
+            this.networkHandler = networkHandler;
+            networkHandler.TimeSyncEvent += networkHandler_TimeSyncEvent;
             timeMap = new ConcurrentDictionary<Hash, TimeStruct>();
         }
 
-
+        void networkHandler_TimeSyncEvent(NetworkPacket packet)
+        {
+            
+        }
 
         /*
          * requests time from all connected peers
@@ -58,8 +59,7 @@ namespace TNetD.Time
 
                 // sending
                 NetworkPacket packet = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_REQUEST, message, ts.token);
-                NetworkPacketQueueEntry npqe = new NetworkPacketQueueEntry(peer, packet);
-                network.AddToQueue(npqe);
+                networkHandler.AddToQueue(peer, packet);
             }
 
             // wait
@@ -109,12 +109,10 @@ namespace TNetD.Time
             // sending response
             byte[] data = response.Serialize();
             Hash token = packet.Token;
-            NetworkPacket respacket = new NetworkPacket(packet.PublicKey_Src, PacketType.TPT_TIMESYNC_RESPONSE, data, token);
-            NetworkPacketQueueEntry npqe = new NetworkPacketQueueEntry(packet.PublicKey_Src, respacket);
-            network.AddToQueue(npqe);
+            NetworkPacket respacket = new NetworkPacket(packet.PublicKeySource, PacketType.TPT_TIMESYNC_RESPONSE, data, token);
+           
+            networkHandler.AddToQueue(packet.PublicKeySource, respacket);   
         }
-
-
 
         /*
          * Takes one encoded response and registers it
@@ -124,7 +122,7 @@ namespace TNetD.Time
             TimeSyncRsMsg response = new TimeSyncRsMsg();
             response.Deserialize(packet.Data);
 
-            Hash sender = packet.PublicKey_Src;
+            Hash sender = packet.PublicKeySource;
 
             TimeStruct ts = timeMap[sender];
             if (ts.token == packet.Token)

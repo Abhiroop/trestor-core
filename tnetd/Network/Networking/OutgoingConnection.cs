@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace TNetD.Network.Networking
 {
-    public delegate void PacketReceivedHandler(Hash PublicKey, NetworkPacket Data);
+    public delegate void PacketReceivedHandler(NetworkPacket packet);
 
     class OutgoingConnection
     {
@@ -500,9 +500,17 @@ namespace TNetD.Network.Networking
                                 NetworkPacket np = new NetworkPacket();
 
                                 np.Deserialize(rec_data);
+                                
+                                if (nodeSocketData.PublicKey == np.PublicKeySource)
+                                {
+                                    if (PacketReceived != null)
+                                        PacketReceived(np);
+                                }
+                                else
+                                {
+                                    DisplayUtils.Display("Packet Source Outgoing Mismatch", DisplayType.Warning);
+                                }
 
-                                if (PacketReceived != null)
-                                    PacketReceived(nodeSocketData.PublicKey, np);
                             }
                             else
                             {

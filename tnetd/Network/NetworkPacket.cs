@@ -16,14 +16,14 @@ namespace TNetD.Network
     {
         // Network layer security must make sure that this value is correct.
         // Must check signature.
-        public Hash PublicKey_Src;
+        public Hash PublicKeySource;
         public PacketType Type;
         public byte[] Data;
         public Hash Token;
 
         public NetworkPacket()
         {
-            PublicKey_Src = new Hash();
+            PublicKeySource = new Hash();
             Type = PacketType.TPT_NOTHING;
             Data = new byte[0];
             Token = new Hash();
@@ -31,7 +31,7 @@ namespace TNetD.Network
 
         public NetworkPacket(Hash publicKey_Src, PacketType type, byte[] Data, Hash token)
         {
-            PublicKey_Src = publicKey_Src;
+            PublicKeySource = publicKey_Src;
             Type = type;
             this.Data = Data;
             Token = token;
@@ -39,7 +39,7 @@ namespace TNetD.Network
 
         public NetworkPacket(Hash publicKey_Src, PacketType type, byte[] Data)
         {
-            PublicKey_Src = publicKey_Src;
+            PublicKeySource = publicKey_Src;
             Type = type;
             this.Data = Data;
             Token = new Hash();
@@ -48,7 +48,7 @@ namespace TNetD.Network
         public byte[] Serialize()
         {
             List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
-            PDTs.Add(ProtocolPackager.Pack(PublicKey_Src, 0));
+            PDTs.Add(ProtocolPackager.Pack(PublicKeySource, 0));
             PDTs.Add(ProtocolPackager.Pack((byte)Type, 1));
             PDTs.Add(ProtocolPackager.Pack(Data, 2));
             PDTs.Add(ProtocolPackager.Pack(Token, 3));
@@ -67,7 +67,7 @@ namespace TNetD.Network
                 switch (PDT.NameType)
                 {
                     case 0:
-                        ProtocolPackager.UnpackHash(PDT, 0, out PublicKey_Src);
+                        ProtocolPackager.UnpackHash(PDT, 0, out PublicKeySource);
                         break;
 
                     case 1:
