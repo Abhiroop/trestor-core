@@ -17,7 +17,7 @@ namespace TNetD.Time
         private NodeState nodeState;
         private NodeConfig nodeConfig;
         private NetworkHandler networkHandler;
-        private ConcurrentDictionary<Hash, TimeStruct> timeMap;
+        private ConcurrentDictionary<Hash, TimeStruct> collectedRequests;
 
         // time to sleep after sending out time sync requests
         // in milliseconds
@@ -34,7 +34,7 @@ namespace TNetD.Time
             this.nodeConfig = nodeConfig;
             this.networkHandler = networkHandler;
             networkHandler.TimeSyncEvent += networkHandler_TimeSyncEvent;
-            timeMap = new ConcurrentDictionary<Hash, TimeStruct>();
+            collectedRequests = new ConcurrentDictionary<Hash, TimeStruct>();
         }
 
         void networkHandler_TimeSyncEvent(NetworkPacket packet)
@@ -62,7 +62,17 @@ namespace TNetD.Time
         /// <returns>Median diff of all responses</returns>
         public long SyncTime()
         {
-            Print("start syncing");
+            // process responses
+            List<long> diffs = new List<long>();
+            foreach (KeyValuePair<Hash, TimeStruct> entry in collectedRequests)
+                diffs.Add(entry.Value.timeDifference);
+
+            long diff = computeMedianDelay(diffs);
+            Print("received " + diffs.Count + " responses; median diff of " + diff);
+
+
+            //send new requests
+            Print("start syncing with " + nodeState.ConnectedValidators.Count + " peers");
             foreach (Hash peer in nodeState.ConnectedValidators)
             {
                 // prepare message
@@ -74,23 +84,14 @@ namespace TNetD.Time
                 TimeStruct ts = new TimeStruct();
                 ts.sendTime = request.senderTime;
                 ts.token = TNetUtils.GenerateNewToken();
-                timeMap.AddOrUpdate(peer, ts, (ok, ov) => ts);
+                collectedRequests.AddOrUpdate(peer, ts, (ok, ov) => ts);
 
                 // sending
                 NetworkPacket packet = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_REQUEST, message, ts.token);
                 networkHandler.AddToQueue(peer, packet);
             }
 
-            // wait
-            Thread.Sleep(TIME_TO_SLEEP);
 
-            // process responses
-            List<long> diffs = new List<long>();
-            foreach (KeyValuePair<Hash, TimeStruct> entry in timeMap)
-                diffs.Add(entry.Value.timeDifference);
-            
-            long diff = computeMedianDelay(diffs);
-            Print("received " + diffs.Count + " responses; median diff of " + diff);
             return diff;
         }
 
@@ -107,6 +108,8 @@ namespace TNetD.Time
         {
             TimeSyncRqMsg request = new TimeSyncRqMsg();
             request.Deserialize(packet.Data);
+
+            Print("request sender time" + request.senderTime);
 
             TimeSyncRsMsg response = new TimeSyncRsMsg();
             response.senderTime = request.senderTime;
@@ -131,7 +134,7 @@ namespace TNetD.Time
 
             Hash sender = packet.PublicKeySource;
 
-            TimeStruct ts = timeMap[sender];
+            TimeStruct ts = collectedRequests[sender];
             if (ts.token == packet.Token)
             {
                 ts.receivedTime = nodeState.SystemTime;
@@ -139,7 +142,7 @@ namespace TNetD.Time
                 long delay = (ts.receivedTime - ts.sendTime) / 2;
                 ts.timeDifference = ts.TimeFromValidator - delay - ts.sendTime;
             }
-            timeMap.AddOrUpdate(sender, ts, (ok, ov) => ts);
+            collectedRequests.AddOrUpdate(sender, ts, (ok, ov) => ts);
         }
 
 
@@ -162,105 +165,3 @@ namespace TNetD.Time
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-/*
-// create a TimeStruct, set system time and add it to nodeState.TimeMap
-public void SendTimeRequest()
-{
-    Hash[] connected = nodeState.ConnectedValidators.ToArray();
-
-    foreach (Hash validator in connected)
-    {
-        Hash token = TNetUtils.GenerateNewToken();
-
-        if (!nodeState.TimeMap.ContainsKey(validator))
-        {
-            TimeStruct ts = new TimeStruct();
-            ts.sendTime = nodeState.SystemTime;
-            ts.receivedTime = 0;
-            ts.TimeFromValidator = 0;
-            ts.timeDifference = 0;
-            ts.token = token;
-            nodeState.TimeMap[validator] = ts; 
-            //nodeState.TimeMap.AddOrUpdate(validator, ts, (k,v) => ts);
-        }
-    }
-}
-
-public long GetGlobalAvgTime()
-{
-    List<long> timeVector = new List<long>();
-
-    foreach (KeyValuePair<long, long> kvp in timeMachine)
-    {
-//                long myTime_i = kvp.Key;
-//              long otherTime_i = kvp.Value;
-
-        long offset = (nodeState.SystemTime - kvp.Key);
-        long adjustedTime = offset + kvp.Value;
-
-        timeVector.Add(adjustedTime);
-    }
-
-    long timeSum = nodeState.SystemTime;
-
-    int total = timeVector.Count;
-
-    for (int i = 0; i < total; i++)
-    {
-        timeSum += timeVector[i];
-    }
-
-    long avgTime = timeSum / (total + 1);
-    return avgTime;
-}
-
-
-//if everything is ok then 0
-//else 1
-public bool SetTime(Hash PublicKey, Hash token, long time)
-{
-    if (nodeState.TimeMap.ContainsKey(PublicKey))
-    {
-        TimeStruct ts;
-        nodeState.TimeMap.TryGetValue(PublicKey, out ts);
-        Hash _token = ts.token;
-        if (token != _token)
-            return false;
-
-        ts.receivedTime = nodeState.SystemTime;
-
-        Int64 RTT_one_way = (nodeState.SystemTime - ts.sendTime) / 2;
-        Int64 RTT_corrrected_time = time + RTT_one_way;
-
-        ts.TimeFromValidator = RTT_corrrected_time;
-        ts.timeDifference = (RTT_corrrected_time - nodeState.SystemTime);
-
-        return true;
-    }
-    return false;
-}
-
-public long CalculateAvgTime()
-{
-    long diff = 0;
-    int counter = 0;
-
-    foreach (KeyValuePair<Hash, TimeStruct> ts in nodeState.TimeMap)
-    {
-        counter++;
-        diff += ts.Value.timeDifference;
-    }
-    return (diff / counter);
-}
-
-*/

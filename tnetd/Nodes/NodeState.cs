@@ -40,8 +40,6 @@ namespace TNetD.Nodes
 
         public ConcurrentBag<Hash> GlobalBlacklistedUsers { get; set; }
 
-        public ConcurrentDictionary<Hash, TimeStruct> TimeMap { get; set; }
-
         public ConcurrentBag<Hash> ConnectedValidators { get; set; }
 
         public long SystemTime{ get; set; }
@@ -64,7 +62,6 @@ namespace TNetD.Nodes
             
             GlobalBlacklistedValidators = new ConcurrentBag<Hash>();
             GlobalBlacklistedUsers = new ConcurrentBag<Hash>();
-            TimeMap = new ConcurrentDictionary<Hash, TimeStruct>();
             
             ConnectedValidators = new ConcurrentBag<Hash>();
             SystemTime = DateTime.UtcNow.ToFileTimeUtc();
