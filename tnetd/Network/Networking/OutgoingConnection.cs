@@ -26,7 +26,7 @@ namespace TNetD.Network.Networking
         /// </summary>
         public NodeConfig nodeConfig;
 
-        NodeSocketData nodeSocketData = default(NodeSocketData);
+        public NodeSocketData nodeSocketData = default(NodeSocketData);
 
         ConcurrentQueue<NetworkPacket> outgoingQueue = new ConcurrentQueue<NetworkPacket>();
 
@@ -91,6 +91,7 @@ namespace TNetD.Network.Networking
         byte[] TransportKey = new byte[32];
         byte[] AuthenticationKey = new byte[32];
 
+        bool InterKeyExchanged = false;
         public bool KeyExchanged = false;
 
         public bool Ended = false;
@@ -431,7 +432,7 @@ namespace TNetD.Network.Networking
 
                                 await PacketSender.SendTransportPacket(writer, TransportPacketType.KeyExComplete_1, macSigPK);
 
-                                KeyExchanged = true;
+                                InterKeyExchanged = true;
                             }
                             else
                             {
@@ -450,12 +451,12 @@ namespace TNetD.Network.Networking
 
                 case TransportPacketType.KeyExComplete_2:
 
-                    if (KeyExchanged)
+                    if (InterKeyExchanged)
                     {
+                        KeyExchanged = true;
                         if (Constants.NetworkVerbosity >= Verbosity.Info)
                         {
                             DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : Key Exchanged 3 (Sync)", DisplayType.Info);
-
                         }
                     }
 

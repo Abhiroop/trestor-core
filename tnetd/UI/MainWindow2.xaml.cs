@@ -66,7 +66,7 @@ namespace TNetD
 
             foreach(Node nd in nodes)
             {
-                connData.AppendLine("\n\n  KEY: " + nd.PublicKey);
+                connData.AppendLine("\n\n NODE ID " + nd.nodeConfig.NodeID + "   KEY: " + nd.PublicKey);
 
                 connData.AppendLine("  OUTGOING ----> ");
                 
@@ -78,6 +78,13 @@ namespace TNetD
                 connData.AppendLine("  INCOMING ----> ");
 
                 foreach (Hash h in nd.networkHandler.GetConnectedNodes(ConnectionListType.Incoming))
+                {
+                    connData.AppendLine("\t" + h.ToString());
+                }
+
+                connData.AppendLine("  ConnectedValidators ----> ");
+
+                foreach (Hash h in nd.nodeState.ConnectedValidators)
                 {
                     connData.AppendLine("\t" + h.ToString());
                 }

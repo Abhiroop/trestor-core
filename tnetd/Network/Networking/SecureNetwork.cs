@@ -159,7 +159,7 @@ namespace TNetD.Network.Networking
                 {
                     if(kvp.Value.KeyExchanged)
                     {
-                        if(!nodeState.ConnectedValidators.Contains(kvp.Value.nodeConfig.PublicKey))
+                        if (!nodeState.ConnectedValidators.Contains(kvp.Value.nodeConfig.PublicKey))
                         {
                             nodeState.ConnectedValidators.Add(kvp.Value.nodeConfig.PublicKey);
                         }
@@ -192,7 +192,7 @@ namespace TNetD.Network.Networking
 
                 foreach(Hash h in toRemove)
                 {                    
-                    nodeState.ConnectedValidators.Remove(h);
+                    //nodeState.ConnectedValidators.Remove(h);
                 }
 
             }
