@@ -116,6 +116,8 @@ namespace TNetD
 
              AddNode(0);
             AddNode(1);
+            AddNode(2);
+
 
         }
 

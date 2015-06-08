@@ -22,7 +22,12 @@ namespace TNetD.Time
         // time to sleep after sending out time sync requests
         // in milliseconds
         private readonly int TIME_TO_SLEEP = 5000;
-                
+
+        private void Print(String message)
+        {
+            DisplayUtils.Display(" Node " + nodeConfig.NodeID + " |\tTimeSync: " + message);
+        }
+
         public TimeSync(NodeState nodeState, NodeConfig nodeConfig, NetworkHandler networkHandler)
         {
             this.nodeState = nodeState;
@@ -37,9 +42,11 @@ namespace TNetD.Time
             switch (packet.Type)
             {
                 case PacketType.TPT_TIMESYNC_REQUEST:
+                    Print("request packet received");
                     requestHandler(packet);
                     break;
                 case PacketType.TPT_TIMESYNC_RESPONSE:
+                    Print("response packet received");
                     responseHandler(packet);
                     break;
             }
@@ -55,6 +62,7 @@ namespace TNetD.Time
         /// <returns>Median diff of all responses</returns>
         public long SyncTime()
         {
+            Print("start syncing");
             foreach (Hash peer in nodeState.ConnectedValidators)
             {
                 // prepare message
@@ -74,15 +82,24 @@ namespace TNetD.Time
             }
 
             // wait
+            Print("waiting");
             Thread.Sleep(TIME_TO_SLEEP);
 
             // process responses
             List<long> diffs = new List<long>();
             foreach (KeyValuePair<Hash, TimeStruct> entry in timeMap)
-            {
                 diffs.Add(entry.Value.timeDifference);
+            Print("received " + diffs.Count + " responses");
+            if (diffs.Count > 0)
+            {
+                long diff = computeMedianDelay(diffs);
+                Print("median diff of " + diff);
+                return diff;
             }
-            return computeMedianDelay(diffs);
+            else
+            {
+                return 0;
+            }
         }
 
 
@@ -107,7 +124,7 @@ namespace TNetD.Time
             byte[] data = response.Serialize();
             Hash token = packet.Token;
             NetworkPacket respacket = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_RESPONSE, data, token);
-            networkHandler.AddToQueue(packet.PublicKeySource, respacket);   
+            networkHandler.AddToQueue(packet.PublicKeySource, respacket);
         }
 
 
@@ -136,18 +153,18 @@ namespace TNetD.Time
 
 
         /// <summary>
-        /// Compute median delay
+        /// Compute median diff
         /// </summary>
-        /// <param name="delays">List of delays</param>
+        /// <param name="diffs">List of delays</param>
         /// <returns>Median of delays</returns>
-        private long computeMedianDelay(List<long> delays)
+        private long computeMedianDelay(List<long> diffs)
         {
-            delays.Sort();
-            int l = delays.Count;
+            diffs.Sort();
+            int l = diffs.Count;
             if ((l % 2) != 0)
-                return delays[l / 2];
+                return diffs[l / 2];
             else
-                return delays[l / 2 - 1] + delays[l / 2];
+                return diffs[l / 2 - 1] + diffs[l / 2];
         }
     }
 }
