@@ -8,6 +8,8 @@ using TNetD.Nodes;
 
 namespace TNetD.Network.Networking
 {
+    public enum ConnectionListType { Outgoing, Incoming, All };
+
     class SecureNetwork
     {
         public event PacketReceivedHandler PacketReceived;
@@ -39,6 +41,39 @@ namespace TNetD.Network.Networking
 
             updateTimer = new Timer(TimerCallback, null, 0, nodeConfig.NetworkConfig.UpdateFrequencyMS);
         }
+
+
+        public Hash [] GetConnectedNodes(ConnectionListType type)
+        {
+            List<Hash> Conns = new List<Hash>();
+
+            if(type == ConnectionListType.Incoming || type == ConnectionListType.All)
+            {
+                foreach (KeyValuePair<Hash, IncomingClient> kvp in incomingConnectionHander.IncomingConnections)
+                {
+                    if (kvp.Value.KeyExchanged)
+                    {
+                        Conns.Add(kvp.Key);
+                    }
+                }
+                
+            }
+
+            if(type == ConnectionListType.Outgoing || type == ConnectionListType.All)
+            {
+                foreach (KeyValuePair<Hash, OutgoingConnection> kvp in outgoingConnections)
+                {
+                    if (kvp.Value.Ended) // Remove killed connections
+                    {
+                        Conns.Add(kvp.Key);
+                    }
+                }
+            }
+
+            return Conns.ToArray();
+
+        }
+
 
         public bool IsConnected(Hash PublicKey)
         {
@@ -81,7 +116,8 @@ namespace TNetD.Network.Networking
 
                         else // Create a new outgoing connection and queue a packet.
                         {
-                            if (nodeConfig.GlobalConfiguration.TrustedNodes.ContainsKey(npqe.PublicKeyDestination))
+                            if ((nodeConfig.GlobalConfiguration.TrustedNodes.ContainsKey(npqe.PublicKeyDestination)) && 
+                                (npqe.PublicKeyDestination != nodeConfig.PublicKey))
                             {
                                 var socketInfo = nodeConfig.GlobalConfiguration.TrustedNodes[npqe.PublicKeyDestination];
 
@@ -120,8 +156,6 @@ namespace TNetD.Network.Networking
                     outgoingConnections.Remove(hsh);
                 }
 
-                toRemove.Clear();
-
                 foreach (KeyValuePair<Hash, OutgoingConnection> kvp in outgoingConnections)
                 {
                     if(kvp.Value.KeyExchanged)
@@ -142,6 +176,24 @@ namespace TNetD.Network.Networking
                             nodeState.ConnectedValidators.Add(kvp.Value.PublicKey);
                         }
                     }
+                }
+
+                toRemove.Clear();
+
+                foreach (Hash pk in nodeState.ConnectedValidators)
+                {
+                    bool exists = false;
+                    
+                    if (incomingConnectionHander.IsConnected(pk)) exists = true;
+
+                    if (outgoingConnections.ContainsKey(pk)) exists = true;
+
+                    if (!exists) toRemove.Add(pk);
+                }
+
+                foreach(Hash h in toRemove)
+                {                    
+                    nodeState.ConnectedValidators.Remove(h);
                 }
 
             }

@@ -129,8 +129,34 @@
                     <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
                     
                 </Grid>
-            </TabItem>           
-         
+            </TabItem>
+
+            <TabItem Header="Log2">
+                <Grid Name="grid_Main2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="489*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="392*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="100*"/>
+                        <RowDefinition Height="10"/>
+                    </Grid.RowDefinitions>
+                    <Label>Log:</Label>
+                    <Label Grid.Column="2">Status:</Label>
+                    <ScrollViewer Grid.Row="1">
+                        <TextBlock x:Name="textBlock_Log2" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
+                    </ScrollViewer>
+                    <ScrollViewer Grid.Row="1" Grid.Column="2">
+                        <TextBlock x:Name="textBlock_Status2" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
+                    </ScrollViewer>
+
+                    <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
+
+                </Grid>
+            </TabItem>
+
         </TabControl>
 
         <StatusBar Grid.Row="2">

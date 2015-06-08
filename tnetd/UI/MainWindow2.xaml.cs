@@ -55,9 +55,45 @@ namespace TNetD
 
             Title += " | " + Common.NetworkType.ToString();
             
-            //System.Timers.Timer tmr_UI = new System.Timers.Timer(100);
-            //tmr_UI.Elapsed += tmr_UI_Elapsed;
-            //tmr_UI.Start();
+            System.Timers.Timer tmr_UI = new System.Timers.Timer(1000);
+            tmr_UI.Elapsed += tmr_UI_Elapsed;
+            tmr_UI.Start();
+        }
+
+        private void tmr_UI_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            StringBuilder connData = new StringBuilder();
+
+            foreach(Node nd in nodes)
+            {
+                connData.AppendLine("\n\n  KEY: " + nd.PublicKey);
+
+                connData.AppendLine("  OUTGOING ----> ");
+                
+                foreach(Hash h in  nd.networkHandler.GetConnectedNodes(ConnectionListType.Outgoing))
+                {
+                    connData.AppendLine("\t" + h.ToString());
+                }
+
+                connData.AppendLine("  INCOMING ----> ");
+
+                foreach (Hash h in nd.networkHandler.GetConnectedNodes(ConnectionListType.Incoming))
+                {
+                    connData.AppendLine("\t" + h.ToString());
+                }
+            }
+
+            try
+            {
+                this.Dispatcher.Invoke(new Action(() =>
+                {
+
+                    textBlock_Log2.Text = connData.ToString();
+                }));
+            }
+            catch { }
+
+
         }
         
         void AddNode(int idx)

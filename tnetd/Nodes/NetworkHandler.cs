@@ -36,6 +36,11 @@ namespace TNetD.Nodes
             network.Initialize();
         }
 
+        public Hash [] GetConnectedNodes(ConnectionListType type)
+        {
+            return network.GetConnectedNodes(type);
+        }
+
         async public Task InitialConnectAsync()
         {
             await Task.Run(async () =>
@@ -75,7 +80,7 @@ namespace TNetD.Nodes
         /// <param name="packet"></param>
         void network_PacketReceived(NetworkPacket packet)
         {
-            DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + packet.PublicKeySource + " | Data Length : " + packet.Data.Length);
+            //DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + packet.PublicKeySource + " | Data Length : " + packet.Data.Length);
                        
             switch (packet.Type)
             {
@@ -90,6 +95,9 @@ namespace TNetD.Nodes
                 case PacketType.TPT_CONS_RESP_TC_TX:
                 case PacketType.TPT_CONS_VOTES:
                 case PacketType.TPT_CONS_DOUBLESPENDERS:
+
+                    break;
+
                 case PacketType.TPT_LSYNC_FETCH_ROOT:
                 case PacketType.TPT_LSYNC_FETCH_LAYER_DATA:
                 case PacketType.TPT_LSYNC_REPLY_ROOT:

@@ -23,9 +23,7 @@ namespace TNetD.Nodes
         {
             this.nodeConfig = nodeConfig;
             this.nodeState = nodeState;
-
         }
-
 
         public void ProcessPendingTransactions()
         {

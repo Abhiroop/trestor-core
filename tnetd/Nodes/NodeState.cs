@@ -40,7 +40,7 @@ namespace TNetD.Nodes
 
         public ConcurrentBag<Hash> GlobalBlacklistedUsers { get; set; }
 
-        public ConcurrentBag<Hash> ConnectedValidators { get; set; }
+        public HashSet<Hash> ConnectedValidators { get; set; }
 
         public long SystemTime { get; set; }
 
@@ -65,7 +65,7 @@ namespace TNetD.Nodes
             GlobalBlacklistedValidators = new ConcurrentBag<Hash>();
             GlobalBlacklistedUsers = new ConcurrentBag<Hash>();
             
-            ConnectedValidators = new ConcurrentBag<Hash>();
+            ConnectedValidators = new HashSet<Hash>();
             SystemTime = DateTime.UtcNow.ToFileTimeUtc();
             NetworkTime = DateTime.UtcNow.ToFileTimeUtc();
         }
@@ -88,8 +88,7 @@ namespace TNetD.Nodes
 
             return true;
         }
-
-
+        
         public void SetNodeInfo(JS_NodeInfo NodeInfo)
         {
             this.NodeInfo = NodeInfo;

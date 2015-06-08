@@ -55,7 +55,7 @@ namespace TNetD.Nodes
         public NodeState nodeState = default(NodeState);
 
         RpcHandlers rpcHandlers = default(RpcHandlers);
-        NetworkHandler networkHandler = default(NetworkHandler);
+        public NetworkHandler networkHandler = default(NetworkHandler);
         TransactionHandler transactionHandler = default(TransactionHandler);
         TimeSync timeSync = default(TimeSync);
 

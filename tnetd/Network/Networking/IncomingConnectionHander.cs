@@ -176,7 +176,25 @@ namespace TNetD.Network.Networking
                     ThreadList.Remove(h);
                     DisplayUtils.Display("Removed Thread: " + HexUtil.ToString(h.Hex), DisplayType.Warning);
                 }
+
+
+                threadsForRemoval.Clear();
+                foreach (KeyValuePair<Hash, IncomingClient> kvp in IncomingConnections)
+                {
+                    if (kvp.Value.Ended == true)
+                    {
+                        threadsForRemoval.Add(kvp.Key);
+                    }
+                }
+
+                foreach (Hash h in threadsForRemoval)
+                {
+                    IncomingConnections.Remove(h);
+                    DisplayUtils.Display("Removed Connection: " + HexUtil.ToString(h.Hex), DisplayType.Warning);
+                }
+                
             }
+
             catch (System.Exception ex)
             {
                 DisplayUtils.Display("TimerCallback()", ex);
@@ -282,6 +300,8 @@ namespace TNetD.Network.Networking
             }
 
             iClient.Ended = true;
+
+            DisplayUtils.Display("Connection Closed: " + iClient.PublicKey.ToString(), DisplayType.Warning);
         }
 
         //System.Diagnostics.Stopwatch sw_timer = new System.Diagnostics.Stopwatch();
