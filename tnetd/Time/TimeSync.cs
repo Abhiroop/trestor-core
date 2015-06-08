@@ -14,19 +14,35 @@ namespace TNetD.Time
 {
     class TimeSync
     {
+        struct RequestStruct
+        {
+            public long senderTime;
+            public Hash token;
+        }
+
+        struct ResponseStruct
+        {
+            public long sentTime;
+            public long responderTime;
+            public long receivedTime;
+            public Hash token;
+            public long diff;
+        }
+
         private NodeState nodeState;
         private NodeConfig nodeConfig;
         private NetworkHandler networkHandler;
-        private ConcurrentDictionary<Hash, TimeStruct> collectedRequests;
+        private ConcurrentDictionary<Hash, RequestStruct> sentRequests;
+        private ConcurrentDictionary<Hash, ResponseStruct> collectedResponses;
 
-        // time to sleep after sending out time sync requests
-        // in milliseconds
-        private readonly int TIME_TO_SLEEP = 5000;
+
 
         private void Print(String message)
         {
             DisplayUtils.Display(" Node " + nodeConfig.NodeID + " | TimeSync: " + message);
         }
+
+
 
         public TimeSync(NodeState nodeState, NodeConfig nodeConfig, NetworkHandler networkHandler)
         {
@@ -34,8 +50,10 @@ namespace TNetD.Time
             this.nodeConfig = nodeConfig;
             this.networkHandler = networkHandler;
             networkHandler.TimeSyncEvent += networkHandler_TimeSyncEvent;
-            collectedRequests = new ConcurrentDictionary<Hash, TimeStruct>();
+            collectedResponses = new ConcurrentDictionary<Hash, ResponseStruct>();
         }
+
+
 
         void networkHandler_TimeSyncEvent(NetworkPacket packet)
         {
@@ -62,34 +80,37 @@ namespace TNetD.Time
         {
             // process responses
             List<long> diffs = new List<long>();
-            foreach (KeyValuePair<Hash, TimeStruct> entry in collectedRequests)
-                diffs.Add(entry.Value.timeDifference);
+            foreach (KeyValuePair<Hash, ResponseStruct> entry in collectedResponses)
+                diffs.Add(entry.Value.diff);
+            diffs.Add(0);
+            collectedResponses = new ConcurrentDictionary<Hash, ResponseStruct>();
 
-            long diff = computeMedianDelay(diffs);
-            double display = ((double)diff) / 100000;
-            Print("received " + diffs.Count + " responses; median diff of " + display.ToString("0.000") + " ms");
+            long diff = computeAverage(diffs);
+            double display = ((double)diff) / 10000000;
+            DateTime st = DateTime.FromFileTimeUtc(nodeState.SystemTime);
+            DateTime nt = DateTime.FromFileTimeUtc(nodeState.NetworkTime);
+
+            Print(diffs.Count + " resp; diff " + display/*.ToString("0.000")*/ + "; \tst: " + st.ToLongTimeString() + "; \tnt: " + nt.ToLongTimeString());
 
 
             //send new requests
-            Print("start syncing with " + nodeState.ConnectedValidators.Count + " peers");
+            //Print("start syncing with " + nodeState.ConnectedValidators.Count + " peers");
+            sentRequests = new ConcurrentDictionary<Hash, RequestStruct>();
             foreach (Hash peer in nodeState.ConnectedValidators)
             {
-                // prepare message
+                // save locally
+                RequestStruct rs = new RequestStruct();
+                rs.senderTime = nodeState.SystemTime;
+                rs.token = TNetUtils.GenerateNewToken();
+                sentRequests.AddOrUpdate(peer, rs, (ok, ov) => rs);
+
+                // send message
                 TimeSyncRqMsg request = new TimeSyncRqMsg();
                 request.senderTime = nodeState.SystemTime;
                 byte[] message = request.Serialize();
-
-                // save locally
-                TimeStruct ts = new TimeStruct();
-                ts.sendTime = request.senderTime;
-                ts.token = TNetUtils.GenerateNewToken();
-                collectedRequests.AddOrUpdate(peer, ts, (ok, ov) => ts);
-
-                // sending
-                NetworkPacket packet = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_REQUEST, message, ts.token);
+                NetworkPacket packet = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_REQUEST, message, rs.token);
                 networkHandler.AddToQueue(peer, packet);
             }
-
 
             return diff;
         }
@@ -105,14 +126,14 @@ namespace TNetD.Time
         /// <param name="packet"></param>
         private void requestHandler(NetworkPacket packet)
         {
+            // unpacking request
             TimeSyncRqMsg request = new TimeSyncRqMsg();
             request.Deserialize(packet.Data);
 
+            // sending response
             TimeSyncRsMsg response = new TimeSyncRsMsg();
             response.senderTime = request.senderTime;
             response.responderTime = nodeState.SystemTime;
-
-            // sending response
             byte[] data = response.Serialize();
             Hash token = packet.Token;
             NetworkPacket respacket = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_RESPONSE, data, token);
@@ -126,39 +147,53 @@ namespace TNetD.Time
         /// <param name="packet"></param>
         private void responseHandler(NetworkPacket packet)
         {
+            // unpacking response
             TimeSyncRsMsg response = new TimeSyncRsMsg();
             response.Deserialize(packet.Data);
-
             Hash sender = packet.PublicKeySource;
 
-            TimeStruct ts = collectedRequests[sender];
-            if (ts.token == packet.Token)
+            // store response and calculated results
+            if (sentRequests[sender].token == packet.Token)
             {
-                ts.receivedTime = nodeState.SystemTime;
-                ts.TimeFromValidator = response.responderTime;
-                long delay = (ts.receivedTime - ts.sendTime) / 2;
-                ts.timeDifference = ts.TimeFromValidator - delay - ts.sendTime;
+                ResponseStruct rs = new ResponseStruct();
+                rs.sentTime = response.senderTime;
+                rs.token = packet.Token;
+                rs.receivedTime = nodeState.SystemTime;
+                rs.responderTime = response.responderTime;
+                long delay = (rs.receivedTime - rs.sentTime) / 2;
+                rs.diff = rs.responderTime - delay - rs.sentTime;
+                collectedResponses.AddOrUpdate(sender, rs, (ok, ov) => rs);
             }
-            collectedRequests.AddOrUpdate(sender, ts, (ok, ov) => ts);
         }
 
 
 
         /// <summary>
-        /// Compute median diff
+        /// Compute median for a list of values
         /// </summary>
-        /// <param name="diffs">List of delays</param>
+        /// <param name="values">List of values</param>
         /// <returns>Median of delays</returns>
-        private long computeMedianDelay(List<long> diffs)
+        private long computeMedian(List<long> values)
         {
-            if (diffs.Count == 0)
-                return 0;
-            diffs.Sort();
-            int l = diffs.Count;
+            values.Sort();
+            int l = values.Count;
             if ((l % 2) != 0)
-                return diffs[l / 2];
+                return values[l / 2];
             else
-                return diffs[l / 2 - 1] + diffs[l / 2];
+                return values[l / 2 - 1] + values[l / 2];
+        }
+
+        /// <summary>
+        /// Compute median for a list of values
+        /// </summary>
+        /// <param name="values">List of values</param>
+        /// <returns>Median of delays</returns>
+        private long computeAverage(List<long> values)
+        {
+            long sum = 0;
+            foreach (long v in values)
+                sum += v;
+            return sum / values.Count;
         }
     }
 }

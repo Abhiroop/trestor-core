@@ -42,7 +42,7 @@ namespace TNetD
     {
         List<Node> nodes = new List<Node>();
         GlobalConfiguration globalConfiguration;
-        
+
         public MainWindow2()
         {
             Common.Initialize();
@@ -54,7 +54,7 @@ namespace TNetD
 
 
             Title += " | " + Common.NetworkType.ToString();
-            
+
             System.Timers.Timer tmr_UI = new System.Timers.Timer(1000);
             tmr_UI.Elapsed += tmr_UI_Elapsed;
             tmr_UI.Start();
@@ -64,13 +64,13 @@ namespace TNetD
         {
             StringBuilder connData = new StringBuilder();
 
-            foreach(Node nd in nodes)
+            foreach (Node nd in nodes)
             {
                 connData.AppendLine("\n\n NODE ID " + nd.nodeConfig.NodeID + "   KEY: " + nd.PublicKey);
 
                 connData.AppendLine("  OUTGOING ----> ");
-                
-                foreach(Hash h in  nd.networkHandler.GetConnectedNodes(ConnectionListType.Outgoing))
+
+                foreach (Hash h in nd.networkHandler.GetConnectedNodes(ConnectionListType.Outgoing))
                 {
                     connData.AppendLine("\t" + h.ToString());
                 }
@@ -102,11 +102,11 @@ namespace TNetD
 
 
         }
-        
+
         void AddNode(int idx)
         {
             Node nd = new Node(idx, globalConfiguration);
-           // nd.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
+            // nd.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
             nd.NodeStatusEvent += nd_NodeStatusEvent;
             nd.BeginBackgroundLoad();
 
@@ -128,10 +128,10 @@ namespace TNetD
             }
         }
 
-     
+
         void LoadNodes()
         {
-           
+
         }
 
         void DisplayUtils_DisplayText(string Text, Color color, DisplayType type)
@@ -156,16 +156,10 @@ namespace TNetD
 
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
         {
-
-            AddNode(0);
-            AddNode(1);
-            AddNode(2);
-            
-            nodes[0].nodeState.NetworkTime += 5000 * 10000;
-            nodes[1].nodeState.NetworkTime += 6000 * 10000;
-            nodes[2].nodeState.NetworkTime += 300 * 10000;
-
-
+            for (int i = 0; i < 5; i++)
+            {
+                AddNode(i);
+            }
         }
 
         private void menuItem_File_Exit_Click(object sender, RoutedEventArgs e)
@@ -178,16 +172,16 @@ namespace TNetD
             foreach (Node nd in nodes)
             {
                 nd.StopNode();
-            }            
+            }
         }
 
         /// ///////
 
-      
 
-      
 
-      
+
+
+
 
 
 
