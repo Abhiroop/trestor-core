@@ -55,15 +55,14 @@ namespace TNetD.Network.Networking
                     {
                         Conns.Add(kvp.Key);
                     }
-                }
-                
+                }                
             }
 
             if(type == ConnectionListType.Outgoing || type == ConnectionListType.All)
             {
                 foreach (KeyValuePair<Hash, OutgoingConnection> kvp in outgoingConnections)
                 {
-                    if (kvp.Value.Ended) // Remove killed connections
+                    if (kvp.Value.KeyExchanged)
                     {
                         Conns.Add(kvp.Key);
                     }
