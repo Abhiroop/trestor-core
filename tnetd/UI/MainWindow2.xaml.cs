@@ -114,9 +114,13 @@ namespace TNetD
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
         {
 
-             AddNode(0);
+            AddNode(0);
             AddNode(1);
             AddNode(2);
+            
+            nodes[0].nodeState.NetworkTime += 200 * 10000;
+            nodes[1].nodeState.NetworkTime += 500 * 10000;
+            nodes[2].nodeState.NetworkTime += 300 * 10000;
 
 
         }

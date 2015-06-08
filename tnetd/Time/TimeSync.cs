@@ -82,24 +82,16 @@ namespace TNetD.Time
             }
 
             // wait
-            Print("waiting");
             Thread.Sleep(TIME_TO_SLEEP);
 
             // process responses
             List<long> diffs = new List<long>();
             foreach (KeyValuePair<Hash, TimeStruct> entry in timeMap)
                 diffs.Add(entry.Value.timeDifference);
-            Print("received " + diffs.Count + " responses");
-            if (diffs.Count > 0)
-            {
-                long diff = computeMedianDelay(diffs);
-                Print("median diff of " + diff);
-                return diff;
-            }
-            else
-            {
-                return 0;
-            }
+            
+            long diff = computeMedianDelay(diffs);
+            Print("received " + diffs.Count + " responses; median diff of " + diff);
+            return diff;
         }
 
 
@@ -159,6 +151,8 @@ namespace TNetD.Time
         /// <returns>Median of delays</returns>
         private long computeMedianDelay(List<long> diffs)
         {
+            if (diffs.Count == 0)
+                return 0;
             diffs.Sort();
             int l = diffs.Count;
             if ((l % 2) != 0)
