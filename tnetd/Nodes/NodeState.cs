@@ -45,6 +45,8 @@ namespace TNetD.Nodes
         public long SystemTime{ get; set; }
 
         public long NetworkTime{ get; set; }
+
+        private long diff=0;
         
         public JS_NodeInfo NodeInfo;
     
@@ -66,6 +68,16 @@ namespace TNetD.Nodes
             ConnectedValidators = new ConcurrentBag<Hash>();
             SystemTime = DateTime.UtcNow.ToFileTimeUtc();
             NetworkTime = DateTime.UtcNow.ToFileTimeUtc();
+        }
+
+        public void updateNetworkTime()
+        {
+            NetworkTime = SystemTime + diff;
+        }
+
+        public void updateDiff(long diff)
+        {
+            this.diff = diff;
         }
 
         public bool IsGoodValidUserName(string Name)

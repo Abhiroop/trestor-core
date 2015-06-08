@@ -141,8 +141,7 @@ namespace TNetD.Nodes
 
         void TimerTimeSync_Elapsed(object sender, ElapsedEventArgs e)
         {
-            long diff = timeSync.SyncTime();
-            nodeState.NetworkTime += diff;
+            nodeState.updateDiff(timeSync.SyncTime());
         }
 
         void TimerMinute_Elapsed(object sender, ElapsedEventArgs e)
@@ -204,7 +203,8 @@ namespace TNetD.Nodes
             nodeState.NodeInfo.NodeDetails.ProofOfWorkQueueLength = nodeState.WorkProofMap.Count;
 
             nodeState.SystemTime = DateTime.UtcNow.ToFileTimeUtc();
-
+            nodeState.updateNetworkTime();
+            
             if (NodeStatusEvent != null)
             {
                 var json = JsonConvert.SerializeObject(nodeState.NodeInfo.GetResponse(), Common.JsonSerializerSettings);
