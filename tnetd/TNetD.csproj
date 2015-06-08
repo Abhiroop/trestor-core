@@ -174,6 +174,9 @@
     <Compile Include="UI\CreateTransaction.xaml.cs">
       <DependentUpon>CreateTransaction.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\MainWindow2.xaml.cs">
+      <DependentUpon>MainWindow2.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Ledgers\Ledger.cs" />
     <Compile Include="Nodes\Node.cs" />
@@ -196,6 +199,10 @@
     <Page Include="UI\CreateTransaction.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\MainWindow2.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

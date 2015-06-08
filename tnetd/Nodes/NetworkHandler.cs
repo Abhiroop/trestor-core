@@ -23,9 +23,7 @@ namespace TNetD.Nodes
         GlobalConfiguration globalConfiguration;
 
         SecureNetwork network = default(SecureNetwork);
-
-        TimeSync timeSync = default(TimeSync);
-
+        
         public NetworkHandler(NodeConfig nodeConfig, NodeState nodeState, GlobalConfiguration globalConfiguration)
         {
             this.nodeConfig = nodeConfig;
@@ -36,7 +34,6 @@ namespace TNetD.Nodes
             network.PacketReceived += network_PacketReceived;
 
             network.Initialize();
-
         }
 
         async public Task InitialConnectAsync()

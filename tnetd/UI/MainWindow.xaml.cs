@@ -404,6 +404,14 @@ namespace TNetD
 
         }
 
+        private void menuItem_Main2_Click(object sender, RoutedEventArgs e)
+        {
+            Hide();
+            MainWindow2 m2 = new MainWindow2();
+            m2.ShowDialog();
+            Show();
+        }
+
 
 
     }
