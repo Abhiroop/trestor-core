@@ -125,11 +125,17 @@ namespace TNetD.Json.JS_Structs
         public long ProofOfWorkQueueLength = 0;
 
         public int LoadLevel = 1;
-        public DateTime TimeUTC = DateTime.UtcNow;
+        public DateTime SystemTime = DateTime.UtcNow;
+        public DateTime NetworkTime = DateTime.UtcNow;
 
         public JS_NodeDetails()
         {
+        }
 
+        public JS_NodeDetails(DateTime SystemTime, DateTime NetworkTime)
+        {
+            this.SystemTime = SystemTime;
+            this.NetworkTime = NetworkTime;
         }
 
         public JS_Resp GetResponse()

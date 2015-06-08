@@ -40,11 +40,14 @@ namespace TNetD.Nodes
     {
         #region Locals
 
+        public delegate void NodeSecondHandler();
+        public event NodeSecondHandler NodeSecond;
+
         public event NodeStatusEventHandler NodeStatusEvent;
 
         bool TimerEventProcessed = true;
         bool MinuteEventProcessed = true;
-        
+
         // TODO: MAKE PRIVATE : AND FAST
         public NodeConfig nodeConfig = default(NodeConfig);
 
@@ -76,6 +79,7 @@ namespace TNetD.Nodes
         }
 
         System.Timers.Timer TimerConsensus;
+        System.Timers.Timer TimerFast;
         System.Timers.Timer TimerSecond;
         System.Timers.Timer TimerMinute;
         System.Timers.Timer TimerTimeSync;
@@ -113,6 +117,12 @@ namespace TNetD.Nodes
             TimerSecond.Enabled = true;
             TimerSecond.Interval = 100;
             TimerSecond.Start();
+
+            TimerFast = new System.Timers.Timer();
+            TimerFast.Elapsed += TimerFast_Elapsed;
+            TimerFast.Enabled = true;
+            TimerFast.Interval = 100;
+            TimerFast.Start();
 
             TimerMinute = new System.Timers.Timer();
             TimerMinute.Elapsed += TimerMinute_Elapsed;
@@ -179,17 +189,21 @@ namespace TNetD.Nodes
             MinuteEventProcessed = true;
         }
 
-        //WorkProofMap
-
         void TimerSecond_Elapsed(object sender, ElapsedEventArgs e)
         {
-            nodeState.NodeInfo.NodeDetails.TimeUTC = DateTime.UtcNow;
+            if (NodeSecond != null) NodeSecond();
+        }
+
+        void TimerFast_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            nodeState.NodeInfo.NodeDetails.NetworkTime = DateTime.FromFileTimeUtc(nodeState.NetworkTime);
+            nodeState.NodeInfo.NodeDetails.SystemTime = DateTime.FromFileTimeUtc(nodeState.SystemTime);
+
             nodeState.NodeInfo.LastLedgerInfo.Hash = nodeState.Ledger.GetRootHash().Hex;
 
             nodeState.NodeInfo.NodeDetails.ProofOfWorkQueueLength = nodeState.WorkProofMap.Count;
 
             nodeState.SystemTime = DateTime.UtcNow.ToFileTimeUtc();
-            nodeState.NetworkTime = DateTime.UtcNow.ToFileTimeUtc();
 
             if (NodeStatusEvent != null)
             {

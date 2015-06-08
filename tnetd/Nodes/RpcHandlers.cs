@@ -133,8 +133,10 @@ namespace TNetD.Nodes
                 {
                     if (nodeState.WorkProofMap.Count < Constants.WorkProofQueueLength)
                     {
+                        //TODO: CRITICAL: MAKE SURE TIME SOURCE IS CORRECT
+
                         DifficultyTimeData difficultyTimeData = new DifficultyTimeData(Constants.Difficulty,
-                            nodeState.NodeInfo.NodeDetails.TimeUTC, 0, 0, ProofOfWorkType.DOUBLE_SHA256);
+                            DateTime.FromFileTimeUtc(nodeState.SystemTime), 0, 0, ProofOfWorkType.DOUBLE_SHA256);
 
                         resp = new JS_WorkProofRequest(difficultyTimeData);
 
@@ -531,7 +533,8 @@ namespace TNetD.Nodes
                         transactionContent.Deserialize(jtr);
                     }
 
-                    long StaleSeconds = (long)Math.Abs((DateTime.FromFileTimeUtc(transactionContent.Timestamp) - nodeState.NodeInfo.NodeDetails.TimeUTC).TotalSeconds);
+                    //// TODO: CRITICAL: MAKE SURE TIME SOURCE IS CORRECT
+                    long StaleSeconds = (long)Math.Abs((DateTime.FromFileTimeUtc(transactionContent.Timestamp) - DateTime.FromFileTimeUtc(nodeState.SystemTime)).TotalSeconds);
 
                     if (StaleSeconds < (Common.TransactionStaleTimer_Minutes * 60))
                     {
