@@ -47,7 +47,7 @@ namespace TNetD.Nodes
         public long NetworkTime{ get; set; }
 
         private long diff=0;
-        
+
         public JS_NodeInfo NodeInfo;
     
         public NodeState(NodeConfig nodeConfig)

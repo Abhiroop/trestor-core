@@ -25,7 +25,7 @@ namespace TNetD.Time
 
         private void Print(String message)
         {
-            DisplayUtils.Display(" Node " + nodeConfig.NodeID + " |\tTimeSync: " + message);
+            DisplayUtils.Display(" Node " + nodeConfig.NodeID + " | TimeSync: " + message);
         }
 
         public TimeSync(NodeState nodeState, NodeConfig nodeConfig, NetworkHandler networkHandler)
@@ -42,11 +42,9 @@ namespace TNetD.Time
             switch (packet.Type)
             {
                 case PacketType.TPT_TIMESYNC_REQUEST:
-                    Print("request packet received");
                     requestHandler(packet);
                     break;
                 case PacketType.TPT_TIMESYNC_RESPONSE:
-                    Print("response packet received");
                     responseHandler(packet);
                     break;
             }
@@ -68,7 +66,8 @@ namespace TNetD.Time
                 diffs.Add(entry.Value.timeDifference);
 
             long diff = computeMedianDelay(diffs);
-            Print("received " + diffs.Count + " responses; median diff of " + diff);
+            double display = ((double)diff) / 100000;
+            Print("received " + diffs.Count + " responses; median diff of " + display.ToString("0.000") + " ms");
 
 
             //send new requests
@@ -108,8 +107,6 @@ namespace TNetD.Time
         {
             TimeSyncRqMsg request = new TimeSyncRqMsg();
             request.Deserialize(packet.Data);
-
-            Print("request sender time" + request.senderTime);
 
             TimeSyncRsMsg response = new TimeSyncRsMsg();
             response.senderTime = request.senderTime;
