@@ -34,14 +34,25 @@ namespace TNetD.Time
 
         void networkHandler_TimeSyncEvent(NetworkPacket packet)
         {
-            
+            switch (packet.Type)
+            {
+                case PacketType.TPT_TIMESYNC_REQUEST:
+                    requestHandler(packet);
+                    break;
+                case PacketType.TPT_TIMESYNC_RESPONSE:
+                    responseHandler(packet);
+                    break;
+            }
         }
 
-        /*
-         * requests time from all connected peers
-         * collects responses
-         * computes and returns the average of diffs
-         */
+
+
+
+        /// <summary>
+        /// Requests system time from all connected peers, collects responses after 5 seconds
+        /// and computes the median
+        /// </summary>
+        /// <returns>Median diff of all responses</returns>
         public long SyncTime()
         {
             foreach (Hash peer in nodeState.ConnectedValidators)
@@ -76,27 +87,13 @@ namespace TNetD.Time
 
 
 
-        /*
-         * Message handler
-         */
-        public void MsgHandler(NetworkPacket packet)
-        {
-            switch (packet.Type)
-            {
-                case PacketType.TPT_TIMESYNC_REQUEST:
-                    requestHandler(packet);
-                    break;
-                case PacketType.TPT_TIMESYNC_RESPONSE:
-                    responseHandler(packet);
-                    break;
-            }
-        }
 
 
 
-        /*
-         * Takes one encoded request and sends an encoded response
-         */
+        /// <summary>
+        /// Takes one encoded request and sends an encoded response
+        /// </summary>
+        /// <param name="packet"></param>
         private void requestHandler(NetworkPacket packet)
         {
             TimeSyncRqMsg request = new TimeSyncRqMsg();
@@ -109,14 +106,15 @@ namespace TNetD.Time
             // sending response
             byte[] data = response.Serialize();
             Hash token = packet.Token;
-            NetworkPacket respacket = new NetworkPacket(packet.PublicKeySource, PacketType.TPT_TIMESYNC_RESPONSE, data, token);
-           
+            NetworkPacket respacket = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_RESPONSE, data, token);
             networkHandler.AddToQueue(packet.PublicKeySource, respacket);   
         }
 
-        /*
-         * Takes one encoded response and registers it
-         */
+
+        /// <summary>
+        /// Takes one encoded response, computes delay and diff and stores it
+        /// </summary>
+        /// <param name="packet"></param>
         private void responseHandler(NetworkPacket packet)
         {
             TimeSyncRsMsg response = new TimeSyncRsMsg();
@@ -128,7 +126,9 @@ namespace TNetD.Time
             if (ts.token == packet.Token)
             {
                 ts.receivedTime = nodeState.SystemTime;
-                ts.timeDifference = ts.receivedTime - ts.sendTime;
+                ts.TimeFromValidator = response.responderTime;
+                long delay = (ts.receivedTime - ts.sendTime) / 2;
+                ts.timeDifference = ts.TimeFromValidator - delay - ts.sendTime;
             }
             timeMap.AddOrUpdate(sender, ts, (ok, ov) => ts);
         }
@@ -144,7 +144,7 @@ namespace TNetD.Time
         {
             delays.Sort();
             int l = delays.Count;
-            if (l % 2 != 0)
+            if ((l % 2) != 0)
                 return delays[l / 2];
             else
                 return delays[l / 2 - 1] + delays[l / 2];
