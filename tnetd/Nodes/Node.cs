@@ -30,6 +30,7 @@ using TNetD.PersistentStore;
 using TNetD.Transactions;
 using TNetD.Tree;
 using TNetD.Types;
+using TNetD.Time;
 
 namespace TNetD.Nodes
 {
@@ -54,6 +55,7 @@ namespace TNetD.Nodes
         RpcHandlers rpcHandlers = default(RpcHandlers);
         NetworkHandlers networkHandlers = default(NetworkHandlers);
         TransactionHandler transactionHandler = default(TransactionHandler);
+        TimeSync timeSync = default(TimeSync);
 
         public AccountInfo AI;
 
@@ -77,6 +79,7 @@ namespace TNetD.Nodes
         System.Timers.Timer TimerConsensus;
         System.Timers.Timer TimerSecond;
         System.Timers.Timer TimerMinute;
+        System.Timers.Timer TimerTimeSync;
 
         /// <summary>
         /// Initializes a node. Node ID is 0 for most cases.
@@ -94,6 +97,7 @@ namespace TNetD.Nodes
             rpcHandlers = new RpcHandlers(nodeConfig, nodeState);
             networkHandlers = new NetworkHandlers(nodeConfig, nodeState, globalConfiguration);
             transactionHandler = new TransactionHandler(nodeConfig, nodeState);
+            timeSync = new TimeSync(nodeState, nodeConfig, network)
 
             AI = new AccountInfo(PublicKey, Money);
 
@@ -117,8 +121,20 @@ namespace TNetD.Nodes
             TimerMinute.Interval = 30000;
             TimerMinute.Start();
 
+            TimerTimeSync = new System.Timers.Timer();
+            TimerTimeSync.Elapsed += TimerTimeSync_Elapsed;
+            TimerTimeSync.Enabled = true;
+            TimerTimeSync.Interval = 10000;
+            TimerTimeSync.Start();
+
 
             DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
+        }
+
+        void TimerTimeSync_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            long diff = timeSync.SyncTime();
+            nodeState.NetworkTime += diff;
         }
 
         void TimerMinute_Elapsed(object sender, ElapsedEventArgs e)

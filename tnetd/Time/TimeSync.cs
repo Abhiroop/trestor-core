@@ -7,28 +7,40 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using TNetD.Nodes;
 using TNetD.Network;
+using TNetD.Network.Networking;
+
 
 namespace TNetD.Time
 {
     class TimeSync
     {
         private NodeState nodeState;
+        private NodeConfig nodeConfig;
+        private SecureNetwork network;
         private ConcurrentDictionary<Hash, TimeStruct> timeMap;
 
         // time to sleep after sending out time sync requests
-        private const int TIME_TO_SLEEP = 5000;
+        // in milliseconds
+        private readonly int TIME_TO_SLEEP = 5000;
 
-        // extreme delay to be deleted (in tenth of seconds)
-        private const int EXTREME_DELAY = 3000;
 
-        public TimeSync(NodeState nodeState)
+
+
+        public TimeSync(NodeState nodeState, NodeConfig nodeConfig, SecureNetwork network)
         {
             this.nodeState = nodeState;
+            this.nodeConfig = nodeConfig;
+            this.network = network;
             timeMap = new ConcurrentDictionary<Hash, TimeStruct>();
         }
 
 
 
+        /*
+         * requests time from all connected peers
+         * collects responses
+         * computes and returns the average of diffs
+         */
         public long SyncTime()
         {
             foreach (Hash peer in nodeState.ConnectedValidators)
@@ -41,14 +53,13 @@ namespace TNetD.Time
                 // save locally
                 TimeStruct ts = new TimeStruct();
                 ts.sendTime = request.senderTime;
-                ts.token = peer;
-                timeMap[peer] = ts;
+                ts.token = TNetUtils.GenerateNewToken();
+                timeMap.AddOrUpdate(peer, ts, (ok, ov) => ts);
 
-                /*
-                 *  TODO: send out
-                 */
-
-
+                // sending
+                NetworkPacket packet = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_REQUEST, message, ts.token);
+                NetworkPacketQueueEntry npqe = new NetworkPacketQueueEntry(peer, packet);
+                network.AddToQueue(npqe);
             }
 
             // wait
@@ -60,58 +71,78 @@ namespace TNetD.Time
             {
                 diffs.Add(entry.Value.timeDifference);
             }
-            return ComputeMedianDelay(diffs);
+            return computeMedianDelay(diffs);
         }
 
 
 
         /*
          * Message handler
-         */ 
+         */
         public void MsgHandler(NetworkPacket packet)
         {
             switch (packet.Type)
             {
-                case 
+                case PacketType.TPT_TIMESYNC_REQUEST:
+                    requestHandler(packet);
+                    break;
+                case PacketType.TPT_TIMESYNC_RESPONSE:
+                    responseHandler(packet);
+                    break;
             }
         }
+
+
 
         /*
          * Takes one encoded request and sends an encoded response
          */
-        public void RequestHandler(byte[] message, Hash sender)
+        private void requestHandler(NetworkPacket packet)
         {
             TimeSyncRqMsg request = new TimeSyncRqMsg();
-            request.Deserialize(message);
+            request.Deserialize(packet.Data);
 
             TimeSyncRsMsg response = new TimeSyncRsMsg();
             response.senderTime = request.senderTime;
             response.responderTime = nodeState.SystemTime;
-            return response.Serialize();
+
+            // sending response
+            byte[] data = response.Serialize();
+            Hash token = packet.Token;
+            NetworkPacket respacket = new NetworkPacket(packet.PublicKey_Src, PacketType.TPT_TIMESYNC_RESPONSE, data, token);
+            NetworkPacketQueueEntry npqe = new NetworkPacketQueueEntry(packet.PublicKey_Src, respacket);
+            network.AddToQueue(npqe);
         }
+
 
 
         /*
          * Takes one encoded response and registers it
          */
-        public void ResponseHandler(byte[] message, Hash sender)
+        private void responseHandler(NetworkPacket packet)
         {
             TimeSyncRsMsg response = new TimeSyncRsMsg();
-            response.Deserialize(message);
+            response.Deserialize(packet.Data);
+
+            Hash sender = packet.PublicKey_Src;
 
             TimeStruct ts = timeMap[sender];
-            if (ts.sendTime == response.senderTime)
+            if (ts.token == packet.Token)
             {
                 ts.receivedTime = nodeState.SystemTime;
                 ts.timeDifference = ts.receivedTime - ts.sendTime;
             }
+            timeMap.AddOrUpdate(sender, ts, (ok, ov) => ts);
         }
 
 
-        /*
-         * compute the median
-         */
-        private long ComputeMedianDelay(List<long> delays)
+
+        /// <summary>
+        /// Compute median delay
+        /// </summary>
+        /// <param name="delays">List of delays</param>
+        /// <returns>Median of delays</returns>
+        private long computeMedianDelay(List<long> delays)
         {
             delays.Sort();
             int l = delays.Count;
