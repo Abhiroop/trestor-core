@@ -24,7 +24,7 @@ namespace TNetD.Network.Networking
         /// <summary>
         /// Stores the configuration information for the local Node
         /// </summary>
-        public NodeConfig nodeConfig;
+        NodeConfig nodeConfig;
 
         public NodeSocketData nodeSocketData = default(NodeSocketData);
 
