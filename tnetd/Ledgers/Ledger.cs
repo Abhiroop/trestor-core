@@ -65,7 +65,10 @@ namespace TNetD.Ledgers
 
             long records = await ReloadFromPersistentStore();
 
-            LedgerEvent(LedgerEventType.Progress, "Ready");
+            if (LedgerEvent != null)
+            {
+                LedgerEvent(LedgerEventType.Progress, "Ready");
+            }
 
             initialLoading = false;
 

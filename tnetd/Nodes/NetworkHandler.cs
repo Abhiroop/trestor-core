@@ -30,7 +30,7 @@ namespace TNetD.Nodes
             this.nodeState = nodeState;
             this.globalConfiguration = globalConfiguration;
             
-            network = new SecureNetwork(nodeConfig);
+            network = new SecureNetwork(nodeConfig, nodeState);
             network.PacketReceived += network_PacketReceived;
 
             network.Initialize();

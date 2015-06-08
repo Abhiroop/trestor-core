@@ -13,7 +13,8 @@ namespace TNetD.Network.Networking
         public event PacketReceivedHandler PacketReceived;
 
         Timer updateTimer;
-        NodeConfig nodeConfig;
+        NodeConfig nodeConfig = default(NodeConfig); 
+        NodeState nodeState = default(NodeState);
 
         ConcurrentQueue<NetworkPacketQueueEntry> outgoingPacketQueue = new ConcurrentQueue<NetworkPacketQueueEntry>();
 
@@ -24,9 +25,10 @@ namespace TNetD.Network.Networking
         /// </summary>
         Dictionary<Hash, OutgoingConnection> outgoingConnections = new Dictionary<Hash, OutgoingConnection>();
 
-        public SecureNetwork(NodeConfig nodeConfig)
+        public SecureNetwork(NodeConfig nodeConfig, NodeState nodeState)
         {
             this.nodeConfig = nodeConfig;
+            this.nodeState = nodeState;
         }
 
         public void Initialize()
@@ -117,6 +119,36 @@ namespace TNetD.Network.Networking
                 {
                     outgoingConnections.Remove(hsh);
                 }
+
+                toRemove.Clear();
+
+                foreach (KeyValuePair<Hash, OutgoingConnection> kvp in outgoingConnections)
+                {
+                    if(kvp.Value.KeyExchanged)
+                    {
+                        if(!nodeState.ConnectedValidators.Contains(kvp.Value.nodeConfig.PublicKey))
+                        {
+                            nodeState.ConnectedValidators.Add(kvp.Value.nodeConfig.PublicKey);
+                        }
+                    }
+                }
+
+                
+
+                foreach(KeyValuePair<Hash, IncomingClient> kvp in incomingConnectionHander.IncomingConnections)
+                {
+                    if (kvp.Value.KeyExchanged)
+                    {
+                        if (!nodeState.ConnectedValidators.Contains(kvp.Value.PublicKey))
+                        {
+                            nodeState.ConnectedValidators.Add(kvp.Value.PublicKey);
+                        }
+                    }
+
+
+                }
+
+
 
             }
             catch (System.Exception ex)
