@@ -158,7 +158,7 @@ namespace TNetD
 
             ListHashTree lht = new ListHashTree();
 
-            int ACCOUNTS = 10;
+            int ACCOUNTS = 100000;
 
             long taka = 0;
 
@@ -168,7 +168,7 @@ namespace TNetD
             {
                 N_H[0] = (byte)(i);
 
-                //Common.rngCsp.GetBytes(N_H);
+                Common.rngCsp.GetBytes(N_H);
 
                 accounts.Add(new Hash(N_H));
 
