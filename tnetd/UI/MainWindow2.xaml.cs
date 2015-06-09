@@ -156,9 +156,31 @@ namespace TNetD
 
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 24; i++)
             {
                 AddNode(i);
+            }
+            generateTrustlist();
+        }
+
+        private void generateTrustlist()
+        {
+            using (FileStream fs = new FileStream("newTrustList.ini", FileMode.Create))
+            {
+                using (StreamWriter w = new StreamWriter(fs, Encoding.UTF8))
+                {
+                    foreach (Node n in nodes)
+                    {
+                        StringBuilder sb = new StringBuilder();
+                        sb.Append(n.nodeConfig.PublicKey);
+                        sb.Append(" 127.0.0.1 ");
+                        sb.Append(n.nodeConfig.ListenPortProtocol);
+                        sb.Append(" Node_");
+                        sb.Append(n.nodeConfig.NodeID);
+
+                        w.WriteLine(sb.ToString());
+                    }
+                }
             }
         }
 
