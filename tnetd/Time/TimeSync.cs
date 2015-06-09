@@ -152,6 +152,10 @@ namespace TNetD.Time
             response.Deserialize(packet.Data);
             Hash sender = packet.PublicKeySource;
 
+            // if never sent request to this peer, drop packet
+            if (!sentRequests.Keys.Contains(sender))
+                return;
+
             // store response and calculated results
             if (sentRequests[sender].token == packet.Token)
             {
