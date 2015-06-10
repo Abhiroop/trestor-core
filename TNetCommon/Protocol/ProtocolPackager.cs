@@ -233,6 +233,12 @@ namespace TNetD.Protocol
         //    return packets;
         //}
 
+        /// <summary>
+        /// Packs a Hash, Essentially a PD_BYTE_VECTOR is used.
+        /// </summary>
+        /// <param name="hashValue"></param>
+        /// <param name="nameType"></param>
+        /// <returns></returns>
         public static ProtocolDataType Pack(Hash hashValue, byte nameType)
         {
             ProtocolDataType PDType = GenericPack(PDataType.PD_BYTE_VECTOR, nameType);

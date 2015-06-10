@@ -31,7 +31,7 @@ namespace TNetD.Time
 
         private NodeState nodeState;
         private NodeConfig nodeConfig;
-        private NetworkPacketSwitch networkHandler;
+        private NetworkPacketSwitch networkPacketSwitch;
         private ConcurrentDictionary<Hash, RequestStruct> sentRequests;
         private ConcurrentDictionary<Hash, ResponseStruct> collectedResponses;
 
@@ -44,12 +44,12 @@ namespace TNetD.Time
 
 
 
-        public TimeSync(NodeState nodeState, NodeConfig nodeConfig, NetworkPacketSwitch networkHandler)
+        public TimeSync(NodeState nodeState, NodeConfig nodeConfig, NetworkPacketSwitch networkPacketSwitch)
         {
             this.nodeState = nodeState;
             this.nodeConfig = nodeConfig;
-            this.networkHandler = networkHandler;
-            networkHandler.TimeSyncEvent += networkHandler_TimeSyncEvent;
+            this.networkPacketSwitch = networkPacketSwitch;
+            networkPacketSwitch.TimeSyncEvent += networkHandler_TimeSyncEvent;
             collectedResponses = new ConcurrentDictionary<Hash, ResponseStruct>();
         }
 
@@ -109,7 +109,7 @@ namespace TNetD.Time
                 request.senderTime = nodeState.SystemTime;
                 byte[] message = request.Serialize();
                 NetworkPacket packet = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_REQUEST, message, rs.token);
-                networkHandler.AddToQueue(peer, packet);
+                networkPacketSwitch.AddToQueue(peer, packet);
             }
 
             return diff;
@@ -137,7 +137,7 @@ namespace TNetD.Time
             byte[] data = response.Serialize();
             Hash token = packet.Token;
             NetworkPacket respacket = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_RESPONSE, data, token);
-            networkHandler.AddToQueue(packet.PublicKeySource, respacket);
+            networkPacketSwitch.AddToQueue(packet.PublicKeySource, respacket);
         }
 
 

@@ -552,11 +552,11 @@ namespace TNetD.Tree
         // Sync method ...
         // 
         
-
-
-
-
-
+        public void GetRootData()
+        {
+            
+        }
+        
 
         /*
         /// <summary>

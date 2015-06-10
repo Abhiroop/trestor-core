@@ -55,9 +55,10 @@ namespace TNetD.Nodes
         public NodeState nodeState = default(NodeState);
 
         RpcHandlers rpcHandlers = default(RpcHandlers);
-        public NetworkPacketSwitch networkHandler = default(NetworkPacketSwitch);
+        public NetworkPacketSwitch networkPacketSwitch = default(NetworkPacketSwitch);
         TransactionHandler transactionHandler = default(TransactionHandler);
         TimeSync timeSync = default(TimeSync);
+        LedgerSync ledgerSync = default(LedgerSync);
 
         public AccountInfo AI;
 
@@ -98,9 +99,10 @@ namespace TNetD.Nodes
             nodeState.NodeInfo = nodeConfig.Get_JS_Info();
 
             rpcHandlers = new RpcHandlers(nodeConfig, nodeState);
-            networkHandler = new NetworkPacketSwitch(nodeConfig, nodeState, globalConfiguration);
+            networkPacketSwitch = new NetworkPacketSwitch(nodeConfig, nodeState, globalConfiguration);
             transactionHandler = new TransactionHandler(nodeConfig, nodeState);
-            timeSync = new TimeSync(nodeState, nodeConfig, networkHandler);
+            timeSync = new TimeSync(nodeState, nodeConfig, networkPacketSwitch);
+            ledgerSync = new LedgerSync(nodeState, nodeConfig, networkPacketSwitch);
 
             AI = new AccountInfo(PublicKey, Money);
 
@@ -223,7 +225,7 @@ namespace TNetD.Nodes
 
                 Interlocked.Add(ref nodeState.NodeInfo.NodeDetails.TotalAccounts, records);
 
-                await networkHandler.InitialConnectAsync();
+                await networkPacketSwitch.InitialConnectAsync();
 
                 LedgerCloseData ledgerCloseData;
                 nodeState.PersistentCloseHistory.GetLastRowData(out ledgerCloseData);
@@ -237,7 +239,7 @@ namespace TNetD.Nodes
         {
             Constants.ApplicationRunning = false;
 
-            networkHandler.Stop();
+            networkPacketSwitch.Stop();
             rpcHandlers.StopServer();
         }
 

@@ -70,14 +70,14 @@ namespace TNetD
 
                 connData.AppendLine("  OUTGOING ----> ");
 
-                foreach (Hash h in nd.networkHandler.GetConnectedNodes(ConnectionListType.Outgoing))
+                foreach (Hash h in nd.networkPacketSwitch.GetConnectedNodes(ConnectionListType.Outgoing))
                 {
                     connData.AppendLine("\t" + h.ToString());
                 }
 
                 connData.AppendLine("  INCOMING ----> ");
 
-                foreach (Hash h in nd.networkHandler.GetConnectedNodes(ConnectionListType.Incoming))
+                foreach (Hash h in nd.networkPacketSwitch.GetConnectedNodes(ConnectionListType.Incoming))
                 {
                     connData.AppendLine("\t" + h.ToString());
                 }
