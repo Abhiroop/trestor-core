@@ -158,7 +158,7 @@ namespace TNetD
 
             ListHashTree lht = new ListHashTree();
 
-            int ACCOUNTS = 100000;
+            int ACCOUNTS = 1000;
 
             long taka = 0;
 

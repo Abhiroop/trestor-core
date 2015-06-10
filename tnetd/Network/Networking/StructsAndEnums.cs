@@ -113,6 +113,17 @@ namespace TNetD.Network.Networking
         }
     }
 
+    public struct PendingNetworkRequest
+    {
+        public long Time;
+        public Hash PublicKey;
+        public PendingNetworkRequest(long Time, Hash PublicKey)
+        {
+            this.Time = Time;
+            this.PublicKey = PublicKey;
+        }
+    }
+
     public enum NetworkResult { Sent, Received, Queued, ConnFailed, Disconnected };
 
     /// <summary>
@@ -134,8 +145,12 @@ namespace TNetD.Network.Networking
 
         TPT_CONS_VOTES = 0x34, TPT_CONS_DOUBLESPENDERS = 0x36,
 
-        TPT_LSYNC_FETCH_ROOT = 0x40, TPT_LSYNC_FETCH_LAYER_DATA = 0x41,
-        TPT_LSYNC_REPLY_ROOT = 0x42, TPT_LSYNC_REPLY_LAYER_DATA = 0x43,
+        TPT_LSYNC_ROOT_REQUEST = 0x40,
+        TPT_LSYNC_ROOT_RESPONSE = 0x41,
+        TPT_LSYNC_NODE_REQUEST = 0x42,
+        TPT_LSYNC_NODE_RESPONSE = 0x43,
+        TPT_LSYNC_LEAF_REQUEST = 0x44,
+        TPT_LSYNC_LEAF_RESPONSE = 0x45,
 
         /// <summary>
         /// Request transaction data for a range of Ledger Sequence Numbers
@@ -157,7 +172,7 @@ namespace TNetD.Network.Networking
         /// Response to a Transactio Data ID Request
         /// </summary>
         TPT_TX_SYNC_ID_RESPONSE = 0x53,
-        
+
         /// <summary>
         /// Queries for current ledger sequence and TransactionCount
         /// </summary>

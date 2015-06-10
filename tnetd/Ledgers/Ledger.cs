@@ -203,7 +203,5 @@ namespace TNetD.Ledgers
         {
             return LedgerTree.GetRootHash();
         }
-
-
     }
 }

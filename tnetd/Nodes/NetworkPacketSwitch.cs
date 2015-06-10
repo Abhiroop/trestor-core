@@ -3,6 +3,7 @@
 // @Date: 8th June 2015
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -99,10 +100,10 @@ namespace TNetD.Nodes
 
                     break;
 
-                case PacketType.TPT_LSYNC_FETCH_ROOT:
-                case PacketType.TPT_LSYNC_FETCH_LAYER_DATA:
-                case PacketType.TPT_LSYNC_REPLY_ROOT:
-                case PacketType.TPT_LSYNC_REPLY_LAYER_DATA:
+                case PacketType.TPT_LSYNC_ROOT_REQUEST:
+                case PacketType.TPT_LSYNC_ROOT_RESPONSE:
+                case PacketType.TPT_LSYNC_NODE_REQUEST:
+                case PacketType.TPT_LSYNC_NODE_RESPONSE:
 
                     if (LedgerSyncEvent != null) LedgerSyncEvent(packet);
 
@@ -143,6 +144,31 @@ namespace TNetD.Nodes
         public void Stop()
         {
             network.Stop();
+        }
+
+        /// <summary>
+        /// Checks if a packet reply was indeed requested. If not, the packet should be dropped.
+        /// </summary>
+        /// <param name="packet"></param>
+        /// <returns></returns>
+        public bool VerifyPendingPacket(NetworkPacket packet)
+        {
+            bool good = false;
+
+            if (nodeState.PendingNetworkRequests.ContainsKey(packet.Token))
+            {
+                PendingNetworkRequest pnr = nodeState.PendingNetworkRequests[packet.Token];
+
+                if (pnr.PublicKey == packet.PublicKeySource)
+                {
+                    good = true;
+                }
+
+                PendingNetworkRequest tmp;
+                nodeState.PendingNetworkRequests.TryRemove(packet.Token, out tmp);
+            }
+
+            return good;
         }
 
 

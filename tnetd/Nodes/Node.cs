@@ -54,8 +54,12 @@ namespace TNetD.Nodes
         // TODO: MAKE PRIVATE : AND FAST
         public NodeState nodeState = default(NodeState);
 
-        RpcHandlers rpcHandlers = default(RpcHandlers);
+        /// <summary>
+        /// Handles all received network packets and dispatches them to various sub-systems.
+        /// </summary>
         public NetworkPacketSwitch networkPacketSwitch = default(NetworkPacketSwitch);
+
+        RpcHandlers rpcHandlers = default(RpcHandlers);        
         TransactionHandler transactionHandler = default(TransactionHandler);
         TimeSync timeSync = default(TimeSync);
         LedgerSync ledgerSync = default(LedgerSync);

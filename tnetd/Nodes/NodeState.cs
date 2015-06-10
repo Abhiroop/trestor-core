@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TNetD.Json.JS_Structs;
 using TNetD.Ledgers;
+using TNetD.Network.Networking;
 using TNetD.PersistentStore;
 using TNetD.Transactions;
 using TNetD.Types;
@@ -42,6 +43,11 @@ namespace TNetD.Nodes
 
         public HashSet<Hash> ConnectedValidators { get; set; }
 
+        /// <summary>
+        /// Key: Token, Value: Time & Public key of recipient
+        /// </summary>
+        public ConcurrentDictionary<Hash, PendingNetworkRequest> PendingNetworkRequests;
+
         public long SystemTime { get; set; }
 
         public long NetworkTime { get; set; }
@@ -66,6 +72,9 @@ namespace TNetD.Nodes
             GlobalBlacklistedUsers = new ConcurrentBag<Hash>();
             
             ConnectedValidators = new HashSet<Hash>();
+
+            PendingNetworkRequests = new ConcurrentDictionary<Hash, PendingNetworkRequest>();
+
             SystemTime = DateTime.UtcNow.ToFileTimeUtc();
             NetworkTime = DateTime.UtcNow.ToFileTimeUtc();
         }

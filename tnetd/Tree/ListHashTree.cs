@@ -551,12 +551,15 @@ namespace TNetD.Tree
         //
         // Sync method ...
         // 
-        
-        public void GetRootData()
+
+        /// <summary>
+        /// Make sure, no write operation is done on it.
+        /// </summary>
+        /// <returns></returns>
+        public ListTreeNode RootNode
         {
-            
-        }
-        
+            get { return Root; }
+        }        
 
         /*
         /// <summary>
