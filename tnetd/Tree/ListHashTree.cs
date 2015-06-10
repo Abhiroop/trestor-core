@@ -162,12 +162,10 @@ namespace TNetD.Tree
                 ListTreeNode val = PathStack.Pop();
                 Hash NodeHash = null;
                 long entityCount = 0;
-
+                List<byte> _tempHash = new List<byte>();
                 if (!LeafDone)
                 {
                     // Do the hashing for the leaf.
-                    List<byte> _tempHash = new List<byte>();
-                    
                     for (int i = 0; i < 16; i++)
                     {
                         if (val.Children[i] != null)
@@ -184,8 +182,7 @@ namespace TNetD.Tree
                 }
                 else
                 {
-                    // Perform hashing for node.
-                    List<byte> _tempHash = new List<byte>();
+                    // Perform hashing for node.                  
                     for (int i = 0; i < 16; i++)
                     {
                         if (val.Children[i] != null)
@@ -200,8 +197,6 @@ namespace TNetD.Tree
                 }
 
                 val.SetLeafCount(entityCount);
-               // val.LeafCount = entityCount;
-
                 val.SetHash(NodeHash);
             }
 
@@ -471,18 +466,21 @@ namespace TNetD.Tree
                 {
                     ListTreeNode node = PathStack.Pop();
 
+                    List<byte> _tempHash = new List<byte>();
+                    long entityCount = 0;
+                    int childCount = 0;
+                    
                     // Process the leaf [actual leafs are the clilds if this node]
                     if (!LeafDone)
                     {
                         // Do the hashing for the node.
-                        List<byte> _tempHash = new List<byte>();
-                        int c_count = 0;
+                        
                         for (int i = 0; i < 16; i++)
                         {
                             if (node.Children[i] != null)
                             {
                                 ListTreeLeafNode leaf = (ListTreeLeafNode)node.Children[i];
-
+                                entityCount += leaf.Count;
                                 if (leaf.Count == 0) // No Elements in the Leaf
                                 {
                                     node.Children[i] = null; // Delete the Leaf.
@@ -491,15 +489,16 @@ namespace TNetD.Tree
                                 {
                                     Hash hsh = leaf.GetHash();
                                     _tempHash.AddRange(hsh.Hex);
-                                    c_count++;
+                                    childCount++;
                                 }
                             }
                         }
 
-                        if (c_count > 0) // Update the value of the Leaf node hash.
+                        if (childCount > 0) // Update the value of the Leaf node hash.
                         {
-                            Hash NodeHash = new Hash((new SHA512Managed()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
+                            Hash NodeHash = new Hash((new SHA512Cng()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
                             node.SetHash(NodeHash);
+                            node.SetLeafCount(entityCount);
                         }
                         else // No children: Node should be deleted.
                         {
@@ -510,9 +509,7 @@ namespace TNetD.Tree
                     }
                     else // Process the intermediate nodes
                     {
-                        // Perform hashing for node.
-                        List<byte> _tempHash = new List<byte>();
-                        int c_count = 0;
+                        // Perform hashing for node.                  
                         for (int i = 0; i < 16; i++)
                         {
                             if (node.Children[i] != null)
@@ -525,15 +522,17 @@ namespace TNetD.Tree
                                 {
                                     var ai = (ListTreeNode)node.Children[i];
                                     _tempHash.AddRange(ai.Hash.Hex);
-                                    c_count++;
+                                    entityCount += ai.LeafCount;
+                                    childCount++;
                                 }
                             }
                         }
 
-                        if (c_count > 0)
+                        if (childCount > 0)
                         {
-                            Hash NodeHash = new Hash((new SHA512Managed()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
+                            Hash NodeHash = new Hash((new SHA512Cng()).ComputeHash(_tempHash.ToArray()).Take(32).ToArray());
                             node.SetHash(NodeHash);
+                            node.SetLeafCount(entityCount);
                         }
                         else // No children: Node should be deleted.
                         {
