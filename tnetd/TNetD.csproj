@@ -134,6 +134,7 @@
     <Compile Include="Network\NetworkPacketQueueEntry.cs" />
     <Compile Include="Network\Networking\OutgoingConnection.cs" />
     <Compile Include="Network\Networking\IncomingClient.cs" />
+    <Compile Include="Network\PeerDiscovery\PeerDiscovery.cs" />
     <Compile Include="Nodes\NetworkHandler.cs" />
     <Compile Include="Nodes\TransactionHandler.cs" />
     <Compile Include="SyncFramework\Packets\LedgerSyncRequest.cs" />
