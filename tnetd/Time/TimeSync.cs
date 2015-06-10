@@ -31,7 +31,7 @@ namespace TNetD.Time
 
         private NodeState nodeState;
         private NodeConfig nodeConfig;
-        private NetworkHandler networkHandler;
+        private NetworkPacketSwitch networkHandler;
         private ConcurrentDictionary<Hash, RequestStruct> sentRequests;
         private ConcurrentDictionary<Hash, ResponseStruct> collectedResponses;
 
@@ -44,7 +44,7 @@ namespace TNetD.Time
 
 
 
-        public TimeSync(NodeState nodeState, NodeConfig nodeConfig, NetworkHandler networkHandler)
+        public TimeSync(NodeState nodeState, NodeConfig nodeConfig, NetworkPacketSwitch networkHandler)
         {
             this.nodeState = nodeState;
             this.nodeConfig = nodeConfig;

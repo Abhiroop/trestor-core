@@ -1,6 +1,6 @@
 ﻿
 // @Author : Arpan Jati
-// @Date: 13th Feb 2015 | 8 June 2015
+// @Date: 8th June 2015
 
 using System;
 using System.Collections.Generic;
@@ -13,10 +13,11 @@ using TNetD.Time;
 
 namespace TNetD.Nodes
 {
-    class NetworkHandler
+    class NetworkPacketSwitch
     {
-        public delegate void TimeSyncEventHandler(NetworkPacket packet);
-        public event TimeSyncEventHandler TimeSyncEvent;
+        public delegate void NetworkPacketEventHandler(NetworkPacket packet);
+        public event NetworkPacketEventHandler TimeSyncEvent;
+        public event NetworkPacketEventHandler LedgerSyncEvent;
 
         NodeConfig nodeConfig;
         NodeState nodeState;
@@ -24,7 +25,7 @@ namespace TNetD.Nodes
 
         SecureNetwork network = default(SecureNetwork);
         
-        public NetworkHandler(NodeConfig nodeConfig, NodeState nodeState, GlobalConfiguration globalConfiguration)
+        public NetworkPacketSwitch(NodeConfig nodeConfig, NodeState nodeState, GlobalConfiguration globalConfiguration)
         {
             this.nodeConfig = nodeConfig;
             this.nodeState = nodeState;
@@ -102,6 +103,8 @@ namespace TNetD.Nodes
                 case PacketType.TPT_LSYNC_FETCH_LAYER_DATA:
                 case PacketType.TPT_LSYNC_REPLY_ROOT:
                 case PacketType.TPT_LSYNC_REPLY_LAYER_DATA:
+
+                    if (LedgerSyncEvent != null) LedgerSyncEvent(packet);
 
                     break;
 

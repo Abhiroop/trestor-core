@@ -55,7 +55,7 @@ namespace TNetD.Nodes
         public NodeState nodeState = default(NodeState);
 
         RpcHandlers rpcHandlers = default(RpcHandlers);
-        public NetworkHandler networkHandler = default(NetworkHandler);
+        public NetworkPacketSwitch networkHandler = default(NetworkPacketSwitch);
         TransactionHandler transactionHandler = default(TransactionHandler);
         TimeSync timeSync = default(TimeSync);
 
@@ -98,7 +98,7 @@ namespace TNetD.Nodes
             nodeState.NodeInfo = nodeConfig.Get_JS_Info();
 
             rpcHandlers = new RpcHandlers(nodeConfig, nodeState);
-            networkHandler = new NetworkHandler(nodeConfig, nodeState, globalConfiguration);
+            networkHandler = new NetworkPacketSwitch(nodeConfig, nodeState, globalConfiguration);
             transactionHandler = new TransactionHandler(nodeConfig, nodeState);
             timeSync = new TimeSync(nodeState, nodeConfig, networkHandler);
 

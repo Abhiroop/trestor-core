@@ -427,8 +427,7 @@ namespace TNetD.Tree
                 return tr;
             }
         }
-
-
+        
         /// <summary>
         /// Traverse down tree to see the availability of given leaf node.
         /// This is equivalent to trying to fetch the element, in terms of complexity.
@@ -549,7 +548,17 @@ namespace TNetD.Tree
             return result;
         }
 
+        //
+        // Sync method ...
+        // 
+        
 
+
+
+
+
+
+        /*
         /// <summary>
         /// This method will give all the leaves under a node
         /// Recursive
@@ -589,10 +598,7 @@ namespace TNetD.Tree
             Leaves = leaves;
         }
 
-        /*
-         *Most important one
-        */
-
+      
         public List<TreeSyncData> getDifference(List<ListTreeNode> other, List<ListTreeNode> me)
         {
             List<TreeSyncData> difference = new List<TreeSyncData>();
@@ -674,10 +680,6 @@ namespace TNetD.Tree
 
         }
 
-        private void getAllLeafUnderNode()
-        {
-            throw new NotImplementedException();
-        }
 
         //gives back immediate children
         public bool getImmediateChildren(Hash hash, out List<ListTreeNode> nodes)
@@ -758,6 +760,10 @@ namespace TNetD.Tree
             return listToReturn;
 
         }
+
+
+        */
+
 
     }
 }
