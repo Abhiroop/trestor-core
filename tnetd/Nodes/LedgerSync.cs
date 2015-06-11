@@ -19,6 +19,9 @@ namespace TNetD.Nodes
         private NodeConfig nodeConfig;
         private NetworkPacketSwitch networkPacketSwitch;
         private ListHashTree LedgerTree;
+        System.Timers.Timer TimerLedgerSync;
+
+        //Queue<>  
 
         public LedgerSync(NodeState nodeState, NodeConfig nodeConfig, NetworkPacketSwitch networkPacketSwitch)
         {
@@ -28,6 +31,17 @@ namespace TNetD.Nodes
             this.LedgerTree = nodeState.Ledger.LedgerTree; // Just aliasing.
 
             this.networkPacketSwitch.LedgerSyncEvent += networkHandler_LedgerSyncEvent;
+
+            TimerLedgerSync = new System.Timers.Timer();
+            TimerLedgerSync.Elapsed += TimerLedgerSync_Elapsed;
+            TimerLedgerSync.Enabled = true;
+            TimerLedgerSync.Interval = nodeConfig.UpdateFrequencyLedgerSyncMS;
+            TimerLedgerSync.Start();
+        }
+
+        void TimerLedgerSync_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+
         }
 
         void networkHandler_LedgerSyncEvent(NetworkPacket packet)
@@ -44,14 +58,33 @@ namespace TNetD.Nodes
             }
         }
 
+        bool GetRandomTrustedNode(out List<NodeSocketData> randomPeer, int count)
+        {
+            int peerCount = nodeConfig.GlobalConfiguration.TrustedNodes.Count;
+            randomPeer = new List<NodeSocketData>();
+            if (peerCount >= count)
+            {
+                int[] dist = Utils.GenerateNonRepeatingDistribution(peerCount, count);
+
+                foreach (int randomPeerID in dist)
+                {
+                    randomPeer.Add(nodeConfig.GlobalConfiguration.TrustedNodes.Values.ElementAt(randomPeerID));
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+        
         void HandleRootRequest(NetworkPacket packet)
         {
             LedgerCloseData ledgerCloseData;
             nodeState.PersistentCloseHistory.GetLastRowData(out ledgerCloseData);
 
-            RootDataResponseMessage rdrm = new RootDataResponseMessage(nodeState.Ledger.LedgerTree.RootNode, ledgerCloseData);
-        
-            NetworkPacket response = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_LSYNC_ROOT_RESPONSE,                
+            RootData rdrm = new RootData(LedgerTree.RootNode, ledgerCloseData);
+
+            NetworkPacket response = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_LSYNC_ROOT_RESPONSE,
                 rdrm.Serialize(), packet.Token);
 
             networkPacketSwitch.AddToQueue(packet.PublicKeySource, response);
@@ -60,18 +93,17 @@ namespace TNetD.Nodes
         void HandleRootResponse(NetworkPacket packet)
         {
             // Check that the packet is valid.
-            if(networkPacketSwitch.VerifyPendingPacket(packet))
+            if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
-                RootDataResponseMessage rdrm = new RootDataResponseMessage();
+                RootData rdrm = new RootData();
                 rdrm.Deserialize(packet.Data);
-                
+
                 /// Compare with current tree and matchup.
-                 
-               if(LedgerTree.RootNode.Hash != rdrm.RootHash) // Need to match up child nodes.
-               {
 
+                if (LedgerTree.RootNode.Hash != rdrm.RootHash) // Need to match up child nodes.
+                {
 
-               }
+                }
 
 
             }

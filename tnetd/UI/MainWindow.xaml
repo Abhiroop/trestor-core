@@ -89,6 +89,7 @@
             <MenuItem Header="FILE">
                 <MenuItem Name="menuItem_File_Exit" Header="EXIT" Click="menuItem_File_Exit_Click"/>
                 <MenuItem Name="menuItem_Main2" Header="MAIN 2" Click="menuItem_Main2_Click"/>
+                <MenuItem Name="menuItem_Main3" Header="DEBUG LEDGER-SYNC" Click="menuItem_Main3_Click"/>
             </MenuItem>
             <MenuItem Header="SERVER">
                 <MenuItem Header="Start" Click="menuItem_Server_Start_Click"/>

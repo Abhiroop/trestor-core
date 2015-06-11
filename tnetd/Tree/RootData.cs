@@ -10,56 +10,60 @@ using System.Threading.Tasks;
 using TNetD.Protocol;
 
 namespace TNetD.Tree
-{  
-    class NodeDataResponseMessage : ISerializableBase
+{
+    class RootData : ISerializableBase
     {
-        public Hash NodeHash;
+        public Hash RootHash;
         public long LeafCount;
-        public Hash[] Children;
+        public NodeData[] Children;
+        public LedgerCloseData LedgerCloseData;
 
-        public NodeDataResponseMessage(ListTreeNode node)
+        public RootData(ListTreeNode root, LedgerCloseData ledgerCloseData)
         {
-            NodeHash = node.Hash;
-            LeafCount = node.LeafCount;
-
-            Children = new Hash[16];
+            RootHash = root.Hash;
+            LeafCount = root.LeafCount;
+            LedgerCloseData = ledgerCloseData;
+            Children = new NodeData[16];
             for (int i = 0; i < 16; i++)
             {
-                ListTreeNode LTN = node.Children[i];
-                Children[i] = LTN.Hash;
+                ListTreeNode LTN = root.Children[i];
+                if(LTN != null) Children[i] = new NodeData(LTN);
             }
         }
 
-        public NodeDataResponseMessage()
+        public RootData()
         {
             Init(); // Seems redundant.
         }
 
         private void Init()
         {
-            NodeHash = new Hash();
+            RootHash = new Hash();
             LeafCount = 0;
-            Children = new Hash[16];
+            LedgerCloseData = new LedgerCloseData();
+            Children = new NodeData[16];
         }
 
         public byte[] Serialize()
         {
             List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
 
-            PDTs.Add(ProtocolPackager.Pack(NodeHash, 0));
+            PDTs.Add(ProtocolPackager.Pack(RootHash, 0));
             PDTs.Add(ProtocolPackager.PackVarint(LeafCount, 1));
+            PDTs.Add(ProtocolPackager.Pack(LedgerCloseData.Serialize(), 2));
 
             for (int i = 0; i < 16; i++)
             {
-                if (Children[i].Hex.Length == 16)
+                if (Children[i] != null)
                 {
-                    PDTs.Add(ProtocolPackager.Pack(Children[i], (byte)(i + 10)));
+                    PDTs.Add(ProtocolPackager.Pack(Children[i].Serialize(), (byte)(i + 10)));
                 }
             }
 
             return ProtocolPackager.PackRaw(PDTs);
         }
-        
+
+
         public void Deserialize(byte[] Data)
         {
             List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
@@ -75,23 +79,34 @@ namespace TNetD.Tree
                 {
                     byte[] _data0 = new byte[0];
                     ProtocolPackager.UnpackByteVector(PDT, 0, ref _data0);
-                    NodeHash = new Hash(_data0);
+                    RootHash = new Hash(_data0);
                 }
                 else if (PDT.NameType == 1)
                 {
                     ProtocolPackager.UnpackVarint(PDT, 1, ref LeafCount);
-                }       
+                }
+                else if (PDT.NameType == 2)
+                {
+                    byte[] _data1 = new byte[0];
+                    if (ProtocolPackager.UnpackByteVector(PDT, 2, ref _data1))
+                    {
+                        LedgerCloseData.Deserialize(_data1);
+                    }
+                }
                 else if ((PDT.NameType >= 10) && (PDT.NameType <= 26))
                 {
                     byte[] _data2 = new byte[0];
-                    if (ProtocolPackager.UnpackByteVector_s(PDT, PDT.NameType, 32, ref _data2))
+                    if(ProtocolPackager.UnpackByteVector_s(PDT, PDT.NameType, 32, ref _data2))
                     {
-                        Children[PDT.NameType - 10] = new Hash(_data2);
+                        NodeData nd = new NodeData();
+                        nd.Deserialize(_data2);
+                        Children[PDT.NameType - 10] = nd;
                     }
                 }
             }
         }
-
-
     }
+
+
+
 }

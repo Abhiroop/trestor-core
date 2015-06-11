@@ -125,7 +125,7 @@ namespace TNetD
 
         void LoadNodes()
         {
-           // AddNode(0);
+            //AddNode(0);
             //AddNode(1);
         }
 
@@ -412,7 +412,13 @@ namespace TNetD
             Show();
         }
 
-
+        private void menuItem_Main3_Click(object sender, RoutedEventArgs e)
+        {
+            Hide();
+            DebugWindow3 m3 = new DebugWindow3();
+            m3.ShowDialog();
+            Show();
+        }
 
     }
 }
