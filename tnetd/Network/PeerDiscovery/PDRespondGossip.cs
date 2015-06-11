@@ -19,6 +19,11 @@ namespace TNetD.Network.PeerDiscovery
             this.knownPeers = knownPeers;
         }
 
+        public PDRespondGossip()
+        {
+            knownPeers = null;
+        }
+
 
         public byte[] Serialize()
         {
