@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
+using System.Timers;
 using System.Threading.Tasks;
 using TNetD.Network;
 using TNetD.Network.Networking;
@@ -23,6 +24,7 @@ namespace TNetD.Network.PeerDiscovery
         private NodeConfig nodeConfig;
         private NetworkPacketSwitch networkPacketSwitch;
         private Random rng;
+        private Timer timer;
 
         public PeerDiscovery(NodeState nodeState, NodeConfig nodeConfig, NetworkPacketSwitch networkPacketSwitch)
         {
@@ -37,16 +39,26 @@ namespace TNetD.Network.PeerDiscovery
             rng = new Random();
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="interval"></param>
         public void Start(int interval)
         {
-
+            timer = new Timer();
+            timer.Interval = interval;
+            timer.Elapsed += initiatePeerDiscovery;
+            timer.Enabled = true;
+            timer.Start();
         }
 
         /// <summary>
-        /// Initiate gossip style peer discovery protocol with a node
+        /// Initiate gossip-style peer-discovery protocol with a node
         /// </summary>
-        /// <param name="node"></param>
-        private void initiatePeerDiscovery(Hash node)
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void initiatePeerDiscovery(object sender, ElapsedEventArgs e)
         {
             int count = nodeState.ConnectedValidators.Count;
             Hash peer = nodeState.ConnectedValidators.ToArray()[rng.Next(count)];
