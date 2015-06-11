@@ -8,6 +8,7 @@ using TNetD.Network;
 using TNetD.Network.Networking;
 using TNetD.Nodes;
 
+
 namespace TNetD.Network.PeerDiscovery
 {
     class PeerDiscovery
@@ -19,29 +20,47 @@ namespace TNetD.Network.PeerDiscovery
         private Hash requestToken;
 
         private NodeState nodeState;
+        private NodeConfig nodeConfig;
+        private NetworkPacketSwitch networkPacketSwitch;
         private Random rng;
 
-        public PeerDiscovery(NodeState nodeState)
+        public PeerDiscovery(NodeState nodeState, NodeConfig nodeConfig, NetworkPacketSwitch networkPacketSwitch)
         {
             this.nodeState = nodeState;
+            this.nodeConfig = nodeConfig;
+            this.networkPacketSwitch = networkPacketSwitch;
             requestRecipient = null;
             requestToken = null;
             KnownPeers = new ConcurrentDictionary<Hash, byte[]>();
-            // maybe replace by better rng
+
+            // maybe replace by better rng, but no crypo here
             rng = new Random();
+        }
+
+        public void Start(int interval)
+        {
+
         }
 
         /// <summary>
         /// Initiate gossip with a node
         /// </summary>
         /// <param name="node"></param>
-        public void InitiateGossip(Hash node)
+        private void InitiateGossip(Hash node)
         {
             int count = nodeState.ConnectedValidators.Count;
-            int i = rng.Next(count);
+            Hash peer = nodeState.ConnectedValidators.ToArray()[rng.Next(count)];
+            Hash token = TNetUtils.GenerateNewToken();
 
-            PDRespondGossip message = new PDRespondGossip(KnownPeers);
+            //save locally
+            requestRecipient = peer;
+            requestToken = token;
 
+            //send message
+            PDRespondGossip request = new PDRespondGossip(KnownPeers);
+            byte[] message = request.Serialize();
+            NetworkPacket packet = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_REQUEST, message, token);
+            networkPacketSwitch.AddToQueue(peer, packet);
         }
 
         public void GossipMsgHandler(NetworkPacket packet)
@@ -59,7 +78,9 @@ namespace TNetD.Network.PeerDiscovery
 
         private void respondToGossip(NetworkPacket packet)
         {
-
+            Hash token = packet.Token;
+            PDRespondGossip request = new PDRespondGossip();
+            request.Deserialize(packet.Data);
         }
 
         private void processGossipResponse(NetworkPacket packet)
