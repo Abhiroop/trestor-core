@@ -197,9 +197,9 @@ namespace TNetD.Network.Networking
 
         TPT_TIMESYNC_RESPONSE = 0x61,
 
-        TPT_GOSSIP_INIT = 0x70,
+        TPT_PEER_DISCOVERY_INIT = 0x70,
 
-        TPT_GOSSIP_RESPONSE = 0x71
+        TPT_PEER_DISCOVERY_RESPONSE = 0x71
 
     };
 

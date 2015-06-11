@@ -43,10 +43,10 @@ namespace TNetD.Network.PeerDiscovery
         }
 
         /// <summary>
-        /// Initiate gossip with a node
+        /// Initiate gossip style peer discovery protocol with a node
         /// </summary>
         /// <param name="node"></param>
-        private void InitiateGossip(Hash node)
+        private void initiatePeerDiscovery(Hash node)
         {
             int count = nodeState.ConnectedValidators.Count;
             Hash peer = nodeState.ConnectedValidators.ToArray()[rng.Next(count)];
@@ -57,40 +57,40 @@ namespace TNetD.Network.PeerDiscovery
             requestToken = token;
 
             //send message
-            PDRespondGossip request = new PDRespondGossip();
+            PeerDiscoveryMsg request = new PeerDiscoveryMsg();
             request.knownPeers = KnownPeers;
             byte[] message = request.Serialize();
             NetworkPacket packet = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_REQUEST, message, token);
             networkPacketSwitch.AddToQueue(peer, packet);
         }
 
-        public void GossipMsgHandler(NetworkPacket packet)
+        public void PeerDiscoveryMsgHandler(NetworkPacket packet)
         {
             switch (packet.Type)
             {
-                case PacketType.TPT_GOSSIP_INIT:
-                    respondToGossip(packet);
+                case PacketType.TPT_PEER_DISCOVERY_INIT:
+                    respondPeerDiscovery(packet);
                     return;
-                case PacketType.TPT_GOSSIP_RESPONSE:
-                    processGossipResponse(packet);
+                case PacketType.TPT_PEER_DISCOVERY_RESPONSE:
+                    processPeerDiscovery(packet);
                     return;
             }
         }
 
-        private void respondToGossip(NetworkPacket packet)
+        private void respondPeerDiscovery(NetworkPacket packet)
         {
             Hash token = packet.Token;
-            PDRespondGossip request = new PDRespondGossip();
+            PeerDiscoveryMsg request = new PeerDiscoveryMsg();
             request.Deserialize(packet.Data);
 
             processNewPeerList(request.knownPeers);
         }
 
-        private void processGossipResponse(NetworkPacket packet)
+        private void processPeerDiscovery(NetworkPacket packet)
         {
             if (packet.Token == requestToken)
             {
-                PDRespondGossip response = new PDRespondGossip();
+                PeerDiscoveryMsg response = new PeerDiscoveryMsg();
                 response.Deserialize(packet.Data);
                 processNewPeerList(response.knownPeers);
             }

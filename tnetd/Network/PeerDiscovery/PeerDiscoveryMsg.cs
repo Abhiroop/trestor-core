@@ -9,7 +9,7 @@ using TNetD.Protocol;
 
 namespace TNetD.Network.PeerDiscovery
 {
-    class PDRespondGossip
+    class PeerDiscoveryMsg
     {
         // TODO: give value a meaning
         public ConcurrentDictionary<Hash, byte[]> knownPeers;
