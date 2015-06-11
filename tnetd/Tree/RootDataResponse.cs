@@ -11,27 +11,27 @@ using TNetD.Protocol;
 
 namespace TNetD.Tree
 {
-    class RootData : ISerializableBase
+    class RootDataResponse : ISerializableBase
     {
         public Hash RootHash;
         public long LeafCount;
-        public NodeData[] Children;
+        public NodeDataResponse[] Children;
         public LedgerCloseData LedgerCloseData;
 
-        public RootData(ListTreeNode root, LedgerCloseData ledgerCloseData)
+        public RootDataResponse(ListTreeNode root, LedgerCloseData ledgerCloseData)
         {
             RootHash = root.Hash;
             LeafCount = root.LeafCount;
             LedgerCloseData = ledgerCloseData;
-            Children = new NodeData[16];
+            Children = new NodeDataResponse[16];
             for (int i = 0; i < 16; i++)
             {
                 ListTreeNode LTN = root.Children[i];
-                if(LTN != null) Children[i] = new NodeData(LTN);
+                if(LTN != null) Children[i] = new NodeDataResponse(LTN);
             }
         }
 
-        public RootData()
+        public RootDataResponse()
         {
             Init(); // Seems redundant.
         }
@@ -41,7 +41,7 @@ namespace TNetD.Tree
             RootHash = new Hash();
             LeafCount = 0;
             LedgerCloseData = new LedgerCloseData();
-            Children = new NodeData[16];
+            Children = new NodeDataResponse[16];
         }
 
         public byte[] Serialize()
@@ -98,7 +98,7 @@ namespace TNetD.Tree
                     byte[] _data2 = new byte[0];
                     if(ProtocolPackager.UnpackByteVector_s(PDT, PDT.NameType, 32, ref _data2))
                     {
-                        NodeData nd = new NodeData();
+                        NodeDataResponse nd = new NodeDataResponse();
                         nd.Deserialize(_data2);
                         Children[PDT.NameType - 10] = nd;
                     }

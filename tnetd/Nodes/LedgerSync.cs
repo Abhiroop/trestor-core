@@ -82,7 +82,7 @@ namespace TNetD.Nodes
             LedgerCloseData ledgerCloseData;
             nodeState.PersistentCloseHistory.GetLastRowData(out ledgerCloseData);
 
-            RootData rdrm = new RootData(LedgerTree.RootNode, ledgerCloseData);
+            RootDataResponse rdrm = new RootDataResponse(LedgerTree.RootNode, ledgerCloseData);
 
             NetworkPacket response = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_LSYNC_ROOT_RESPONSE,
                 rdrm.Serialize(), packet.Token);
@@ -95,7 +95,7 @@ namespace TNetD.Nodes
             // Check that the packet is valid.
             if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
-                RootData rdrm = new RootData();
+                RootDataResponse rdrm = new RootDataResponse();
                 rdrm.Deserialize(packet.Data);
 
                 /// Compare with current tree and matchup.

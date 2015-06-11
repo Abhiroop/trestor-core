@@ -168,8 +168,8 @@
     <Compile Include="Tree\ListHashTree.cs" />
     <Compile Include="Tree\ListTreeLeafNode.cs" />
     <Compile Include="Tree\ListTreeNode.cs" />
-    <Compile Include="Tree\NodeData.cs" />
-    <Compile Include="Tree\RootData.cs" />
+    <Compile Include="Tree\NodeDataResponse.cs" />
+    <Compile Include="Tree\RootDataResponse.cs" />
     <Compile Include="Tree\TreeSyncData.cs" />
     <Compile Include="UI\ColoredTB.xaml.cs">
       <DependentUpon>ColoredTB.xaml</DependentUpon>
