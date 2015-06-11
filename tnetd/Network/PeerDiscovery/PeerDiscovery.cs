@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using TNetD.Network;
 using TNetD.Network.Networking;
 using TNetD.Nodes;
-using System.ran
 
 namespace TNetD.Network.PeerDiscovery
 {

@@ -11,14 +11,14 @@ using TNetD.Protocol;
 
 namespace TNetD.Tree
 {  
-    class NodeData : ISerializableBase
+    class NodeDataResponse : ISerializableBase
     {
         public Hash NodeHash;
         public long LeafCount;
         public Hash AddressNibbles;
         public Hash[] Children;
 
-        public NodeData(ListTreeNode node)
+        public NodeDataResponse(ListTreeNode node)
         {
             NodeHash = node.Hash;
             LeafCount = node.LeafCount;
@@ -32,7 +32,7 @@ namespace TNetD.Tree
             }
         }
 
-        public NodeData()
+        public NodeDataResponse()
         {
             Init(); // Seems redundant.
         }
