@@ -21,7 +21,7 @@ namespace TNetD.Nodes
         private ListHashTree LedgerTree;
         System.Timers.Timer TimerLedgerSync;
 
-        Queue<>  
+        //Queue<>  
 
         public LedgerSync(NodeState nodeState, NodeConfig nodeConfig, NetworkPacketSwitch networkPacketSwitch)
         {
