@@ -14,15 +14,6 @@ namespace TNetD.Network.PeerDiscovery
         // TODO: give value a meaning
         public ConcurrentDictionary<Hash, byte[]> knownPeers;
 
-        public PDRespondGossip(ConcurrentDictionary<Hash, byte[]> knownPeers)
-        {
-            this.knownPeers = knownPeers;
-        }
-
-        public PDRespondGossip()
-        {
-            knownPeers = null;
-        }
 
 
         public byte[] Serialize()

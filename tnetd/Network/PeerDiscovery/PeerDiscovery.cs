@@ -57,7 +57,8 @@ namespace TNetD.Network.PeerDiscovery
             requestToken = token;
 
             //send message
-            PDRespondGossip request = new PDRespondGossip(KnownPeers);
+            PDRespondGossip request = new PDRespondGossip();
+            request.knownPeers = KnownPeers;
             byte[] message = request.Serialize();
             NetworkPacket packet = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_REQUEST, message, token);
             networkPacketSwitch.AddToQueue(peer, packet);
@@ -81,11 +82,26 @@ namespace TNetD.Network.PeerDiscovery
             Hash token = packet.Token;
             PDRespondGossip request = new PDRespondGossip();
             request.Deserialize(packet.Data);
+
+            processNewPeerList(request.knownPeers);
         }
 
         private void processGossipResponse(NetworkPacket packet)
         {
+            if (packet.Token == requestToken)
+            {
+                PDRespondGossip response = new PDRespondGossip();
+                response.Deserialize(packet.Data);
+                processNewPeerList(response.knownPeers);
+            }
+        }
 
+        private void processNewPeerList(ConcurrentDictionary<Hash, byte[]> knownPeers)
+        {
+            foreach (KeyValuePair<Hash, byte[]> peer in knownPeers)
+            {
+                KnownPeers.AddOrUpdate(peer.Key, peer.Value, (ok, ov) => peer.Value);
+            }
         }
     }
 }
