@@ -22,9 +22,9 @@ namespace TNetD.Time
         }
 
 
-        public void Deserialize(byte[] Data)
+        public void Deserialize(byte[] data)
         {
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
+            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(data);
             ProtocolPackager.UnpackInt64(PDTs[0], 0, ref senderTime);
             ProtocolPackager.UnpackInt64(PDTs[1], 1, ref responderTime);
         }
