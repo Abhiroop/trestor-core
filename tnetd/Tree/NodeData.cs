@@ -10,37 +10,38 @@ using System.Threading.Tasks;
 using TNetD.Protocol;
 
 namespace TNetD.Tree
-{
-    class RootDataResponseMessage : ISerializableBase
+{  
+    class NodeData : ISerializableBase
     {
-        public Hash RootHash;
+        public Hash NodeHash;
         public long LeafCount;
+        public Hash AddressNibbles;
         public Hash[] Children;
-        public LedgerCloseData LedgerCloseData;
 
-        public RootDataResponseMessage(ListTreeNode root, LedgerCloseData ledgerCloseData)
+        public NodeData(ListTreeNode node)
         {
-            RootHash = root.Hash;
-            LeafCount = root.LeafCount;
-            LedgerCloseData = ledgerCloseData;
+            NodeHash = node.Hash;
+            LeafCount = node.LeafCount;
+            AddressNibbles = node.addressNibbles;
+
             Children = new Hash[16];
             for (int i = 0; i < 16; i++)
             {
-                ListTreeNode LTN = root.Children[i];
+                ListTreeNode LTN = node.Children[i];
                 Children[i] = LTN.Hash;
             }
         }
 
-        public RootDataResponseMessage()
+        public NodeData()
         {
             Init(); // Seems redundant.
         }
 
         private void Init()
         {
-            RootHash = new Hash();
+            NodeHash = new Hash();
             LeafCount = 0;
-            LedgerCloseData = new LedgerCloseData();
+            AddressNibbles = new Hash();
             Children = new Hash[16];
         }
 
@@ -48,10 +49,10 @@ namespace TNetD.Tree
         {
             List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
 
-            PDTs.Add(ProtocolPackager.Pack(RootHash, 0));
-            PDTs.Add(ProtocolPackager.PackVarint(LeafCount, 1));
-            PDTs.Add(ProtocolPackager.Pack(LedgerCloseData.Serialize(), 2));
-
+            PDTs.Add(ProtocolPackager.Pack(NodeHash, 0));
+            PDTs.Add(ProtocolPackager.Pack(AddressNibbles, 1));
+            PDTs.Add(ProtocolPackager.PackVarint(LeafCount, 2));
+            
             for (int i = 0; i < 16; i++)
             {
                 if (Children[i].Hex.Length == 16)
@@ -62,8 +63,7 @@ namespace TNetD.Tree
 
             return ProtocolPackager.PackRaw(PDTs);
         }
-
-
+        
         public void Deserialize(byte[] Data)
         {
             List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
@@ -77,34 +77,27 @@ namespace TNetD.Tree
 
                 if (PDT.NameType == 0)
                 {
-                    byte[] _data0 = new byte[0];
-                    ProtocolPackager.UnpackByteVector(PDT, 0, ref _data0);
-                    RootHash = new Hash(_data0);
+                    ProtocolPackager.UnpackHash(PDT, 0, out NodeHash);  
                 }
-                else if (PDT.NameType == 1)
-                {
-                    ProtocolPackager.UnpackVarint(PDT, 1, ref LeafCount);
+                if (PDT.NameType == 1)
+                {                    
+                    ProtocolPackager.UnpackHash(PDT, 1, out AddressNibbles);                    
                 }
                 else if (PDT.NameType == 2)
                 {
-                    byte[] _data1 = new byte[0];
-                    if (ProtocolPackager.UnpackByteVector(PDT, 2, ref _data1))
-                    {
-                        LedgerCloseData.Deserialize(_data1);
-                    }
-                }
+                    ProtocolPackager.UnpackVarint(PDT, 2, ref LeafCount);
+                }       
                 else if ((PDT.NameType >= 10) && (PDT.NameType <= 26))
                 {
                     byte[] _data2 = new byte[0];
-                    if(ProtocolPackager.UnpackByteVector_s(PDT, PDT.NameType, 32, ref _data2))
+                    if (ProtocolPackager.UnpackByteVector_s(PDT, PDT.NameType, 32, ref _data2))
                     {
                         Children[PDT.NameType - 10] = new Hash(_data2);
-                    }                    
+                    }
                 }
             }
         }
+
+
     }
-
-
-
 }
