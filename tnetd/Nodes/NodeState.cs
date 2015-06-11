@@ -44,7 +44,7 @@ namespace TNetD.Nodes
         public HashSet<Hash> ConnectedValidators { get; set; }
 
         /// <summary>
-        /// Key: Token, Value: Time & Public key of recipient
+        /// Key Token, Value: Time, Public key of recipient
         /// </summary>
         public ConcurrentDictionary<Hash, PendingNetworkRequest> PendingNetworkRequests;
 
@@ -102,5 +102,6 @@ namespace TNetD.Nodes
         {
             this.NodeInfo = NodeInfo;
         }
+
     }
 }

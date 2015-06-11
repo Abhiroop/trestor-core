@@ -207,19 +207,23 @@ namespace TNetD.Network.Networking
             if (PacketReceived != null) // Relay the packet to the outer event.
                 PacketReceived(packet);
         }
-
+        
         public NetworkResult AddToQueue(NetworkPacketQueueEntry npqe)
         {
             outgoingPacketQueue.Enqueue(npqe);
+
+            if (npqe.Packet.Token.Hex.Length == Common.NETWORK_TOKEN_LENGTH)
+            {
+                PendingNetworkRequest pnr = new PendingNetworkRequest(nodeState.SystemTime, npqe.PublicKeyDestination);
+                nodeState.PendingNetworkRequests.AddOrUpdate(npqe.Packet.Token, pnr, (k,v) => pnr);
+            }
 
             return NetworkResult.Queued;
         }
 
         public NetworkResult AddToQueue(Hash publicKeyDestination, NetworkPacket packet)
         {
-            outgoingPacketQueue.Enqueue(new NetworkPacketQueueEntry(publicKeyDestination, packet));
-
-            return NetworkResult.Queued;
+            return AddToQueue(new NetworkPacketQueueEntry(publicKeyDestination, packet));            
         }
 
     }

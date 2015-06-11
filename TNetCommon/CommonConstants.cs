@@ -35,6 +35,11 @@ namespace TNetD
         public static readonly int NETWORK_Min_Transaction_Value_SrcDest = 1;
         public static readonly int NETWORK_Min_Transaction_TotalValue = 1;
 
+        /// <summary>
+        /// Token length in bytes (8 => 2^64 possibilities)
+        /// </summary>
+        public static readonly int NETWORK_TOKEN_LENGTH = 8;
+
         public static JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings();
 
         public static readonly int UI_TextBox_Max_Length = 20000;

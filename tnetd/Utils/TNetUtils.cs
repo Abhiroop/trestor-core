@@ -11,12 +11,9 @@ namespace TNetD
 
     class TNetUtils
     {
-        
-
-
         public static Hash GenerateNewToken()
         {
-            byte[] randBytes = new byte[8];            
+            byte[] randBytes = new byte[Common.NETWORK_TOKEN_LENGTH];            
             Common.rngCsp.GetBytes(randBytes);
             return new Hash(randBytes);
         }

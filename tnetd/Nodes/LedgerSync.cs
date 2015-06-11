@@ -11,17 +11,31 @@ using TNetD.Network;
 using TNetD.Network.Networking;
 using TNetD.Tree;
 
+/*
+ * FSM States
+ * 
+ * ST_GOOD
+ * ST_ROOT_FETCH
+ * ST_DATA_FETCH
+ */
+
 namespace TNetD.Nodes
 {
+    public enum LedgerSyncStateTypes { ST_GOOD, ST_ROOT_FETCH, ST_DATA_FETCH };
+
     class LedgerSync
     {
-        private NodeState nodeState;
-        private NodeConfig nodeConfig;
-        private NetworkPacketSwitch networkPacketSwitch;
-        private ListHashTree LedgerTree;
+        object LedgerSyncLock = new object();
+
+        NodeState nodeState;
+        NodeConfig nodeConfig;
+        NetworkPacketSwitch networkPacketSwitch;
+        ListHashTree LedgerTree;
         System.Timers.Timer TimerLedgerSync;
 
-        //Queue<>  
+        LedgerSyncStateTypes LedgerState;
+
+        Queue<NodeDataResponse> PendingNodes = new Queue<NodeDataResponse>();
 
         public LedgerSync(NodeState nodeState, NodeConfig nodeConfig, NetworkPacketSwitch networkPacketSwitch)
         {
@@ -29,6 +43,8 @@ namespace TNetD.Nodes
             this.nodeConfig = nodeConfig;
             this.networkPacketSwitch = networkPacketSwitch;
             this.LedgerTree = nodeState.Ledger.LedgerTree; // Just aliasing.
+
+            LedgerState = LedgerSyncStateTypes.ST_GOOD;
 
             this.networkPacketSwitch.LedgerSyncEvent += networkHandler_LedgerSyncEvent;
 
@@ -40,6 +56,53 @@ namespace TNetD.Nodes
         }
 
         void TimerLedgerSync_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            lock (LedgerSyncLock)
+            {
+                switch (LedgerState)
+                {
+
+                    case LedgerSyncStateTypes.ST_GOOD:
+
+                        handle_ST_GOOD();
+                        break;
+
+                    case LedgerSyncStateTypes.ST_ROOT_FETCH:
+                        handle_ST_ROOT_FETCH();
+                        break;
+
+                    case LedgerSyncStateTypes.ST_DATA_FETCH:
+                        handle_ST_DATA_FETCH();
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// All is well, lets get a random trusted peer and ask for the current root.
+        /// </summary>
+        void handle_ST_GOOD()
+        {
+            List<NodeSocketData> nsds;
+            // THINK: HOW MANY NODES TO CONNECT TO ??
+            if (nodeConfig.GetRandomTrustedNode(out nsds, 1))
+            {
+                foreach(NodeSocketData nsd in nsds)
+                {
+                    NetworkPacket request = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_LSYNC_ROOT_REQUEST,
+                        new byte[0], TNetUtils.GenerateNewToken());
+
+                    networkPacketSwitch.AddToQueue(nsd.PublicKey, request);
+                }
+            }
+        }
+
+        void handle_ST_ROOT_FETCH()
+        {
+
+        }
+
+        void handle_ST_DATA_FETCH()
         {
 
         }
@@ -58,25 +121,6 @@ namespace TNetD.Nodes
             }
         }
 
-        bool GetRandomTrustedNode(out List<NodeSocketData> randomPeer, int count)
-        {
-            int peerCount = nodeConfig.GlobalConfiguration.TrustedNodes.Count;
-            randomPeer = new List<NodeSocketData>();
-            if (peerCount >= count)
-            {
-                int[] dist = Utils.GenerateNonRepeatingDistribution(peerCount, count);
-
-                foreach (int randomPeerID in dist)
-                {
-                    randomPeer.Add(nodeConfig.GlobalConfiguration.TrustedNodes.Values.ElementAt(randomPeerID));
-                }
-
-                return true;
-            }
-
-            return false;
-        }
-        
         void HandleRootRequest(NetworkPacket packet)
         {
             LedgerCloseData ledgerCloseData;

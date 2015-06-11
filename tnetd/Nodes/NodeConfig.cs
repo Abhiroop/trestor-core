@@ -399,5 +399,25 @@ namespace TNetD.Nodes
 
             return info;
         }
+
+        public bool GetRandomTrustedNode(out List<NodeSocketData> randomPeer, int count)
+        {
+            int peerCount = GlobalConfiguration.TrustedNodes.Count;
+            randomPeer = new List<NodeSocketData>();
+            if (peerCount >= count)
+            {
+                int[] dist = Utils.GenerateNonRepeatingDistribution(peerCount, count);
+
+                foreach (int randomPeerID in dist)
+                {
+                    randomPeer.Add(GlobalConfiguration.TrustedNodes.Values.ElementAt(randomPeerID));
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
     }
 }
