@@ -134,6 +134,8 @@
     <Compile Include="Network\NetworkPacketQueueEntry.cs" />
     <Compile Include="Network\Networking\OutgoingConnection.cs" />
     <Compile Include="Network\Networking\IncomingClient.cs" />
+    <Compile Include="Network\PeerDiscovery\PDRespondGossip.cs" />
+    <Compile Include="Network\PeerDiscovery\PDStartGossip.cs" />
     <Compile Include="Network\PeerDiscovery\PeerDiscovery.cs" />
     <Compile Include="Nodes\NetworkPacketSwitch.cs" />
     <Compile Include="Nodes\TransactionHandler.cs" />
