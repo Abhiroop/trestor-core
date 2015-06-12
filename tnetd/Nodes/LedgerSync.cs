@@ -25,6 +25,8 @@ namespace TNetD.Nodes
 
     class LedgerSync
     {
+        private readonly int NODE_REQUEST_COUNT = 20;
+
         object LedgerSyncLock = new object();
 
         NodeState nodeState;
@@ -103,6 +105,9 @@ namespace TNetD.Nodes
         void handle_ST_DATA_FETCH()
         {
 
+
+
+
         }
 
         void networkHandler_LedgerSyncEvent(NetworkPacket packet)
@@ -122,14 +127,15 @@ namespace TNetD.Nodes
         void HandleRootRequest(NetworkPacket packet)
         {
             LedgerCloseData ledgerCloseData;
-            nodeState.PersistentCloseHistory.GetLastRowData(out ledgerCloseData);
+            if (nodeState.PersistentCloseHistory.GetLastRowData(out ledgerCloseData))
+            {
+                RootDataResponse rdrm = new RootDataResponse(LedgerTree.RootNode, ledgerCloseData);
 
-            RootDataResponse rdrm = new RootDataResponse(LedgerTree.RootNode, ledgerCloseData);
+                NetworkPacket response = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_LSYNC_ROOT_RESPONSE,
+                    rdrm.Serialize(), packet.Token);
 
-            NetworkPacket response = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_LSYNC_ROOT_RESPONSE,
-                rdrm.Serialize(), packet.Token);
-
-            networkPacketSwitch.AddToQueue(packet.PublicKeySource, response);
+                networkPacketSwitch.AddToQueue(packet.PublicKeySource, response);
+            }
         }
 
         void HandleRootResponse(NetworkPacket packet)
