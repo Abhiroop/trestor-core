@@ -8,6 +8,7 @@ using System.Collections.Concurrent;
 using TNetD.Nodes;
 using TNetD.Network;
 using TNetD.Network.Networking;
+using System.Data.Entity;
 
 
 namespace TNetD.Time
@@ -85,7 +86,7 @@ namespace TNetD.Time
             diffs.Add(0);
             collectedResponses = new ConcurrentDictionary<Hash, ResponseStruct>();
 
-            long diff = computeAverage(diffs);
+            long diff = computeDiff(diffs);
             double display = ((double)diff) / 10000000;
             DateTime st = DateTime.FromFileTimeUtc(nodeState.SystemTime);
             DateTime nt = DateTime.FromFileTimeUtc(nodeState.NetworkTime);
@@ -172,32 +173,39 @@ namespace TNetD.Time
 
 
 
-        /// <summary>
-        /// Compute median for a list of values
-        /// </summary>
-        /// <param name="values">List of values</param>
-        /// <returns>Median of delays</returns>
-        private long computeMedian(List<long> values)
-        {
-            values.Sort();
-            int l = values.Count;
-            if ((l % 2) != 0)
-                return values[l / 2];
-            else
-                return values[l / 2 - 1] + values[l / 2];
-        }
+
+
 
         /// <summary>
-        /// Compute median for a list of values
+        /// Computes average of list elements after dismissing extremes that exceed two times standard deviation
         /// </summary>
-        /// <param name="values">List of values</param>
-        /// <returns>Median of delays</returns>
-        private long computeAverage(List<long> values)
+        /// <param name="values"></param>
+        /// <returns></returns>
+        private long computeDiff(List<long> values)
         {
-            long sum = 0;
-            foreach (long v in values)
-                sum += v;
-            return sum / values.Count;
+            // compute mean and standard deviation
+            double mean = values.Average();
+            double dev = 0;
+            foreach (long value in values)
+            {
+                dev += ((double)value) * ((double)value);
+            }
+            dev /= values.Count;
+            dev = Math.Sqrt(dev);
+
+            // throw away extremes
+            double tolerance = 2 * dev;
+            List<long> accepted = new List<long>();
+            foreach (long value in values)
+            {
+                if ((value - mean) <= tolerance && (value - mean) >= -tolerance)
+                {
+                    accepted.Add(value);
+                }
+            }
+
+            Print("accepted " + accepted.Count  + " out of " + values.Count + " responses");
+            return (long)accepted.Average();
         }
     }
 }
