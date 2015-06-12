@@ -188,7 +188,8 @@ namespace TNetD.Time
             double dev = 0;
             foreach (long value in values)
             {
-                dev += ((double)value) * ((double)value);
+                double diff = value - mean;
+                dev += diff * diff;
             }
             dev /= values.Count;
             dev = Math.Sqrt(dev);
