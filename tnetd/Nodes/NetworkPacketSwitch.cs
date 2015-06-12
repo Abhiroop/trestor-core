@@ -19,6 +19,7 @@ namespace TNetD.Nodes
         public delegate void NetworkPacketEventHandler(NetworkPacket packet);
         public event NetworkPacketEventHandler TimeSyncEvent;
         public event NetworkPacketEventHandler LedgerSyncEvent;
+        public event NetworkPacketEventHandler PeerDiscoveryEvent;
 
         NodeConfig nodeConfig;
         NodeState nodeState;
@@ -123,7 +124,16 @@ namespace TNetD.Nodes
                 case PacketType.TPT_TIMESYNC_REQUEST:
                 case PacketType.TPT_TIMESYNC_RESPONSE:
 
-                    if (TimeSyncEvent != null) TimeSyncEvent(packet);
+                    if (TimeSyncEvent != null) 
+                        TimeSyncEvent(packet);
+
+                    break;
+
+                case PacketType.TPT_PEER_DISCOVERY_INIT:
+                case PacketType.TPT_PEER_DISCOVERY_RESPONSE:
+
+                    if (PeerDiscoveryEvent != null) 
+                        PeerDiscoveryEvent(packet);
 
                     break;
 

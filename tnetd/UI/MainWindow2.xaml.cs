@@ -158,12 +158,12 @@ namespace TNetD
 
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 3; i++)
             {
                 AddNode(i);
                 nodes[i].peerDiscovery.KnownPeers = generateFakePeerList(10);
             }
-
+            //generateTrustlist();
             nodes[0].peerDiscovery.Start(5000);
         }
 
@@ -171,7 +171,7 @@ namespace TNetD
         {
             ConcurrentDictionary<Hash, byte[]> list = new ConcurrentDictionary<Hash,byte[]>();
             int n = rng.Next(max);
-            for (int i = 0; i < max; i++) {
+            for (int i = 0; i < n; i++) {
                 Hash peer = TNetUtils.GenerateNewToken();
                 list.AddOrUpdate(peer, (byte[]) null, (ok, ov) => null);
             }
@@ -180,7 +180,7 @@ namespace TNetD
 
         private void generateTrustlist()
         {
-            using (FileStream fs = new FileStream("newTrustList.ini", FileMode.Create))
+            using (FileStream fs = new FileStream("TrustedNodes.ini", FileMode.Create))
             {
                 using (StreamWriter w = new StreamWriter(fs, Encoding.UTF8))
                 {

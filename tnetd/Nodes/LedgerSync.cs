@@ -49,7 +49,7 @@ namespace TNetD.Nodes
             this.networkPacketSwitch.LedgerSyncEvent += networkHandler_LedgerSyncEvent;
 
             TimerLedgerSync = new System.Timers.Timer();
-            TimerLedgerSync.Elapsed += TimerLedgerSync_Elapsed;
+            //TimerLedgerSync.Elapsed += TimerLedgerSync_Elapsed;
             TimerLedgerSync.Enabled = true;
             TimerLedgerSync.Interval = nodeConfig.UpdateFrequencyLedgerSyncMS;
             TimerLedgerSync.Start();

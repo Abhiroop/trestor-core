@@ -22,7 +22,7 @@ namespace TNetD.Network.PeerDiscovery
             int i = 0;
             foreach (KeyValuePair<Hash, byte[]> peer in knownPeers)
             {
-                PDTs[i] = (ProtocolPackager.Pack(peer.Key, (byte)i));
+                PDTs[i] = (ProtocolPackager.Pack(peer.Key, 0));
                 i++;
             }
             return ProtocolPackager.PackRaw(PDTs);
@@ -35,7 +35,7 @@ namespace TNetD.Network.PeerDiscovery
             for (int i = 0; i < PDTs.Count; i++)
             {
                 Hash peer;
-                ProtocolPackager.UnpackHash(PDTs[0], (byte)i, out peer);
+                ProtocolPackager.UnpackHash(PDTs[0], 0, out peer);
                 knownPeers[peer] = null;
             }
         }
