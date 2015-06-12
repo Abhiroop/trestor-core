@@ -145,8 +145,10 @@ namespace TNetD.Nodes
             TimerTimeSync = new System.Timers.Timer();
             TimerTimeSync.Elapsed += TimerTimeSync_Elapsed;
             TimerTimeSync.Enabled = true;
-            TimerTimeSync.Interval = 10000;
+            TimerTimeSync.Interval = 10 * 60 * 1000;
             TimerTimeSync.Start();
+
+            peerDiscovery.Start(15 * 60 * 1000);
 
             DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
         }

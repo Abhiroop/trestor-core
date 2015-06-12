@@ -156,15 +156,19 @@ namespace TNetD
             }
         }
 
+
+
+
+
+
+
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 5; i++)
             {
                 AddNode(i);
-                nodes[i].peerDiscovery.KnownPeers = generateFakePeerList(10);
+                nodes[i].peerDiscovery.KnownPeers = generateFakePeerList(100);
             }
-            //generateTrustlist();
-            nodes[0].peerDiscovery.Start(5000);
         }
 
         private ConcurrentDictionary<Hash, byte[]> generateFakePeerList(int max)

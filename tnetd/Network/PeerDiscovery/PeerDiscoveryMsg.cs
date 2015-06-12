@@ -35,7 +35,7 @@ namespace TNetD.Network.PeerDiscovery
             for (int i = 0; i < PDTs.Count; i++)
             {
                 Hash peer;
-                ProtocolPackager.UnpackHash(PDTs[0], 0, out peer);
+                ProtocolPackager.UnpackHash(PDTs[i], 0, out peer);
                 knownPeers[peer] = null;
             }
         }

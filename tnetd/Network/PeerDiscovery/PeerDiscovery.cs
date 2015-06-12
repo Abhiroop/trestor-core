@@ -36,7 +36,7 @@ namespace TNetD.Network.PeerDiscovery
             KnownPeers = new ConcurrentDictionary<Hash, byte[]>();
             networkPacketSwitch.PeerDiscoveryEvent += networkHandler_PeerDiscoveryEvent;
 
-            // maybe replace by better rng, but no crypo here
+            // maybe replace by better rng, but no crypo here anyway
             rng = new Random();
         }
 
@@ -47,10 +47,8 @@ namespace TNetD.Network.PeerDiscovery
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="interval"></param>
+
+
         public void Start(int interval)
         {
             timer = new Timer();
@@ -58,7 +56,6 @@ namespace TNetD.Network.PeerDiscovery
             timer.Elapsed += initiatePeerDiscovery;
             timer.Enabled = true;
             timer.Start();
-            Print("timer started");
         }
 
         /// <summary>
@@ -90,7 +87,6 @@ namespace TNetD.Network.PeerDiscovery
 
         public void networkHandler_PeerDiscoveryEvent(NetworkPacket packet)
         {
-            Print("incoming packet");
             switch (packet.Type)
             {
                 case PacketType.TPT_PEER_DISCOVERY_INIT:
@@ -104,12 +100,20 @@ namespace TNetD.Network.PeerDiscovery
 
         private void respondPeerDiscovery(NetworkPacket packet)
         {
-            Print("request arrived");
-            Hash token = packet.Token;
             PeerDiscoveryMsg request = new PeerDiscoveryMsg();
             request.Deserialize(packet.Data);
 
+            // process incoming peer list
             processNewPeerList(request.knownPeers);
+
+            // send message with own peer list
+            Hash token = packet.Token;
+            Hash peer = packet.PublicKeySource;
+            PeerDiscoveryMsg response = new PeerDiscoveryMsg();
+            response.knownPeers = KnownPeers;
+            byte[] message = response.Serialize();
+            NetworkPacket newpacket = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_PEER_DISCOVERY_RESPONSE, message, token);
+            networkPacketSwitch.AddToQueue(peer, newpacket);
         }
 
         private void processPeerDiscovery(NetworkPacket packet)
@@ -120,8 +124,16 @@ namespace TNetD.Network.PeerDiscovery
                 response.Deserialize(packet.Data);
                 processNewPeerList(response.knownPeers);
             }
+            else
+            {
+                Print("toke mismatch");
+            }
         }
 
+        /// <summary>
+        /// Will merge a new peer list into the existing one
+        /// </summary>
+        /// <param name="knownPeers"></param>
         private void processNewPeerList(ConcurrentDictionary<Hash, byte[]> knownPeers)
         {
             int oldcount = KnownPeers.Count;
