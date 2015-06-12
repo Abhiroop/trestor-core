@@ -13,6 +13,13 @@ namespace TNetD.Tree
 {
 
     public enum TreeResponseType { Added, Removed, Updated, Failed, NothingDone };
+
+    public enum TraverseResult
+    {
+        Success, MidwayBreak, NodeDoesNotExist, LeafDoesNotExist, ElementDoesNotExistInLeaf,
+        ReachedLeafNode, TooLongAddressPath
+    }
+
     public delegate TreeResponseType LeafDataFetchEventHandler(LeafDataType[] accountInfo);
 
     /// <summary>
@@ -232,7 +239,7 @@ namespace TNetD.Tree
                     /////////////////////////////////////
 
                     FoundNodesCount++;
-                  
+
                     if (Root.Hash != null)
                     {
                         //DisplayUtils.Display("ID : " + HexUtil.ToString(Root.Hash.Hex) + " : " + depth);                  
@@ -248,7 +255,7 @@ namespace TNetD.Tree
                     {
                         //DisplayUtils.Display("Intermediate Traversed : " + Root.Children[i].Hash.ToString() + " : " + depth);
 
-                        TraverseTree(Root.Children[i], ref FoundLeafDataCount, ref FoundNodesCount, leafDataFetch, depth+1);
+                        TraverseTree(Root.Children[i], ref FoundLeafDataCount, ref FoundNodesCount, leafDataFetch, depth + 1);
                     }
                     else
                     {
@@ -279,7 +286,7 @@ namespace TNetD.Tree
             return foundElements;
         }
 
-        public enum TraverseResult { Success, MidwayBreak, NodeDoesNotExist, LeafDoesNotExist, ElementDoesNotExistInLeaf }
+
 
         /// <summary>
         /// Traverses to a leaf node and returns the stack while traversing.
@@ -379,6 +386,50 @@ namespace TNetD.Tree
             return TraverseResult.NodeDoesNotExist;
         }
 
+        public TraverseResult TraverseToNode(Hash AddressNibbles, out ListTreeNode Leaf)
+        {
+            ListTreeNode TempRoot = Root;
+
+            int LeafDepth = Constants.HashTree_NodeListDepth;
+
+            byte[] addressNibbles = AddressNibbles.Hex;
+
+            if (addressNibbles.Length <= LeafDepth)
+            {
+                for (int i = 0; i < AddressNibbles.Hex.Length; i++)
+                {
+                    byte Nibble = AddressNibbles.Hex[i];
+
+                    if ((i < (LeafDepth - 1)))
+                    {
+                        if (TempRoot.Children[Nibble] == null)
+                        {
+                            Leaf = default(ListTreeLeafNode);
+                            return TraverseResult.MidwayBreak;
+                        }
+
+                        TempRoot = TempRoot.Children[Nibble];
+                    }
+
+                    if (i == (addressNibbles.Length - 1)) // ValidateCondition
+                    {
+                        // Success
+                        Leaf = TempRoot;
+                        return TraverseResult.Success;
+                    }
+                }
+            }
+            else
+            {
+                Leaf = default(ListTreeLeafNode);
+                return TraverseResult.TooLongAddressPath;
+            }
+
+            Leaf = default(ListTreeLeafNode);
+            return TraverseResult.NodeDoesNotExist;
+        }
+
+
         /// <summary>
         /// True if the node exists.
         /// This traverses the tree to get the info, so is slightly expensive. Still pretty fast.
@@ -427,7 +478,7 @@ namespace TNetD.Tree
                 return tr;
             }
         }
-        
+
         /// <summary>
         /// Traverse down tree to see the availability of given leaf node.
         /// This is equivalent to trying to fetch the element, in terms of complexity.
@@ -468,12 +519,12 @@ namespace TNetD.Tree
                     List<byte> _tempHash = new List<byte>();
                     long entityCount = 0;
                     int childCount = 0;
-                    
+
                     // Process the leaf [actual leafs are the clilds if this node]
                     if (!LeafDone)
                     {
                         // Do the hashing for the node.
-                        
+
                         for (int i = 0; i < 16; i++)
                         {
                             if (node.Children[i] != null)
@@ -559,213 +610,212 @@ namespace TNetD.Tree
         public ListTreeNode RootNode
         {
             get { return Root; }
-        }        
+        }
 
-        /*
         /// <summary>
         /// This method will give all the leaves under a node
-        /// Recursive
+        /// Method is recursive. Set MaxLeaves properly.
         /// </summary>
+        /// /// <param name="MaxLeaves"></param>
         /// <param name="Node"></param>
         /// <param name="Leaves"></param>
         /// <returns></returns>
-        public void getAllLeafUnderNode(ListTreeNode Node, out List<LeafDataType> Leaves)
+        public void GetAllLeavesUnderNode(long MaxLeaves, ListTreeNode Node, ref List<LeafDataType> Leaves)
         {
-            List<LeafDataType> leaves = new List<LeafDataType>();
+            //List<LeafDataType> leaves = new List<LeafDataType>();
 
             for (int i = 0; i < 16; i++)
             {
                 if (Node.Children[i] != null)
-                {
-                    //base condition of the recursion
+                {         
+                    // Base condition of the recursion
                     if (Node.Children[i].IsLeaf)
                     {
                         ListTreeLeafNode leafNode = (ListTreeLeafNode)Node.Children[i];
+
+                        if ((Leaves.Count + leafNode.Count) > MaxLeaves) break;
+
                         SortedDictionary<Hash, LeafDataType> val = leafNode.Values;
                         foreach (KeyValuePair<Hash, LeafDataType> v in val)
                         {
-                            leaves.Add(v.Value);
+                            Leaves.Add(v.Value);
                         }
-                        Leaves = leaves;
 
                         return;
-                    }
-
-                    //recusion steps
+                    } // recusion steps                    
                     else
                     {
-                        getAllLeafUnderNode(Node.Children[i], out leaves);
+                        GetAllLeavesUnderNode(MaxLeaves, Node.Children[i], ref Leaves);
                     }
                 }
             }
-            Leaves = leaves;
         }
 
-      
-        public List<TreeSyncData> getDifference(List<ListTreeNode> other, List<ListTreeNode> me)
-        {
-            List<TreeSyncData> difference = new List<TreeSyncData>();
+        /*
+          public List<TreeSyncData> getDifference(List<ListTreeNode> other, List<ListTreeNode> me)
+          {
+              List<TreeSyncData> difference = new List<TreeSyncData>();
 
-            int i = 0, j = 0;
+              int i = 0, j = 0;
 
-            while (true)
-            {
-                if (i == other.Count)
-                    break;
+              while (true)
+              {
+                  if (i == other.Count)
+                      break;
 
-                //all new
-                if (j == me.Count)
-                {
-                    for (int t = i; t < other.Count; t++)
-                    {
-                        TreeSyncData TSD = new TreeSyncData(other[t], false);
-                        TSD.setGetAll(other[t].LeafCount <= Constants.SYNC_LEAF_COUNT_THRESHOLD);
-                    }
-                    break;
-                }
+                  //all new
+                  if (j == me.Count)
+                  {
+                      for (int t = i; t < other.Count; t++)
+                      {
+                          TreeSyncData TSD = new TreeSyncData(other[t], false);
+                          TSD.setGetAll(other[t].LeafCount <= Constants.SYNC_LEAF_COUNT_THRESHOLD);
+                      }
+                      break;
+                  }
 
-                if (other[i].addressNibbles.Hex.Length != me[j].addressNibbles.Hex.Length)
-                {
-                    return new List<TreeSyncData>();
-                }
+                  if (other[i].addressNibbles.Hex.Length != me[j].addressNibbles.Hex.Length)
+                  {
+                      return new List<TreeSyncData>();
+                  }
 
-                int compare = other[i].addressNibbles.CompareTo(me[j].addressNibbles);
+                  int compare = other[i].addressNibbles.CompareTo(me[j].addressNibbles);
 
-                if (compare == 0)
-                {
-                    i++;
-                    j++;
-                }
-                //new
-                else if (compare == -1)
-                {
-                    TreeSyncData LSD = new TreeSyncData(other[i], false);
-                    // Get leaf nodes if the count is below threshold.
-                    LSD.setGetAll(other[i].LeafCount <= Constants.SYNC_LEAF_COUNT_THRESHOLD);
-                    difference.Add(LSD);
-                    i++;
-                }
-                else
-                {
-                    // thenga i have you dont
-                    //pretty much fucked up i guess :P
-                    j++;
-                }
-            }
+                  if (compare == 0)
+                  {
+                      i++;
+                      j++;
+                  }
+                  //new
+                  else if (compare == -1)
+                  {
+                      TreeSyncData LSD = new TreeSyncData(other[i], false);
+                      // Get leaf nodes if the count is below threshold.
+                      LSD.setGetAll(other[i].LeafCount <= Constants.SYNC_LEAF_COUNT_THRESHOLD);
+                      difference.Add(LSD);
+                      i++;
+                  }
+                  else
+                  {
+                      // thenga i have you dont
+                      //pretty much fucked up i guess :P
+                      j++;
+                  }
+              }
 
-            return difference;
-        }
+              return difference;
+          }
 
-        public void sendTreeSyncData(List<TreeSyncData> incoming, out List<ListTreeNode> internalNodes, out List<LeafDataType> leaves)
-        {
-            List<ListTreeNode> outInternal = new List<ListTreeNode>();
-            List<LeafDataType> outLeaves = new List<LeafDataType>();
-            for (int i = 0; i < incoming.Count; i++)
-            {
-                TreeSyncData TSD = incoming[i];
-                if (TSD.getAll)
-                {
-                    ListTreeNode LTN = TSD.LTN;
-                    List<LeafDataType> temp = new List<LeafDataType>();
-                    this.getAllLeafUnderNode(LTN, out temp);
-                    outLeaves.AddRange(temp);
-                }
-                else
-                {
-                    Hash address = TSD.address;
-                    List<ListTreeNode> temp = new List<ListTreeNode>();
-                    this.getImmediateChildren(address, out temp);
-                    outInternal.AddRange(temp);
-                }
-            }
-            internalNodes = outInternal;
-            leaves = outLeaves;
+          public void sendTreeSyncData(List<TreeSyncData> incoming, out List<ListTreeNode> internalNodes, out List<LeafDataType> leaves)
+          {
+              List<ListTreeNode> outInternal = new List<ListTreeNode>();
+              List<LeafDataType> outLeaves = new List<LeafDataType>();
+              for (int i = 0; i < incoming.Count; i++)
+              {
+                  TreeSyncData TSD = incoming[i];
+                  if (TSD.getAll)
+                  {
+                      ListTreeNode LTN = TSD.LTN;
+                      List<LeafDataType> temp = new List<LeafDataType>();
+                      this.getAllLeafUnderNode(LTN, out temp);
+                      outLeaves.AddRange(temp);
+                  }
+                  else
+                  {
+                      Hash address = TSD.address;
+                      List<ListTreeNode> temp = new List<ListTreeNode>();
+                      this.getImmediateChildren(address, out temp);
+                      outInternal.AddRange(temp);
+                  }
+              }
+              internalNodes = outInternal;
+              leaves = outLeaves;
 
-        }
-
-
-        //gives back immediate children
-        public bool getImmediateChildren(Hash hash, out List<ListTreeNode> nodes)
-        {
-            nodes = new List<ListTreeNode>();
-
-            List<ListTreeNode> nd = new List<ListTreeNode>();
-
-            ListTreeNode TempRoot = Root;
-            int depth = Constants.HashTree_NodeListDepth;
-
-            for (int i = 0; i < depth; i++)
-            {
-                byte Nibble = hash.GetNibble(i);
-
-                if ((i < (depth - 1)))
-                {
-                    if (TempRoot.Children[Nibble] == null)
-                    {
-                        nodes = nd;
-                        return false;
-                    }
-
-                    TempRoot = TempRoot.Children[Nibble];
-                }
-
-                if (i == (depth - 1))
-                {
-                    nodes = nd;
-                    return false;
-                }
-            }
-
-            for (int i = 0; i < 16; i++)
-            {
-                if (TempRoot.Children[i] != null)
-                    nodes.Add(TempRoot.Children[i]);
-            }
-            nodes = nd;
-            return true;
-        }
-
-        public List<ListTreeNode> depthOrderTraversal(int depth)
-        {
-            List<ListTreeNode> listToReturn = new List<ListTreeNode>();
-            ListTreeNode tempRoot = Root;
-
-            List<ListTreeNode> list1 = new List<ListTreeNode>();
-            List<ListTreeNode> list2 = new List<ListTreeNode>();
-
-            list1.Add(tempRoot);
-
-            int currentDepth = 0;
-
-            while (currentDepth < depth)
-            {
-                currentDepth++;
-
-                for (int item = 0; item < list1.Count; item++)
-                {
-                    for (int i = 0; i < 16; i++)
-                    {
-                        ListTreeNode currentNode = list1[item];
-                        if (currentNode.Children[i] != null)
-                        {
-                            list2.Add(currentNode.Children[i]);
-                        }
-                    }
-                }
-
-                list1.Clear();
-                list1.AddRange(list2);
-                list2.Clear();
-            }
-
-            listToReturn = list1;
-
-            return listToReturn;
-
-        }
+          }
 
 
-        */
+          //gives back immediate children
+          public bool getImmediateChildren(Hash hash, out List<ListTreeNode> nodes)
+          {
+              nodes = new List<ListTreeNode>();
+
+              List<ListTreeNode> nd = new List<ListTreeNode>();
+
+              ListTreeNode TempRoot = Root;
+              int depth = Constants.HashTree_NodeListDepth;
+
+              for (int i = 0; i < depth; i++)
+              {
+                  byte Nibble = hash.GetNibble(i);
+
+                  if ((i < (depth - 1)))
+                  {
+                      if (TempRoot.Children[Nibble] == null)
+                      {
+                          nodes = nd;
+                          return false;
+                      }
+
+                      TempRoot = TempRoot.Children[Nibble];
+                  }
+
+                  if (i == (depth - 1))
+                  {
+                      nodes = nd;
+                      return false;
+                  }
+              }
+
+              for (int i = 0; i < 16; i++)
+              {
+                  if (TempRoot.Children[i] != null)
+                      nodes.Add(TempRoot.Children[i]);
+              }
+              nodes = nd;
+              return true;
+          }
+
+          public List<ListTreeNode> depthOrderTraversal(int depth)
+          {
+              List<ListTreeNode> listToReturn = new List<ListTreeNode>();
+              ListTreeNode tempRoot = Root;
+
+              List<ListTreeNode> list1 = new List<ListTreeNode>();
+              List<ListTreeNode> list2 = new List<ListTreeNode>();
+
+              list1.Add(tempRoot);
+
+              int currentDepth = 0;
+
+              while (currentDepth < depth)
+              {
+                  currentDepth++;
+
+                  for (int item = 0; item < list1.Count; item++)
+                  {
+                      for (int i = 0; i < 16; i++)
+                      {
+                          ListTreeNode currentNode = list1[item];
+                          if (currentNode.Children[i] != null)
+                          {
+                              list2.Add(currentNode.Children[i]);
+                          }
+                      }
+                  }
+
+                  list1.Clear();
+                  list1.AddRange(list2);
+                  list2.Clear();
+              }
+
+              listToReturn = list1;
+
+              return listToReturn;
+
+          }
+
+
+          */
 
 
     }

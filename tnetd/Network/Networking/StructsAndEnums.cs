@@ -150,7 +150,8 @@ namespace TNetD.Network.Networking
         TPT_LSYNC_NODE_REQUEST = 0x42,
         TPT_LSYNC_NODE_RESPONSE = 0x43,
         TPT_LSYNC_LEAF_REQUEST = 0x44,
-        TPT_LSYNC_LEAF_RESPONSE = 0x45,
+        TPT_LSYNC_LEAF_REQUEST_ALL = 0x45,
+        TPT_LSYNC_LEAF_RESPONSE = 0x46,
 
         /// <summary>
         /// Request transaction data for a range of Ledger Sequence Numbers

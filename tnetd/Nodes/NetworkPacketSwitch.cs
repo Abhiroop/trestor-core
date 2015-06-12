@@ -26,20 +26,20 @@ namespace TNetD.Nodes
         GlobalConfiguration globalConfiguration;
 
         SecureNetwork network = default(SecureNetwork);
-        
+
         public NetworkPacketSwitch(NodeConfig nodeConfig, NodeState nodeState, GlobalConfiguration globalConfiguration)
         {
             this.nodeConfig = nodeConfig;
             this.nodeState = nodeState;
             this.globalConfiguration = globalConfiguration;
-            
+
             network = new SecureNetwork(nodeConfig, nodeState);
             network.PacketReceived += network_PacketReceived;
 
             network.Initialize();
         }
 
-        public Hash [] GetConnectedNodes(ConnectionListType type)
+        public Hash[] GetConnectedNodes(ConnectionListType type)
         {
             return network.GetConnectedNodes(type);
         }
@@ -54,7 +54,7 @@ namespace TNetD.Nodes
                 foreach (KeyValuePair<Hash, NodeSocketData> kvp in globalConfiguration.TrustedNodes)
                 {
                     // Make sure we are not connecting to self !!
-                    if (kvp.Key != nodeConfig.PublicKey) 
+                    if (kvp.Key != nodeConfig.PublicKey)
                     {
                         if (!network.IsConnected(kvp.Key))
                         {
@@ -67,11 +67,11 @@ namespace TNetD.Nodes
 
             });
         }
-        
+
         async Task SendInitialize(Hash publicKey)
         {
             await Task.Delay(Common.random.Next(500, 1000)); // Wait a random delay before connecting.
-            NetworkPacketQueueEntry npqe = new NetworkPacketQueueEntry(publicKey, 
+            NetworkPacketQueueEntry npqe = new NetworkPacketQueueEntry(publicKey,
                 new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_HELLO, new byte[0]));
 
             network.AddToQueue(npqe);
@@ -84,12 +84,12 @@ namespace TNetD.Nodes
         void network_PacketReceived(NetworkPacket packet)
         {
             //DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + packet.PublicKeySource + " | Data Length : " + packet.Data.Length);
-                       
+
             switch (packet.Type)
             {
                 case PacketType.TPT_TRANS_REQUEST:
                 case PacketType.TPT_TRANS_FORWARDING:
-                    
+
                     break;
 
                 case PacketType.TPT_CONS_STATE:
@@ -105,7 +105,10 @@ namespace TNetD.Nodes
                 case PacketType.TPT_LSYNC_ROOT_RESPONSE:
                 case PacketType.TPT_LSYNC_NODE_REQUEST:
                 case PacketType.TPT_LSYNC_NODE_RESPONSE:
-
+                case PacketType.TPT_LSYNC_LEAF_REQUEST:
+                case PacketType.TPT_LSYNC_LEAF_REQUEST_ALL:
+                case PacketType.TPT_LSYNC_LEAF_RESPONSE:
+                    
                     if (LedgerSyncEvent != null) LedgerSyncEvent(packet);
 
                     break;
@@ -118,13 +121,13 @@ namespace TNetD.Nodes
                 case PacketType.TPT_TX_SYNC_QUERY_RESPONSE:
                 case PacketType.TPT_TX_SYNC_CLOSEHISTORY_REQUEST:
                 case PacketType.TPT_TX_SYNC_CLOSEHISTORY_RESPONSE:
-                    
+
                     break;
 
                 case PacketType.TPT_TIMESYNC_REQUEST:
                 case PacketType.TPT_TIMESYNC_RESPONSE:
 
-                    if (TimeSyncEvent != null) 
+                    if (TimeSyncEvent != null)
                         TimeSyncEvent(packet);
 
                     break;
@@ -132,15 +135,15 @@ namespace TNetD.Nodes
                 case PacketType.TPT_PEER_DISCOVERY_INIT:
                 case PacketType.TPT_PEER_DISCOVERY_RESPONSE:
 
-                    if (PeerDiscoveryEvent != null) 
+                    if (PeerDiscoveryEvent != null)
                         PeerDiscoveryEvent(packet);
 
                     break;
 
-            }           
+            }
 
         }
-        
+
         public NetworkResult AddToQueue(NetworkPacketQueueEntry npqe)
         {
             return network.AddToQueue(npqe);
@@ -150,7 +153,7 @@ namespace TNetD.Nodes
         {
             return network.AddToQueue(publicKeyDestination, packet);
         }
-        
+
         public void Stop()
         {
             network.Stop();

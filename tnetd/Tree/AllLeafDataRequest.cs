@@ -25,6 +25,12 @@ namespace TNetD.Tree
             this.AddressNibbles = new Hash();
         }
 
+        public AllLeafDataRequest(NodeDataResponse ndr)
+        {
+            this.TotalRequestedLeaves = ndr.LeafCount;
+            this.AddressNibbles = ndr.AddressNibbles;
+        }
+
         public AllLeafDataRequest(long totalRequestedLeaves, Hash addressNibbles)
         {
             this.TotalRequestedLeaves = totalRequestedLeaves;

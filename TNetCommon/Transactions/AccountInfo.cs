@@ -33,6 +33,17 @@ namespace TNetD.Transactions
         NetworkType networkType;
         long lastTransactionTime;
 
+        public AccountInfo()
+        {
+            this.publicKey = new Hash();
+            this.money = 0;
+            this.name = "";
+            this.accountState = AccountState.Normal;
+            this.networkType = NetworkType.MainNet;
+            this.accountType = AccountType.MainNormal;
+            this.lastTransactionTime = 0;
+        }
+
         ///////////////////////////////////
 
         /// <summary>
@@ -249,6 +260,8 @@ namespace TNetD.Transactions
                         break;
                 }
             }
+
+            updateInternalHash();
         }
 
         public static long CalculateTotalMoney(LeafDataType[] ais)

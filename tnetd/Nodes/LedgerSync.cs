@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TNetD.Network;
 using TNetD.Network.Networking;
+using TNetD.Transactions;
 using TNetD.Tree;
 
 /*
@@ -68,8 +69,8 @@ namespace TNetD.Nodes
                         break;
 
                     //case LedgerSyncStateTypes.ST_ROOT_FETCH:
-                      //  handle_ST_ROOT_FETCH();
-                       // break;
+                    //  handle_ST_ROOT_FETCH();
+                    // break;
 
                     case LedgerSyncStateTypes.ST_DATA_FETCH:
                         handle_ST_DATA_FETCH();
@@ -104,20 +105,32 @@ namespace TNetD.Nodes
 
         void handle_ST_DATA_FETCH()
         {
-            int totalOrderedNodes = 0;
-            int totalOrderedLeaves = 0;
+            long totalOrderedNodes = 0;
+            long totalOrderedLeaves = 0;
 
-            while ((PendingNodesToBeFetched.Count > 0) && 
-                (totalOrderedNodes < Common.LSYNC_MAX_ORDERED_NODES) && 
+            while ((PendingNodesToBeFetched.Count > 0) &&
+                (totalOrderedNodes < Common.LSYNC_MAX_ORDERED_NODES) &&
                 (totalOrderedLeaves < Common.LSYNC_MAX_ORDERED_LEAVES))
             {
                 NodeDataResponse ndr = PendingNodesToBeFetched.Dequeue();
 
-                if(ndr.LeafCount <= Common.LSYNC_MAX_LEAVES_TO_FETCH)
+                if (ndr.LeafCount <= Common.LSYNC_MAX_LEAVES_TO_FETCH)
                 {
                     // Fetch all nodes below
+                    List<NodeSocketData> nsds;
 
-                    
+                    // A single random trusted node is okay for fetching data.
+                    if (nodeConfig.GetRandomTrustedNode(out nsds, 1)) 
+                    {
+                        AllLeafDataRequest aldr = new AllLeafDataRequest(ndr);
+
+                        NetworkPacket request = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_LSYNC_LEAF_REQUEST_ALL,
+                            aldr.Serialize(), TNetUtils.GenerateNewToken());
+
+                        networkPacketSwitch.AddToQueue(nsds[0].PublicKey, request);
+
+                        totalOrderedLeaves += aldr.TotalRequestedLeaves;
+                    }
                 }
                 else
                 {
@@ -139,6 +152,59 @@ namespace TNetD.Nodes
                 case PacketType.TPT_LSYNC_ROOT_RESPONSE:
                     HandleRootResponse(packet);
                     break;
+
+                case PacketType.TPT_LSYNC_LEAF_REQUEST_ALL:
+                    HandleLeafRequestAll(packet);
+                    break;
+
+                case PacketType.TPT_LSYNC_LEAF_RESPONSE:
+                    HandleLeafResponse(packet);
+                    break;
+            }
+        }
+
+        void HandleLeafRequestAll(NetworkPacket packet)
+        {
+            AllLeafDataRequest aldr = new AllLeafDataRequest();
+            aldr.Deserialize(packet.Data);
+
+            if(aldr.TotalRequestedLeaves <= Common.LSYNC_MAX_LEAVES_TO_FETCH)
+            {
+                ListTreeNode node;
+
+                if (LedgerTree.TraverseToNode(aldr.AddressNibbles, out node) == TraverseResult.Success)
+                {
+                    List<LeafDataType> leaves = new List<LeafDataType>();
+
+                    LedgerTree.GetAllLeavesUnderNode(Common.LSYNC_MAX_LEAVES_TO_FETCH, node, ref leaves);
+
+                    LeafAccountDataResponse ladr = new LeafAccountDataResponse();
+
+                    foreach(LeafDataType ldt in leaves)
+                    {
+                        AccountInfo ai = (AccountInfo) ldt;
+                        ladr.Add(ai);
+                    }
+
+                    NetworkPacket response = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_LSYNC_LEAF_RESPONSE,
+                            ladr.Serialize(), packet.Token);
+
+                    networkPacketSwitch.AddToQueue(packet.PublicKeySource, response);
+
+                    //DisplayUtils.Display("YAYY, SENT " + ladr.LeafCount + " Leaves ... ", DisplayType.ImportantInfo);
+                }
+            }
+        }
+
+        void HandleLeafResponse(NetworkPacket packet)
+        {
+            // Check that the packet is valid.
+            //if (networkPacketSwitch.VerifyPendingPacket(packet))
+            {
+                LeafAccountDataResponse ladr = new LeafAccountDataResponse();
+                ladr.Deserialize(packet.Data);
+
+                //DisplayUtils.Display("YAYY, RECEIVED " + ladr.LeafCount +" LEAVES", DisplayType.Warning);
             }
         }
 
@@ -177,7 +243,7 @@ namespace TNetD.Nodes
 
                         if (remoteChild != null)
                         {
-                            if(currentChild == null) 
+                            if (currentChild == null)
                             {
                                 // Download all the data below the node.
                                 // Needs to be handled properly, as it may have millions of nodes.
@@ -187,7 +253,7 @@ namespace TNetD.Nodes
                             }
                             else
                             {
-                                if(remoteChild.NodeHash != currentChild.Hash)
+                                if (remoteChild.NodeHash != currentChild.Hash)
                                 {
                                     if (PendingNodesToBeFetched.Count < Common.LSYNC_MAX_PENDING_QUEUE_LENGTH)
                                         PendingNodesToBeFetched.Enqueue(remoteChild);

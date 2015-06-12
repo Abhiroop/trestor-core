@@ -165,6 +165,7 @@
     <Compile Include="Transactions\IncomingTransactionMap.cs" />
     <Compile Include="Tree\AllLeafDataRequest.cs" />
     <Compile Include="Tree\LeafDataRequest.cs" />
+    <Compile Include="Tree\LeafAccountDataResponse.cs" />
     <Compile Include="Tree\NodeInfoEntity.cs" />
     <Compile Include="Tree\NodeInfoRequest.cs" />
     <Compile Include="Tree\FlatNodeStore.cs" />
