@@ -217,6 +217,11 @@ namespace TNetD.Network.Networking
                 PendingNetworkRequest pnr = new PendingNetworkRequest(nodeState.SystemTime, npqe.PublicKeyDestination);
                 nodeState.PendingNetworkRequests.AddOrUpdate(npqe.Packet.Token, pnr, (k,v) => pnr);
             }
+            else
+            {
+                if (npqe.Packet.Token.Hex.Length != 0)
+                    DisplayUtils.Display("Bad token Length.", DisplayType.CodeAssertionFailed);
+            }
 
             return NetworkResult.Queued;
         }

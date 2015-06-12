@@ -42,7 +42,12 @@ namespace TNetD
         /// <summary>
         /// [5] : Invalid Transactions / Malformed Packets.
         /// </summary>
-        BadData 
+        BadData,
+ 
+        /// <summary>
+        /// [5] : Should not ahppen for good code.
+        /// </summary>
+        CodeAssertionFailed
     };
 
     public static class DisplayUtils
@@ -86,6 +91,10 @@ namespace TNetD
 
                 case DisplayType.BadData:
                     DisplayText((WriteHeader ? " BadData: " : "") + Message, Colors.Magenta, type);
+                    break;
+
+                case DisplayType.CodeAssertionFailed:
+                    DisplayText((WriteHeader ? " CodeAssertionFailed: " : "") + Message, Colors.OrangeRed, type);
                     break;
             }
         }
