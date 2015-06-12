@@ -31,6 +31,7 @@ using TNetD.Transactions;
 using TNetD.Tree;
 using TNetD.Types;
 using TNetD.Time;
+using TNetD.Network.PeerDiscovery;
 
 namespace TNetD.Nodes
 {
@@ -53,6 +54,10 @@ namespace TNetD.Nodes
 
         // TODO: MAKE PRIVATE : AND FAST
         public NodeState nodeState = default(NodeState);
+
+        // TODO: MAKE PRIVATE (public only for testing)
+        public PeerDiscovery peerDiscovery = default(PeerDiscovery);
+
 
         /// <summary>
         /// Handles all received network packets and dispatches them to various sub-systems.
@@ -107,6 +112,7 @@ namespace TNetD.Nodes
             transactionHandler = new TransactionHandler(nodeConfig, nodeState);
             timeSync = new TimeSync(nodeState, nodeConfig, networkPacketSwitch);
             ledgerSync = new LedgerSync(nodeState, nodeConfig, networkPacketSwitch);
+            peerDiscovery = new PeerDiscovery(nodeState, nodeConfig, networkPacketSwitch);
 
             AI = new AccountInfo(PublicKey, Money);
 

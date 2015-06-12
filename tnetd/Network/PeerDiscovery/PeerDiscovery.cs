@@ -40,6 +40,12 @@ namespace TNetD.Network.PeerDiscovery
         }
 
 
+        private void Print(String message)
+        {
+            DisplayUtils.Display(" Node " + nodeConfig.NodeID + " | PrDscvry: " + message);
+        }
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -51,6 +57,7 @@ namespace TNetD.Network.PeerDiscovery
             timer.Elapsed += initiatePeerDiscovery;
             timer.Enabled = true;
             timer.Start();
+            Print("timer started");
         }
 
         /// <summary>
@@ -61,7 +68,11 @@ namespace TNetD.Network.PeerDiscovery
         private void initiatePeerDiscovery(object sender, ElapsedEventArgs e)
         {
             int count = nodeState.ConnectedValidators.Count;
-            Hash peer = nodeState.ConnectedValidators.ToArray()[rng.Next(count)];
+            if (count <= 0)
+                return;
+            int select = rng.Next(count);
+            Print("init: count " + count + " select " + select);
+            Hash peer = nodeState.ConnectedValidators.First<Hash>();// ToArray()[select];
             Hash token = TNetUtils.GenerateNewToken();
 
             //save locally
@@ -73,7 +84,7 @@ namespace TNetD.Network.PeerDiscovery
             request.knownPeers = KnownPeers;
             byte[] message = request.Serialize();
             NetworkPacket packet = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_REQUEST, message, token);
-            networkPacketSwitch.AddToQueue(peer, packet);
+            //networkPacketSwitch.AddToQueue(peer, packet);
         }
 
         public void PeerDiscoveryMsgHandler(NetworkPacket packet)
@@ -91,6 +102,7 @@ namespace TNetD.Network.PeerDiscovery
 
         private void respondPeerDiscovery(NetworkPacket packet)
         {
+            Print("request arrived");
             Hash token = packet.Token;
             PeerDiscoveryMsg request = new PeerDiscoveryMsg();
             request.Deserialize(packet.Data);
@@ -110,10 +122,13 @@ namespace TNetD.Network.PeerDiscovery
 
         private void processNewPeerList(ConcurrentDictionary<Hash, byte[]> knownPeers)
         {
+            int oldcount = knownPeers.Count;
             foreach (KeyValuePair<Hash, byte[]> peer in knownPeers)
             {
                 KnownPeers.AddOrUpdate(peer.Key, peer.Value, (ok, ov) => peer.Value);
             }
+            int newcount = knownPeers.Count;
+            Print("processing peer list: " + oldcount + " => " + newcount); 
         }
     }
 }

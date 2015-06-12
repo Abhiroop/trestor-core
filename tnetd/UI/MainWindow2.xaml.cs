@@ -9,6 +9,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -42,6 +43,7 @@ namespace TNetD
     {
         List<Node> nodes = new List<Node>();
         GlobalConfiguration globalConfiguration;
+        Random rng = new Random();
 
         public MainWindow2()
         {
@@ -156,11 +158,24 @@ namespace TNetD
 
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 24; i++)
+            for (int i = 0; i < 5; i++)
             {
                 AddNode(i);
+                nodes[i].peerDiscovery.KnownPeers = generateFakePeerList(10);
             }
-            generateTrustlist();
+
+            nodes[0].peerDiscovery.Start(5000);
+        }
+
+        private ConcurrentDictionary<Hash, byte[]> generateFakePeerList(int max)
+        {
+            ConcurrentDictionary<Hash, byte[]> list = new ConcurrentDictionary<Hash,byte[]>();
+            int n = rng.Next(max);
+            for (int i = 0; i < max; i++) {
+                Hash peer = TNetUtils.GenerateNewToken();
+                list.AddOrUpdate(peer, (byte[]) null, (ok, ov) => null);
+            }
+            return list;
         }
 
         private void generateTrustlist()
