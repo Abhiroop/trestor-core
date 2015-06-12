@@ -96,7 +96,7 @@ namespace TNetD.Tree
                 else if ((PDT.NameType >= 10) && (PDT.NameType <= 26))
                 {
                     byte[] _data2 = new byte[0];
-                    if(ProtocolPackager.UnpackByteVector_s(PDT, PDT.NameType, 32, ref _data2))
+                    if(ProtocolPackager.UnpackByteVector(PDT, PDT.NameType, ref _data2))
                     {
                         NodeDataResponse nd = new NodeDataResponse();
                         nd.Deserialize(_data2);

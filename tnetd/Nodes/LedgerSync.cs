@@ -61,15 +61,13 @@ namespace TNetD.Nodes
             {
                 switch (LedgerState)
                 {
-
                     case LedgerSyncStateTypes.ST_GOOD:
-
                         handle_ST_GOOD();
                         break;
 
-                    case LedgerSyncStateTypes.ST_ROOT_FETCH:
-                        handle_ST_ROOT_FETCH();
-                        break;
+                    //case LedgerSyncStateTypes.ST_ROOT_FETCH:
+                      //  handle_ST_ROOT_FETCH();
+                       // break;
 
                     case LedgerSyncStateTypes.ST_DATA_FETCH:
                         handle_ST_DATA_FETCH();
@@ -79,7 +77,7 @@ namespace TNetD.Nodes
         }
 
         /// <summary>
-        /// All is well, lets get a random trusted peer and ask for the current root.
+        /// All is well, let's get a random trusted peer and ask for the current root.
         /// </summary>
         void handle_ST_GOOD()
         {
@@ -87,7 +85,7 @@ namespace TNetD.Nodes
             // THINK: HOW MANY NODES TO CONNECT TO ??
             if (nodeConfig.GetRandomTrustedNode(out nsds, 1))
             {
-                foreach(NodeSocketData nsd in nsds)
+                foreach (NodeSocketData nsd in nsds)
                 {
                     NetworkPacket request = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_LSYNC_ROOT_REQUEST,
                         new byte[0], TNetUtils.GenerateNewToken());
@@ -97,10 +95,10 @@ namespace TNetD.Nodes
             }
         }
 
-        void handle_ST_ROOT_FETCH()
-        {
-
-        }
+        //void handle_ST_ROOT_FETCH()
+        //{
+        //
+        //}
 
         void handle_ST_DATA_FETCH()
         {
@@ -146,9 +144,25 @@ namespace TNetD.Nodes
 
                 if (LedgerTree.RootNode.Hash != rdrm.RootHash) // Need to match up child nodes.
                 {
+                    LedgerState = LedgerSyncStateTypes.ST_DATA_FETCH;
+
+                    for (int i = 0; i < 16; i++)
+                    {
+                        NodeDataResponse remoteChild = rdrm.Children[i];
+                        ListTreeNode currentChild = LedgerTree.RootNode.Children[i];
+
+                        if (remoteChild != null)
+                        {
+
+
+                        }
+
+
+                    }
+
+
 
                 }
-
 
             }
 

@@ -28,7 +28,7 @@ namespace TNetD.Tree
             for (int i = 0; i < 16; i++)
             {
                 ListTreeNode LTN = node.Children[i];
-                Children[i] = LTN.Hash;
+                if (LTN != null) Children[i] = LTN.Hash;
             }
         }
 
@@ -55,7 +55,7 @@ namespace TNetD.Tree
             
             for (int i = 0; i < 16; i++)
             {
-                if (Children[i].Hex.Length == 16)
+                if (Children[i] != null)               
                 {
                     PDTs.Add(ProtocolPackager.Pack(Children[i], (byte)(i + 10)));
                 }
