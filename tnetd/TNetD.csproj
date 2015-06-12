@@ -163,6 +163,10 @@
     <Compile Include="Time\TimeSyncRqMsg.cs" />
     <Compile Include="Time\TimeSyncRsMsg.cs" />
     <Compile Include="Transactions\IncomingTransactionMap.cs" />
+    <Compile Include="Tree\AllLeafDataRequest.cs" />
+    <Compile Include="Tree\LeafDataRequest.cs" />
+    <Compile Include="Tree\NodeInfoEntity.cs" />
+    <Compile Include="Tree\NodeInfoRequest.cs" />
     <Compile Include="Tree\FlatNodeStore.cs" />
     <Compile Include="Tree\ListHashTree.cs" />
     <Compile Include="Tree\ListTreeLeafNode.cs" />

@@ -37,7 +37,7 @@ namespace TNetD.Nodes
 
         LedgerSyncStateTypes LedgerState;
 
-        Queue<NodeDataResponse> PendingNodes = new Queue<NodeDataResponse>();
+        Queue<NodeDataResponse> PendingNodesToBeFetched = new Queue<NodeDataResponse>();
 
         public LedgerSync(NodeState nodeState, NodeConfig nodeConfig, NetworkPacketSwitch networkPacketSwitch)
         {
@@ -104,10 +104,28 @@ namespace TNetD.Nodes
 
         void handle_ST_DATA_FETCH()
         {
+            int totalOrderedNodes = 0;
+            int totalOrderedLeaves = 0;
 
+            while ((PendingNodesToBeFetched.Count > 0) && 
+                (totalOrderedNodes < Common.LSYNC_MAX_ORDERED_NODES) && 
+                (totalOrderedLeaves < Common.LSYNC_MAX_ORDERED_LEAVES))
+            {
+                NodeDataResponse ndr = PendingNodesToBeFetched.Dequeue();
 
+                if(ndr.LeafCount <= Common.LSYNC_MAX_LEAVES_TO_FETCH)
+                {
+                    // Fetch all nodes below
 
+                    
+                }
+                else
+                {
+                    // Fetch selective nodes
+                    
 
+                }
+            }
         }
 
         void networkHandler_LedgerSyncEvent(NetworkPacket packet)
@@ -159,14 +177,41 @@ namespace TNetD.Nodes
 
                         if (remoteChild != null)
                         {
+                            if(currentChild == null) 
+                            {
+                                // Download all the data below the node.
+                                // Needs to be handled properly, as it may have millions of nodes.
 
+                                if (PendingNodesToBeFetched.Count < Common.LSYNC_MAX_PENDING_QUEUE_LENGTH)
+                                    PendingNodesToBeFetched.Enqueue(remoteChild);
+                            }
+                            else
+                            {
+                                if(remoteChild.NodeHash != currentChild.Hash)
+                                {
+                                    if (PendingNodesToBeFetched.Count < Common.LSYNC_MAX_PENDING_QUEUE_LENGTH)
+                                        PendingNodesToBeFetched.Enqueue(remoteChild);
+                                }
 
+                                /*for (int j = 0; j < 16; j++)
+                                {
+                                    ListTreeNode currentChild_2 = currentChild.Children[j];
+                                    Hash remoteChild_2 = remoteChild.Children[i];
+                                    if(remoteChild_2 != currentChild_2.Hash)
+                                    {
+                                        PendingNodes.Enqueue(remoteChild);
+                                    }
+                                }*/
+                            }
                         }
-
-
+                        else
+                        {
+                            // HANDLE CASE FOR THE REMOTE HAVING NO NODE WHEN WE HAVE
+                            // VERIFY WITH OTHERS AND DELETE
+                            // ONLY NEEDED IF THE TRUSTED NODES ARE SENDING BAD DATA
+                            // SHOULD BE IMPLEMENTED BEFORE FINAL NETWORK COMPLETION
+                        }
                     }
-
-
 
                 }
 
