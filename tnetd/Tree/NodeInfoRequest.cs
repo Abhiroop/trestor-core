@@ -70,7 +70,7 @@ namespace TNetD.Tree
                 {
                     ProtocolPackager.UnpackVarint(PDT, 0, ref TotalRequestedNodes);
                 }
-                if (PDT.NameType == 1)
+                else if (PDT.NameType == 1)
                 {
                     byte[] _bv = new byte[0];
                     if(ProtocolPackager.UnpackByteVector(PDT, 1, ref _bv))

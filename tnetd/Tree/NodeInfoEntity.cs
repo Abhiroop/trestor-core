@@ -69,7 +69,7 @@ namespace TNetD.Tree
                 {
                     ProtocolPackager.UnpackHash(PDT, 0, out NodeHash);
                 }
-                if (PDT.NameType == 1)
+                else if (PDT.NameType == 1)
                 {
                     ProtocolPackager.UnpackHash(PDT, 1, out AddressNibbles);
                 }
