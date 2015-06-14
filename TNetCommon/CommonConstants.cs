@@ -41,9 +41,14 @@ namespace TNetD
         public static readonly int NETWORK_TOKEN_LENGTH = 8;
 
         public static readonly long LSYNC_MAX_PENDING_QUEUE_LENGTH = 1024; 
-        public static readonly long LSYNC_MAX_ORDERED_NODES = 32;
+        public static readonly long LSYNC_MAX_ORDERED_NODES = 64;
         public static readonly long LSYNC_MAX_ORDERED_LEAVES = 1024;
-        public static readonly long LSYNC_MAX_LEAVES_TO_FETCH = 4096; 
+        public static readonly long LSYNC_MAX_LEAVES_TO_FETCH = 32; // 4096 
+
+        /// <summary>
+        /// This is for requests over the network
+        /// </summary>
+        public static readonly long LSYNC_MAX_REQUESTED_NODES = 256;
 
         public static JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings();
 

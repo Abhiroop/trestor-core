@@ -15,7 +15,7 @@ namespace TNetD.Tree
     {
         public Hash RootHash;
         public long LeafCount;
-        public NodeDataResponse[] Children;
+        public NodeDataEntity[] Children;
         public LedgerCloseData LedgerCloseData;
 
         public RootDataResponse(ListTreeNode root, LedgerCloseData ledgerCloseData)
@@ -23,11 +23,11 @@ namespace TNetD.Tree
             RootHash = root.Hash;
             LeafCount = root.LeafCount;
             LedgerCloseData = ledgerCloseData;
-            Children = new NodeDataResponse[16];
+            Children = new NodeDataEntity[16];
             for (int i = 0; i < 16; i++)
             {
                 ListTreeNode LTN = root.Children[i];
-                if(LTN != null) Children[i] = new NodeDataResponse(LTN);
+                if(LTN != null) Children[i] = new NodeDataEntity(LTN);
             }
         }
 
@@ -41,7 +41,7 @@ namespace TNetD.Tree
             RootHash = new Hash();
             LeafCount = 0;
             LedgerCloseData = new LedgerCloseData();
-            Children = new NodeDataResponse[16];
+            Children = new NodeDataEntity[16];
         }
 
         public byte[] Serialize()
@@ -98,7 +98,7 @@ namespace TNetD.Tree
                     byte[] _data2 = new byte[0];
                     if(ProtocolPackager.UnpackByteVector(PDT, PDT.NameType, ref _data2))
                     {
-                        NodeDataResponse nd = new NodeDataResponse();
+                        NodeDataEntity nd = new NodeDataEntity();
                         nd.Deserialize(_data2);
                         Children[PDT.NameType - 10] = nd;
                     }

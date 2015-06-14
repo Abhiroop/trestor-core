@@ -166,13 +166,14 @@
     <Compile Include="Tree\AllLeafDataRequest.cs" />
     <Compile Include="Tree\LeafDataRequest.cs" />
     <Compile Include="Tree\LeafAccountDataResponse.cs" />
+    <Compile Include="Tree\NodeInfoResponse.cs" />
     <Compile Include="Tree\NodeInfoEntity.cs" />
     <Compile Include="Tree\NodeInfoRequest.cs" />
     <Compile Include="Tree\FlatNodeStore.cs" />
     <Compile Include="Tree\ListHashTree.cs" />
     <Compile Include="Tree\ListTreeLeafNode.cs" />
     <Compile Include="Tree\ListTreeNode.cs" />
-    <Compile Include="Tree\NodeDataResponse.cs" />
+    <Compile Include="Tree\NodeDataEntity.cs" />
     <Compile Include="Tree\RootDataResponse.cs" />
     <Compile Include="Tree\TreeSyncData.cs" />
     <Compile Include="UI\ColoredTB.xaml.cs">

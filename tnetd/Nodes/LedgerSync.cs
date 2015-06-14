@@ -26,10 +26,10 @@ namespace TNetD.Nodes
 
     class LedgerSync
     {
-        bool Enable = true;
+        bool Enable = false;
 
         private readonly int NODE_REQUEST_COUNT = 20;
-        
+
         object LedgerSyncLock = new object();
 
         NodeState nodeState;
@@ -40,7 +40,8 @@ namespace TNetD.Nodes
 
         LedgerSyncStateTypes LedgerState;
 
-        Queue<NodeDataResponse> PendingNodesToBeFetched = new Queue<NodeDataResponse>();
+        Queue<NodeDataEntity> PendingNodesToBeFetched = new Queue<NodeDataEntity>();
+        Queue<Hash> NodeFetchQueue = new Queue<Hash>();
 
         public LedgerSync(NodeState nodeState, NodeConfig nodeConfig, NetworkPacketSwitch networkPacketSwitch)
         {
@@ -110,6 +111,44 @@ namespace TNetD.Nodes
             DisplayUtils.Display(Text, type);
         }
 
+
+        void FetchRemoteNode(Hash addressNibbles, byte childIndex)
+        {
+            List<byte> bytes = (addressNibbles.Hex.ToList());
+            bytes.Add(childIndex);
+            Hash fetchAddress = new Hash(bytes.ToArray());
+            NodeFetchQueue.Enqueue(fetchAddress);
+        }
+
+        void ProcessPendingRemoteFetches()
+        {
+            long chunk_size = Common.LSYNC_MAX_REQUESTED_NODES / 2;                       
+
+            while (NodeFetchQueue.Count > 0)
+            {
+                int count = 0;
+                NodeInfoRequest nir = new NodeInfoRequest();
+                while ((NodeFetchQueue.Count > 0) && (count++ < chunk_size))
+                {
+                    nir.Add(NodeFetchQueue.Dequeue());
+                }
+
+                // Create a packet and send.
+                List<NodeSocketData> nsds;
+
+                // A single random trusted node is okay for fetching data.
+                if (nodeConfig.GetRandomTrustedNode(out nsds, 1))
+                {
+                    NetworkPacket request = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_LSYNC_NODE_REQUEST,
+                                nir.Serialize(), TNetUtils.GenerateNewToken());
+
+                    networkPacketSwitch.AddToQueue(nsds[0].PublicKey, request);
+
+                    DebugPrint("Requesting " + nir.TotalRequestedNodes + " nodes from, " + nsds[0].PublicKey + " ME: " + nodeConfig.PublicKey, DisplayType.ImportantInfo);
+                }
+            }
+        }
+
         void handle_ST_DATA_FETCH()
         {
             long totalOrderedNodes = 0;
@@ -119,17 +158,17 @@ namespace TNetD.Nodes
                 (totalOrderedNodes < Common.LSYNC_MAX_ORDERED_NODES) &&
                 (totalOrderedLeaves < Common.LSYNC_MAX_ORDERED_LEAVES))
             {
-                NodeDataResponse ndr = PendingNodesToBeFetched.Dequeue();
+                NodeDataEntity nde = PendingNodesToBeFetched.Dequeue();
 
-                if (ndr.LeafCount <= Common.LSYNC_MAX_LEAVES_TO_FETCH)
+                if (nde.LeafCount <= Common.LSYNC_MAX_LEAVES_TO_FETCH)
                 {
                     // Fetch all nodes below
                     List<NodeSocketData> nsds;
 
                     // A single random trusted node is okay for fetching data.
-                    if (nodeConfig.GetRandomTrustedNode(out nsds, 1)) 
+                    if (nodeConfig.GetRandomTrustedNode(out nsds, 1))
                     {
-                        AllLeafDataRequest aldr = new AllLeafDataRequest(ndr);
+                        AllLeafDataRequest aldr = new AllLeafDataRequest(nde);
 
                         NetworkPacket request = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_LSYNC_LEAF_REQUEST_ALL,
                             aldr.Serialize(), TNetUtils.GenerateNewToken());
@@ -146,11 +185,62 @@ namespace TNetD.Nodes
                     // Fetch selective nodes
                     DebugPrint("Fetch Selective Nodes", DisplayType.ImportantInfo);
 
+                    ListTreeNode currentNode;
+                    if (LedgerTree.TraverseToNode(nde.AddressNibbles, out currentNode) == TraverseResult.Success)
+                    {
+
+                        if (currentNode.Hash != nde.NodeHash)
+                        {
+
+                            for (int i = 0; i < 16; i++)
+                            {
+                                Hash remoteChildHash = nde.Children[i];
+                                ListTreeNode currentChild = currentNode.Children[i];
+
+                                if (PendingNodesToBeFetched.Count > Common.LSYNC_MAX_PENDING_QUEUE_LENGTH) break;
+
+                                if (remoteChildHash != null)
+                                {
+                                    if (currentChild == null)
+                                    {
+                                        FetchRemoteNode(nde.AddressNibbles, (byte)i); totalOrderedNodes++;
+                                    }
+                                    else
+                                    {
+                                        if (remoteChildHash != currentChild.Hash)
+                                        {
+                                            FetchRemoteNode(nde.AddressNibbles, (byte)i); totalOrderedNodes++;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    // HANDLE CASE FOR THE REMOTE HAVING NO NODE WHEN WE HAVE
+                                    // VERIFY WITH OTHERS AND DELETE
+                                    // ONLY NEEDED IF THE TRUSTED NODES ARE SENDING BAD DATA
+                                    // SHOULD BE IMPLEMENTED BEFORE FINAL NETWORK COMPLETION
+                                }
+                            }
+
+                        }
+
+                    }
+                    else
+                    {
+                        // ORDER ALL NODES BELOW. Probably in the initial condition.
+                        for (int i = 0; i < 16; i++)
+                        {
+                            FetchRemoteNode(nde.AddressNibbles, (byte)i); totalOrderedNodes++;
+                        }
+                    }
+
                 }
             }
 
+            ProcessPendingRemoteFetches();
+
             //if (PendingNodesToBeFetched.Count == 0) LedgerState = LedgerSyncStateTypes.ST_GOOD;
-            
+
         }
 
         void networkHandler_LedgerSyncEvent(NetworkPacket packet)
@@ -172,6 +262,40 @@ namespace TNetD.Nodes
                 case PacketType.TPT_LSYNC_LEAF_RESPONSE:
                     HandleLeafResponse(packet);
                     break;
+
+                case PacketType.TPT_LSYNC_NODE_REQUEST:
+                    HandleNodeRequest(packet);
+                    break;
+
+                case PacketType.TPT_LSYNC_NODE_RESPONSE:
+                    HandleNodeResponse(packet);
+                    break;
+            }
+        }
+
+        void HandleNodeRequest(NetworkPacket packet)
+        {
+            NodeInfoRequest nir = new NodeInfoRequest();
+            nir.Deserialize(packet.Data);
+
+            DebugPrint("NodeRequest from " + packet.PublicKeySource + " Nodes : " + nir.TotalRequestedNodes, DisplayType.Warning);
+
+
+
+
+        }
+
+        void HandleNodeResponse(NetworkPacket packet)
+        {
+            // Check that the packet is valid.
+            if (networkPacketSwitch.VerifyPendingPacket(packet))
+            {
+                //DebugPrint("NodeResponse from " + packet.PublicKeySource + " : " + packet.Data.Length +
+               // " Bytes, Nodes : " + nir.TotalRequestedNodes, DisplayType.Warning);
+            }
+            else
+            {
+                DebugPrint("Packet VER FAILED : 343.", DisplayType.Warning);
             }
         }
 
@@ -182,7 +306,7 @@ namespace TNetD.Nodes
 
             DebugPrint("LEAF REQUEST All : " + aldr.TotalRequestedLeaves + " NODES : " + packet.Data.Length + " Bytes", DisplayType.ImportantInfo);
 
-            if(aldr.TotalRequestedLeaves <= Common.LSYNC_MAX_LEAVES_TO_FETCH)
+            if (aldr.TotalRequestedLeaves <= Common.LSYNC_MAX_LEAVES_TO_FETCH)
             {
                 ListTreeNode node;
 
@@ -194,9 +318,9 @@ namespace TNetD.Nodes
 
                     LeafAccountDataResponse ladr = new LeafAccountDataResponse();
 
-                    foreach(LeafDataType ldt in leaves)
+                    foreach (LeafDataType ldt in leaves)
                     {
-                        AccountInfo ai = (AccountInfo) ldt;
+                        AccountInfo ai = (AccountInfo)ldt;
                         ladr.Add(ai);
                     }
 
@@ -205,7 +329,7 @@ namespace TNetD.Nodes
 
                     networkPacketSwitch.AddToQueue(packet.PublicKeySource, response);
 
-                    DebugPrint("SENT LEAF RESPONSE : " + ladr.LeafCount + " Leaves ... " + 
+                    DebugPrint("SENT LEAF RESPONSE : " + ladr.LeafCount + " Leaves ... " +
                         response.Data.Length + " Bytes", DisplayType.CodeAssertionFailed);
                 }
             }
@@ -260,8 +384,10 @@ namespace TNetD.Nodes
 
                     for (int i = 0; i < 16; i++)
                     {
-                        NodeDataResponse remoteChild = rdrm.Children[i];
+                        NodeDataEntity remoteChild = rdrm.Children[i];
                         ListTreeNode currentChild = LedgerTree.RootNode.Children[i];
+
+                        if (PendingNodesToBeFetched.Count > Common.LSYNC_MAX_PENDING_QUEUE_LENGTH) break;
 
                         if (remoteChild != null)
                         {
@@ -270,26 +396,14 @@ namespace TNetD.Nodes
                                 // Download all the data below the node.
                                 // Needs to be handled properly, as it may have millions of nodes.
 
-                                if (PendingNodesToBeFetched.Count < Common.LSYNC_MAX_PENDING_QUEUE_LENGTH)
-                                    PendingNodesToBeFetched.Enqueue(remoteChild);
+                                PendingNodesToBeFetched.Enqueue(remoteChild);
                             }
                             else
                             {
                                 if (remoteChild.NodeHash != currentChild.Hash)
                                 {
-                                    if (PendingNodesToBeFetched.Count < Common.LSYNC_MAX_PENDING_QUEUE_LENGTH)
-                                        PendingNodesToBeFetched.Enqueue(remoteChild);
+                                    PendingNodesToBeFetched.Enqueue(remoteChild);
                                 }
-
-                                /*for (int j = 0; j < 16; j++)
-                                {
-                                    ListTreeNode currentChild_2 = currentChild.Children[j];
-                                    Hash remoteChild_2 = remoteChild.Children[i];
-                                    if(remoteChild_2 != currentChild_2.Hash)
-                                    {
-                                        PendingNodes.Enqueue(remoteChild);
-                                    }
-                                }*/
                             }
                         }
                         else

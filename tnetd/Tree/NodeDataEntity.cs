@@ -11,14 +11,14 @@ using TNetD.Protocol;
 
 namespace TNetD.Tree
 {  
-    class NodeDataResponse : ISerializableBase
+    class NodeDataEntity : ISerializableBase
     {
         public Hash NodeHash;
         public long LeafCount;
         public Hash AddressNibbles;
         public Hash[] Children;
 
-        public NodeDataResponse(ListTreeNode node)
+        public NodeDataEntity(ListTreeNode node)
         {
             NodeHash = node.Hash;
             LeafCount = node.LeafCount;
@@ -32,7 +32,7 @@ namespace TNetD.Tree
             }
         }
 
-        public NodeDataResponse()
+        public NodeDataEntity()
         {
             Init(); // Seems redundant.
         }
@@ -79,7 +79,7 @@ namespace TNetD.Tree
                 {
                     ProtocolPackager.UnpackHash(PDT, 0, out NodeHash);  
                 }
-                if (PDT.NameType == 1)
+                else if (PDT.NameType == 1)
                 {                    
                     ProtocolPackager.UnpackHash(PDT, 1, out AddressNibbles);                    
                 }
@@ -97,7 +97,6 @@ namespace TNetD.Tree
                 }
             }
         }
-
 
     }
 }

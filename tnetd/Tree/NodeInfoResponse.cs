@@ -1,6 +1,6 @@
 ﻿
 // @Author : Arpan Jati
-// @Date: 12th June 2015
+// @Date: 10th June 2015
 
 using System;
 using System.Collections.Generic;
@@ -10,47 +10,41 @@ using System.Threading.Tasks;
 using TNetD.Protocol;
 
 namespace TNetD.Tree
-{   
-
-    /// <summary>
-    /// This contains an array of requests for separate nodes.
-    /// </summary>
-    class NodeInfoRequest
+{
+    class NodeInfoResponse : ISerializableBase
     {
         public long TotalRequestedNodes;
-        
+
         /// <summary>
         /// Do not add elements directly.
         /// </summary>
-        public List<Hash> RequestedNodes;
+        public List<NodeDataEntity> RequestedNodes;
 
-        public NodeInfoRequest()
+        public NodeInfoResponse()
         {
             Init();
         }
 
-        void Init()
-        {
-            TotalRequestedNodes = 0;
-            RequestedNodes = new List<Hash>();
-        }
-
-        public void Add(Hash entry)
+        public void Add(NodeDataEntity entry)
         {
             RequestedNodes.Add(entry);
             TotalRequestedNodes++;
         }
-        
+
+        private void Init()
+        {
+            TotalRequestedNodes = 0;
+            RequestedNodes = new List<NodeDataEntity>();
+        }
+
         public byte[] Serialize()
         {
             List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
 
             PDTs.Add(ProtocolPackager.PackVarint(TotalRequestedNodes, 0));
 
-            foreach (Hash nie in RequestedNodes)
-            {
-                PDTs.Add(ProtocolPackager.Pack(nie, 1));
-            }
+            foreach (NodeDataEntity nie in RequestedNodes)
+                PDTs.Add(ProtocolPackager.Pack(nie.Serialize(), 1));
 
             return ProtocolPackager.PackRaw(PDTs);
         }
@@ -72,15 +66,17 @@ namespace TNetD.Tree
                 }
                 else if (PDT.NameType == 1)
                 {
-                    Hash address;
-                    if (ProtocolPackager.UnpackHash(PDT, 1, out address))
-                    {                        
-                        RequestedNodes.Add(address);
+                    byte[] _data = new byte[0];
+                    if (ProtocolPackager.UnpackByteVector(PDT, 1, ref _data))
+                    {
+                        NodeDataEntity nie = new NodeDataEntity();
+                        nie.Deserialize(_data);
+                        RequestedNodes.Add(nie);
                     }
-                }                
+                }
+
             }
         }
-
 
     }
 }
