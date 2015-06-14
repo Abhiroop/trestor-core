@@ -410,7 +410,9 @@ namespace TNetD.Nodes
 
                 foreach (int randomPeerID in dist)
                 {
-                    randomPeer.Add(GlobalConfiguration.TrustedNodes.Values.ElementAt(randomPeerID));
+                    NodeSocketData nsd = GlobalConfiguration.TrustedNodes.Values.ElementAt(randomPeerID);
+                    if(nsd.PublicKey != PublicKey)
+                        randomPeer.Add(nsd);
                 }
 
                 return true;

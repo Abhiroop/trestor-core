@@ -26,8 +26,10 @@ namespace TNetD.Nodes
 
     class LedgerSync
     {
-        private readonly int NODE_REQUEST_COUNT = 20;
+        bool Enable = true;
 
+        private readonly int NODE_REQUEST_COUNT = 20;
+        
         object LedgerSyncLock = new object();
 
         NodeState nodeState;
@@ -52,7 +54,7 @@ namespace TNetD.Nodes
             this.networkPacketSwitch.LedgerSyncEvent += networkHandler_LedgerSyncEvent;
 
             TimerLedgerSync = new System.Timers.Timer();
-            TimerLedgerSync.Elapsed += TimerLedgerSync_Elapsed;
+            if (Enable) TimerLedgerSync.Elapsed += TimerLedgerSync_Elapsed;
             TimerLedgerSync.Enabled = true;
             TimerLedgerSync.Interval = nodeConfig.UpdateFrequencyLedgerSyncMS;
             TimerLedgerSync.Start();
@@ -103,6 +105,11 @@ namespace TNetD.Nodes
         //
         //}
 
+        void DebugPrint(string Text, DisplayType type)
+        {
+            DisplayUtils.Display(Text, type);
+        }
+
         void handle_ST_DATA_FETCH()
         {
             long totalOrderedNodes = 0;
@@ -131,14 +138,19 @@ namespace TNetD.Nodes
 
                         totalOrderedLeaves += aldr.TotalRequestedLeaves;
                     }
+
+                    DebugPrint("Fetch Normal All Nodes Below", DisplayType.ImportantInfo);
                 }
                 else
                 {
                     // Fetch selective nodes
-                    
+                    DebugPrint("Fetch Selective Nodes", DisplayType.ImportantInfo);
 
                 }
             }
+
+            //if (PendingNodesToBeFetched.Count == 0) LedgerState = LedgerSyncStateTypes.ST_GOOD;
+            
         }
 
         void networkHandler_LedgerSyncEvent(NetworkPacket packet)
@@ -168,6 +180,8 @@ namespace TNetD.Nodes
             AllLeafDataRequest aldr = new AllLeafDataRequest();
             aldr.Deserialize(packet.Data);
 
+            DebugPrint("LEAF REQUEST All : " + aldr.TotalRequestedLeaves + " NODES : " + packet.Data.Length + " Bytes", DisplayType.ImportantInfo);
+
             if(aldr.TotalRequestedLeaves <= Common.LSYNC_MAX_LEAVES_TO_FETCH)
             {
                 ListTreeNode node;
@@ -191,7 +205,8 @@ namespace TNetD.Nodes
 
                     networkPacketSwitch.AddToQueue(packet.PublicKeySource, response);
 
-                    //DisplayUtils.Display("YAYY, SENT " + ladr.LeafCount + " Leaves ... ", DisplayType.ImportantInfo);
+                    DebugPrint("SENT LEAF RESPONSE : " + ladr.LeafCount + " Leaves ... " + 
+                        response.Data.Length + " Bytes", DisplayType.CodeAssertionFailed);
                 }
             }
         }
@@ -199,17 +214,22 @@ namespace TNetD.Nodes
         void HandleLeafResponse(NetworkPacket packet)
         {
             // Check that the packet is valid.
-            //if (networkPacketSwitch.VerifyPendingPacket(packet))
+            if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
                 LeafAccountDataResponse ladr = new LeafAccountDataResponse();
                 ladr.Deserialize(packet.Data);
 
-                //DisplayUtils.Display("YAYY, RECEIVED " + ladr.LeafCount +" LEAVES", DisplayType.Warning);
+                DebugPrint("YAYY, RECEIVED " + ladr.LeafCount + " LEAVES: " + packet.Data.Length + " Bytes", DisplayType.Warning);
+            }
+            else
+            {
+                DebugPrint("Packet VER FAILED : 273.", DisplayType.Warning);
             }
         }
 
         void HandleRootRequest(NetworkPacket packet)
         {
+            DebugPrint("ROOT DATA REQUESTED BY " + packet.PublicKeySource.ToString(), DisplayType.ImportantInfo);
             LedgerCloseData ledgerCloseData;
             if (nodeState.PersistentCloseHistory.GetLastRowData(out ledgerCloseData))
             {
@@ -227,6 +247,8 @@ namespace TNetD.Nodes
             // Check that the packet is valid.
             if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
+                DebugPrint("RootResponse from " + packet.PublicKeySource + " : " + packet.Data.Length + " Bytes", DisplayType.Warning);
+
                 RootDataResponse rdrm = new RootDataResponse();
                 rdrm.Deserialize(packet.Data);
 
@@ -281,6 +303,10 @@ namespace TNetD.Nodes
 
                 }
 
+            }
+            else
+            {
+                DebugPrint("Packet VER FAILED : 222.", DisplayType.Warning);
             }
 
         }

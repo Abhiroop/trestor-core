@@ -601,7 +601,7 @@ namespace TNetD.Tree
 
         //
         // Sync method ...
-        // 
+        //
 
         /// <summary>
         /// Make sure, no write operation is done on it.

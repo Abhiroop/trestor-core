@@ -98,7 +98,7 @@ namespace TNetD.Network.Networking
                     }
                     else
                     {
-                        //DisplayUtils.Display("User: " + userIndex + ", INCOMPLETE PACKET: (" + DATA_SZ + " + 3 ) / " + (ms.Length - ms.Position), DisplayType.Exception);
+                       // DisplayUtils.Display("User: " + userIndex + ", INCOMPLETE PACKET: (" + DATA_SZ + " + 3 ) / " + (ms.Length - ms.Position), DisplayType.Exception);
                         return false;
                     }
                 }

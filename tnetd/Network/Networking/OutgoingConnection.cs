@@ -62,7 +62,7 @@ namespace TNetD.Network.Networking
                     while (outgoingQueue.Count > 0)
                     {
                         NetworkPacket np;
-                        
+
                         if (outgoingQueue.TryDequeue(out np))
                         {
                             //DisplayUtils.Display("SENDING OC Packet: " + np.Type + " | From: " + np.PublicKeySource + " | Data Length : " + np.Data.Length);
@@ -181,23 +181,20 @@ namespace TNetD.Network.Networking
                                     {
                                         long SuccessPosition = 0;
                                         byte[] content = messageStream.ToArray();
-                                        packetGood = PacketCodec.ValidateAndDecodeTransportPacket_Consume(nodeSocketData.Name, content, ref mp, ref SuccessPosition);
+                                        PacketCodec.ValidateAndDecodeTransportPacket_Consume(nodeSocketData.Name, content, ref mp, ref SuccessPosition);
 
-                                        if (packetGood)
+                                        foreach (TransportPacket p in mp)
                                         {
-                                            foreach (TransportPacket p in mp)
+                                            try
                                             {
-                                                try
-                                                {
-                                                    await ProcessOutgoingConnectionInternal(tcpClient, p);
-                                                }
-                                                catch (Exception ex)
-                                                {
-                                                    DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : --- ProcessConnection:CNT:" + mp.Count, ex);
-                                                }
+                                                await ProcessOutgoingConnectionInternal(tcpClient, p);
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : --- ProcessConnection:CNT:" + mp.Count, ex);
                                             }
                                         }
-
+                                        
                                         byte[] remaining = new byte[content.Length - SuccessPosition];
 
                                         Array.Copy(content, (int)SuccessPosition, remaining, 0, remaining.Length);
@@ -208,9 +205,9 @@ namespace TNetD.Network.Networking
                                     }
 
                                 }
-                                catch
+                                catch (Exception ex)
                                 {
-                                    //DisplayUtils.Display("ClientHandler : Read()", ex);
+                                    DisplayUtils.Display("ClientHandler : Read()", ex);
                                 }
                             }
                             while (nsRead.DataAvailable);
@@ -503,7 +500,7 @@ namespace TNetD.Network.Networking
                                 NetworkPacket np = new NetworkPacket();
 
                                 np.Deserialize(rec_data);
-                                
+
                                 if (nodeSocketData.PublicKey == np.PublicKeySource)
                                 {
                                     if (PacketReceived != null)

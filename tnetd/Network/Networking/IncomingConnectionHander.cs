@@ -192,7 +192,7 @@ namespace TNetD.Network.Networking
                     IncomingConnections.Remove(h);
                     DisplayUtils.Display("Removed Connection: " + HexUtil.ToString(h.Hex), DisplayType.Warning);
                 }
-                
+
             }
 
             catch (System.Exception ex)
@@ -249,23 +249,20 @@ namespace TNetD.Network.Networking
 
                                         long SuccessPosition = 0;
                                         byte[] content = messageStream.ToArray();
-                                        packetGood = PacketCodec.ValidateAndDecodeTransportPacket_Consume(iClient.UserName, content, ref mp, ref SuccessPosition);
+                                        PacketCodec.ValidateAndDecodeTransportPacket_Consume(iClient.UserName, content, ref mp, ref SuccessPosition);
 
                                         //PacketSender.SendTransportPacket(new BinaryWriter(writer), TransportPacketType.KeepAlive, new byte[0], ref iClient.PacketCounter);
 
-                                        if (packetGood)
+                                        foreach (TransportPacket p in mp)
                                         {
-                                            foreach (TransportPacket p in mp)
+                                            try
                                             {
-                                                try
-                                                {
-                                                    Constants.SERVER_GLOBAL_PACKETS++;
-                                                    await ProcessIncomingUserInternal(iClient, p);
-                                                }
-                                                catch (Exception ex)
-                                                {
-                                                    DisplayUtils.Display("--- ProcessConnection:CNT:" + mp.Count, ex);
-                                                }
+                                                Constants.SERVER_GLOBAL_PACKETS++;
+                                                await ProcessIncomingUserInternal(iClient, p);
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                DisplayUtils.Display("--- ProcessConnection:CNT:" + mp.Count, ex);
                                             }
                                         }
 
@@ -491,7 +488,7 @@ namespace TNetD.Network.Networking
                             if (iClient.PublicKey == np.PublicKeySource)
                             {
                                 if (PacketReceived != null)
-                                    PacketReceived( np);
+                                    PacketReceived(np);
                             }
                             else
                             {

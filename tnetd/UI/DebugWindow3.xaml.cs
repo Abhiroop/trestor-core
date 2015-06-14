@@ -40,6 +40,9 @@ namespace TNetD
     /// </summary>
     public partial class DebugWindow3 : Window
     {
+        object TimerLock = new object();
+
+
         List<Node> nodes = new List<Node>();
         GlobalConfiguration globalConfiguration;
 
@@ -62,45 +65,48 @@ namespace TNetD
 
         private void tmr_UI_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            StringBuilder connData = new StringBuilder();
-
-            foreach (Node nd in nodes)
+            lock (TimerLock)
             {
-                connData.AppendLine("\n\n NODE ID " + nd.nodeConfig.NodeID + "   KEY: " + nd.PublicKey);
 
-                connData.AppendLine("  OUTGOING ----> ");
+                StringBuilder connData = new StringBuilder();
 
-                foreach (Hash h in nd.networkPacketSwitch.GetConnectedNodes(ConnectionListType.Outgoing))
+                foreach (Node nd in nodes)
                 {
-                    connData.AppendLine("\t" + h.ToString());
+                    connData.AppendLine("\n\n NODE ID " + nd.nodeConfig.NodeID + "   KEY: " + nd.PublicKey);
+
+                    connData.AppendLine("  OUTGOING ----> ");
+
+                    foreach (Hash h in nd.networkPacketSwitch.GetConnectedNodes(ConnectionListType.Outgoing))
+                    {
+                        connData.AppendLine("\t" + h.ToString());
+                    }
+
+                    connData.AppendLine("  INCOMING ----> ");
+
+                    foreach (Hash h in nd.networkPacketSwitch.GetConnectedNodes(ConnectionListType.Incoming))
+                    {
+                        connData.AppendLine("\t" + h.ToString());
+                    }
+
+                    connData.AppendLine("  ConnectedValidators ----> ");
+
+                    foreach (Hash h in nd.nodeState.ConnectedValidators)
+                    {
+                        connData.AppendLine("\t" + h.ToString());
+                    }
                 }
 
-                connData.AppendLine("  INCOMING ----> ");
-
-                foreach (Hash h in nd.networkPacketSwitch.GetConnectedNodes(ConnectionListType.Incoming))
+                try
                 {
-                    connData.AppendLine("\t" + h.ToString());
-                }
+                    this.Dispatcher.Invoke(new Action(() =>
+                    {
 
-                connData.AppendLine("  ConnectedValidators ----> ");
-
-                foreach (Hash h in nd.nodeState.ConnectedValidators)
-                {
-                    connData.AppendLine("\t" + h.ToString());
+                        textBlock_Log2.Text = connData.ToString();
+                    }));
                 }
+                catch { }
+
             }
-
-            try
-            {
-                this.Dispatcher.Invoke(new Action(() =>
-                {
-
-                    textBlock_Log2.Text = connData.ToString();
-                }));
-            }
-            catch { }
-
-
         }
 
         void AddNode(int idx)
