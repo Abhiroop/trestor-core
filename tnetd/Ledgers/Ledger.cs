@@ -110,7 +110,6 @@ namespace TNetD.Ledgers
         }
 
         /// <summary>
-        /// Add User, false if user already exists. 
         /// TODO: PROPER TESTBENCH { CRITICAL }
         /// </summary>
         /// <param name="userInfo"></param>

@@ -68,12 +68,18 @@ namespace TNetD.Nodes
                 switch (LedgerState)
                 {
                     case LedgerSyncStateTypes.ST_GOOD:
-                        handle_ST_GOOD();
-                        break;
 
-                    //case LedgerSyncStateTypes.ST_ROOT_FETCH:
-                    //  handle_ST_ROOT_FETCH();
-                    // break;
+                        if (PendingNodesToBeFetched.Count == 0)
+                        {
+                            handle_ST_ROOT();
+                        }
+                        else
+                        {
+                            LedgerState = LedgerSyncStateTypes.ST_DATA_FETCH;
+                            handle_ST_DATA_FETCH();                            
+                        }
+
+                        break;
 
                     case LedgerSyncStateTypes.ST_DATA_FETCH:
                         handle_ST_DATA_FETCH();
@@ -85,7 +91,7 @@ namespace TNetD.Nodes
         /// <summary>
         /// All is well, let's get a random trusted peer and ask for the current root.
         /// </summary>
-        void handle_ST_GOOD()
+        void handle_ST_ROOT()
         {
             List<NodeSocketData> nsds;
             // THINK: HOW MANY NODES TO CONNECT TO ??
@@ -101,16 +107,10 @@ namespace TNetD.Nodes
             }
         }
 
-        //void handle_ST_ROOT_FETCH()
-        //{
-        //
-        //}
-
         void DebugPrint(string Text, DisplayType type)
         {
             DisplayUtils.Display(Text, type);
         }
-
 
         void FetchRemoteNode(Hash addressNibbles, byte childIndex)
         {
@@ -122,7 +122,7 @@ namespace TNetD.Nodes
 
         void ProcessPendingRemoteFetches()
         {
-            long chunk_size = Common.LSYNC_MAX_REQUESTED_NODES / 2;                       
+            long chunk_size = Common.LSYNC_MAX_REQUESTED_NODES / 2;
 
             while (NodeFetchQueue.Count > 0)
             {
@@ -144,7 +144,7 @@ namespace TNetD.Nodes
 
                     networkPacketSwitch.AddToQueue(nsds[0].PublicKey, request);
 
-                    DebugPrint("Requesting " + nir.TotalRequestedNodes + " nodes from, " + nsds[0].PublicKey + " ME: " + nodeConfig.PublicKey, DisplayType.ImportantInfo);
+                    //DebugPrint("Requesting " + nir.TotalRequestedNodes + " nodes from, " + nsds[0].PublicKey + " ME: " + nodeConfig.PublicKey, DisplayType.ImportantInfo);
                 }
             }
         }
@@ -178,20 +178,18 @@ namespace TNetD.Nodes
                         totalOrderedLeaves += aldr.TotalRequestedLeaves;
                     }
 
-                    DebugPrint("Fetch Normal All Nodes Below", DisplayType.ImportantInfo);
+                   // DebugPrint("Fetch Normal All Nodes Below", DisplayType.ImportantInfo);
                 }
                 else
                 {
                     // Fetch selective nodes
-                    DebugPrint("Fetch Selective Nodes", DisplayType.ImportantInfo);
+                    //DebugPrint("Fetch Selective Nodes", DisplayType.ImportantInfo);
 
                     ListTreeNode currentNode;
                     if (LedgerTree.TraverseToNode(nde.AddressNibbles, out currentNode) == TraverseResult.Success)
                     {
-
                         if (currentNode.Hash != nde.NodeHash)
                         {
-
                             for (int i = 0; i < 16; i++)
                             {
                                 Hash remoteChildHash = nde.Children[i];
@@ -215,15 +213,15 @@ namespace TNetD.Nodes
                                 }
                                 else
                                 {
+                                    //DebugPrint("REMOTE NULL !!", DisplayType.ImportantInfo);
+
                                     // HANDLE CASE FOR THE REMOTE HAVING NO NODE WHEN WE HAVE
                                     // VERIFY WITH OTHERS AND DELETE
                                     // ONLY NEEDED IF THE TRUSTED NODES ARE SENDING BAD DATA
                                     // SHOULD BE IMPLEMENTED BEFORE FINAL NETWORK COMPLETION
                                 }
                             }
-
                         }
-
                     }
                     else
                     {
@@ -233,13 +231,12 @@ namespace TNetD.Nodes
                             FetchRemoteNode(nde.AddressNibbles, (byte)i); totalOrderedNodes++;
                         }
                     }
-
                 }
             }
 
             ProcessPendingRemoteFetches();
 
-            //if (PendingNodesToBeFetched.Count == 0) LedgerState = LedgerSyncStateTypes.ST_GOOD;
+            if (PendingNodesToBeFetched.Count == 0) LedgerState = LedgerSyncStateTypes.ST_GOOD;
 
         }
 
@@ -278,11 +275,27 @@ namespace TNetD.Nodes
             NodeInfoRequest nir = new NodeInfoRequest();
             nir.Deserialize(packet.Data);
 
-            DebugPrint("NodeRequest from " + packet.PublicKeySource + " Nodes : " + nir.TotalRequestedNodes, DisplayType.Warning);
+           // DebugPrint("NodeRequest from " + packet.PublicKeySource + " Nodes : " + nir.TotalRequestedNodes, DisplayType.Warning);
 
+            if ((Common.LSYNC_MAX_REQUESTED_NODES >= nir.TotalRequestedNodes) &&
+                (nir.TotalRequestedNodes == nir.RequestedNodesAdresses.Count))
+            {
+                NodeInfoResponse responseData = new NodeInfoResponse();
 
+                foreach (Hash nodeAddress in nir.RequestedNodesAdresses)
+                {
+                    ListTreeNode ltn;
+                    if (LedgerTree.TraverseToNode(nodeAddress, out ltn) == TraverseResult.Success)
+                    {
+                        responseData.Add(new NodeDataEntity(ltn));
+                    }
+                }
 
+                NetworkPacket response = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_LSYNC_NODE_RESPONSE,
+                   responseData.Serialize(), packet.Token);
 
+                networkPacketSwitch.AddToQueue(packet.PublicKeySource, response);
+            }
         }
 
         void HandleNodeResponse(NetworkPacket packet)
@@ -290,12 +303,19 @@ namespace TNetD.Nodes
             // Check that the packet is valid.
             if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
-                //DebugPrint("NodeResponse from " + packet.PublicKeySource + " : " + packet.Data.Length +
-               // " Bytes, Nodes : " + nir.TotalRequestedNodes, DisplayType.Warning);
+                NodeInfoResponse nir = new NodeInfoResponse();
+                nir.Deserialize(packet.Data);
+
+               // DebugPrint("NodeResponse from " + packet.PublicKeySource + " : " + packet.Data.Length + " Bytes, Nodes : " + nir.TotalRequestedNodes, DisplayType.Warning);
+
+                foreach (NodeDataEntity nde in nir.RequestedNodes)
+                {
+                    PendingNodesToBeFetched.Enqueue(nde);
+                }
             }
             else
             {
-                DebugPrint("Packet VER FAILED : 343.", DisplayType.Warning);
+                DebugPrint("Packet VER FAILED : HandleNodeResponse().", DisplayType.Warning);
             }
         }
 
@@ -304,7 +324,7 @@ namespace TNetD.Nodes
             AllLeafDataRequest aldr = new AllLeafDataRequest();
             aldr.Deserialize(packet.Data);
 
-            DebugPrint("LEAF REQUEST All : " + aldr.TotalRequestedLeaves + " NODES : " + packet.Data.Length + " Bytes", DisplayType.ImportantInfo);
+           // DebugPrint("LEAF REQUEST All : " + aldr.TotalRequestedLeaves + " NODES : " + packet.Data.Length + " Bytes", DisplayType.ImportantInfo);
 
             if (aldr.TotalRequestedLeaves <= Common.LSYNC_MAX_LEAVES_TO_FETCH)
             {
@@ -329,8 +349,7 @@ namespace TNetD.Nodes
 
                     networkPacketSwitch.AddToQueue(packet.PublicKeySource, response);
 
-                    DebugPrint("SENT LEAF RESPONSE : " + ladr.LeafCount + " Leaves ... " +
-                        response.Data.Length + " Bytes", DisplayType.CodeAssertionFailed);
+                    //DebugPrint("SENT LEAF RESPONSE : " + ladr.LeafCount + " Leaves ... " + response.Data.Length + " Bytes", DisplayType.CodeAssertionFailed);
                 }
             }
         }
@@ -341,13 +360,26 @@ namespace TNetD.Nodes
             if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
                 LeafAccountDataResponse ladr = new LeafAccountDataResponse();
+
                 ladr.Deserialize(packet.Data);
 
-                DebugPrint("YAYY, RECEIVED " + ladr.LeafCount + " LEAVES: " + packet.Data.Length + " Bytes", DisplayType.Warning);
+                if (ladr.Leaves.Count == ladr.LeafCount)
+                {
+                    //DebugPrint("YAYY, RECEIVED " + ladr.LeafCount + " LEAVES: " + packet.Data.Length + " Bytes, Adding/Updating to ledger", DisplayType.Warning);
+
+                    foreach (AccountInfo ai in ladr.Leaves)
+                    {
+                        LedgerTree.AddUpdate(ai);
+                    }
+                }
+                else
+                {
+                    DebugPrint("Bad Deserialize : HandleLeafResponse().", DisplayType.Warning);
+                }
             }
             else
             {
-                DebugPrint("Packet VER FAILED : 273.", DisplayType.Warning);
+                DebugPrint("Packet VER FAILED : HandleLeafResponse().", DisplayType.Warning);
             }
         }
 
@@ -371,8 +403,6 @@ namespace TNetD.Nodes
             // Check that the packet is valid.
             if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
-                DebugPrint("RootResponse from " + packet.PublicKeySource + " : " + packet.Data.Length + " Bytes", DisplayType.Warning);
-
                 RootDataResponse rdrm = new RootDataResponse();
                 rdrm.Deserialize(packet.Data);
 
@@ -380,6 +410,8 @@ namespace TNetD.Nodes
 
                 if (LedgerTree.RootNode.Hash != rdrm.RootHash) // Need to match up child nodes.
                 {
+                    DebugPrint("MISMATCH: RootResponse from " + packet.PublicKeySource + " : " + packet.Data.Length + " Bytes", DisplayType.Warning);
+
                     LedgerState = LedgerSyncStateTypes.ST_DATA_FETCH;
 
                     for (int i = 0; i < 16; i++)
@@ -414,15 +446,17 @@ namespace TNetD.Nodes
                             // SHOULD BE IMPLEMENTED BEFORE FINAL NETWORK COMPLETION
                         }
                     }
-
+                }
+                else
+                {
+                    DebugPrint("ROOT IS SYNCHRONZED WITH: " + packet.PublicKeySource, DisplayType.ImportantInfo);
                 }
 
             }
             else
             {
-                DebugPrint("Packet VER FAILED : 222.", DisplayType.Warning);
+                DebugPrint("Packet VER FAILED : HandleRootResponse().", DisplayType.Warning);
             }
-
         }
 
 

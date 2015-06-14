@@ -95,7 +95,7 @@
                 <MenuItem Name="menuItem_Simulation_Stop" Header="Stop"/>
                 <MenuItem Name="menuItem_Simulation_Restart" Header="Restart" />
                 <Separator/>
-                <MenuItem Name="menuItem_Simulation_Resync" Header="Resync"/>
+                <MenuItem Name="menuItem_Simulation_RamdomlyAddAccounts" Header="Add Accounts to Node_0" Click="menuItem_Simulation_RamdomlyAddAccounts_Click"/>
             </MenuItem>
           
             <MenuItem Header="HELP">

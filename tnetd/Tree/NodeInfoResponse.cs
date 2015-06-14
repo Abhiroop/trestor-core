@@ -74,9 +74,7 @@ namespace TNetD.Tree
                         RequestedNodes.Add(nie);
                     }
                 }
-
             }
         }
-
     }
 }

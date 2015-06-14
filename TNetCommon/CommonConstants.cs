@@ -43,7 +43,7 @@ namespace TNetD
         public static readonly long LSYNC_MAX_PENDING_QUEUE_LENGTH = 1024; 
         public static readonly long LSYNC_MAX_ORDERED_NODES = 64;
         public static readonly long LSYNC_MAX_ORDERED_LEAVES = 1024;
-        public static readonly long LSYNC_MAX_LEAVES_TO_FETCH = 32; // 4096 
+        public static readonly long LSYNC_MAX_LEAVES_TO_FETCH = 1; // 4096 
 
         /// <summary>
         /// This is for requests over the network

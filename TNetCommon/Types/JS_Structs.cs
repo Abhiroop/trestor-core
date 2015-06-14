@@ -119,6 +119,9 @@ namespace TNetD.Json.JS_Structs
         public long TransactionsValidated = 0;
         public long RequestsProcessed = 0;
 
+        public long NetworkPacketsOut = 0;
+        public long NetworkPacketsIn = 0;
+
         public long AccountCreationRequests = 0;
         public long TotalAccounts = 0;
 

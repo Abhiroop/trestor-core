@@ -205,12 +205,16 @@ namespace TNetD.Network.Networking
         void process_PacketReceived(NetworkPacket packet)
         {
             if (PacketReceived != null) // Relay the packet to the outer event.
+            {
+                Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.NetworkPacketsIn);
                 PacketReceived(packet);
+            }
         }
         
         public NetworkResult AddToQueue(NetworkPacketQueueEntry npqe)
         {
             outgoingPacketQueue.Enqueue(npqe);
+            Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.NetworkPacketsOut);
 
             if (npqe.Packet.Token.Hex.Length == Common.NETWORK_TOKEN_LENGTH)
             {

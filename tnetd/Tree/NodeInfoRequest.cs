@@ -22,7 +22,7 @@ namespace TNetD.Tree
         /// <summary>
         /// Do not add elements directly.
         /// </summary>
-        public List<Hash> RequestedNodes;
+        public List<Hash> RequestedNodesAdresses;
 
         public NodeInfoRequest()
         {
@@ -32,12 +32,12 @@ namespace TNetD.Tree
         void Init()
         {
             TotalRequestedNodes = 0;
-            RequestedNodes = new List<Hash>();
+            RequestedNodesAdresses = new List<Hash>();
         }
 
         public void Add(Hash entry)
         {
-            RequestedNodes.Add(entry);
+            RequestedNodesAdresses.Add(entry);
             TotalRequestedNodes++;
         }
         
@@ -47,7 +47,7 @@ namespace TNetD.Tree
 
             PDTs.Add(ProtocolPackager.PackVarint(TotalRequestedNodes, 0));
 
-            foreach (Hash nie in RequestedNodes)
+            foreach (Hash nie in RequestedNodesAdresses)
             {
                 PDTs.Add(ProtocolPackager.Pack(nie, 1));
             }
@@ -75,7 +75,7 @@ namespace TNetD.Tree
                     Hash address;
                     if (ProtocolPackager.UnpackHash(PDT, 1, out address))
                     {                        
-                        RequestedNodes.Add(address);
+                        RequestedNodesAdresses.Add(address);
                     }
                 }                
             }

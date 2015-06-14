@@ -67,12 +67,12 @@ namespace TNetD
         {
             lock (TimerLock)
             {
-
                 StringBuilder connData = new StringBuilder();
 
                 foreach (Node nd in nodes)
                 {
-                    connData.AppendLine("\n\n NODE ID " + nd.nodeConfig.NodeID + "   KEY: " + nd.PublicKey);
+                    connData.AppendLine("\n\n\n NODE ID " + nd.nodeConfig.NodeID + "   KEY: " + nd.PublicKey);
+                    connData.AppendLine(" Ledger Hash : " + nd.nodeState.Ledger.GetRootHash());
 
                     connData.AppendLine("  OUTGOING ----> ");
 
@@ -201,6 +201,27 @@ namespace TNetD
             {
                 nd.StopNode();
             }
+        }
+
+        private void menuItem_Simulation_RamdomlyAddAccounts_Click(object sender, RoutedEventArgs e)
+        {
+            int count = 5000;
+
+            long received_takas = 0;
+
+            for (int i = 0; i < 5000; i++)
+            {
+                byte[] N_H = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
+                Common.rngCsp.GetBytes(N_H);
+                
+                Hash h = new Hash(N_H);
+
+                AccountInfo ai = new AccountInfo(h, Common.random.Next(79382, 823649238), 
+                    "name_" + Common.random.Next(0, 823649238), AccountState.Normal, NetworkType.TestNet, AccountType.TestNormal, 0);
+
+                nodes[0].nodeState.Ledger.AddUserToLedger(ai);
+            }
+
         }
 
         /// ///////
