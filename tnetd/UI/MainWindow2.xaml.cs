@@ -171,13 +171,13 @@ namespace TNetD
             }
         }
 
-        private ConcurrentDictionary<Hash, byte[]> generateFakePeerList(int max)
+        private ConcurrentDictionary<Hash, ConnectConfig> generateFakePeerList(int max)
         {
-            ConcurrentDictionary<Hash, byte[]> list = new ConcurrentDictionary<Hash,byte[]>();
+            ConcurrentDictionary<Hash, ConnectConfig> list = new ConcurrentDictionary<Hash,ConnectConfig>();
             int n = rng.Next(max);
             for (int i = 0; i < n; i++) {
                 Hash peer = TNetUtils.GenerateNewToken();
-                list.AddOrUpdate(peer, (byte[]) null, (ok, ov) => null);
+                list.AddOrUpdate(peer, new ConnectConfig(), (ok, ov) => new ConnectConfig());
             }
             return list;
         }

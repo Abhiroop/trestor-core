@@ -41,38 +41,6 @@ namespace TNetD.Network.Networking
 
     /////////////////////////////////////
 
-    class ConnectConfig
-    {
-        /// <summary>
-        /// IPv4 Address of the node. [make plans for IPv6]
-        /// </summary>
-        public string IP;
-
-        /// <summary>
-        /// Network Port to connect to.
-        /// </summary>
-        public int ListenPort;
-
-        /// <summary>
-        /// Delay in ms between two consecutive refresh operations.
-        /// </summary>
-        public int UpdateFrequencyMS;
-
-        public ConnectConfig(NodeSocketData socketInfo)
-        {
-            this.IP = socketInfo.IP;
-            this.ListenPort = socketInfo.ListenPort;
-            UpdateFrequencyMS = Constants.Network_UpdateFrequencyMS;
-        }
-
-        public ConnectConfig(string IP, int Port)
-        {
-            this.IP = IP;
-            this.ListenPort = Port;
-            UpdateFrequencyMS = Constants.Network_UpdateFrequencyMS;
-        }
-    }
-
     class NetworkConfig
     {
         /// <summary>

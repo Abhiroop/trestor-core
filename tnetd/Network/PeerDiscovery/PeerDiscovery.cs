@@ -15,7 +15,7 @@ namespace TNetD.Network.PeerDiscovery
     class PeerDiscovery
     {
         // TODO: add more properties like IP address, byte[] can be changed
-        public ConcurrentDictionary<Hash, byte[]> KnownPeers { get; set; }
+        public ConcurrentDictionary<Hash, ConnectConfig> KnownPeers { get; set; }
 
         private Hash requestRecipient;
         private Hash requestToken;
@@ -33,7 +33,7 @@ namespace TNetD.Network.PeerDiscovery
             this.networkPacketSwitch = networkPacketSwitch;
             requestRecipient = null;
             requestToken = null;
-            KnownPeers = new ConcurrentDictionary<Hash, byte[]>();
+            KnownPeers = new ConcurrentDictionary<Hash, ConnectConfig>();
             networkPacketSwitch.PeerDiscoveryEvent += networkHandler_PeerDiscoveryEvent;
 
             // maybe replace by better rng, but no crypo here anyway
@@ -134,10 +134,10 @@ namespace TNetD.Network.PeerDiscovery
         /// Will merge a new peer list into the existing one
         /// </summary>
         /// <param name="knownPeers"></param>
-        private void processNewPeerList(ConcurrentDictionary<Hash, byte[]> knownPeers)
+        private void processNewPeerList(ConcurrentDictionary<Hash, ConnectConfig> knownPeers)
         {
             int oldcount = KnownPeers.Count;
-            foreach (KeyValuePair<Hash, byte[]> peer in knownPeers)
+            foreach (KeyValuePair<Hash, ConnectConfig> peer in knownPeers)
             {
                 KnownPeers.AddOrUpdate(peer.Key, peer.Value, (ok, ov) => peer.Value);
             }
@@ -146,3 +146,4 @@ namespace TNetD.Network.PeerDiscovery
         }
     }
 }
+
