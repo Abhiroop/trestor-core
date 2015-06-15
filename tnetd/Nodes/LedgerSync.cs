@@ -28,7 +28,10 @@ namespace TNetD.Nodes
     {
         bool Enable = false;
 
-        private readonly int NODE_REQUEST_COUNT = 20;
+        // So with update of 2 seconds, its value is 16 seconds when set.
+        private readonly uint ROOT_BACKOFF = 8; 
+
+        private uint rootBackoff = 0;
 
         object LedgerSyncLock = new object();
 
@@ -36,6 +39,7 @@ namespace TNetD.Nodes
         NodeConfig nodeConfig;
         NetworkPacketSwitch networkPacketSwitch;
         ListHashTree LedgerTree;
+        System.Timers.Timer TimerLedgerSync_Root;
         System.Timers.Timer TimerLedgerSync;
 
         LedgerSyncStateTypes LedgerState;
@@ -59,9 +63,15 @@ namespace TNetD.Nodes
             TimerLedgerSync.Enabled = true;
             TimerLedgerSync.Interval = nodeConfig.UpdateFrequencyLedgerSyncMS;
             TimerLedgerSync.Start();
+
+            TimerLedgerSync_Root = new System.Timers.Timer();
+            if (Enable) TimerLedgerSync_Root.Elapsed += TimerLedgerSync_Root_Elapsed;
+            TimerLedgerSync_Root.Enabled = true;
+            TimerLedgerSync_Root.Interval = nodeConfig.UpdateFrequencyLedgerSyncMS_Root;
+            TimerLedgerSync_Root.Start();
         }
 
-        void TimerLedgerSync_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        void TimerLedgerSync_Root_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             lock (LedgerSyncLock)
             {
@@ -71,16 +81,31 @@ namespace TNetD.Nodes
 
                         if (PendingNodesToBeFetched.Count == 0)
                         {
-                            handle_ST_ROOT();
+                            if(rootBackoff > 0) 
+                                rootBackoff--;
+
+                            if (rootBackoff <= 0)
+                            {
+                                handle_ST_ROOT();
+                            }
                         }
                         else
                         {
                             LedgerState = LedgerSyncStateTypes.ST_DATA_FETCH;
-                            handle_ST_DATA_FETCH();                            
+                            handle_ST_DATA_FETCH();
                         }
 
-                        break;
+                        break;                
+                }
+            }
+        }
 
+        void TimerLedgerSync_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            lock (LedgerSyncLock)
+            {
+                switch (LedgerState)
+                {
                     case LedgerSyncStateTypes.ST_DATA_FETCH:
                         handle_ST_DATA_FETCH();
                         break;
@@ -151,6 +176,8 @@ namespace TNetD.Nodes
 
         void handle_ST_DATA_FETCH()
         {
+            rootBackoff = ROOT_BACKOFF;
+
             long totalOrderedNodes = 0;
             long totalOrderedLeaves = 0;
 
@@ -194,8 +221,8 @@ namespace TNetD.Nodes
                             {
                                 Hash remoteChildHash = nde.Children[i];
                                 ListTreeNode currentChild = currentNode.Children[i];
-
-                                if (PendingNodesToBeFetched.Count > Common.LSYNC_MAX_PENDING_QUEUE_LENGTH) break;
+                                
+                                if (NodeFetchQueue.Count > Common.LSYNC_MAX_PENDING_QUEUE_LENGTH) break;
 
                                 if (remoteChildHash != null)
                                 {

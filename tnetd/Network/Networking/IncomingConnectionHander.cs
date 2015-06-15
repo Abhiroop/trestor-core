@@ -29,6 +29,7 @@ namespace TNetD.Network.Networking
 
         TcpListener listener;
         Timer timer;
+        Timer timer_hello;
 
         List<Hash> KeysGlobal = new List<Hash>();
 
@@ -38,12 +39,12 @@ namespace TNetD.Network.Networking
 
             listener = new TcpListener(IPAddress.Any, ListenPort);
             timer = new Timer(TimerCallback_Housekeeping, null, 0, 2000);
-            /* timer_hello = new Timer(TimerCallback_Hello, null, 0, 500);*/
+            //timer_hello = new Timer(TimerCallback_Hello, null, 0, 500);
 
-            Observable.Interval(TimeSpan.FromMilliseconds(100))
+            Observable.Interval(TimeSpan.FromMilliseconds(Constants.Network_UpdateFrequencyMS))
                 .Subscribe(async x => await TimerCallback_Hello(x));
 
-            ServicePointManager.DefaultConnectionLimit = 200000;
+            ServicePointManager.DefaultConnectionLimit = 32768;
 
             // Start a new thread to accept new incoming connections.
             StartListening();
@@ -92,19 +93,26 @@ namespace TNetD.Network.Networking
             else return false;
         }
 
-        private async Task TimerCallback_Hello(long o)
+        private async Task TimerCallback_Hello(Object o)
         {
-            while (outgoingQueue.Count > 0)
+            try
             {
-                NetworkPacketQueueEntry npqe = outgoingQueue.Dequeue();
-
-                if (IncomingConnections.ContainsKey(npqe.PublicKeyDestination))
+                while (outgoingQueue.Count > 0)
                 {
-                    //DisplayUtils.Display("SENDING IC Packet: " + npqe.Packet.Type + " | From: " + npqe.Packet.PublicKeySource + " | Data Length : " + npqe.Packet.Data.Length);
-                    await SendData(npqe.Packet.Serialize(), IncomingConnections[npqe.PublicKeyDestination]);
-                }
-            }
+                    NetworkPacketQueueEntry npqe = outgoingQueue.Dequeue();
 
+                    if (IncomingConnections.ContainsKey(npqe.PublicKeyDestination))
+                    {
+                        //DisplayUtils.Display("SENDING IC Packet: " + npqe.Packet.Type + " | From: " + npqe.Packet.PublicKeySource + " | Data Length : " + npqe.Packet.Data.Length);
+                        await SendData(npqe.Packet.Serialize(), IncomingConnections[npqe.PublicKeyDestination]);
+                    }
+                }
+
+            }
+            catch(Exception ex)
+            {
+                DisplayUtils.Display("Exception while Sending Packet", ex);
+            }           
 
             /*
 

@@ -116,7 +116,8 @@ namespace TNetD
         /// </summary>
         public static readonly int Node_UpdateFrequencyPacketProcessMS = 500;
 
-        public static readonly int Node_UpdateFrequencyLedgerSyncMS = 2000;
+        public static readonly int Node_UpdateFrequencyLedgerSyncMS = 100;
+        public static readonly int Node_UpdateFrequencyLedgerSyncMS_Root = 2000;
 
         public static readonly string File_TrustedNodes = "TrustedNodes.ini";
         

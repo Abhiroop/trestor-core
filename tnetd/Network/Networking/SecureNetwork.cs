@@ -41,8 +41,7 @@ namespace TNetD.Network.Networking
 
             updateTimer = new Timer(TimerCallback, null, 0, nodeConfig.NetworkConfig.UpdateFrequencyMS);
         }
-
-
+        
         public Hash [] GetConnectedNodes(ConnectionListType type)
         {
             List<Hash> Conns = new List<Hash>();

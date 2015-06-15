@@ -27,6 +27,7 @@ namespace TNetD.Nodes
         public int UpdateFrequencyPacketProcessMS;
         public int UpdateFrequencyConsensusMS;
         public int UpdateFrequencyLedgerSyncMS;
+        public int UpdateFrequencyLedgerSyncMS_Root;
         public int ListenPortProtocol;
         public int ListenPortRPC;
         public int NodeID { get; private set; }
@@ -113,6 +114,7 @@ namespace TNetD.Nodes
             UpdateFrequencyConsensusMS = Constants.Node_UpdateFrequencyConsensusMS;
             UpdateFrequencyPacketProcessMS = Constants.Node_UpdateFrequencyPacketProcessMS;
             UpdateFrequencyLedgerSyncMS = Constants.Node_UpdateFrequencyLedgerSyncMS;
+            UpdateFrequencyLedgerSyncMS_Root = Constants.Node_UpdateFrequencyLedgerSyncMS_Root;
 
             Path_BannedNamesDB = GetInitString("PersistentDatabase", "BannedNamesDB", WorkDirectory + "\\BannedNames.sqlite3");
             DisplayUtils.Display(" Node " + NodeID + " | Banned Names DB Path    : " + Path_BannedNamesDB);
