@@ -28,6 +28,8 @@ namespace TNetD.Network.Networking
         /// </summary>
         public int UpdateFrequencyMS;
 
+        public long TimeStamp;
+
 
 
 
@@ -39,10 +41,10 @@ namespace TNetD.Network.Networking
             UpdateFrequencyMS = Constants.Network_UpdateFrequencyMS;
         }
 
-        public ConnectConfig(string IP, int Port)
+        public ConnectConfig(string IP, int port)
         {
             this.IP = IP;
-            this.ListenPort = Port;
+            this.ListenPort = port;
             UpdateFrequencyMS = Constants.Network_UpdateFrequencyMS;
         }
 
@@ -61,6 +63,7 @@ namespace TNetD.Network.Networking
             PDTs[0] = (ProtocolPackager.Pack(IP, 0));
             PDTs[1] = (ProtocolPackager.PackVarint(ListenPort, 1));
             PDTs[2] = (ProtocolPackager.PackVarint(UpdateFrequencyMS, 2));
+            PDTs[3] = (ProtocolPackager.PackVarint(TimeStamp, 3));
 
             return ProtocolPackager.PackRaw(PDTs);
         }
@@ -74,8 +77,19 @@ namespace TNetD.Network.Networking
             long port = 0, frequency = 0;
             ProtocolPackager.UnpackVarint(PDTs[1], 1, ref port);
             ProtocolPackager.UnpackVarint(PDTs[2], 2, ref frequency);
+            ProtocolPackager.UnpackVarint(PDTs[3], 3, ref TimeStamp);
             ListenPort = (int) port;
             UpdateFrequencyMS = (int) frequency;
+        }
+
+        /// <summary>
+        /// Will check validity of signature for the connection data once implemented
+        /// Public key for this signature is the validator's general pub key.
+        /// </summary>
+        /// <returns></returns>
+        public bool CheckValidity(Hash pubkey)
+        {
+            return true;
         }
     }
 

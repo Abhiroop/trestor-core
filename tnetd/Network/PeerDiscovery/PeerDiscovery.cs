@@ -139,10 +139,14 @@ namespace TNetD.Network.PeerDiscovery
             int oldcount = KnownPeers.Count;
             foreach (KeyValuePair<Hash, ConnectConfig> peer in knownPeers)
             {
-                KnownPeers.AddOrUpdate(peer.Key, peer.Value, (ok, ov) => peer.Value);
+                if (peer.Value.CheckValidity(peer.Key))
+                {
+                    // in case of two: use the more recent one
+                    KnownPeers.AddOrUpdate(peer.Key, peer.Value, (ok, ov) => (ov.TimeStamp > peer.Value.TimeStamp) ? ov : peer.Value);
+                }
             }
             int newcount = KnownPeers.Count;
-            Print("processing peer list: " + oldcount + " => " + newcount); 
+            Print("processing peer list: " + oldcount + " => " + newcount);
         }
     }
 }
