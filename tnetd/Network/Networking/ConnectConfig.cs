@@ -59,8 +59,8 @@ namespace TNetD.Network.Networking
             ProtocolDataType[] PDTs = new ProtocolDataType[3];
 
             PDTs[0] = (ProtocolPackager.Pack(IP, 0));
-            PDTs[1] = (ProtocolPackager.Pack(ListenPort, 0));
-            PDTs[2] = (ProtocolPackager.Pack(UpdateFrequencyMS, 0));
+            PDTs[1] = (ProtocolPackager.PackVarint(ListenPort, 1));
+            PDTs[2] = (ProtocolPackager.PackVarint(UpdateFrequencyMS, 2));
 
             return ProtocolPackager.PackRaw(PDTs);
         }
@@ -71,8 +71,11 @@ namespace TNetD.Network.Networking
 
 
             ProtocolPackager.UnpackString(PDTs[0], 0, ref IP);
-            ProtocolPackager.UnpackInt32(PDTs[1], 0, ref ListenPort);
-            ProtocolPackager.UnpackInt32(PDTs[2], 0, ref UpdateFrequencyMS);
+            long port = 0, frequency = 0;
+            ProtocolPackager.UnpackVarint(PDTs[1], 1, ref port);
+            ProtocolPackager.UnpackVarint(PDTs[2], 2, ref frequency);
+            ListenPort = (int) port;
+            UpdateFrequencyMS = (int) frequency;
         }
     }
 
