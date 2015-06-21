@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using TNetD.Protocol;
 using TNetD.Transactions;
 using TNetD.Nodes;
+using Chaos.NaCl;
 
 
 namespace TNetD.Network.Networking
@@ -29,6 +30,9 @@ namespace TNetD.Network.Networking
         public int UpdateFrequencyMS;
 
         public long TimeStamp;
+
+        public Hash PubKey;
+        public Hash Signature;
 
 
 
@@ -78,8 +82,13 @@ namespace TNetD.Network.Networking
             ProtocolPackager.UnpackVarint(PDTs[1], 1, ref port);
             ProtocolPackager.UnpackVarint(PDTs[2], 2, ref frequency);
             ProtocolPackager.UnpackVarint(PDTs[3], 3, ref TimeStamp);
-            ListenPort = (int) port;
-            UpdateFrequencyMS = (int) frequency;
+            ListenPort = (int)port;
+            UpdateFrequencyMS = (int)frequency;
+        }
+
+        private byte[] signableData()
+        {
+            return new byte[0];
         }
 
         /// <summary>
@@ -89,7 +98,15 @@ namespace TNetD.Network.Networking
         /// <returns></returns>
         public bool CheckValidity(Hash pubkey)
         {
-            return true;
+            if (pubkey == PubKey)
+            {
+                byte[] data = signableData();
+                return Ed25519.Verify(Signature.Hex, data, pubkey.Hex);
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 
