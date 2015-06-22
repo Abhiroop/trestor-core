@@ -149,7 +149,7 @@ namespace TNetD.Nodes
             TimerTimeSync.Interval = 10 * 60 * 1000;
             TimerTimeSync.Start();
 
-            peerDiscovery.Start(30 * 1000);
+            //peerDiscovery.Start(30 * 1000);
 
             DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
         }
