@@ -432,6 +432,20 @@ namespace TNetD.Protocol
             else return false;
         }
 
+        public static bool UnpackVarint(ProtocolDataType packedData, byte nameType, ref int Data)
+        {
+            if (packedData.Data.Length > 0 && packedData.Data.Length <= 9 && (nameType == packedData.NameType) && (packedData.DataType == PDataType.PD_VARINT)) // PD_VARINT has 1-9 bytes
+            {
+                try
+                {
+                    Data = (int) Varint2.Decode(packedData.Data);
+                }
+                catch { return false; }
+                return true;
+            }
+            else return false;
+        }
+
         public static bool UnpackBool(ProtocolDataType packedData, byte nameType, ref bool Data)
         {
             if (packedData.Data.Length == 1 && (nameType == packedData.NameType) && (packedData.DataType == PDataType.PD_BOOL))
