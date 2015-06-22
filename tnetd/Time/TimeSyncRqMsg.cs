@@ -26,7 +26,10 @@ namespace TNetD.Time
         public void Deserialize(byte[] Data)
         {
             List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
-            ProtocolPackager.UnpackInt64(PDTs[0], 0, ref senderTime);
+            if (PDTs.Count == 1)
+            {
+                ProtocolPackager.UnpackInt64(PDTs[0], 0, ref senderTime);
+            }
         }
 
 

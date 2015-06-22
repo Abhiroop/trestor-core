@@ -13,19 +13,17 @@ namespace TNetD.Network.PeerDiscovery
     class PeerDiscoveryMsg
     {
         // TODO: give value a meaning
-        public ConcurrentDictionary<Hash, ConnectConfig> knownPeers;
+        public ConcurrentDictionary<Hash, PeerData> knownPeers;
 
 
 
         public byte[] Serialize()
         {
-            ProtocolDataType[] PDTs = new ProtocolDataType[2 * knownPeers.Count];
+            ProtocolDataType[] PDTs = new ProtocolDataType[knownPeers.Count];
             int i = 0;
-            foreach (KeyValuePair<Hash, ConnectConfig> peer in knownPeers)
+            foreach (KeyValuePair<Hash, PeerData> peer in knownPeers)
             {
-                PDTs[i] = ProtocolPackager.Pack(peer.Key, 0);
-                i++;
-                PDTs[i] = ProtocolPackager.Pack(peer.Value.Serialize(), 1);
+                PDTs[i] = ProtocolPackager.Pack(peer.Value.Serialize(), 0);
                 i++;
             }
             return ProtocolPackager.PackRaw(PDTs);
@@ -34,21 +32,17 @@ namespace TNetD.Network.PeerDiscovery
         public void Deserialize(byte[] data)
         {
             List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(data);
-            knownPeers = new ConcurrentDictionary<Hash, ConnectConfig>();
+            knownPeers = new ConcurrentDictionary<Hash, PeerData>();
 
-            int i = 0;
-            while (i <= PDTs.Count - 2)
+            for (int i = 0; i < PDTs.Count; i++)
             {
-                Hash peer;
-                ProtocolPackager.UnpackHash(PDTs[i++], 0, out peer);
-
                 byte[] tmpData = new byte[0];
-                ProtocolPackager.UnpackByteVector(PDTs[i++], 1, ref tmpData);
+                ProtocolPackager.UnpackByteVector(PDTs[i], 0, ref tmpData);
                 if (tmpData.Length > 0)
                 {
-                    ConnectConfig conn = new ConnectConfig();
+                    PeerData conn = new PeerData();
                     conn.Deserialize(tmpData);
-                    knownPeers[peer] = conn;
+                    knownPeers[conn.PubKey] = conn;
                 }
             }
         }

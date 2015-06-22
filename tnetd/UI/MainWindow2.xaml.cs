@@ -27,6 +27,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TNetD.Address;
 using TNetD.Ledgers;
+using TNetD.Network.PeerDiscovery;
 using TNetD.Network.Networking;
 using TNetD.Nodes;
 using TNetD.PersistentStore;
@@ -164,20 +165,19 @@ namespace TNetD
 
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 50; i++)
             {
                 AddNode(i);
-                nodes[i].peerDiscovery.KnownPeers = generateFakePeerList(100);
             }
         }
 
-        private ConcurrentDictionary<Hash, ConnectConfig> generateFakePeerList(int max)
+        private ConcurrentDictionary<Hash, PeerData> generateFakePeerList(int max)
         {
-            ConcurrentDictionary<Hash, ConnectConfig> list = new ConcurrentDictionary<Hash,ConnectConfig>();
+            ConcurrentDictionary<Hash, PeerData> list = new ConcurrentDictionary<Hash, PeerData>();
             int n = rng.Next(max);
             for (int i = 0; i < n; i++) {
                 Hash peer = TNetUtils.GenerateNewToken();
-                list.AddOrUpdate(peer, new ConnectConfig(), (ok, ov) => new ConnectConfig());
+                //list.AddOrUpdate(peer, null, (ok, ov) => ov);
             }
             return list;
         }

@@ -15,7 +15,7 @@ namespace TNetD.Network.PeerDiscovery
     class PeerDiscovery
     {
         // TODO: add more properties like IP address, byte[] can be changed
-        public ConcurrentDictionary<Hash, ConnectConfig> KnownPeers { get; set; }
+        public ConcurrentDictionary<Hash, PeerData> KnownPeers { get; set; }
 
         private Hash requestRecipient;
         private Hash requestToken;
@@ -33,11 +33,25 @@ namespace TNetD.Network.PeerDiscovery
             this.networkPacketSwitch = networkPacketSwitch;
             requestRecipient = null;
             requestToken = null;
-            KnownPeers = new ConcurrentDictionary<Hash, ConnectConfig>();
+            KnownPeers = new ConcurrentDictionary<Hash, PeerData>();
             networkPacketSwitch.PeerDiscoveryEvent += networkHandler_PeerDiscoveryEvent;
 
             // maybe replace by better rng, but no crypo here anyway
             rng = new Random();
+        }
+
+
+        public void AddKnownPeer(PeerData peer)
+        {
+            if (peer.CheckValidity())
+            {
+                // in case of two: use the more recent one
+                KnownPeers.AddOrUpdate(peer.PubKey, peer, (ok, ov) => (ov.TimeStamp > peer.TimeStamp) ? ov : peer);
+            }
+            else
+            {
+                Print("PeerData with invalid signature.");
+            }
         }
 
 
@@ -134,15 +148,19 @@ namespace TNetD.Network.PeerDiscovery
         /// Will merge a new peer list into the existing one
         /// </summary>
         /// <param name="knownPeers"></param>
-        private void processNewPeerList(ConcurrentDictionary<Hash, ConnectConfig> knownPeers)
+        private void processNewPeerList(ConcurrentDictionary<Hash, PeerData> knownPeers)
         {
             int oldcount = KnownPeers.Count;
-            foreach (KeyValuePair<Hash, ConnectConfig> peer in knownPeers)
+            foreach (KeyValuePair<Hash, PeerData> peer in knownPeers)
             {
-                if (peer.Value.CheckValidity(peer.Key))
+                if (peer.Value.CheckValidity())
                 {
                     // in case of two: use the more recent one
                     KnownPeers.AddOrUpdate(peer.Key, peer.Value, (ok, ov) => (ov.TimeStamp > peer.Value.TimeStamp) ? ov : peer.Value);
+                }
+                else
+                {
+                    Print("PeerData with invalid signature.");
                 }
             }
             int newcount = KnownPeers.Count;

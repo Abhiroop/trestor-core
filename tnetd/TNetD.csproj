@@ -128,7 +128,7 @@
     <Compile Include="Ledgers\GenesisRawData.cs" />
     <Compile Include="Ledgers\SQLiteLedgerFileHandler.cs" />
     <Compile Include="Network\FakeNetwork.cs" />
-    <Compile Include="Network\Networking\ConnectConfig.cs" />
+    <Compile Include="Network\PeerDiscovery\PeerData.cs" />
     <Compile Include="Network\Networking\PacketSender.cs" />
     <Compile Include="Network\Networking\SecureNetwork.cs" />
     <Compile Include="Network\NetworkPacket.cs" />

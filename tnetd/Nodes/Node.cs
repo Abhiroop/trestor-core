@@ -113,6 +113,7 @@ namespace TNetD.Nodes
             timeSync = new TimeSync(nodeState, nodeConfig, networkPacketSwitch);
             ledgerSync = new LedgerSync(nodeState, nodeConfig, networkPacketSwitch);
             peerDiscovery = new PeerDiscovery(nodeState, nodeConfig, networkPacketSwitch);
+            peerDiscovery.AddKnownPeer(new PeerData(new NodeSocketData(nodeConfig.PublicKey, nodeConfig.ListenPortProtocol, "127.0.0.1", nodeConfig.Name), nodeState, nodeConfig));
 
             AI = new AccountInfo(PublicKey, Money);
 
