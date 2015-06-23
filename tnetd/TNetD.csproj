@@ -125,6 +125,7 @@
     </ApplicationDefinition>
     <Compile Include="Consensus\Ballot.cs" />
     <Compile Include="Consensus\ConsensusMap.cs" />
+    <Compile Include="Consensus\TransactionBlacklist.cs" />
     <Compile Include="Consensus\VoteType.cs" />
     <Compile Include="Consensus\Voting.cs" />
     <Compile Include="Ledgers\GenesisRawData.cs" />

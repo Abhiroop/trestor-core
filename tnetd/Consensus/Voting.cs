@@ -19,6 +19,7 @@ namespace TNetD.Consensus
 
         Dictionary<Hash, TransactionContent> CurrentTransactions = new Dictionary<Hash, TransactionContent>();
 
+        Dictionary<Hash, HashSet<Hash>> propagationMap;
         public Voting(NodeConfig nodeConfig, NodeState nodeState, NetworkPacketSwitch networkPacketSwitch)
         {
             this.nodeConfig = nodeConfig;
