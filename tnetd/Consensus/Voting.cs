@@ -15,13 +15,27 @@ namespace TNetD.Consensus
 
         NodeConfig nodeConfig;
         NodeState nodeState;
+        NetworkPacketSwitch networkPacketSwitch;
 
         Dictionary<Hash, TransactionContent> CurrentTransactions = new Dictionary<Hash, TransactionContent>();
 
-        public Voting(NodeConfig nodeConfig, NodeState nodeState)
+        public Voting(NodeConfig nodeConfig, NodeState nodeState, NetworkPacketSwitch networkPacketSwitch)
         {
             this.nodeConfig = nodeConfig;
             this.nodeState = nodeState;
+            this.networkPacketSwitch = networkPacketSwitch;
+            networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
+            networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
+        }
+        
+        void networkPacketSwitch_VoteMergeEvent(Network.NetworkPacket packet)
+        {
+
+        }
+
+        void networkPacketSwitch_VoteEvent(Network.NetworkPacket packet)
+        {
+
         }
 
         public void ProcessPendingTransactions()

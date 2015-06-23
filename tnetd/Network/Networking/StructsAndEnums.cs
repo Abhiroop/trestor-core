@@ -109,9 +109,12 @@ namespace TNetD.Network.Networking
 
         TPT_TRANS_FORWARDING = 0x21,
 
-        TPT_CONS_STATE = 0x30, TPT_CONS_CURRENT_SET = 0x31, TPT_CONS_REQUEST_TC_TX = 0x32, TPT_CONS_RESP_TC_TX = 0x33,
-
-        TPT_CONS_VOTES = 0x34, TPT_CONS_DOUBLESPENDERS = 0x36,
+        TPT_CONS_STATE = 0x30, 
+        TPT_CONS_MERGE_REQUEST = 0x31,
+        TPT_CONS_MERGE_RESPONSE = 0x32,
+        TPT_CONS_BALLOT = 0x33,
+        TPT_CONS_BALLOT_AGREE = 0x34,     
+        
 
         TPT_LSYNC_ROOT_REQUEST = 0x40,
         TPT_LSYNC_ROOT_RESPONSE = 0x41,
@@ -120,7 +123,7 @@ namespace TNetD.Network.Networking
         TPT_LSYNC_LEAF_REQUEST = 0x44,
         TPT_LSYNC_LEAF_REQUEST_ALL = 0x45,
         TPT_LSYNC_LEAF_RESPONSE = 0x46,
-
+        
         /// <summary>
         /// Request transaction data for a range of Ledger Sequence Numbers
         /// FORMAT: TransactionSyncRequest

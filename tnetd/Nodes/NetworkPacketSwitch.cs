@@ -20,6 +20,8 @@ namespace TNetD.Nodes
         public event NetworkPacketEventHandler TimeSyncEvent;
         public event NetworkPacketEventHandler LedgerSyncEvent;
         public event NetworkPacketEventHandler PeerDiscoveryEvent;
+        public event NetworkPacketEventHandler VoteMergeEvent;
+        public event NetworkPacketEventHandler VoteEvent;
 
         NodeConfig nodeConfig;
         NodeState nodeState;
@@ -92,12 +94,18 @@ namespace TNetD.Nodes
 
                     break;
 
-                case PacketType.TPT_CONS_STATE:
-                case PacketType.TPT_CONS_CURRENT_SET:
-                case PacketType.TPT_CONS_REQUEST_TC_TX:
-                case PacketType.TPT_CONS_RESP_TC_TX:
-                case PacketType.TPT_CONS_VOTES:
-                case PacketType.TPT_CONS_DOUBLESPENDERS:
+                case PacketType.TPT_CONS_MERGE_REQUEST:
+                case PacketType.TPT_CONS_MERGE_RESPONSE:
+
+                    if (VoteMergeEvent != null) VoteMergeEvent(packet);
+
+                    break;
+
+                case PacketType.TPT_CONS_STATE:                
+                case PacketType.TPT_CONS_BALLOT:
+                case PacketType.TPT_CONS_BALLOT_AGREE:
+
+                    if (VoteEvent != null) VoteEvent(packet);
 
                     break;
 
