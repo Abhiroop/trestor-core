@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TNetD.Protocol;
+using Chaos.NaCl;
 
 namespace TNetD.Consensus
 {
@@ -48,6 +49,17 @@ namespace TNetD.Consensus
 
         }
 
+
+        private byte[] getSignableData()
+        {
+            List<byte> data = new List<byte>();
+            foreach (Hash transaction in TransactionIds)
+            {
+                data.AddRange(transaction.Hex);
+            }
+            data.AddRange(Conversions.Int64ToVector(Timestamp));
+            return data.ToArray();
+        }
 
     }
 }
