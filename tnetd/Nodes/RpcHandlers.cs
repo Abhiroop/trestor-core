@@ -538,15 +538,23 @@ namespace TNetD.Nodes
 
                     if (StaleSeconds < (Common.TransactionStaleTimer_Minutes * 60))
                     {
-                        TransactionProcessingResult tpResult = nodeState.IncomingTransactionMap.HandlePropagationRequest(transactionContent);
-
-                        if (tpResult == TransactionProcessingResult.Accepted)
+                        // This is a bit Redundant / Done later too. But okay.
+                        if (transactionContent.VerifySignature() == TransactionProcessingResult.Accepted)
                         {
-                            msg = new JS_Msg("Transaction Added to propagation queue.", RPCStatus.Success);
+                            TransactionProcessingResult tpResult = nodeState.IncomingTransactionMap.HandlePropagationRequest(transactionContent);
+
+                            if (tpResult == TransactionProcessingResult.Accepted)
+                            {
+                                msg = new JS_Msg("Transaction Added to propagation queue.", RPCStatus.Success);
+                            }
+                            else
+                            {
+                                msg = new JS_Msg("Transaction Processing Error: " + tpResult, RPCStatus.Failure);
+                            }
                         }
                         else
                         {
-                            msg = new JS_Msg("Transaction Processing Error: " + tpResult, RPCStatus.Failure);
+                            msg = new JS_Msg("Transaction signature is invalid.", RPCStatus.Failure);
                         }
                     }
                     else
