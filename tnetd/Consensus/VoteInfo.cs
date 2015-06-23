@@ -15,7 +15,7 @@ namespace TNetD.Consensus
         
         
 
-        public List<TransactionContent> Transactions
+        /*public List<TransactionContent> Transactions
         {
             get { return _transactions; }
         }
@@ -28,7 +28,7 @@ namespace TNetD.Consensus
         public void AddTransaction(TransactionContent transaction)
         {
             _transactions.Add(transaction);
-        }
+        }*/
 
         ///// <summary>
         ///// *******  TEST FUNCTION ONLY  ******
