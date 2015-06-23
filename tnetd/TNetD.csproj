@@ -126,6 +126,7 @@
     <Compile Include="Consensus\Ballot.cs" />
     <Compile Include="Consensus\ConsensusMap.cs" />
     <Compile Include="Consensus\VoteType.cs" />
+    <Compile Include="Consensus\Voting.cs" />
     <Compile Include="Ledgers\GenesisRawData.cs" />
     <Compile Include="Ledgers\SQLiteLedgerFileHandler.cs" />
     <Compile Include="Network\FakeNetwork.cs" />
