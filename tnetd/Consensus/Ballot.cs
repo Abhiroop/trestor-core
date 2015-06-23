@@ -9,8 +9,8 @@ namespace TNetD.Consensus
 {
     class Ballot : ISerializableBase
     {
-        SortedSet<Hash> TransactionIds = new SortedSet<Hash>();
-               
+        SortedSet<Hash> TransactionIds;
+        
         /// <summary>
         /// Public key of the signer.
         /// </summary>
@@ -33,19 +33,69 @@ namespace TNetD.Consensus
             return false;
         }
 
+        void Init()
+        {
+            TransactionIds = new SortedSet<Hash>();
+            PublicKey = new Hash();
+            Signature = new Hash();
+            Timestamp = 0;
+        }
+
         public Ballot()
         {
-
+            Init();
         }
 
         public byte [] Serialize()
         {
-            return new byte[0];
+            List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
+
+            foreach(Hash txId in TransactionIds)
+            {
+                PDTs.Add(ProtocolPackager.Pack(txId, 0));
+            }
+            
+            PDTs.Add(ProtocolPackager.Pack(PublicKey, 1));
+            PDTs.Add(ProtocolPackager.Pack(Signature, 2));
+            PDTs.Add(ProtocolPackager.PackVarint(Timestamp, 2));
+
+            return ProtocolPackager.PackRaw(PDTs);
         }
 
-        public void Deserialize(byte[] data)
+        public void Deserialize(byte[] Data)
         {
+            Init();
 
+            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
+            int cnt = 0;
+
+            while (cnt < (int)PDTs.Count)
+            {
+                ProtocolDataType PDT = PDTs[cnt++];
+
+                switch (PDT.NameType)
+                {
+                    case 0:
+                        Hash txID;
+                        if(ProtocolPackager.UnpackHash(PDT, 0, out txID))
+                        {
+                            TransactionIds.Add(txID);
+                        }
+                        break;
+
+                    case 1:
+                        ProtocolPackager.UnpackHash(PDT, 1, out PublicKey);
+                        break;
+
+                    case 2:
+                        ProtocolPackager.UnpackHash(PDT, 2, out Signature);
+                        break;
+
+                    case 3:
+                        ProtocolPackager.UnpackVarint(PDT, 3, ref Timestamp);
+                        break;
+                }
+            }
         }
 
 
