@@ -91,15 +91,14 @@ namespace TNetD.Network.PeerDiscovery
 
         private byte[] signableData()
         {
-            ProtocolDataType[] PDTs = new ProtocolDataType[5];
+            List<byte> data = new List<byte>();
+            data.AddRange(Utils.Encoding88591.GetBytes(Name));
+            data.AddRange(PubKey.Hex);
+            data.AddRange(Utils.Encoding88591.GetBytes(IP));
+            data.AddRange(Conversions.Int32ToVector(ListenPort));
+            data.AddRange(Conversions.Int64ToVector(TimeStamp));
 
-            PDTs[0] = (ProtocolPackager.Pack(Name, 0));
-            PDTs[1] = (ProtocolPackager.Pack(PubKey, 1));
-            PDTs[2] = (ProtocolPackager.Pack(IP, 2));
-            PDTs[3] = (ProtocolPackager.PackVarint(ListenPort, 3));
-            PDTs[4] = (ProtocolPackager.PackVarint(TimeStamp, 4));
-
-            return ProtocolPackager.PackRaw(PDTs);
+            return data.ToArray();
         }
 
         /// <summary>
