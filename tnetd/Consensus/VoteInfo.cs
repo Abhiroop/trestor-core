@@ -7,30 +7,20 @@ using TNetD.Transactions;
 
 namespace TNetD.Consensus
 {
-
-    class CandidateSet
+    class VoteInfo
     {
-        List<TransactionContent> _transactions;
+        Dictionary<Hash, TransactionContent> Transactions;        
+        Dictionary<Hash, TransactionContent> TransactionsBlacklist;
 
-        public TransactionContent this[int index]
-        {
-            get
-            {
-                return _transactions[index];
-            }
-        }
-
-        public int Count
-        {
-            get { return _transactions.Count; }
-        }
+        
+        
 
         public List<TransactionContent> Transactions
         {
             get { return _transactions; }
         }
 
-        public CandidateSet()
+        public VoteInfo()
         {
             _transactions = new List<TransactionContent>();
         }

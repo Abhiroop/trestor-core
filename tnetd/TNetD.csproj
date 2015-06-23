@@ -123,6 +123,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Consensus\Ballot.cs" />
     <Compile Include="Consensus\ConsensusMap.cs" />
     <Compile Include="Consensus\VoteType.cs" />
     <Compile Include="Ledgers\GenesisRawData.cs" />
@@ -158,7 +159,7 @@
     <Compile Include="PersistentStore\SQLiteBannedNames.cs" />
     <Compile Include="PersistentStore\SQLiteAccountStore.cs" />
     <Compile Include="PersistentStore\SQLiteTransactionStore.cs" />
-    <Compile Include="Consensus\CandidateSet.cs" />
+    <Compile Include="Consensus\VoteInfo.cs" />
     <Compile Include="SyncFramework\TransactionStreamHandler.cs" />
     <Compile Include="Time\TimeSync.cs" />
     <Compile Include="Time\TimeSyncRqMsg.cs" />
