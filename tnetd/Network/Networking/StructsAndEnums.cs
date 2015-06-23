@@ -112,9 +112,10 @@ namespace TNetD.Network.Networking
         TPT_CONS_STATE = 0x30, 
         TPT_CONS_MERGE_REQUEST = 0x31,
         TPT_CONS_MERGE_RESPONSE = 0x32,
-        TPT_CONS_BALLOT = 0x33,
-        TPT_CONS_BALLOT_AGREE = 0x34,     
-        
+        TPT_CONS_BALLOT_REQUEST = 0x33,
+        TPT_CONS_BALLOT_RESPONSE = 0x34,
+        TPT_CONS_BALLOT_AGREE_REQUEST = 0x35,
+        TPT_CONS_BALLOT_AGREE_RESPONSE = 0x36,   
 
         TPT_LSYNC_ROOT_REQUEST = 0x40,
         TPT_LSYNC_ROOT_RESPONSE = 0x41,

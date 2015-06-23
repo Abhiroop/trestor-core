@@ -102,8 +102,10 @@ namespace TNetD.Nodes
                     break;
 
                 case PacketType.TPT_CONS_STATE:                
-                case PacketType.TPT_CONS_BALLOT:
-                case PacketType.TPT_CONS_BALLOT_AGREE:
+                case PacketType.TPT_CONS_BALLOT_REQUEST:
+                case PacketType.TPT_CONS_BALLOT_RESPONSE:
+                case PacketType.TPT_CONS_BALLOT_AGREE_REQUEST:
+                case PacketType.TPT_CONS_BALLOT_AGREE_RESPONSE:
 
                     if (VoteEvent != null) VoteEvent(packet);
 

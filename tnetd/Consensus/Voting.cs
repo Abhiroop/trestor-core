@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using TNetD.Network.Networking;
 using TNetD.Nodes;
 using TNetD.Transactions;
 
@@ -11,7 +12,7 @@ namespace TNetD.Consensus
 {
     class Voting
     {
-         private object VotingTransactionLock = new object();
+        private object VotingTransactionLock = new object();
 
         NodeConfig nodeConfig;
         NodeState nodeState;
@@ -28,7 +29,7 @@ namespace TNetD.Consensus
             networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
             networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
         }
-        
+
         void networkPacketSwitch_VoteMergeEvent(Network.NetworkPacket packet)
         {
 
@@ -36,7 +37,23 @@ namespace TNetD.Consensus
 
         void networkPacketSwitch_VoteEvent(Network.NetworkPacket packet)
         {
+            switch(packet.Type)
+            {
+                 case PacketType.TPT_CONS_STATE:
+                    break;
 
+                case PacketType.TPT_CONS_BALLOT_REQUEST:
+                    break;
+
+                case PacketType.TPT_CONS_BALLOT_RESPONSE: 
+                    break;
+
+                case PacketType.TPT_CONS_BALLOT_AGREE_REQUEST: 
+                    break;
+
+                case PacketType.TPT_CONS_BALLOT_AGREE_RESPONSE: 
+                    break;
+            }
         }
 
         public void ProcessPendingTransactions()
