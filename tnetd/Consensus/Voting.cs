@@ -18,10 +18,13 @@ namespace TNetD.Consensus
 
         Dictionary<Hash, TransactionContent> CurrentTransactions = new Dictionary<Hash, TransactionContent>();
 
+        Dictionary<Hash, HashSet<Hash>> propagationMap;
+
         public Voting(NodeConfig nodeConfig, NodeState nodeState)
         {
             this.nodeConfig = nodeConfig;
             this.nodeState = nodeState;
+            propagationMap = new Dictionary<Hash, HashSet<Hash>>();
         }
 
         public void ProcessPendingTransactions()
