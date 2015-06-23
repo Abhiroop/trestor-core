@@ -9,8 +9,8 @@ namespace TNetD.Consensus
 {
     class VoteInfo
     {
-        Dictionary<Hash, TransactionContent> Transactions;        
-        Dictionary<Hash, TransactionContent> TransactionsBlacklist;
+        public Dictionary<Hash, TransactionContent> Transactions;        
+        public Dictionary<Hash, TransactionContent> TransactionsBlacklist;
 
         
         
