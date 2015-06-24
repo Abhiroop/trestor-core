@@ -48,7 +48,8 @@ namespace TNetD.Consensus
             this.networkPacketSwitch = networkPacketSwitch;
             this.CurrentTransactions = new Dictionary<Hash, TransactionContent>();
             this.mergeTokens = new Dictionary<Hash, Hash>();
-            propagationMap = new Dictionary<Hash, HashSet<Hash>>();
+            this.fetchTokens = new Dictionary<Hash, Hash>();
+            this.propagationMap = new Dictionary<Hash, HashSet<Hash>>();
             networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
             networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
         }
@@ -109,8 +110,22 @@ namespace TNetD.Consensus
         {
             if (packet.Token == fetchTokens[packet.PublicKeySource])
             {
+                FetchResponseMsg message = new FetchResponseMsg();
+                message.Deserialize(packet.Data);
 
+                foreach (KeyValuePair<Hash, TransactionContent> transaction in message.transactions)
+                {
+                    if (VerifyTransaction(transaction.Value))
+                    {
+                        CurrentTransactions.Add(transaction.Key, transaction.Value);
+                    }
+                }
             }
+        }
+
+        bool VerifyTransaction(TransactionContent transaction)
+        {
+            return false;
         }
 
         void ProcessMergeRequest(NetworkPacket packet)
