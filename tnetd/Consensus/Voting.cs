@@ -29,6 +29,8 @@ namespace TNetD.Consensus
         /// ID and content of current transactions
         /// </summary>
         Dictionary<Hash, TransactionContent> CurrentTransactions;
+        SortedSet<Hash> mergedTransactions = new SortedSet<Hash>();
+
 
         /// <summary>
         /// Maps nodes on tokes used for merge requests
@@ -44,6 +46,7 @@ namespace TNetD.Consensus
         /// value: Set of nodes
         /// </summary>
         Dictionary<Hash, HashSet<Hash>> propagationMap;
+
 
 
 
@@ -105,10 +108,15 @@ namespace TNetD.Consensus
         
         void HandleMerge()
         {
-            MergeStateCounter++;
+            while (MergeStateCounter < 5) 
+            {
+                MergeStateCounter++;
+                SendMergeRequests();
+            }
 
 
-           // CurrentState = ConsensusStates.Vote;           
+           // CurrentState = ConsensusStates.Vote; 
+           MergeStateCounter = 0;
         }
 
         void HandleVoting()
