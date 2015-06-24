@@ -71,7 +71,7 @@ namespace TNetD.Consensus
             }
         }
 
-        void sendFetchRequest(Hash node, Hash transaction)
+        void sendFetchRequest(Hash node, SortedSet<Hash> transactions)
         {
 
         }
@@ -121,9 +121,7 @@ namespace TNetD.Consensus
                 //add sender to propagationMap
                 propagationMap[transaction].Add(packet.PublicKeySource);
             }
-
-
-            //TODO: request content for new transactions, check and add
+            sendFetchRequest(packet.PublicKeySource, newTransactions);
         }
 
         void SendMergeRequests()
