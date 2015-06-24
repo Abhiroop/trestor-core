@@ -203,7 +203,7 @@ namespace TNetD.Ledgers
             return LedgerTree.GetRootHash();
         }
 
-        bool TryFetch(Hash publicKey, out AccountInfo account)
+        public bool TryFetch(Hash publicKey, out AccountInfo account)
         {
             bool okay = false;
             LeafDataType ldt ;
