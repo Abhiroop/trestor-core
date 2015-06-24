@@ -202,5 +202,20 @@ namespace TNetD.Ledgers
         {
             return LedgerTree.GetRootHash();
         }
+
+        bool TryFetch(Hash publicKey, out AccountInfo account)
+        {
+            bool okay = false;
+            LeafDataType ldt ;
+            if (LedgerTree.GetNodeData(publicKey, out ldt) == TraverseResult.Success)
+            {
+                account = (AccountInfo)ldt;
+                okay = true;
+            }
+            account = new AccountInfo();
+            return okay;
+        }
+
+
     }
 }

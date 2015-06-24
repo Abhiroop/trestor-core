@@ -15,12 +15,14 @@ namespace TNetD.Network.Networking
         public event PacketReceivedHandler PacketReceived;
 
         Timer updateTimer;
-        NodeConfig nodeConfig = default(NodeConfig); 
+        NodeConfig nodeConfig = default(NodeConfig);
         NodeState nodeState = default(NodeState);
 
         ConcurrentQueue<NetworkPacketQueueEntry> outgoingPacketQueue = new ConcurrentQueue<NetworkPacketQueueEntry>();
 
         IncomingConnectionHander incomingConnectionHander = default(IncomingConnectionHander);
+
+        NetworkMessagePairs messageTypePairs;
 
         /// <summary>
         /// Collection of OutgoingConnections, Key is the PublicKey.
@@ -31,6 +33,8 @@ namespace TNetD.Network.Networking
         {
             this.nodeConfig = nodeConfig;
             this.nodeState = nodeState;
+
+            messageTypePairs = new NetworkMessagePairs();
         }
 
         public void Initialize()
@@ -41,12 +45,12 @@ namespace TNetD.Network.Networking
 
             updateTimer = new Timer(TimerCallback, null, 0, nodeConfig.NetworkConfig.UpdateFrequencyMS);
         }
-        
-        public Hash [] GetConnectedNodes(ConnectionListType type)
+
+        public Hash[] GetConnectedNodes(ConnectionListType type)
         {
             List<Hash> Conns = new List<Hash>();
 
-            if(type == ConnectionListType.Incoming || type == ConnectionListType.All)
+            if (type == ConnectionListType.Incoming || type == ConnectionListType.All)
             {
                 foreach (KeyValuePair<Hash, IncomingClient> kvp in incomingConnectionHander.IncomingConnections)
                 {
@@ -54,10 +58,10 @@ namespace TNetD.Network.Networking
                     {
                         Conns.Add(kvp.Key);
                     }
-                }                
+                }
             }
 
-            if(type == ConnectionListType.Outgoing || type == ConnectionListType.All)
+            if (type == ConnectionListType.Outgoing || type == ConnectionListType.All)
             {
                 foreach (KeyValuePair<Hash, OutgoingConnection> kvp in outgoingConnections)
                 {
@@ -114,7 +118,7 @@ namespace TNetD.Network.Networking
 
                         else // Create a new outgoing connection and queue a packet.
                         {
-                            if ((nodeConfig.GlobalConfiguration.TrustedNodes.ContainsKey(npqe.PublicKeyDestination)) && 
+                            if ((nodeConfig.GlobalConfiguration.TrustedNodes.ContainsKey(npqe.PublicKeyDestination)) &&
                                 (npqe.PublicKeyDestination != nodeConfig.PublicKey))
                             {
                                 var socketInfo = nodeConfig.GlobalConfiguration.TrustedNodes[npqe.PublicKeyDestination];
@@ -156,7 +160,7 @@ namespace TNetD.Network.Networking
 
                 foreach (KeyValuePair<Hash, OutgoingConnection> kvp in outgoingConnections)
                 {
-                    if(kvp.Value.KeyExchanged)
+                    if (kvp.Value.KeyExchanged)
                     {
                         if (!nodeState.ConnectedValidators.Contains(kvp.Value.nodeSocketData.PublicKey))
                         {
@@ -164,8 +168,8 @@ namespace TNetD.Network.Networking
                         }
                     }
                 }
-                
-                foreach(KeyValuePair<Hash, IncomingClient> kvp in incomingConnectionHander.IncomingConnections)
+
+                foreach (KeyValuePair<Hash, IncomingClient> kvp in incomingConnectionHander.IncomingConnections)
                 {
                     if (kvp.Value.KeyExchanged)
                     {
@@ -181,7 +185,7 @@ namespace TNetD.Network.Networking
                 foreach (Hash pk in nodeState.ConnectedValidators)
                 {
                     bool exists = false;
-                    
+
                     if (incomingConnectionHander.IsConnected(pk)) exists = true;
 
                     if (outgoingConnections.ContainsKey(pk)) exists = true;
@@ -189,8 +193,8 @@ namespace TNetD.Network.Networking
                     if (!exists) toRemove.Add(pk);
                 }
 
-                foreach(Hash h in toRemove)
-                {                    
+                foreach (Hash h in toRemove)
+                {
                     nodeState.ConnectedValidators.Remove(h);
                 }
 
@@ -209,7 +213,7 @@ namespace TNetD.Network.Networking
                 PacketReceived(packet);
             }
         }
-        
+
         public NetworkResult AddToQueue(NetworkPacketQueueEntry npqe)
         {
             outgoingPacketQueue.Enqueue(npqe);
@@ -217,8 +221,17 @@ namespace TNetD.Network.Networking
 
             if (npqe.Packet.Token.Hex.Length == Common.NETWORK_TOKEN_LENGTH)
             {
-                PendingNetworkRequest pnr = new PendingNetworkRequest(nodeState.SystemTime, npqe.PublicKeyDestination);
-                nodeState.PendingNetworkRequests.AddOrUpdate(npqe.Packet.Token, pnr, (k,v) => pnr);
+                if (messageTypePairs.Pairs.ContainsKey(npqe.Packet.Type))
+                {
+                    PendingNetworkRequest pnr = new PendingNetworkRequest(nodeState.SystemTime, npqe.PublicKeyDestination,
+                        messageTypePairs.Pairs[npqe.Packet.Type]);
+
+                    nodeState.PendingNetworkRequests.AddOrUpdate(npqe.Packet.Token, pnr, (k, v) => pnr);
+                }
+                else
+                {
+                    DisplayUtils.Display("Non-Pair packet with valid Token.", DisplayType.CodeAssertionFailed);
+                }
             }
             else
             {
@@ -231,7 +244,7 @@ namespace TNetD.Network.Networking
 
         public NetworkResult AddToQueue(Hash publicKeyDestination, NetworkPacket packet)
         {
-            return AddToQueue(new NetworkPacketQueueEntry(publicKeyDestination, packet));            
+            return AddToQueue(new NetworkPacketQueueEntry(publicKeyDestination, packet));
         }
 
     }

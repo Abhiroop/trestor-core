@@ -1,6 +1,6 @@
 ﻿
 // @Author : Arpan Jati
-// @Date: 8th June 2015
+// @Date: 8th June 2015 | 25 June 2015
 
 using System;
 using System.Collections.Concurrent;
@@ -89,10 +89,6 @@ namespace TNetD.Nodes
 
             switch (packet.Type)
             {
-                case PacketType.TPT_TRANS_REQUEST:
-                case PacketType.TPT_TRANS_FORWARDING:
-
-                    break;
 
                 case PacketType.TPT_CONS_MERGE_REQUEST:
                 case PacketType.TPT_CONS_MERGE_RESPONSE:
@@ -101,7 +97,7 @@ namespace TNetD.Nodes
 
                     break;
 
-                case PacketType.TPT_CONS_STATE:                
+                case PacketType.TPT_CONS_STATE:
                 case PacketType.TPT_CONS_BALLOT_REQUEST:
                 case PacketType.TPT_CONS_BALLOT_RESPONSE:
                 case PacketType.TPT_CONS_BALLOT_AGREE_REQUEST:
@@ -118,7 +114,7 @@ namespace TNetD.Nodes
                 case PacketType.TPT_LSYNC_LEAF_REQUEST:
                 case PacketType.TPT_LSYNC_LEAF_REQUEST_ALL:
                 case PacketType.TPT_LSYNC_LEAF_RESPONSE:
-                    
+
                     if (LedgerSyncEvent != null) LedgerSyncEvent(packet);
 
                     break;
@@ -182,7 +178,7 @@ namespace TNetD.Nodes
             {
                 PendingNetworkRequest pnr = nodeState.PendingNetworkRequests[packet.Token];
 
-                if (pnr.PublicKey == packet.PublicKeySource)
+                if ((pnr.PublicKey == packet.PublicKeySource) && (pnr.ResponseType == packet.Type))
                 {
                     good = true;
                 }

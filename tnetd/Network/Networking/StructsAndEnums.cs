@@ -85,10 +85,12 @@ namespace TNetD.Network.Networking
     {
         public long Time;
         public Hash PublicKey;
-        public PendingNetworkRequest(long Time, Hash PublicKey)
+        public PacketType ResponseType;
+        public PendingNetworkRequest(long Time, Hash PublicKey, PacketType ResponseType)
         {
             this.Time = Time;
             this.PublicKey = PublicKey;
+            this.ResponseType = ResponseType;
         }
     }
 
@@ -102,13 +104,7 @@ namespace TNetD.Network.Networking
     {
         TPT_NOTHING = 0x00,
         TPT_HELLO = 0x01, TPT_DISCONNECT = 0x02, TPT_KEEPALIVE = 0x03,
-        TPT_KEY_EXCHANGE_1 = 0x10, TPT_KEY_EXCHANGE_2 = 0x11, TPT_KEY_EXCHANGE_DONE = 0x12,
-
-        // TPT_TRANS_REQUEST : DATA [TransactionContent] or a single TransactionContent request.
-        TPT_TRANS_REQUEST = 0x20,
-
-        TPT_TRANS_FORWARDING = 0x21,
-
+        
         TPT_CONS_STATE = 0x30, 
         TPT_CONS_MERGE_REQUEST = 0x31,
         TPT_CONS_MERGE_RESPONSE = 0x32,
@@ -169,15 +165,33 @@ namespace TNetD.Network.Networking
         TPT_TX_SYNC_CLOSEHISTORY_RESPONSE = 0x57,
 
         TPT_TIMESYNC_REQUEST = 0x60,
-
         TPT_TIMESYNC_RESPONSE = 0x61,
 
         TPT_PEER_DISCOVERY_INIT = 0x70,
-
         TPT_PEER_DISCOVERY_RESPONSE = 0x71
 
     };
 
+    public class NetworkMessagePairs
+    {
+        public readonly Dictionary<PacketType, PacketType> Pairs = new Dictionary<PacketType, PacketType>();
+
+        public NetworkMessagePairs()
+        {
+            Pairs.Add(PacketType.TPT_CONS_MERGE_REQUEST, PacketType.TPT_CONS_MERGE_RESPONSE);
+            Pairs.Add(PacketType.TPT_CONS_TX_FETCH_REQUEST, PacketType.TPT_CONS_TX_FETCH_RESPONSE);
+            Pairs.Add(PacketType.TPT_CONS_BALLOT_REQUEST, PacketType.TPT_CONS_BALLOT_RESPONSE);
+            Pairs.Add(PacketType.TPT_CONS_BALLOT_AGREE_REQUEST, PacketType.TPT_CONS_BALLOT_AGREE_RESPONSE);
+
+            Pairs.Add(PacketType.TPT_LSYNC_ROOT_REQUEST, PacketType.TPT_LSYNC_ROOT_RESPONSE);
+            Pairs.Add(PacketType.TPT_LSYNC_NODE_REQUEST, PacketType.TPT_LSYNC_NODE_RESPONSE);
+            Pairs.Add(PacketType.TPT_LSYNC_LEAF_REQUEST, PacketType.TPT_LSYNC_LEAF_RESPONSE);
+            Pairs.Add(PacketType.TPT_LSYNC_LEAF_REQUEST_ALL, PacketType.TPT_LSYNC_LEAF_RESPONSE);
+
+            Pairs.Add(PacketType.TPT_TIMESYNC_REQUEST, PacketType.TPT_TIMESYNC_RESPONSE);
+            Pairs.Add(PacketType.TPT_PEER_DISCOVERY_INIT, PacketType.TPT_PEER_DISCOVERY_RESPONSE);
+        }
+    }
 
 
 }
