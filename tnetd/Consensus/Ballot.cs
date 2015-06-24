@@ -107,6 +107,7 @@ namespace TNetD.Consensus
             {
                 data.AddRange(transaction.Hex);
             }
+            data.AddRange(PublicKey.Hex);
             data.AddRange(Conversions.Int64ToVector(Timestamp));
             return data.ToArray();
         }
