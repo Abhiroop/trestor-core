@@ -88,11 +88,21 @@ namespace TNetD.Consensus
         {
             MergeResponseMsg message = new MergeResponseMsg();
             message.Deserialize(packet.Data);
+            SortedSet<Hash> newTransactions = new SortedSet<Hash>();
 
             foreach (Hash transaction in message.transactions)
             {
-
+                //check whether transaction for the given ID is already known
+                if (!CurrentTransactions.ContainsKey(transaction))
+                {
+                    newTransactions.Add(transaction);
+                }
+                //add sender to propagationMap
+                propagationMap[transaction].Add(packet.PublicKeySource);
             }
+
+
+            //TODO: request content for new transactions, check and add
         }
 
         void SendMergeRequests()
