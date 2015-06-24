@@ -126,8 +126,12 @@ namespace TNetD.Consensus
             foreach (TransactionEntity sender in transaction.Sources)
             {
                 Hash account = new Hash(sender.PublicKey);
+
+                AccountInfo accountInfo;
+                bool ok = nodeState.Ledger.TryFetch(account, out accountInfo);
+
                 // account does not exist
-                if (!nodeState.Ledger.AccountExists(account))
+                if (!ok)
                 {
                     return false;
                 }
@@ -136,14 +140,14 @@ namespace TNetD.Consensus
                 {
                     if (sender.Value > temporaryBalances[account])
                     {
-
+                        blacklist.Add(transaction);
                         return false;
                     }
                 }
                 // account not used before
                 else
                 {
-                    if (sender.Value > nodeState.Ledger[account].Money)
+                    if (sender.Value > accountInfo.Money)
                     {
                         return false;
                     }

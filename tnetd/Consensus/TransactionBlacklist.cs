@@ -31,15 +31,20 @@ namespace TNetD.Consensus
 
 
 
-        public void Add(TransactionContent[] transactions)
+        //public void Add(TransactionContent[] transactions)
+        //{
+        //    foreach (TransactionContent transaction in transactions)
+        //    {
+        //        foreach (TransactionEntity account in transaction.Sources)
+        //        {
+        //            blacklist.AddOrUpdate(new Hash(account.PublicKey), transaction.Timestamp, (ok, ov) => ov > transaction.Timestamp ? ov : transaction.Timestamp);
+        //        }
+        //    }
+        //}
+
+        public void Add(TransactionContent transaction)
         {
-            foreach (TransactionContent transaction in transactions)
-            {
-                foreach (TransactionEntity account in transaction.Sources)
-                {
-                    blacklist.AddOrUpdate(new Hash(account.PublicKey), transaction.Timestamp, (ok, ov) => ov > transaction.Timestamp ? ov : transaction.Timestamp);
-                }
-            }
+
         }
 
 
