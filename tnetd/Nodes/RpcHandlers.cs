@@ -116,7 +116,9 @@ namespace TNetD.Nodes
             }
             else if (context.Request.RawUrl.Matches(@"^/register")) // Register Account
             {
-                HandleAccountRegister(context);
+                //HandleAccountRegister(context);
+                var resp = new JS_Msg("Update the application to create new Accounts..", RPCStatus.InvalidAPIUsage);
+                this.SendJsonResponse(context, resp.GetResponse());
                 return true;
             }
 

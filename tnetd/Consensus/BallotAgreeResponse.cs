@@ -13,10 +13,11 @@ namespace TNetD.Consensus
 {
     class BallotAgreeResponse : ISerializableBase
     {
-        
+
         public Hash SignerPublicKey;
         public Hash BallotHash;
         public long LedgerCloseSequence;
+
         public Hash Signature;
 
         public BallotAgreeResponse()
@@ -37,8 +38,9 @@ namespace TNetD.Consensus
             List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
             PDTs.Add(ProtocolPackager.Pack(SignerPublicKey, 0));
             PDTs.Add(ProtocolPackager.Pack(BallotHash, 1));
-            PDTs.Add(ProtocolPackager.Pack(Signature, 2));
-            PDTs.Add(ProtocolPackager.Pack(LedgerCloseSequence, 3));
+            PDTs.Add(ProtocolPackager.Pack(LedgerCloseSequence, 2));
+            PDTs.Add(ProtocolPackager.Pack(Signature, 3));
+
             return ProtocolPackager.PackRaw(PDTs);
         }
 
@@ -46,14 +48,14 @@ namespace TNetD.Consensus
         {
             Init();
 
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);            
+            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
 
-            foreach(ProtocolDataType PDT in PDTs)
+            foreach (ProtocolDataType PDT in PDTs)
             {
                 switch (PDT.NameType)
                 {
                     case 0:
-                        ProtocolPackager.UnpackHash(PDT, 0, out SignerPublicKey);                        
+                        ProtocolPackager.UnpackHash(PDT, 0, out SignerPublicKey);
                         break;
 
                     case 1:
@@ -61,17 +63,29 @@ namespace TNetD.Consensus
                         break;
 
                     case 2:
-                        ProtocolPackager.UnpackHash(PDT, 2, out Signature);
+                        ProtocolPackager.UnpackInt64(PDT, 2, ref LedgerCloseSequence);
                         break;
 
                     case 3:
-                        ProtocolPackager.UnpackInt64(PDT, 3, ref LedgerCloseSequence);
+                        ProtocolPackager.UnpackHash(PDT, 3, out Signature);
                         break;
                 }
             }
         }
 
-       // public 
+        public byte[] GetSignatureData()
+        {
+            List<byte> data = new List<byte>();
+            data.AddRange(SignerPublicKey.Hex);
+            data.AddRange(BallotHash.Hex);
+            data.AddRange(Conversions.Int64ToVector(LedgerCloseSequence));
+            return data.ToArray();
+        }
+
+        public void UpdateSignature(byte[] signature)
+        {
+            this.Signature = new Hash(signature);
+        }
 
     }
 }
