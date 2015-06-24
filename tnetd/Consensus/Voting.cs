@@ -9,6 +9,7 @@ using TNetD.Nodes;
 using TNetD.Transactions;
 using TNetD.Network;
 using System.Reactive.Linq;
+using System.Collections.Concurrent;
 
 namespace TNetD.Consensus
 {
@@ -17,7 +18,7 @@ namespace TNetD.Consensus
         private object VotingTransactionLock = new object();
         private object ConsensusLock = new object();
 
-        enum ConsensusStates { Collect, Merge, Vote, Confirm, Apply };
+        public enum ConsensusStates { Collect, Merge, Vote, Confirm, Apply };
 
         public ConsensusStates CurrentState = ConsensusStates.Collect;
 
@@ -28,24 +29,17 @@ namespace TNetD.Consensus
         /// <summary>
         /// ID and content of current transactions
         /// </summary>
-        Dictionary<Hash, TransactionContent> CurrentTransactions;
+        ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions;
         SortedSet<Hash> mergedTransactions = new SortedSet<Hash>();
-
-
-        /// <summary>
-        /// Maps nodes on tokes used for merge requests
-        /// key: Node
-        /// value: Token
-        /// </summary>
-        Dictionary<Hash, Hash> mergeTokens;
-        Dictionary<Hash, Hash> fetchTokens;
 
         /// <summary>
         /// Set of nodes, who sent a transaction ID
         /// key: Transaction ID
         /// value: Set of nodes
         /// </summary>
-        Dictionary<Hash, HashSet<Hash>> propagationMap;
+        ConcurrentDictionary<Hash, HashSet<Hash>> propagationMap;
+
+        TransactionBlacklist blacklist;
 
 
 
@@ -55,10 +49,9 @@ namespace TNetD.Consensus
             this.nodeConfig = nodeConfig;
             this.nodeState = nodeState;
             this.networkPacketSwitch = networkPacketSwitch;
-            this.CurrentTransactions = new Dictionary<Hash, TransactionContent>();
-            this.mergeTokens = new Dictionary<Hash, Hash>();
-            this.fetchTokens = new Dictionary<Hash, Hash>();
-            this.propagationMap = new Dictionary<Hash, HashSet<Hash>>();
+            this.CurrentTransactions = new ConcurrentDictionary<Hash, TransactionContent>();
+            this.propagationMap = new ConcurrentDictionary<Hash, HashSet<Hash>>();
+            this.blacklist = new TransactionBlacklist(nodeState);
             networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
             networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
 
@@ -105,31 +98,71 @@ namespace TNetD.Consensus
         int MergeStateCounter = 0;
         int VotingStateCounter = 0;
         int ConfirmationStateCounter = 0;
-        
+
         void HandleMerge()
         {
-            while (MergeStateCounter < 5) 
+            MergeStateCounter++;
+            SendMergeRequests();
+
+            if (MergeStateCounter == 5)
             {
-                MergeStateCounter++;
-                SendMergeRequests();
+                Dictionary<Hash, long> temporaryBalances = new Dictionary<Hash, long>();
+                foreach (KeyValuePair<Hash, TransactionContent> transaction in CurrentTransactions)
+                {
+                    if (Spendable(transaction.Value, temporaryBalances))
+                    {
+
+                    }
+                }
+
+                //fetch
+                CurrentState = ConsensusStates.Vote;
+                MergeStateCounter = 0;
             }
+        }
 
+        bool Spendable(TransactionContent transaction, Dictionary<Hash, long> temporaryBalances)
+        {
+            foreach (TransactionEntity sender in transaction.Sources)
+            {
+                Hash account = new Hash(sender.PublicKey);
+                // account does not exist
+                if (!nodeState.Ledger.AccountExists(account))
+                {
+                    return false;
+                }
+                // account already used in this voting round
+                if (temporaryBalances.ContainsKey(account))
+                {
+                    if (sender.Value > temporaryBalances[account])
+                    {
 
-           // CurrentState = ConsensusStates.Vote; 
-           MergeStateCounter = 0;
+                        return false;
+                    }
+                }
+                // account not used before
+                else
+                {
+                    if (sender.Value > nodeState.Ledger[account].Money)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         void HandleVoting()
         {
             VotingStateCounter++;
-            
+
 
         }
 
         void HandleConfirmation()
         {
             ConfirmationStateCounter++;
-            
+
 
         }
 
@@ -139,7 +172,7 @@ namespace TNetD.Consensus
 
             CurrentState = ConsensusStates.Apply;
         }
-        
+
         void networkPacketSwitch_VoteMergeEvent(NetworkPacket packet)
         {
             switch (packet.Type)
@@ -167,7 +200,6 @@ namespace TNetD.Consensus
             NetworkPacket packet = new NetworkPacket();
             packet.Data = message.Serialize();
             packet.Token = token;
-            fetchTokens[node] = token;
             packet.PublicKeySource = nodeConfig.PublicKey;
             packet.Type = PacketType.TPT_CONS_TX_FETCH_REQUEST;
             networkPacketSwitch.AddToQueue(node, packet);
@@ -194,24 +226,23 @@ namespace TNetD.Consensus
 
         void ProcessFetchResponse(NetworkPacket packet)
         {
-            if (packet.Token == fetchTokens[packet.PublicKeySource])
+            if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
                 FetchResponseMsg message = new FetchResponseMsg();
                 message.Deserialize(packet.Data);
 
                 foreach (KeyValuePair<Hash, TransactionContent> transaction in message.transactions)
                 {
-                    if (VerifyTransaction(transaction.Value))
+                    if (transaction.Value.VerifySignature() == TransactionProcessingResult.Accepted)
                     {
-                        CurrentTransactions.Add(transaction.Key, transaction.Value);
+                        CurrentTransactions.AddOrUpdate(transaction.Key, transaction.Value, (ok, ov) => ov);
+                    }
+                    else
+                    {
+                        // TODO: blacklist peer 
                     }
                 }
             }
-        }
-
-        bool VerifyTransaction(TransactionContent transaction)
-        {
-            return false;
         }
 
         void ProcessMergeRequest(NetworkPacket packet)
@@ -235,7 +266,7 @@ namespace TNetD.Consensus
 
         void ProcessMergeResponse(NetworkPacket packet)
         {
-            if (packet.Token == mergeTokens[packet.PublicKeySource])
+            if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
                 MergeResponseMsg message = new MergeResponseMsg();
                 message.Deserialize(packet.Data);
@@ -263,7 +294,6 @@ namespace TNetD.Consensus
                 NetworkPacket request = new NetworkPacket();
                 request.PublicKeySource = nodeConfig.PublicKey;
                 request.Token = token;
-                mergeTokens[node] = token;
                 request.Type = PacketType.TPT_CONS_MERGE_REQUEST;
                 networkPacketSwitch.AddToQueue(node, request);
             }
@@ -307,7 +337,7 @@ namespace TNetD.Consensus
                                 //transactionContentStack.Enqueue(kvp.Value);
                                 if (!CurrentTransactions.ContainsKey(kvp.Key))
                                 {
-                                    CurrentTransactions.Add(kvp.Key, kvp.Value);
+                                    CurrentTransactions.TryAdd(kvp.Key, kvp.Value);
                                 }
                                 //Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.TransactionsVerified);
                             }
