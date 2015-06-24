@@ -18,7 +18,7 @@ namespace TNetD.Consensus
         private object VotingTransactionLock = new object();
         private object ConsensusLock = new object();
 
-        enum ConsensusStates { Collect, Merge, Vote, Confirm, Apply };
+        public enum ConsensusStates { Collect, Merge, Vote, Confirm, Apply };
 
         public ConsensusStates CurrentState = ConsensusStates.Collect;
 
@@ -39,6 +39,8 @@ namespace TNetD.Consensus
         /// </summary>
         ConcurrentDictionary<Hash, HashSet<Hash>> propagationMap;
 
+        TransactionBlacklist blacklist;
+
 
 
 
@@ -49,6 +51,7 @@ namespace TNetD.Consensus
             this.networkPacketSwitch = networkPacketSwitch;
             this.CurrentTransactions = new ConcurrentDictionary<Hash, TransactionContent>();
             this.propagationMap = new ConcurrentDictionary<Hash, HashSet<Hash>>();
+            this.blacklist = new TransactionBlacklist(nodeState);
             networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
             networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
 
@@ -106,7 +109,7 @@ namespace TNetD.Consensus
                 Dictionary<Hash, long> temporaryBalances = new Dictionary<Hash, long>();
                 foreach (KeyValuePair<Hash, TransactionContent> transaction in CurrentTransactions)
                 {
-                    if (!temporaryBalances.ContainsKey(transaction.Key))
+                    if (Spendable(transaction.Value, temporaryBalances))
                     {
 
                     }
@@ -116,6 +119,37 @@ namespace TNetD.Consensus
                 CurrentState = ConsensusStates.Vote;
                 MergeStateCounter = 0;
             }
+        }
+
+        bool Spendable(TransactionContent transaction, Dictionary<Hash, long> temporaryBalances)
+        {
+            foreach (TransactionEntity sender in transaction.Sources)
+            {
+                Hash account = new Hash(sender.PublicKey);
+                // account does not exist
+                if (!nodeState.Ledger.AccountExists(account))
+                {
+                    return false;
+                }
+                // account already used in this voting round
+                if (temporaryBalances.ContainsKey(account))
+                {
+                    if (sender.Value > temporaryBalances[account])
+                    {
+
+                        return false;
+                    }
+                }
+                // account not used before
+                else
+                {
+                    if (sender.Value > nodeState.Ledger[account].Money)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         void HandleVoting()
