@@ -8,12 +8,18 @@ using TNetD.Network.Networking;
 using TNetD.Nodes;
 using TNetD.Transactions;
 using TNetD.Network;
+using System.Reactive.Linq;
 
 namespace TNetD.Consensus
 {
     class Voting
     {
         private object VotingTransactionLock = new object();
+        private object ConsensusLock = new object();
+
+        enum ConsensusStates { Collect, Merge, Vote, Confirm, Apply };
+
+        public ConsensusStates CurrentState = ConsensusStates.Collect;
 
         NodeConfig nodeConfig;
         NodeState nodeState;
@@ -52,8 +58,80 @@ namespace TNetD.Consensus
             this.propagationMap = new Dictionary<Hash, HashSet<Hash>>();
             networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
             networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
+
+            Observable.Interval(TimeSpan.FromMilliseconds(1000))
+                .Subscribe(async x => await TimerCallback_Voting(x));
+
         }
 
+        private async Task TimerCallback_Voting(Object o)
+        {
+            await Task.Run(() =>
+            {
+                lock (ConsensusLock)
+                {
+                    switch (CurrentState)
+                    {
+                        case ConsensusStates.Collect:
+                            ProcessPendingTransactions();
+                            CurrentState = ConsensusStates.Merge;
+                            break;
+
+                        case ConsensusStates.Merge:
+                            HandleMerge();
+                            break;
+
+                        case ConsensusStates.Vote:
+                            HandleVoting();
+                            break;
+
+                        case ConsensusStates.Confirm:
+                            HandleConfirmation();
+                            break;
+
+                        case ConsensusStates.Apply:
+                            HandleVoting();
+                            break;
+
+                    }
+                }
+
+            });
+        }
+
+        int MergeStateCounter = 0;
+        int VotingStateCounter = 0;
+        int ConfirmationStateCounter = 0;
+        
+        void HandleMerge()
+        {
+            MergeStateCounter++;
+
+
+           // CurrentState = ConsensusStates.Vote;           
+        }
+
+        void HandleVoting()
+        {
+            VotingStateCounter++;
+            
+
+        }
+
+        void HandleConfirmation()
+        {
+            ConfirmationStateCounter++;
+            
+
+        }
+
+        void HandleApply()
+        {
+
+
+            CurrentState = ConsensusStates.Apply;
+        }
+        
         void networkPacketSwitch_VoteMergeEvent(NetworkPacket packet)
         {
             switch (packet.Type)
