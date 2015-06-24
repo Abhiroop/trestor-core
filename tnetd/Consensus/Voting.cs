@@ -22,7 +22,7 @@ namespace TNetD.Consensus
         /// <summary>
         /// ID and content of current transactions
         /// </summary>
-        Dictionary<Hash, TransactionContent> CurrentTransactions = new Dictionary<Hash, TransactionContent>();
+        Dictionary<Hash, TransactionContent> CurrentTransactions;
 
         /// <summary>
         /// Maps nodes on tokes used for merge requests
@@ -45,7 +45,9 @@ namespace TNetD.Consensus
             this.nodeConfig = nodeConfig;
             this.nodeState = nodeState;
             this.networkPacketSwitch = networkPacketSwitch;
+            this.CurrentTransactions = new Dictionary<Hash, TransactionContent>();
             this.mergeTokens = new Dictionary<Hash, Hash>();
+            propagationMap = new Dictionary<Hash, HashSet<Hash>>();
             networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
             networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
         }
