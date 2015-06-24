@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using TNetD.Network.Networking;
 using TNetD.Nodes;
 using TNetD.Transactions;
+using TNetD.Network;
 
 namespace TNetD.Consensus
 {
@@ -18,21 +19,91 @@ namespace TNetD.Consensus
         NodeState nodeState;
         NetworkPacketSwitch networkPacketSwitch;
 
+        /// <summary>
+        /// ID and content of current transactions
+        /// </summary>
         Dictionary<Hash, TransactionContent> CurrentTransactions = new Dictionary<Hash, TransactionContent>();
 
+        /// <summary>
+        /// Maps nodes on tokes used for merge requests
+        /// key: Node
+        /// value: Token
+        /// </summary>
+        Dictionary<Hash, Hash> mergeTokens;
+
+        /// <summary>
+        /// Set of nodes, who sent a transaction ID
+        /// key: Transaction ID
+        /// value: Set of nodes
+        /// </summary>
         Dictionary<Hash, HashSet<Hash>> propagationMap;
+
+
+
         public Voting(NodeConfig nodeConfig, NodeState nodeState, NetworkPacketSwitch networkPacketSwitch)
         {
             this.nodeConfig = nodeConfig;
             this.nodeState = nodeState;
             this.networkPacketSwitch = networkPacketSwitch;
+            this.mergeTokens = new Dictionary<Hash, Hash>();
             networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
             networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
         }
 
-        void networkPacketSwitch_VoteMergeEvent(Network.NetworkPacket packet)
+        void networkPacketSwitch_VoteMergeEvent(NetworkPacket packet)
         {
+            switch (packet.Type)
+            {
+                case PacketType.TPT_CONS_MERGE_REQUEST:
+                    ProcessMergeRequest(packet);
+                    break;
+                case PacketType.TPT_CONS_MERGE_RESPONSE:
+                    ProcessMergeResponse(packet);
+                    break;
+            }
+        }
 
+        void ProcessMergeRequest(NetworkPacket packet)
+        {
+            Hash sender = packet.PublicKeySource;
+            Hash token = packet.Token;
+
+            MergeResponseMsg message = new MergeResponseMsg();
+            foreach (KeyValuePair<Hash, TransactionContent> transaction in CurrentTransactions)
+            {
+                message.transactions.Add(transaction.Key);
+            }
+
+            NetworkPacket response = new NetworkPacket();
+            response.Token = token;
+            response.PublicKeySource = nodeConfig.PublicKey;
+            response.Data = message.Serialize();
+            response.Type = PacketType.TPT_CONS_MERGE_RESPONSE;
+            networkPacketSwitch.AddToQueue(sender, response);
+        }
+
+        void ProcessMergeResponse(NetworkPacket packet)
+        {
+            MergeResponseMsg message = new MergeResponseMsg();
+            message.Deserialize(packet.Data);
+
+            foreach (Hash transaction in message.transactions)
+            {
+
+            }
+        }
+
+        void SendMergeRequests()
+        {
+            foreach (Hash node in nodeState.ConnectedValidators)
+            {
+                Hash token = TNetUtils.GenerateNewToken();
+                NetworkPacket request = new NetworkPacket();
+                request.PublicKeySource = nodeConfig.PublicKey;
+                request.Token = token;
+                request.Type = PacketType.TPT_CONS_MERGE_REQUEST;
+                networkPacketSwitch.AddToQueue(node, request);
+            }
         }
 
         void networkPacketSwitch_VoteEvent(Network.NetworkPacket packet)
