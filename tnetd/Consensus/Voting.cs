@@ -108,21 +108,21 @@ namespace TNetD.Consensus
 
         void networkPacketSwitch_VoteEvent(Network.NetworkPacket packet)
         {
-            switch(packet.Type)
+            switch (packet.Type)
             {
-                 case PacketType.TPT_CONS_STATE:
+                case PacketType.TPT_CONS_STATE:
                     break;
 
                 case PacketType.TPT_CONS_BALLOT_REQUEST:
                     break;
 
-                case PacketType.TPT_CONS_BALLOT_RESPONSE: 
+                case PacketType.TPT_CONS_BALLOT_RESPONSE:
                     break;
 
-                case PacketType.TPT_CONS_BALLOT_AGREE_REQUEST: 
+                case PacketType.TPT_CONS_BALLOT_AGREE_REQUEST:
                     break;
 
-                case PacketType.TPT_CONS_BALLOT_AGREE_RESPONSE: 
+                case PacketType.TPT_CONS_BALLOT_AGREE_RESPONSE:
                     break;
             }
         }
