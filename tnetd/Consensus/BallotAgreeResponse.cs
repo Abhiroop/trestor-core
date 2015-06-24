@@ -11,7 +11,7 @@ using TNetD.Protocol;
 
 namespace TNetD.Consensus
 {
-    class BallotAgreeResponse : ISerializableBase
+    class BallotAgreeResponse : ISerializableBase, ISignableBase
     {
 
         public Hash SignerPublicKey;

@@ -26,7 +26,7 @@ namespace TNetD.Nodes
 
     class LedgerSync
     {
-        bool Enable = true;
+        bool Enable = false;
 
         // So with update of 2 seconds, its value is 16 seconds when set.
         private readonly uint ROOT_BACKOFF = 8; 
