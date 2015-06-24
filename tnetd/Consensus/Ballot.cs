@@ -8,7 +8,7 @@ using Chaos.NaCl;
 
 namespace TNetD.Consensus
 {
-    class Ballot : ISerializableBase
+    class Ballot : ISerializableBase, ISignableBase
     {
         SortedSet<Hash> TransactionIds;
         
@@ -98,9 +98,8 @@ namespace TNetD.Consensus
                 }
             }
         }
-
-
-        private byte[] getSignableData()
+        
+        public byte[] GetSignatureData()
         {
             List<byte> data = new List<byte>();
             foreach (Hash transaction in TransactionIds)
@@ -110,6 +109,11 @@ namespace TNetD.Consensus
             data.AddRange(PublicKey.Hex);
             data.AddRange(Conversions.Int64ToVector(Timestamp));
             return data.ToArray();
+        }
+
+        public void UpdateSignature(byte[] signature)
+        {
+            this.Signature = new Hash(signature);
         }
 
     }

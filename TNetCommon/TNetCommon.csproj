@@ -167,6 +167,7 @@
     <Compile Include="Hash.cs" />
     <Compile Include="HexUtil.cs" />
     <Compile Include="Interop\Rig2.cs" />
+    <Compile Include="ISignableBase.cs" />
     <Compile Include="Json\JsonService.cs" />
     <Compile Include="Json\REST\BytesToHexConverter.cs" />
     <Compile Include="Json\REST\Client\RESTClient.cs" />

@@ -145,6 +145,11 @@ namespace TNetD.Nodes
         {
             return Ed25519.Sign(data, masterPrivateKeyExpanded);
         }
+        
+        public void SignEntity(ISignableBase entity)
+        {
+            entity.UpdateSignature( Ed25519.Sign(entity.GetSignatureData(), masterPrivateKeyExpanded));
+        }
 
         #region INI Methods
 
