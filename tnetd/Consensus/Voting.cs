@@ -30,6 +30,7 @@ namespace TNetD.Consensus
         /// value: Token
         /// </summary>
         Dictionary<Hash, Hash> mergeTokens;
+        Dictionary<Hash, Hash> fetchTokens;
 
         /// <summary>
         /// Set of nodes, who sent a transaction ID
@@ -73,17 +74,43 @@ namespace TNetD.Consensus
 
         void sendFetchRequest(Hash node, SortedSet<Hash> transactions)
         {
-
+            FetchRequestMsg message = new FetchRequestMsg();
+            message.IDs = transactions;
+            Hash token = TNetUtils.GenerateNewToken();
+            NetworkPacket packet = new NetworkPacket();
+            packet.Data = message.Serialize();
+            packet.Token = token;
+            fetchTokens[node] = token;
+            packet.PublicKeySource = nodeConfig.PublicKey;
+            packet.Type = PacketType.TPT_CONS_TX_FETCH_REQUEST;
+            networkPacketSwitch.AddToQueue(node, packet);
         }
 
         void ProcessFetchRequest(NetworkPacket packet)
         {
+            FetchRequestMsg message = new FetchRequestMsg();
+            message.Deserialize(packet.Data);
 
+            FetchResponseMsg response = new FetchResponseMsg();
+            foreach (Hash id in message.IDs)
+            {
+                response.transactions.Add(id, CurrentTransactions[id]);
+            }
+
+            NetworkPacket rpacket = new NetworkPacket();
+            rpacket.Data = response.Serialize();
+            rpacket.Token = packet.Token;
+            rpacket.PublicKeySource = nodeConfig.PublicKey;
+            rpacket.Type = PacketType.TPT_CONS_TX_FETCH_RESPONSE;
+            networkPacketSwitch.AddToQueue(packet.PublicKeySource, rpacket);
         }
 
         void ProcessFetchResponse(NetworkPacket packet)
         {
+            if (packet.Token == fetchTokens[packet.PublicKeySource])
+            {
 
+            }
         }
 
         void ProcessMergeRequest(NetworkPacket packet)
@@ -107,21 +134,24 @@ namespace TNetD.Consensus
 
         void ProcessMergeResponse(NetworkPacket packet)
         {
-            MergeResponseMsg message = new MergeResponseMsg();
-            message.Deserialize(packet.Data);
-            SortedSet<Hash> newTransactions = new SortedSet<Hash>();
-
-            foreach (Hash transaction in message.transactions)
+            if (packet.Token == mergeTokens[packet.PublicKeySource])
             {
-                //check whether transaction for the given ID is already known
-                if (!CurrentTransactions.ContainsKey(transaction))
+                MergeResponseMsg message = new MergeResponseMsg();
+                message.Deserialize(packet.Data);
+                SortedSet<Hash> newTransactions = new SortedSet<Hash>();
+
+                foreach (Hash transaction in message.transactions)
                 {
-                    newTransactions.Add(transaction);
+                    //check whether transaction for the given ID is already known
+                    if (!CurrentTransactions.ContainsKey(transaction))
+                    {
+                        newTransactions.Add(transaction);
+                    }
+                    //add sender to propagationMap
+                    propagationMap[transaction].Add(packet.PublicKeySource);
                 }
-                //add sender to propagationMap
-                propagationMap[transaction].Add(packet.PublicKeySource);
+                sendFetchRequest(packet.PublicKeySource, newTransactions);
             }
-            sendFetchRequest(packet.PublicKeySource, newTransactions);
         }
 
         void SendMergeRequests()
@@ -132,6 +162,7 @@ namespace TNetD.Consensus
                 NetworkPacket request = new NetworkPacket();
                 request.PublicKeySource = nodeConfig.PublicKey;
                 request.Token = token;
+                mergeTokens[node] = token;
                 request.Type = PacketType.TPT_CONS_MERGE_REQUEST;
                 networkPacketSwitch.AddToQueue(node, request);
             }

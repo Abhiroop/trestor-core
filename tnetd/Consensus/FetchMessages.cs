@@ -10,11 +10,11 @@ namespace TNetD.Consensus
 {
     class FetchRequestMsg : ISerializableBase
     {
-        public HashSet<Hash> IDs;
+        public SortedSet<Hash> IDs;
 
         public FetchRequestMsg()
         {
-            IDs = new HashSet<Hash>();
+            IDs = new SortedSet<Hash>();
         }
 
         public byte[] Serialize()
