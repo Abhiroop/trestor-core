@@ -62,7 +62,28 @@ namespace TNetD.Consensus
                 case PacketType.TPT_CONS_MERGE_RESPONSE:
                     ProcessMergeResponse(packet);
                     break;
+                case PacketType.TPT_CONS_TX_FETCH_REQUEST:
+                    ProcessFetchRequest(packet);
+                    break;
+                case PacketType.TPT_CONS_TX_FETCH_RESPONSE:
+                    ProcessFetchResponse(packet);
+                    break;
             }
+        }
+
+        void sendFetchRequest(Hash node, Hash transaction)
+        {
+
+        }
+
+        void ProcessFetchRequest(NetworkPacket packet)
+        {
+
+        }
+
+        void ProcessFetchResponse(NetworkPacket packet)
+        {
+
         }
 
         void ProcessMergeRequest(NetworkPacket packet)

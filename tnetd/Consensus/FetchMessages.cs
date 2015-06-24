@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace TNetD.Consensus
 {
-    class BallotResponseMessage
+    class FetchRequestMessage
+    {
+    }
+
+    class FetchResponseMessage
     {
     }
 }
