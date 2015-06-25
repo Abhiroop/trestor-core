@@ -230,7 +230,10 @@ namespace TNetD.Network.Networking
                 }
                 else
                 {
-                    DisplayUtils.Display("Non-Pair packet with valid Token.", DisplayType.CodeAssertionFailed);
+                    if (!messageTypePairs.Responses.Contains(npqe.Packet.Type))
+                    {
+                        DisplayUtils.Display("Non-Pair packet with valid Token.", DisplayType.CodeAssertionFailed);
+                    }              
                 }
             }
             else

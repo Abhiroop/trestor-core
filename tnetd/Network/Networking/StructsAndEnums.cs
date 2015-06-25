@@ -176,6 +176,9 @@ namespace TNetD.Network.Networking
     {
         public readonly Dictionary<PacketType, PacketType> Pairs = new Dictionary<PacketType, PacketType>();
 
+        public HashSet<PacketType> Requests = new HashSet<PacketType>();
+        public HashSet<PacketType> Responses = new HashSet<PacketType>();
+
         public NetworkMessagePairs()
         {
             Pairs.Add(PacketType.TPT_CONS_MERGE_REQUEST, PacketType.TPT_CONS_MERGE_RESPONSE);
@@ -190,6 +193,12 @@ namespace TNetD.Network.Networking
 
             Pairs.Add(PacketType.TPT_TIMESYNC_REQUEST, PacketType.TPT_TIMESYNC_RESPONSE);
             Pairs.Add(PacketType.TPT_PEER_DISCOVERY_INIT, PacketType.TPT_PEER_DISCOVERY_RESPONSE);
+            
+            foreach(var v in Pairs)
+            {
+                Requests.Add(v.Key);
+                Responses.Add(v.Value);
+            }
         }
     }
 
