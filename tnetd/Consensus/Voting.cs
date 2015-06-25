@@ -39,7 +39,7 @@ namespace TNetD.Consensus
         /// </summary>
         ConcurrentDictionary<Hash, HashSet<Hash>> propagationMap;
 
-        TransactionBlacklist blacklist;
+        DoubleSpendBlacklist blacklist;
 
 
 
@@ -51,7 +51,7 @@ namespace TNetD.Consensus
             this.networkPacketSwitch = networkPacketSwitch;
             this.CurrentTransactions = new ConcurrentDictionary<Hash, TransactionContent>();
             this.propagationMap = new ConcurrentDictionary<Hash, HashSet<Hash>>();
-            this.blacklist = new TransactionBlacklist(nodeState);
+            this.blacklist = new DoubleSpendBlacklist(nodeState);
             networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
             networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
 
@@ -140,7 +140,7 @@ namespace TNetD.Consensus
                 {
                     if (sender.Value > temporaryBalances[account])
                     {
-                        blacklist.Add(transaction);
+                        //blacklist.Add(transaction);
                         return false;
                     }
                 }
