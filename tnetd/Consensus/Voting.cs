@@ -32,6 +32,7 @@ namespace TNetD.Consensus
         ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions;
         SortedSet<Hash> mergedTransactions = new SortedSet<Hash>();
 
+
         /// <summary>
         /// Set of nodes, who sent a transaction ID
         /// key: Transaction ID
@@ -101,6 +102,7 @@ namespace TNetD.Consensus
 
         void HandleMerge()
         {
+            blacklist.ClearExpired();
             MergeStateCounter++;
             SendMergeRequests();
 
@@ -109,20 +111,76 @@ namespace TNetD.Consensus
                 Dictionary<Hash, long> temporaryBalances = new Dictionary<Hash, long>();
                 foreach (KeyValuePair<Hash, TransactionContent> transaction in CurrentTransactions)
                 {
-                    if (Spendable(transaction.Value, temporaryBalances))
+                    List<Hash> badaccounts;
+                    if (Spendable(transaction.Value, temporaryBalances, out badaccounts))
                     {
-
+                        //update temporary balances
+                        foreach (TransactionEntity te in CurrentTransactions[transaction.Key].Sources)
+                        {
+                            Hash account = new Hash(te.PublicKey);
+                            if (temporaryBalances.ContainsKey(account))
+                            {
+                                temporaryBalances[account] -= te.Value;
+                            }
+                            else
+                            {
+                                AccountInfo accountInfo;
+                                if (nodeState.Ledger.TryFetch(account, out accountInfo))
+                                {
+                                    temporaryBalances[account] = accountInfo.Money - te.Value;
+                                }
+                                else
+                                {
+                                    // this case should not happen
+                                    throw new Exception("account disappeared after check");
+                                }
+                            }
+                        }
+                        //add transaction to ballot proposal
+                        mergedTransactions.Add(transaction.Key);
+                    }
+                    else
+                    {
+                        //handle bad accounts
+                        foreach (Hash badaccount in badaccounts)
+                        {
+                            //remove all bad transactions from ballot proposal
+                            long time = 0;
+                            foreach (Hash t in mergedTransactions)
+                            {
+                                foreach (TransactionEntity source in CurrentTransactions[t].Sources)
+                                {
+                                    if (source.PublicKey == badaccount.Hex)
+                                    {
+                                        mergedTransactions.Remove(t);
+                                    }
+                                }
+                            }
+                            //blacklist bad account
+                            blacklist.Add(badaccount, time);
+                        }
                     }
                 }
 
-                //fetch
                 CurrentState = ConsensusStates.Vote;
                 MergeStateCounter = 0;
             }
         }
 
-        bool Spendable(TransactionContent transaction, Dictionary<Hash, long> temporaryBalances)
+        /// <summary>
+        /// returns true, if transaction is spendable under the current ledger
+        /// in combination with transactions from mergedTransactions
+        /// adds all accounts with too little balance to badaccounts for blacklisting
+        /// removes all double-spending accounts from mergedTransactions
+        /// </summary>
+        /// <param name="transaction"></param>
+        /// <param name="temporaryBalances"></param>
+        /// <param name="badaccounts"></param>
+        /// <returns></returns>
+        bool Spendable(TransactionContent transaction, Dictionary<Hash, long> temporaryBalances, out List<Hash> badaccounts)
         {
+            badaccounts = new List<Hash>();
+            bool spendable = true;
             foreach (TransactionEntity sender in transaction.Sources)
             {
                 Hash account = new Hash(sender.PublicKey);
@@ -133,15 +191,16 @@ namespace TNetD.Consensus
                 // account does not exist
                 if (!ok)
                 {
-                    return false;
+                    spendable = false;
+                    break;
                 }
                 // account already used in this voting round
                 if (temporaryBalances.ContainsKey(account))
                 {
                     if (sender.Value > temporaryBalances[account])
                     {
-                        //blacklist.Add(transaction);
-                        return false;
+                        badaccounts.Add(account);
+                        spendable = false;
                     }
                 }
                 // account not used before
@@ -149,11 +208,12 @@ namespace TNetD.Consensus
                 {
                     if (sender.Value > accountInfo.Money)
                     {
-                        return false;
+                        badaccounts.Add(account);
+                        spendable = false;
                     }
                 }
             }
-            return true;
+            return spendable;
         }
 
         void HandleVoting()

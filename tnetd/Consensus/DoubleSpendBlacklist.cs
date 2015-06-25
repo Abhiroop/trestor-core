@@ -45,11 +45,12 @@ namespace TNetD.Consensus
 
 
 
-        private void clearExpired()
+        public void ClearExpired()
         {
+            long ntime = nodeState.NetworkTime;
             foreach (KeyValuePair<Hash, long> kvp in blacklist)
             {
-                long timediff = (long)(DateTime.FromFileTimeUtc(nodeState.NetworkTime) - DateTime.FromFileTimeUtc(kvp.Value)).TotalSeconds;
+                long timediff = (long)(DateTime.FromFileTimeUtc(ntime) - DateTime.FromFileTimeUtc(kvp.Value)).TotalSeconds;
                 if (timediff > KEEP_EXPIRED + Common.TransactionStaleTimer_Minutes * 60)
                 {
                     long value;
