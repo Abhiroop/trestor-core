@@ -1,8 +1,6 @@
 ﻿
-// File: IncomingConnectionHander.cs 
-// Version: 1.0 
-// Date: Jan 7, 2013 | Dec 29, 2014
 // Author : Arpan Jati
+// Date: Jan 7, 2013 | Dec 29, 2014
 
 using Chaos.NaCl;
 using Elliptic;

@@ -32,9 +32,6 @@ namespace TNetD
             }
             while (!exit);
         }
-        
-
-
 
     }
 }

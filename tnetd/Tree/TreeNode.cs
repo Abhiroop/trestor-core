@@ -1,10 +1,7 @@
-﻿/*
- *
-    @Author: Arpan Jati
-    @Version: 1.0
-    @Description: TreeNode for a generic HashTree
- * 
- */
+﻿
+//  @Author: Arpan Jati
+//  @Date: 22 Dec 2014
+//  @Description: TreeNode for a generic HashTree
 
 using System;
 using System.Collections.Generic;

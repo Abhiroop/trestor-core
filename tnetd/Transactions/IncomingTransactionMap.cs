@@ -1,8 +1,8 @@
 ﻿
-//@Author: Arpan Jati
-//@Date: 16th January 2015
-// 21st Jan 2015 : IncomingPropagations / Single node TEST_MODE.
-// 8th Feb 2015 : TransactionStateManager
+// @Author: Arpan Jati
+// @Date: 16th January 2015
+//  21st Jan 2015 : IncomingPropagations / Single node TEST_MODE.
+//  8th Feb 2015 : TransactionStateManager
 
 using System;
 using System.Collections.Concurrent;
@@ -207,12 +207,12 @@ namespace TNetD.Transactions
 
             transactionStateManager.Set(transactionContent.TransactionID, rslt);
             transactionStateManager.Set(transactionContent.TransactionID, TransactionStatusType.Proposed);
-                      
+
             if (!IncomingPropagations_ALL.ContainsKey(transactionContent.TransactionID))
             {
                 IncomingPropagations_ALL.TryAdd(transactionContent.TransactionID, transactionContent);
             }
-            
+
             if (rslt == TransactionProcessingResult.Accepted)
             {
                 lock (transactionLock)
@@ -235,33 +235,6 @@ namespace TNetD.Transactions
 
             return rslt;
         }
-        
-        /*
-        void IncomingTransactionMap::GetEligibleTransactionForConsensus(vector<Hash> connectedValidators, vector<Hash>& transactionIDtoMigrate)
-        {
-            for (HM::iterator it = TransactionMap.begin(); it != TransactionMap.begin(); ++it)
-            {
-                Hash TransactionID = it->first;
-                TransactionContentData TCD = it->second;
-                hash_set<Hash> ForwardersPKs = TCD.ForwardersPK;
-
-                //run through connectedValidators
-                int counter = 0;
-                for (int i = 0; i < (int)connectedValidators.size(); i++)
-                {
-                    Hash validatorPK = connectedValidators[i];
-                    hash_set<Hash>::iterator itr = ForwardersPKs.find(validatorPK);
-
-                    if (itr != ForwardersPKs.end())
-                    {
-                        ++counter;
-                    }
-                }
-                float perc = (float)counter / connectedValidators.size();
-                if (perc * 100 >= Constants::CONS_TRUSTED_VALIDATOR_THRESHOLD_PERC)
-                    transactionIDtoMigrate.push_back(TransactionID);
-            }
-        }*/
 
         void RemoveTransactionsFromTransactionMap(List<Hash> transactionIDs)
         {
@@ -280,127 +253,10 @@ namespace TNetD.Transactions
             return (Hash[])TransactionMap.Keys;
         }
 
-        /*
-        //given a set of transaction IDs get the associated transaction contents
-
-        vector<TransactionContent> IncomingTransactionMap::FetchTransactionContent(vector<Hash> differenceTransactionIDs)
-        {
-            vector<TransactionContent> toSent;
-
-            HM::accessor acc;
-
-            for (int i = 0; i < (int)differenceTransactionIDs.size(); i++)
-            {
-                Hash transactionID = differenceTransactionIDs[i];
-
-                if (TransactionMap.find(acc, transactionID))
-                {
-                    TransactionContentData TCD = acc->second;
-                    TransactionContent TC = TCD.TC;
-                    toSent.push_back(TC);
-                }
-
-            }
-
-            return toSent;
-        }*/
-
         bool HaveTransactionInfo(Hash transactionID)
         {
             return (TransactionMap.ContainsKey(transactionID));
         }
-
-        /*
-        //Given a transaction ID from a validator, upate it in the current transactionMap
-
-        void IncomingTransactionMap::UpdateTransactionID(Hash transactionID, Hash forwarderPublicKey)
-        {
-            HM::accessor acc;
-
-            if (TransactionMap.find(acc, transactionID))
-            {
-                TransactionContentData tcd = acc->second;
-
-                hash_set<Hash> fpk = tcd.ForwardersPK;
-
-                bool exists = false;
-                for (hash_set<Hash>::iterator it = fpk.begin(); it != fpk.end(); ++it)
-                {
-                    Hash tmp = *it;
-                    if (tmp == forwarderPublicKey)
-                    {
-                        exists = true;
-                        break;
-                    }
-                }
-
-                if (!exists)
-                {
-                    fpk.insert(forwarderPublicKey);
-                }
-            }
-        }
-
-        //Given a transaction ID from a validator, update it in the current transactionMap
-
-        void IncomingTransactionMap::InsertTransactionContent(TransactionContent tc, Hash forwarderPublicKey)
-        {
-            //verify signature
-            if (!tc.VerifySignature())
-            {
-                state.GlobalBlacklistedValidators.push_back(forwarderPublicKey);
-                return;
-            }
-
-            //search in the Transaction map to see
-            //if the particular transaction ID is in
-            //the map. If exists then update. Otherwise
-            //ask for the transaction content
-            Hash transactionID = tc.GetHash();
-
-            HM::accessor acc;
-            if (!TransactionMap.find(acc, transactionID))
-            {
-                TransactionContentData tcd;
-
-                tcd.ForwardersPK.insert(forwarderPublicKey);
-                tcd.TC = tc;
-                TransactionMap.insert(make_pair(transactionID, tcd));
-            }
-
-            else
-            {
-                TransactionContentData tcd = acc->second;
-
-                hash_set<Hash> ForwardersPK = tcd.ForwardersPK;
-
-                bool exists = false;
-                for (hash_set<Hash>::iterator it = ForwardersPK.begin(); it != ForwardersPK.end(); ++it)
-                {
-                    Hash tmp = *it;
-                    if (tmp == forwarderPublicKey)
-                    {
-                        exists = true;
-                        break;
-                    }
-                }
-
-                if (!exists)
-                {
-                    ForwardersPK.insert(forwarderPublicKey);
-                }
-            }
-        }
-
-        // Process pending/queued operations.
-        void IncomingTransactionMap::DoEvents()
-        {
-
-
-        }
-
-        */
-
     }
 }
 

@@ -83,6 +83,7 @@ namespace TNetD
 
         /// <summary>
         /// Well, looks ok, should work !! [Punisher]
+        /// Certainly, can be improved.
         /// </summary>
         /// <returns></returns>
         public override int GetHashCode()

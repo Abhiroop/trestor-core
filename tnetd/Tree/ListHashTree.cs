@@ -1,4 +1,17 @@
-﻿
+﻿/*
+ *  @Author: Arpan Jati | Aritra Dhar
+ *  @Version: 1.0
+ *  @Date: Dec 2014
+ *
+ *  @Description: ListHashTree
+ *      Features: Depth (Config File)
+ *      Child Per Node : 16
+ *      Traverses using the bytes of the ID
+ *      Insertion is Non-Recursive
+ *      Traversal is currently recursive. 
+ *      
+ *  CRITICAL: SOME GOOD TEST VECTORS
+ */
 
 using System;
 using System.Collections.Generic;

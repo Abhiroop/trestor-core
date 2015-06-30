@@ -1,4 +1,8 @@
-﻿using System;
+﻿
+// Author : Stephan Verbuecheln
+// Date: June 2015
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,10 +15,8 @@ using Chaos.NaCl;
 
 namespace TNetD.Network.PeerDiscovery
 {
-
     class PeerData : ISerializableBase
     {
-
         public string Name;
         public Hash PubKey;
 
@@ -23,8 +25,6 @@ namespace TNetD.Network.PeerDiscovery
 
         public long TimeStamp;
         public Hash Signature;
-
-
 
         public PeerData(NodeSocketData socketInfo, NodeState nodeState, NodeConfig nodeConfig)
         {
@@ -51,9 +51,6 @@ namespace TNetD.Network.PeerDiscovery
             Signature = new Hash();
         }
 
-
-
-
         public byte[] Serialize()
         {
             ProtocolDataType[] PDTs = new ProtocolDataType[6];
@@ -67,8 +64,6 @@ namespace TNetD.Network.PeerDiscovery
 
             return ProtocolPackager.PackRaw(PDTs);
         }
-
-
 
         public void Deserialize(byte[] Data)
         {
@@ -86,8 +81,6 @@ namespace TNetD.Network.PeerDiscovery
                 ListenPort = (int)port;
             }
         }
-
-
 
         private byte[] signableData()
         {

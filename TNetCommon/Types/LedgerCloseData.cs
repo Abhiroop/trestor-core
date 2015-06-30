@@ -38,8 +38,7 @@ namespace TNetD
 
             return ProtocolPackager.PackRaw(PDTs);
         }
-
-
+        
         public void Deserialize(byte[] Data)
         {
             List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
@@ -83,9 +82,6 @@ namespace TNetD
                 }
             }
         }
-
         
-
-
     }
 }

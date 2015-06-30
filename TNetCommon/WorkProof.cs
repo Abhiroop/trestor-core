@@ -3,6 +3,7 @@
 // Version: 1.0 
 // Date: Jan 7, 2013
 // Author : Arpan Jati
+// This is temporary. This along with all the POW classes would be re-written.
 
 using System;
 using System.Collections.Generic;

@@ -11,8 +11,7 @@ namespace TNetD.Network
     public delegate void PacketReceivedHandler(NetworkPacket packet);
 
     class FakeNetwork
-    {
-        
+    {        
         //public event PacketReceivedHandler PacketReceived;
 
         ConcurrentDictionary<Hash, PacketReceivedHandler> Listeners = new ConcurrentDictionary<Hash, PacketReceivedHandler>();

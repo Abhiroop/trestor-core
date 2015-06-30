@@ -6,7 +6,6 @@
  */
 
 using Newtonsoft.Json;
-//using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -228,47 +227,7 @@ namespace TNetD.Json.JS_Structs
             return new JS_Resp(RPCStatus.Success, this);
         }
     }
-
-
-    /*public class TransactionEntity : ISerializableBase
-    {
-        byte[] publicKey;
-        string name;
-        string address;
-        long _value;
-                
-        /// <summary>
-        /// Public key for the account.
-        /// </summary>
-        public byte[] PublicKey
-        {
-            get { return publicKey; }
-        }
-
-        /// <summary>
-        /// Name of the account. (Optional)
-        /// </summary>
-        public string Name
-        {
-            get { return name; }
-        }
-
-        /// <summary>
-        /// Base58 Encoded Address.
-        /// </summary>
-        public string Address
-        {
-            get { return address; }
-        }
-
-        /// <summary>
-        /// Remaining value/amount held with the account.
-        /// </summary>
-        public long Value
-        {
-            get { return _value; }
-        }*/
-
+    
     public class JS_TransactionState_Reply : JS_Response
     {
         //public JS_TransactionReply Transaction;

@@ -168,7 +168,6 @@
     <Compile Include="HexUtil.cs" />
     <Compile Include="Interop\Rig2.cs" />
     <Compile Include="ISignableBase.cs" />
-    <Compile Include="Json\JsonService.cs" />
     <Compile Include="Json\REST\BytesToHexConverter.cs" />
     <Compile Include="Json\REST\Client\RESTClient.cs" />
     <Compile Include="Json\REST\Client\RESTRequest.cs" />
@@ -188,6 +187,7 @@
     <Compile Include="Protocol\StandardVarint.cs" />
     <Compile Include="Protocol\Varint2.cs" />
     <Compile Include="Transactions\AccountInfo.cs" />
+    <Compile Include="Transactions\StructsAndEnums.cs" />
     <Compile Include="Transactions\TransactionContent.cs" />
     <Compile Include="Transactions\TransactionEntity.cs" />
     <Compile Include="Transactions\TransactionFactory.cs" />

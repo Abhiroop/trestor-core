@@ -1,7 +1,6 @@
-﻿/*
-*  @Author: Arpan Jati
-*  @Version: 1.0
-*/
+﻿
+// @Author: Arpan Jati
+// @Date: Dec 2014
 
 using System;
 using System.Collections.Generic;

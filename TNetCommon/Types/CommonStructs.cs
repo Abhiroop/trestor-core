@@ -1,4 +1,8 @@
-﻿using System;
+﻿
+// @Author : Arpan Jati
+// @Date: Feb 2015
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,10 +27,6 @@ namespace TNetD.Types
             TimeCost = timeCost;
             Type = type;
         }
-    }
-
-   
-
-   
+    }   
 
 }

@@ -12,7 +12,6 @@ using TNetD.Transactions;
 
 namespace TNetD.Tree
 {
-
     /// <summary>
     /// This contains an array of requests for separate nodes.
     /// </summary>

@@ -1,10 +1,13 @@
-﻿using System;
+﻿
+// Author : Stephan Verbuecheln
+// Date: June 2015
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TNetD.Protocol;
-
 
 namespace TNetD.Time
 {
@@ -20,7 +23,6 @@ namespace TNetD.Time
             PDTs[1] = (ProtocolPackager.Pack(responderTime, 1));
             return ProtocolPackager.PackRaw(PDTs);
         }
-
 
         public void Deserialize(byte[] data)
         {

@@ -128,14 +128,13 @@
     <Compile Include="Consensus\BallotAgreeResponse.cs" />
     <Compile Include="Consensus\BallotRequestMessage.cs" />
     <Compile Include="Consensus\FetchMessages.cs" />
-    <Compile Include="Consensus\ConsensusMap.cs" />
     <Compile Include="Consensus\MergeResponseMsg.cs" />
     <Compile Include="Consensus\TransactionBlacklist.cs" />
     <Compile Include="Consensus\VoteType.cs" />
     <Compile Include="Consensus\Voting.cs" />
     <Compile Include="Ledgers\GenesisRawData.cs" />
-    <Compile Include="Ledgers\SQLiteLedgerFileHandler.cs" />
     <Compile Include="Network\FakeNetwork.cs" />
+    <Compile Include="Network\Networking\NetworkMessagePairs.cs" />
     <Compile Include="Network\PeerDiscovery\PeerData.cs" />
     <Compile Include="Network\Networking\PacketSender.cs" />
     <Compile Include="Network\Networking\SecureNetwork.cs" />
@@ -176,7 +175,6 @@
     <Compile Include="Tree\LeafDataRequest.cs" />
     <Compile Include="Tree\LeafAccountDataResponse.cs" />
     <Compile Include="Tree\NodeInfoResponse.cs" />
-    <Compile Include="Tree\NodeInfoEntity.cs" />
     <Compile Include="Tree\NodeInfoRequest.cs" />
     <Compile Include="Tree\FlatNodeStore.cs" />
     <Compile Include="Tree\ListHashTree.cs" />
@@ -184,7 +182,6 @@
     <Compile Include="Tree\ListTreeNode.cs" />
     <Compile Include="Tree\NodeDataEntity.cs" />
     <Compile Include="Tree\RootDataResponse.cs" />
-    <Compile Include="Tree\TreeSyncData.cs" />
     <Compile Include="UI\ColoredTB.xaml.cs">
       <DependentUpon>ColoredTB.xaml</DependentUpon>
     </Compile>

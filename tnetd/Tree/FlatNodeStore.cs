@@ -30,7 +30,5 @@ namespace TNetD.Tree
         {
             Values.Remove(hash);
         }
-
-
     }
 }

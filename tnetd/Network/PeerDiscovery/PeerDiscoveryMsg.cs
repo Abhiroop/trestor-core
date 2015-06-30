@@ -1,4 +1,8 @@
-﻿using System;
+﻿
+// Author : Stephan Verbuecheln
+// Date: June 2015
+
+using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -7,16 +11,13 @@ using System.Threading.Tasks;
 using TNetD.Protocol;
 using TNetD.Network.Networking;
 
-
 namespace TNetD.Network.PeerDiscovery
 {
     class PeerDiscoveryMsg
     {
         // TODO: give value a meaning
         public ConcurrentDictionary<Hash, PeerData> knownPeers;
-
-
-
+        
         public byte[] Serialize()
         {
             ProtocolDataType[] PDTs = new ProtocolDataType[knownPeers.Count];

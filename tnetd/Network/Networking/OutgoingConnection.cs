@@ -1,4 +1,8 @@
-﻿using Chaos.NaCl;
+﻿
+// @Author : Arpan Jati
+// @Date: Jan 2015
+
+using Chaos.NaCl;
 using Elliptic;
 using TNetD;
 using System;

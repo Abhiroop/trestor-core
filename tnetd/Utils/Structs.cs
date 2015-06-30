@@ -43,29 +43,6 @@ namespace TNetD
             this.Transacation = Transacation;
         }
     }
-
-    /*struct TransactionSink
-    {
-        public Hash PublicKey_Sink;
-        public long Amount;
-        public TransactionSink(Hash PublicKey_Sink, long Amount)
-        {
-            this.PublicKey_Sink = PublicKey_Sink;
-            this.Amount = Amount;
-        }
-    }*/
-
-
-    struct TimeStruct
-    {
-        public long sendTime;
-        public long receivedTime;
-        public long TimeFromValidator;
-        public Hash token;
-        public long timeDifference;
-    };
-
-
     class TransactionContentData
     {
         TransactionContent TransactionContent;
@@ -77,6 +54,4 @@ namespace TNetD
             ForwardersPK = new HashSet<Hash>();
         }
     }
-    
-    
 }
