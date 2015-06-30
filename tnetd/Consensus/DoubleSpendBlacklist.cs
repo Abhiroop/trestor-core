@@ -13,7 +13,7 @@ using TNetD.Nodes;
 
 namespace TNetD.Consensus
 {
-    class TransactionBlacklist
+    class DoubleSpendBlacklist
     {
         private ConcurrentDictionary<Hash, long> blacklist;
         private NodeState nodeState;
@@ -27,7 +27,7 @@ namespace TNetD.Consensus
 
 
 
-        public TransactionBlacklist(NodeState nodeState)
+        public DoubleSpendBlacklist(NodeState nodeState)
         {
             blacklist = new ConcurrentDictionary<Hash, long>();
             this.nodeState = nodeState;
@@ -35,20 +35,9 @@ namespace TNetD.Consensus
 
 
 
-        //public void Add(TransactionContent[] transactions)
-        //{
-        //    foreach (TransactionContent transaction in transactions)
-        //    {
-        //        foreach (TransactionEntity account in transaction.Sources)
-        //        {
-        //            blacklist.AddOrUpdate(new Hash(account.PublicKey), transaction.Timestamp, (ok, ov) => ov > transaction.Timestamp ? ov : transaction.Timestamp);
-        //        }
-        //    }
-        //}
-
-        public void Add(TransactionContent transaction)
+        public void Add(Hash account, long time)
         {
-
+            blacklist.AddOrUpdate(account, time, (ok, ov) => ov > time ? ov : time);
         }
 
 
@@ -60,11 +49,12 @@ namespace TNetD.Consensus
 
 
 
-        private void clearExpired()
+        public void ClearExpired()
         {
+            long ntime = nodeState.NetworkTime;
             foreach (KeyValuePair<Hash, long> kvp in blacklist)
             {
-                long timediff = (long)(DateTime.FromFileTimeUtc(nodeState.NetworkTime) - DateTime.FromFileTimeUtc(kvp.Value)).TotalSeconds;
+                long timediff = (long)(DateTime.FromFileTimeUtc(ntime) - DateTime.FromFileTimeUtc(kvp.Value)).TotalSeconds;
                 if (timediff > KEEP_EXPIRED + Common.TransactionStaleTimer_Minutes * 60)
                 {
                     long value;

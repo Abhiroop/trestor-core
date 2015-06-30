@@ -129,7 +129,7 @@
     <Compile Include="Consensus\BallotRequestMessage.cs" />
     <Compile Include="Consensus\FetchMessages.cs" />
     <Compile Include="Consensus\MergeResponseMsg.cs" />
-    <Compile Include="Consensus\TransactionBlacklist.cs" />
+    <Compile Include="Consensus\DoubleSpendBlacklist.cs" />
     <Compile Include="Consensus\VoteType.cs" />
     <Compile Include="Consensus\Voting.cs" />
     <Compile Include="Ledgers\GenesisRawData.cs" />
