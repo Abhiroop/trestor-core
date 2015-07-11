@@ -43,7 +43,6 @@ namespace TNetD
         ObservableCollection<TransactionContent> _tranxData = new ObservableCollection<TransactionContent>();
 
         List<Node> nodes = new List<Node>();
-        GlobalConfiguration globalConfiguration;
 
         Thread background_Load;
 
@@ -54,7 +53,6 @@ namespace TNetD
             InitializeComponent();
 
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
-            globalConfiguration = new GlobalConfiguration();
 
             lv_TX.ItemsSource = _tranxData;
 
@@ -86,7 +84,7 @@ namespace TNetD
 
         void AddNode(int idx)
         {
-            Node nd = new Node(idx, globalConfiguration);
+            Node nd = new Node(idx);
             nd.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
             nd.NodeStatusEvent += nd_NodeStatusEvent;
             nd.BeginBackgroundLoad();
@@ -282,9 +280,8 @@ namespace TNetD
 
         private void menuItem_Server_Stop_Click(object sender, RoutedEventArgs e)
         {
-            GlobalConfiguration gc = new GlobalConfiguration();
-            NodeConfig nc = new NodeConfig(0, gc);
-            NodeConfig nc1 = new NodeConfig(1, gc);
+            NodeConfig nc = new NodeConfig(0);
+            NodeConfig nc1 = new NodeConfig(1);
 
             IPersistentTransactionStore transactionStore = new SQLiteTransactionStore(nc);
         }

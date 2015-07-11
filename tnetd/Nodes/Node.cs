@@ -99,16 +99,16 @@ namespace TNetD.Nodes
         /// Only other use is hosting multiple validators from an IP (bad-idea) and simulation.
         /// </summary>
         /// <param name="ID"></param>
-        public Node(int ID, GlobalConfiguration globalConfiguration)
+        public Node(int ID)
         {
-            nodeConfig = new NodeConfig(ID, globalConfiguration);
+            nodeConfig = new NodeConfig(ID);
 
             nodeState = new NodeState(nodeConfig);
 
             nodeState.NodeInfo = nodeConfig.Get_JS_Info();
 
             rpcHandlers = new RpcHandlers(nodeConfig, nodeState);
-            networkPacketSwitch = new NetworkPacketSwitch(nodeConfig, nodeState, globalConfiguration);
+            networkPacketSwitch = new NetworkPacketSwitch(nodeConfig, nodeState);
             transactionHandler = new TransactionHandler(nodeConfig, nodeState);
             timeSync = new TimeSync(nodeState, nodeConfig, networkPacketSwitch);
             ledgerSync = new LedgerSync(nodeState, nodeConfig, networkPacketSwitch);

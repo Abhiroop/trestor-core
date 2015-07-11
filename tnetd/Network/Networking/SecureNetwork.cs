@@ -122,10 +122,10 @@ namespace TNetD.Network.Networking
 
                         else // Create a new outgoing connection and queue a packet.
                         {
-                            if ((nodeConfig.GlobalConfiguration.TrustedNodes.ContainsKey(npqe.PublicKeyDestination)) &&
+                            if ((nodeConfig.TrustedNodes.ContainsKey(npqe.PublicKeyDestination)) &&
                                 (npqe.PublicKeyDestination != nodeConfig.PublicKey))
                             {
-                                var socketInfo = nodeConfig.GlobalConfiguration.TrustedNodes[npqe.PublicKeyDestination];
+                                var socketInfo = nodeConfig.TrustedNodes[npqe.PublicKeyDestination];
 
                                 OutgoingConnection oc = new OutgoingConnection(socketInfo, nodeConfig);
                                 oc.PacketReceived += process_PacketReceived;

@@ -46,10 +46,12 @@ namespace TNetD.Nodes
 
         public NetworkConfig NetworkConfig = new NetworkConfig();
 
-        public GlobalConfiguration GlobalConfiguration;
-
         byte[] masterNodeRandom;
         byte[] masterPrivateKeyExpanded;
+
+        private string File_TrustedNodes = "TrustedNodes.ini";
+
+        public Dictionary<Hash, NodeSocketData> TrustedNodes;
 
         INIFile iniFile = default(INIFile);
 
@@ -57,23 +59,25 @@ namespace TNetD.Nodes
 
         #endregion
 
-        public NodeConfig(int NodeID, GlobalConfiguration GlobalConfiguration)
+        public NodeConfig(int NodeID)
         {
-            //this.RpcRequestHandler = rpcRequestHandler;
+            WorkDirectory = "NODE_" + NodeID;
 
-            WorkDirectory = /*AppDomain.CurrentDomain.BaseDirectory +*/ "NODE_" + NodeID;
+            TrustedNodes = new Dictionary<Hash, NodeSocketData>();
+            LoadTrustedNodes();
 
-            
+            DisplayUtils.Display(" Node " + NodeID + " | Loaded " + TrustedNodes.Count + " trusted nodes");
 
             this.NodeID = NodeID;
-            this.GlobalConfiguration = GlobalConfiguration;
 
             if (!Directory.Exists(WorkDirectory))
             {
                 Directory.CreateDirectory(WorkDirectory);
             }
-
+            
             iniFile = new INIFile(WorkDirectory + "\\NodeConfig.ini");
+
+            File_TrustedNodes = WorkDirectory + "\\TrustedNodes.ini";
 
             masterNodeRandom = GetNodePrivateRandom(iniFile);
 
@@ -134,6 +138,58 @@ namespace TNetD.Nodes
 
             // TODO: FIX THIS, TAKE THIS FROM, DB
             Name = GetInitString("Info", "Name", "name" + HexUtil.ToString(RAND_PART).ToLowerInvariant());
+        }
+
+        void LoadTrustedNodes()
+        {
+            if (File.Exists(File_TrustedNodes))
+            {
+                StreamReader sr = new StreamReader(File_TrustedNodes);
+
+                TrustedNodes.Clear();
+
+                //
+                // Example String : [Public Key]  [IP] [ListenPort] [Name] 
+                // EFA31D61AFD22C60065776AD58462D095C21689A9FFD07746E928084F5AB1CC0 127.0.0.1 64683 Node_0
+                //
+
+                while (!sr.EndOfStream)
+                {
+                    string line = sr.ReadLine().Trim();
+
+                    if (!line.Contains(";")) // Semi-colon not allowed.
+                    {
+                        string[] parts = line.Split(' '); // Space is the separator.
+
+                        if (parts.Length >= 3) // Name field is optional.
+                        {
+                            try
+                            {
+                                string _pk = parts[0].Trim();
+
+                                byte[] _PK = HexUtil.GetBytes(_pk);
+
+                                if (_PK.Length == 32) // must have 32 bytes                                
+                                {
+                                    string _ip = parts[1].Trim();
+                                    int _port = int.Parse(parts[2].Trim());
+                                    string _name = "";
+                                    if (parts.Length >= 4) // Name field is present.
+                                    {
+                                        _name = parts[3].Trim();
+                                    }
+
+                                    Hash PK_Hash = new Hash(_PK);
+
+                                    TrustedNodes.Add(PK_Hash, new NodeSocketData(PK_Hash, _port, _ip, _name));
+                                }
+                            }
+                            catch { }
+                        }
+                    }
+                }
+            }
+
         }
 
         /// <summary>
@@ -409,7 +465,7 @@ namespace TNetD.Nodes
 
         public bool GetRandomTrustedNode(out List<NodeSocketData> randomPeer, int count)
         {
-            int peerCount = GlobalConfiguration.TrustedNodes.Count;
+            int peerCount = TrustedNodes.Count;
             randomPeer = new List<NodeSocketData>();
             if (peerCount >= count)
             {
@@ -417,7 +473,7 @@ namespace TNetD.Nodes
 
                 foreach (int randomPeerID in dist)
                 {
-                    NodeSocketData nsd = GlobalConfiguration.TrustedNodes.Values.ElementAt(randomPeerID);
+                    NodeSocketData nsd = TrustedNodes.Values.ElementAt(randomPeerID);
                     if(nsd.PublicKey != PublicKey)
                         randomPeer.Add(nsd);
                 }

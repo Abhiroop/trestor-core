@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TNetD.Network.Networking;
 using TNetD.Nodes;
 
 namespace TNetD.UI
@@ -134,7 +135,8 @@ namespace TNetD.UI
             {
                 drawingContext.DrawRectangle(null, pen, rect);
 
-                
+                HashSet<HashPair> connections = new HashSet<HashPair>();
+                HashSet<HashPair> trustedConnections = new HashSet<HashPair>();
 
                 foreach(var nodeData in nodes)
                 {
@@ -149,8 +151,8 @@ namespace TNetD.UI
 
                         drawingContext.DrawEllipse(Brushes.Blue, null, point, 10, 10);
 
+                        Hash [] conns = node.networkPacketSwitch.GetConnectedNodes(ConnectionListType.All);
                         
-
                     }
                 }
             }

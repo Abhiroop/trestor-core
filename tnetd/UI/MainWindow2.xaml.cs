@@ -43,7 +43,6 @@ namespace TNetD
     public partial class MainWindow2 : Window
     {
         List<Node> nodes = new List<Node>();
-        GlobalConfiguration globalConfiguration;
         Random rng = new Random();
 
         public MainWindow2()
@@ -53,8 +52,6 @@ namespace TNetD
             InitializeComponent();
 
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
-            globalConfiguration = new GlobalConfiguration();
-
 
             Title += " | " + Common.NetworkType.ToString();
 
@@ -108,7 +105,7 @@ namespace TNetD
 
         void AddNode(int idx)
         {
-            Node nd = new Node(idx, globalConfiguration);
+            Node nd = new Node(idx);
             // nd.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
             nd.NodeStatusEvent += nd_NodeStatusEvent;
             nd.BeginBackgroundLoad();

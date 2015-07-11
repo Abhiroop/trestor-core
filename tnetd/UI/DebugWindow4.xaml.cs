@@ -42,9 +42,7 @@ namespace TNetD
     {
         object TimerLock = new object();
 
-
         List<Node> nodes = new List<Node>();
-        GlobalConfiguration globalConfiguration;
 
         public DebugWindow4()
         {
@@ -53,8 +51,6 @@ namespace TNetD
             InitializeComponent();
 
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
-            globalConfiguration = new GlobalConfiguration();
-
 
             Title += " | " + Common.NetworkType.ToString();
 
@@ -111,7 +107,7 @@ namespace TNetD
 
         void AddNode(int idx)
         {
-            Node nd = new Node(idx, globalConfiguration);
+            Node nd = new Node(idx);
             // nd.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
             nd.NodeStatusEvent += nd_NodeStatusEvent;
             nd.BeginBackgroundLoad();

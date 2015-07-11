@@ -25,15 +25,13 @@ namespace TNetD.Nodes
 
         NodeConfig nodeConfig;
         NodeState nodeState;
-        GlobalConfiguration globalConfiguration;
 
         SecureNetwork network = default(SecureNetwork);
 
-        public NetworkPacketSwitch(NodeConfig nodeConfig, NodeState nodeState, GlobalConfiguration globalConfiguration)
+        public NetworkPacketSwitch(NodeConfig nodeConfig, NodeState nodeState)
         {
             this.nodeConfig = nodeConfig;
             this.nodeState = nodeState;
-            this.globalConfiguration = globalConfiguration;
 
             network = new SecureNetwork(nodeConfig, nodeState);
             network.PacketReceived += network_PacketReceived;
@@ -53,7 +51,7 @@ namespace TNetD.Nodes
                 // Connect to TrustedNodes
                 List<Task> tasks = new List<Task>();
 
-                foreach (KeyValuePair<Hash, NodeSocketData> kvp in globalConfiguration.TrustedNodes)
+                foreach (KeyValuePair<Hash, NodeSocketData> kvp in nodeConfig.TrustedNodes)
                 {
                     // Make sure we are not connecting to self !!
                     if (kvp.Key != nodeConfig.PublicKey)

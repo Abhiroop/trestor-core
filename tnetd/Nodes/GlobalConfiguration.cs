@@ -12,102 +12,19 @@ using System.Text;
 
 namespace TNetD.Nodes
 {
-    struct NodeSocketData
-    {
-        /// <summary>
-        /// Public key of the destination node.
-        /// </summary>
-        public Hash PublicKey;
+    //class GlobalConfiguration
+    //{
+        
 
-        /// <summary>
-        /// Listen Port of the destination node.
-        /// </summary>
-        public int ListenPort;
+    //    public GlobalConfiguration()
+    //    {
+            
 
-        /// <summary>
-        /// IP of the destination node.
-        /// </summary>
-        public string IP;
+    //        //LoadTrustedNodes();
+    //    }
 
-        public string Name;
-
-        public NodeSocketData(Hash PublicKey, int ListenPort, string IP, string Name)
-        {
-            this.PublicKey = PublicKey;
-            this.ListenPort = ListenPort;
-            this.IP = IP;
-            this.Name = Name;
-        }
-
-        public static string GetString(NodeSocketData nsd)
-        {
-            return "Node : " + nsd.Name + " | " + nsd.PublicKey.ToString();//.Substring(0,8);
-        }
-    }
-
-    class GlobalConfiguration
-    {
-        public Dictionary<Hash, NodeSocketData> TrustedNodes;
-
-        public GlobalConfiguration()
-        {
-            TrustedNodes = new Dictionary<Hash, NodeSocketData>();
-
-            LoadTrustedNodes();
-        }
-
-        void LoadTrustedNodes()
-        {
-            if (File.Exists(Constants.File_TrustedNodes))
-            {
-                StreamReader sr = new StreamReader(Constants.File_TrustedNodes);
-
-                TrustedNodes.Clear();
-
-                //
-                // Example String : [Public Key]  [IP] [ListenPort] [Name] 
-                // EFA31D61AFD22C60065776AD58462D095C21689A9FFD07746E928084F5AB1CC0 127.0.0.1 64683 Node_0
-                //
-
-                while (!sr.EndOfStream)
-                {
-                    string line = sr.ReadLine().Trim();
-
-                    if (!line.Contains(";")) // Semi-colon not allowed.
-                    {
-                        string[] parts = line.Split(' '); // Space is the separator.
-
-                        if (parts.Length >= 3) // Name field is optional.
-                        {
-                            try
-                            {
-                                string _pk = parts[0].Trim();
-
-                                byte[] _PK = HexUtil.GetBytes(_pk);
-
-                                if (_PK.Length == 32) // must have 32 bytes                                
-                                {
-                                    string _ip = parts[1].Trim();
-                                    int _port = int.Parse(parts[2].Trim());
-                                    string _name = "";
-                                    if (parts.Length >= 4) // Name field is present.
-                                    {
-                                        _name = parts[3].Trim();
-                                    }
-
-                                    Hash PK_Hash = new Hash(_PK);
-
-                                    TrustedNodes.Add(PK_Hash, new NodeSocketData(PK_Hash, _port, _ip, _name));
-                                }
-                            }
-                            catch { }
-                        }
-                    }
-                }
-            }
-
-        }
+        
 
 
-    }
+    //}
 }
