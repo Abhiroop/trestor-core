@@ -165,6 +165,7 @@
     <Compile Include="Crypto\Salsa20.cs" />
     <Compile Include="Curve25519.cs" />
     <Compile Include="Hash.cs" />
+    <Compile Include="HashPair.cs" />
     <Compile Include="HexUtil.cs" />
     <Compile Include="Interop\Rig2.cs" />
     <Compile Include="ISignableBase.cs" />

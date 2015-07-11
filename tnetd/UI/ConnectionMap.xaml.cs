@@ -22,9 +22,9 @@ namespace TNetD.UI
     /// </summary>
     partial class ConnectionMap : UserControl
     {
-        List<Node> nodes = new List<Node>();
+        Dictionary<Hash, Node> nodes = new Dictionary<Hash, Node>();
 
-        List<Point> nodePositions = new List<Point>();
+        Dictionary<Hash, Point> nodePositions = new Dictionary<Hash, Point>();
 
         bool TryGetNewPoint(out Point point)
         {
@@ -53,9 +53,9 @@ namespace TNetD.UI
 
                 bool passed = true;
 
-                foreach (Point p in nodePositions)
+                foreach (var p in nodePositions)
                 {
-                    double dist = Math.Sqrt(((p.X - newPoint.X) * (p.X - newPoint.X)) + ((p.Y - newPoint.Y) * (p.Y - newPoint.Y)));
+                    double dist = Math.Sqrt(((p.Value.X - newPoint.X) * (p.Value.X - newPoint.X)) + ((p.Value.Y - newPoint.Y) * (p.Value.Y - newPoint.Y)));
                     if (dist < MIN_DISTANCE)
                     {
                         passed = false;
@@ -77,24 +77,27 @@ namespace TNetD.UI
 
         bool NotEnoughAreaToDraw = false;
 
-        internal void InitNodes(List<Node> nodes)
+        internal void InitNodes(List<Node> _nodes)
         {
-            this.nodes = nodes;
+            foreach (Node node in _nodes)
+            {
+                nodes.Add(node.PublicKey, node);
+            }
 
-            InitNodePositions(nodes);
+            InitNodePositions();
         }
 
-        private void InitNodePositions(List<Node> nodes)
+        private void InitNodePositions()
         {
             nodePositions.Clear();
             NotEnoughAreaToDraw = false;
 
-            foreach (Node node in nodes)
+            foreach (var node in nodes)
             {
                 Point p;
                 if (TryGetNewPoint(out p))
                 {
-                    nodePositions.Add(p);
+                    nodePositions.Add(node.Key, p);
                 }
                 else
                 {
@@ -112,6 +115,7 @@ namespace TNetD.UI
 
             InitializeComponent();
         }
+       
 
         protected override void OnRender(DrawingContext drawingContext)
         {
@@ -130,21 +134,29 @@ namespace TNetD.UI
             {
                 drawingContext.DrawRectangle(null, pen, rect);
 
-                for (int i = 0; i < nodes.Count; i++)
+                
+
+                foreach(var nodeData in nodes)
                 {
-                    Node node = nodes[i];
-                    Point point = nodePositions[i];
+                    Hash PK = nodeData.Key;
+                    Node node = nodes[PK];
 
-                    // Circle to point the center.
+                    if(nodePositions.ContainsKey(PK))
+                    {
+                        Point point = nodePositions[PK];
 
-                    drawingContext.DrawEllipse(Brushes.Blue, null, point, 10, 10);
+                        // Circle to point the center.
 
+                        drawingContext.DrawEllipse(Brushes.Blue, null, point, 10, 10);
 
+                        
+
+                    }
                 }
-
             }
-
-
         }
+
+        // //////////////  
+
     }
 }
