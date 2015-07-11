@@ -13,15 +13,15 @@ namespace TNetD
 {
     public class HashPair : IEquatable<HashPair>, IComparer<HashPair>, IComparable<HashPair>
     {
-        private byte[] H1;
-        private byte[] H2;
+        private Hash H1;
+        private Hash H2;
 
         private byte[] HashValue;
 
         public HashPair(Hash H1, Hash H2)
         {
-            this.H1 = (byte[])H1.Hex;
-            this.H2 = (byte[])H2.Hex;
+            this.H1 = H1;
+            this.H2 = H2;
 
             if (Compare(H1.Hex, H2.Hex) < 0)
             {
@@ -35,17 +35,17 @@ namespace TNetD
 
         public HashPair()
         {
-            H1 = new byte[0];
-            H2 = new byte[0];
-            this.HashValue = H1.Concat(H2).ToArray();
+            H1 = new Hash();
+            H2 = new Hash();
+            this.HashValue = H1.Hex.Concat(H2.Hex).ToArray();
         }
 
-        public byte[] HexH1
+        public Hash HexH1
         {
             get { return H1; }
         }
 
-        public byte[] HexH2
+        public Hash HexH2
         {
             get { return H2; }
         }
