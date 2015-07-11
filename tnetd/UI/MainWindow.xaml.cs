@@ -400,8 +400,6 @@ namespace TNetD
                 MessageBox.Show("DONE.");
 
             }
-
-
         }
 
         private void menuItem_Main2_Click(object sender, RoutedEventArgs e)
@@ -417,6 +415,14 @@ namespace TNetD
             Hide();
             DebugWindow3 m3 = new DebugWindow3();
             m3.ShowDialog();
+            Show();
+        }
+
+        private void menuItem_Main4_Click(object sender, RoutedEventArgs e)
+        {
+            Hide();
+            DebugWindow4 m4 = new DebugWindow4();
+            m4.ShowDialog();
             Show();
         }
 
