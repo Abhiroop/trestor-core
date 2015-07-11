@@ -88,7 +88,7 @@ namespace TNetD.Network.PeerDiscovery
                 return;
             int select = rng.Next(count);
             Print("init: selecting " + select + " of " + count);
-            Hash peer = nodeState.ConnectedValidators.ToArray()[select];
+            Hash peer = nodeState.ConnectedValidators.ToArray()[select].Key;
             Hash token = TNetUtils.GenerateNewToken();
 
             //save locally

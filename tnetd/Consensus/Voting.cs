@@ -356,14 +356,14 @@ namespace TNetD.Consensus
 
         void SendMergeRequests()
         {
-            foreach (Hash node in nodeState.ConnectedValidators)
+            foreach (var node in nodeState.ConnectedValidators)
             {
                 Hash token = TNetUtils.GenerateNewToken();
                 NetworkPacket request = new NetworkPacket();
                 request.PublicKeySource = nodeConfig.PublicKey;
                 request.Token = token;
                 request.Type = PacketType.TPT_CONS_MERGE_REQUEST;
-                networkPacketSwitch.AddToQueue(node, request);
+                networkPacketSwitch.AddToQueue(node.Key, request);
             }
         }
 

@@ -151,7 +151,7 @@ namespace TNetD.UI
 
                         drawingContext.DrawEllipse(Brushes.Blue, null, point, 10, 10);
 
-                        Hash [] conns = node.networkPacketSwitch.GetConnectedNodes(ConnectionListType.All);
+                        var conns = node.nodeState.ConnectedValidators;
                         
                     }
                 }

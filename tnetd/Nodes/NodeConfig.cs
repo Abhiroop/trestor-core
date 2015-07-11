@@ -64,6 +64,9 @@ namespace TNetD.Nodes
             WorkDirectory = "NODE_" + NodeID;
 
             TrustedNodes = new Dictionary<Hash, NodeSocketData>();
+
+            File_TrustedNodes = WorkDirectory + "\\TrustedNodes.ini";
+
             LoadTrustedNodes();
 
             DisplayUtils.Display(" Node " + NodeID + " | Loaded " + TrustedNodes.Count + " trusted nodes");
@@ -76,9 +79,7 @@ namespace TNetD.Nodes
             }
             
             iniFile = new INIFile(WorkDirectory + "\\NodeConfig.ini");
-
-            File_TrustedNodes = WorkDirectory + "\\TrustedNodes.ini";
-
+            
             masterNodeRandom = GetNodePrivateRandom(iniFile);
 
             DisplayUtils.Display(" Node " + NodeID + " | Private Key     : " + HexUtil.ToString(masterNodeRandom));
@@ -189,7 +190,6 @@ namespace TNetD.Nodes
                     }
                 }
             }
-
         }
 
         /// <summary>

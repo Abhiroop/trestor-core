@@ -96,25 +96,24 @@ namespace TNetD.Time
             DateTime nt = DateTime.FromFileTimeUtc(nodeState.NetworkTime);
 
             Print(diffs.Count + " resp; diff " + display/*.ToString("0.000")*/ + "; \tst: " + st.ToLongTimeString() + "; \tnt: " + nt.ToLongTimeString());
-
-
+            
             //send new requests
             //Print("start syncing with " + nodeState.ConnectedValidators.Count + " peers");
             sentRequests = new ConcurrentDictionary<Hash, RequestStruct>();
-            foreach (Hash peer in nodeState.ConnectedValidators)
+            foreach (var peer in nodeState.ConnectedValidators)
             {
                 // save locally
                 RequestStruct rs = new RequestStruct();
                 rs.senderTime = nodeState.SystemTime;
                 rs.token = TNetUtils.GenerateNewToken();
-                sentRequests.AddOrUpdate(peer, rs, (ok, ov) => rs);
+                sentRequests.AddOrUpdate(peer.Key, rs, (ok, ov) => rs);
 
                 // send message
                 TimeSyncRqMsg request = new TimeSyncRqMsg();
                 request.senderTime = nodeState.SystemTime;
                 byte[] message = request.Serialize();
                 NetworkPacket packet = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_REQUEST, message, rs.token);
-                networkPacketSwitch.AddToQueue(peer, packet);
+                networkPacketSwitch.AddToQueue(peer.Key, packet);
             }
 
             return diff;

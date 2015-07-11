@@ -12,13 +12,14 @@ using TNetD.Nodes;
 
 namespace TNetD.Network.Networking
 {
-    public enum ConnectionListType { Outgoing, Incoming, All };
+    public enum ConnectionDirection { Outgoing, Incoming };
 
     class SecureNetwork
     {
         public event PacketReceivedHandler PacketReceived;
 
         Timer updateTimer;
+        Timer connectionUpdateTimer;
         NodeConfig nodeConfig = default(NodeConfig);
         NodeState nodeState = default(NodeState);
 
@@ -48,38 +49,8 @@ namespace TNetD.Network.Networking
             incomingConnectionHander.PacketReceived += process_PacketReceived;
 
             updateTimer = new Timer(TimerCallback, null, 0, nodeConfig.NetworkConfig.UpdateFrequencyMS);
+            connectionUpdateTimer = new Timer(ConnectionTimerCallback, null, 0, Constants.Network_ConnectionUpdateFrequencyMS);
         }
-
-        public Hash[] GetConnectedNodes(ConnectionListType type)
-        {
-            List<Hash> Conns = new List<Hash>();
-
-            if (type == ConnectionListType.Incoming || type == ConnectionListType.All)
-            {
-                foreach (KeyValuePair<Hash, IncomingClient> kvp in incomingConnectionHander.IncomingConnections)
-                {
-                    if (kvp.Value.KeyExchanged)
-                    {
-                        Conns.Add(kvp.Key);
-                    }
-                }
-            }
-
-            if (type == ConnectionListType.Outgoing || type == ConnectionListType.All)
-            {
-                foreach (KeyValuePair<Hash, OutgoingConnection> kvp in outgoingConnections)
-                {
-                    if (kvp.Value.KeyExchanged)
-                    {
-                        Conns.Add(kvp.Key);
-                    }
-                }
-            }
-
-            return Conns.ToArray();
-
-        }
-
 
         public bool IsConnected(Hash PublicKey)
         {
@@ -144,7 +115,17 @@ namespace TNetD.Network.Networking
                         }
                     }
                 }
+            }
+            catch (System.Exception ex)
+            {
+                DisplayUtils.Display("SecureNetwork.TimerCallback()", ex);
+            }
+        }
 
+        private void ConnectionTimerCallback(Object o)
+        {
+            try
+            {
                 // Maintain / Fix Outgoing connection lists.
 
                 HashSet<Hash> toRemove = new HashSet<Hash>();
@@ -166,9 +147,10 @@ namespace TNetD.Network.Networking
                 {
                     if (kvp.Value.KeyExchanged)
                     {
-                        if (!nodeState.ConnectedValidators.Contains(kvp.Value.nodeSocketData.PublicKey))
+                        if (!nodeState.ConnectedValidators.ContainsKey(kvp.Value.nodeSocketData.PublicKey))
                         {
-                            nodeState.ConnectedValidators.Add(kvp.Value.nodeSocketData.PublicKey);
+                            nodeState.ConnectedValidators.Add(kvp.Value.nodeSocketData.PublicKey, new ConnectionProperties( ConnectionDirection.Outgoing, 
+                                nodeConfig.TrustedNodes.ContainsKey(kvp.Value.nodeSocketData.PublicKey)));
                         }
                     }
                 }
@@ -177,35 +159,35 @@ namespace TNetD.Network.Networking
                 {
                     if (kvp.Value.KeyExchanged)
                     {
-                        if (!nodeState.ConnectedValidators.Contains(kvp.Value.PublicKey))
+                        if (!nodeState.ConnectedValidators.ContainsKey(kvp.Value.PublicKey))
                         {
-                            nodeState.ConnectedValidators.Add(kvp.Value.PublicKey);
+                            nodeState.ConnectedValidators.Add(kvp.Value.PublicKey, new ConnectionProperties(ConnectionDirection.Incoming,
+                                nodeConfig.TrustedNodes.ContainsKey(kvp.Value.PublicKey)));
                         }
                     }
                 }
 
                 toRemove.Clear();
 
-                foreach (Hash pk in nodeState.ConnectedValidators)
+                foreach (var conn in nodeState.ConnectedValidators)
                 {
                     bool exists = false;
 
-                    if (incomingConnectionHander.IsConnected(pk)) exists = true;
+                    if (incomingConnectionHander.IsConnected(conn.Key)) exists = true;
 
-                    if (outgoingConnections.ContainsKey(pk)) exists = true;
+                    if (outgoingConnections.ContainsKey(conn.Key)) exists = true;
 
-                    if (!exists) toRemove.Add(pk);
+                    if (!exists) toRemove.Add(conn.Key);
                 }
 
-                foreach (Hash h in toRemove)
+                foreach (Hash pk in toRemove)
                 {
-                    nodeState.ConnectedValidators.Remove(h);
+                    nodeState.ConnectedValidators.Remove(pk);
                 }
-
             }
             catch (System.Exception ex)
             {
-                DisplayUtils.Display("SecureNetwork.TimerCallback()", ex);
+                DisplayUtils.Display("SecureNetwork.ConnectionTimerCallback()", ex);
             }
         }
 
@@ -237,7 +219,7 @@ namespace TNetD.Network.Networking
                     if (!messageTypePairs.Responses.Contains(npqe.Packet.Type))
                     {
                         DisplayUtils.Display("Non-Pair packet with valid Token.", DisplayType.CodeAssertionFailed);
-                    }              
+                    }
                 }
             }
             else

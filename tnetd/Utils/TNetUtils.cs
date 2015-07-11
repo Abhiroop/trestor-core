@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using TNetD.Network.Networking;
+using TNetD.Nodes;
 
 namespace TNetD
 {
@@ -31,6 +33,28 @@ namespace TNetD
                 Thread.Sleep(100);
             }
             while (!exit);
+        }
+
+        public static string GetNodeConnectionInfoString(IEnumerable<Node> nodes)
+        {
+            StringBuilder connData = new StringBuilder();
+
+            foreach (var nd in nodes)
+            {
+                connData.AppendLine("\n\n\n NODE ID " + nd.nodeConfig.NodeID + "   KEY: " + nd.PublicKey);
+                connData.AppendLine(" Ledger Hash : " + nd.nodeState.Ledger.GetRootHash());
+
+                connData.AppendLine(" ---- ConnectedValidators ---- ");
+
+                foreach (var conn in nd.nodeState.ConnectedValidators)
+                {
+                    connData.AppendLine("\t" + conn.Key.ToString() + "  " +
+                        ((conn.Value.Direction == ConnectionDirection.Incoming) ? "<--" : "-->") + "  " +
+                        (conn.Value.IsTrusted ? "Trusted" : ""));
+                }
+            }
+
+            return connData.ToString();
         }
 
     }

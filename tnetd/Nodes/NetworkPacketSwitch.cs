@@ -39,11 +39,6 @@ namespace TNetD.Nodes
             network.Initialize();
         }
 
-        public Hash[] GetConnectedNodes(ConnectionListType type)
-        {
-            return network.GetConnectedNodes(type);
-        }
-
         async public Task InitialConnectAsync()
         {
             await Task.Run(async () =>

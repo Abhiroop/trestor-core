@@ -63,45 +63,16 @@ namespace TNetD
         {
             lock (TimerLock)
             {
-                StringBuilder connData = new StringBuilder();
-
-                foreach (Node nd in nodes)
-                {
-                    connData.AppendLine("\n\n\n NODE ID " + nd.nodeConfig.NodeID + "   KEY: " + nd.PublicKey);
-                    connData.AppendLine(" Ledger Hash : " + nd.nodeState.Ledger.GetRootHash());
-
-                    connData.AppendLine("  OUTGOING ----> ");
-
-                    foreach (Hash h in nd.networkPacketSwitch.GetConnectedNodes(ConnectionListType.Outgoing))
-                    {
-                        connData.AppendLine("\t" + h.ToString());
-                    }
-
-                    connData.AppendLine("  INCOMING ----> ");
-
-                    foreach (Hash h in nd.networkPacketSwitch.GetConnectedNodes(ConnectionListType.Incoming))
-                    {
-                        connData.AppendLine("\t" + h.ToString());
-                    }
-
-                    connData.AppendLine("  ConnectedValidators ----> ");
-
-                    foreach (Hash h in nd.nodeState.ConnectedValidators)
-                    {
-                        connData.AppendLine("\t" + h.ToString());
-                    }
-                }
+                String connString = TNetUtils.GetNodeConnectionInfoString(nodes);
 
                 try
                 {
                     this.Dispatcher.Invoke(new Action(() =>
                     {
-
-                        textBlock_Log2.Text = connData.ToString();
+                        textBlock_Log2.Text = connString;
                     }));
                 }
                 catch { }
-
             }
         }
 
@@ -158,13 +129,13 @@ namespace TNetD
 
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 5; i++)
             {
                 AddNode(i);
             }
 
             generateTrustlist();
-            
+
             connectionMap.InitNodes(nodes);
         }
 
@@ -212,10 +183,10 @@ namespace TNetD
             {
                 byte[] N_H = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
                 Common.rngCsp.GetBytes(N_H);
-                
+
                 Hash h = new Hash(N_H);
 
-                AccountInfo ai = new AccountInfo(h, Common.random.Next(79382, 823649238), 
+                AccountInfo ai = new AccountInfo(h, Common.random.Next(79382, 823649238),
                     "name_" + Common.random.Next(0, 823649238), AccountState.Normal, NetworkType.TestNet, AccountType.TestNormal, 0);
 
                 nodes[0].nodeState.Ledger.AddUserToLedger(ai);

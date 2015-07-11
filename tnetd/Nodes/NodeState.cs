@@ -40,8 +40,8 @@ namespace TNetD.Nodes
         public ConcurrentBag<Hash> GlobalBlacklistedValidators { get; set; }
 
         public ConcurrentBag<Hash> GlobalBlacklistedUsers { get; set; }
-
-        public HashSet<Hash> ConnectedValidators { get; set; }
+        
+        public Dictionary<Hash, ConnectionProperties> ConnectedValidators { get; set; }
 
         /// <summary>
         /// Key Token, Value: Time, Public key of recipient
@@ -70,8 +70,8 @@ namespace TNetD.Nodes
             
             GlobalBlacklistedValidators = new ConcurrentBag<Hash>();
             GlobalBlacklistedUsers = new ConcurrentBag<Hash>();
-            
-            ConnectedValidators = new HashSet<Hash>();
+
+            ConnectedValidators = new Dictionary<Hash, ConnectionProperties>();
 
             PendingNetworkRequests = new ConcurrentDictionary<Hash, PendingNetworkRequest>();
 
