@@ -5,6 +5,7 @@
     <Application.Resources>
 
         <SolidColorBrush x:Key="DarkBackgroundBrush" Color="#FF1E1E1E"/>
+        <SolidColorBrush x:Key="Brush_GraphBackground" Color="#FF013066"/>
 
     </Application.Resources>
 </Application>

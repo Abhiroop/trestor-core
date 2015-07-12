@@ -194,6 +194,11 @@ namespace TNetD
 
         }
 
+        private void menuItem_ResetLayout_Click(object sender, RoutedEventArgs e)
+        {
+            connectionMap.InitNodes(nodes);
+        }
+
         /// ///////
 
     }

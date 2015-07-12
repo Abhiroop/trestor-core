@@ -96,6 +96,7 @@
                 <MenuItem Name="menuItem_Simulation_Restart" Header="Restart" />
                 <Separator/>
                 <MenuItem Name="menuItem_Simulation_RamdomlyAddAccounts" Header="Add Accounts to Node_0" Click="menuItem_Simulation_RamdomlyAddAccounts_Click"/>
+                <MenuItem Name="menuItem_ResetLayout" Header="Reset Layout" Click="menuItem_ResetLayout_Click"></MenuItem>
             </MenuItem>
           
             <MenuItem Header="HELP">
@@ -171,7 +172,9 @@
                     </Grid.RowDefinitions>
                     <Label>Graph:</Label>
                     <Label Grid.Column="2">Status:</Label>
-                    <local:ConnectionMap x:Name="connectionMap" Grid.Row="1"></local:ConnectionMap>
+                    <Grid Grid.Row="1" Background="{DynamicResource Brush_GraphBackground}">
+                        <local:ConnectionMap HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="connectionMap"></local:ConnectionMap>                        
+                    </Grid>                    
                     <ScrollViewer Grid.Row="1" Grid.Column="2">
                         <TextBlock x:Name="textBlock_Status_Graph" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
                     </ScrollViewer>
