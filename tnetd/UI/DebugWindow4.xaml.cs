@@ -17,6 +17,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -53,6 +54,8 @@ namespace TNetD
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
 
             Title += " | " + Common.NetworkType.ToString();
+
+            comboBox_Graph_DisplayMode.SelectedIndex = 0;
 
             System.Timers.Timer tmr_UI = new System.Timers.Timer(1000);
             tmr_UI.Elapsed += tmr_UI_Elapsed;
@@ -195,6 +198,35 @@ namespace TNetD
         }
 
         private void menuItem_ResetLayout_Click(object sender, RoutedEventArgs e)
+        {
+            connectionMap.InitNodes(nodes);
+        }
+
+        private void comboBox_Graph_DisplayMode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            string text = (e.AddedItems[0] as ComboBoxItem).Content as string;
+
+            switch(text)
+            {
+                case "Voting":
+                    connectionMap.DisplayMode = ConnectionMapDisplayMode.Voting;
+                    break;
+
+                case "Ledger Sync": 
+                    connectionMap.DisplayMode = ConnectionMapDisplayMode.LedgerSync;
+                    break;
+
+                case "Trust": 
+                    connectionMap.DisplayMode = ConnectionMapDisplayMode.Trust;
+                    break;
+
+                case "Time Sync": 
+                    connectionMap.DisplayMode = ConnectionMapDisplayMode.TimeSync;
+                    break;
+            }
+        }
+
+        private void button_Graph_ResetLayout_Click(object sender, RoutedEventArgs e)
         {
             connectionMap.InitNodes(nodes);
         }

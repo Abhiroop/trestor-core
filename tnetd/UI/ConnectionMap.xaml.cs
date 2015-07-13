@@ -21,11 +21,15 @@ using TNetD.Nodes;
 
 namespace TNetD.UI
 {
+    public enum ConnectionMapDisplayMode { Voting, LedgerSync, Trust, TimeSync };
+
     /// <summary>
     /// Interaction logic for ConnectionMap.xaml
     /// </summary>
     partial class ConnectionMap : UserControl
     {
+        public ConnectionMapDisplayMode DisplayMode { get; set; }
+
         Dictionary<Hash, Node> nodes = new Dictionary<Hash, Node>();
 
         Dictionary<Hash, Point> nodePositions = new Dictionary<Hash, Point>();
@@ -203,6 +207,8 @@ namespace TNetD.UI
         {
             UseLayoutRounding = true;
 
+            DisplayMode = ConnectionMapDisplayMode.Voting;
+
             InitializeComponent();
 
             updateTimer = new Timer(TimerCallback, null, 0, 1000);
@@ -250,33 +256,29 @@ namespace TNetD.UI
             Pen startPen = new Pen(new SolidColorBrush(startColor), 3);
             Pen endPen = new Pen(new SolidColorBrush(endColor), 3);
 
-            Point mid = new Point((start.X + end.X) / 2,(start.Y + end.Y) / 2);
+            Point mid = new Point((start.X + end.X) / 2, (start.Y + end.Y) / 2);
 
             drawingContext.DrawLine(startPen, start, mid);
             drawingContext.DrawLine(endPen, mid, end);
-            
+
             //Color endColor = (!isOutgoing) ? (twoToOne ? trustedOutgoing : outgoing) : (twoToOne ? trustedIncoming : incoming);
 
             // Create a rectangle and draw it in the DrawingContext.
-           /* var gradientStopCollection = new GradientStopCollection
-                    {
-                        new GradientStop(startColor, 0.0),
-                        new GradientStop(endColor, 1.0)
-                    };
+            /* var gradientStopCollection = new GradientStopCollection
+                     {
+                         new GradientStop(startColor, 0.0),
+                         new GradientStop(endColor, 1.0)
+                     };
 
-            double deltaY = end.Y - start.Y;
-            double deltaX = end.X - start.X;
+             double deltaY = end.Y - start.Y;
+             double deltaX = end.X - start.X;
             
-            double angleInDegrees = Math.Atan2(deltaY , deltaX) * 180 / Math.PI;
+             double angleInDegrees = Math.Atan2(deltaY , deltaX) * 180 / Math.PI;
             
-            var brush = new LinearGradientBrush(gradientStopCollection, angleInDegrees);
-            var pen = new Pen(brush, 3.0);
+             var brush = new LinearGradientBrush(gradientStopCollection, angleInDegrees);
+             var pen = new Pen(brush, 3.0);
             
-            drawingContext.DrawLine(pen, start, end);*/
-
-           
-
-            
+             drawingContext.DrawLine(pen, start, end);*/
         }
 
         class Placeholder : FrameworkElement
@@ -344,6 +346,62 @@ namespace TNetD.UI
                        CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Courier New"), 12, Brushes.LightCyan);
 
             dc.DrawText(conn_text, position);
+        }
+
+        private string GetNodeDisplayString(Node nd, ConnectionMapDisplayMode mode)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("" + nd.nodeConfig.NodeID + " - " + nd.PublicKey.ToString().Substring(0, 6));
+
+            switch (mode)
+            {
+                case ConnectionMapDisplayMode.Voting:
+
+                    string rh = nd.LocalLedger.LedgerTree.GetRootHash().ToString();
+
+                    sb.Append(
+                        "\nState: " + nd.ConsensusState +
+                        "\nRoot: " + ((rh.Length >= 8) ? rh.Substring(0, 8) : "Empty")
+                        );
+
+                    break;
+
+                case ConnectionMapDisplayMode.Trust:
+
+                    int Trusted = 0;
+                    int Untrusted = 0;
+                    int Outgoing = 0;
+
+                    StringBuilder TL = new StringBuilder();
+
+                    foreach (var val in nd.nodeState.ConnectedValidators)
+                    {
+                        if (val.Value.IsTrusted)
+                            TL.Append("" + val.Key.ToString().Substring(0, 4) + ",");
+
+                        Trusted += val.Value.IsTrusted ? 1 : 0;
+                        Untrusted += val.Value.IsTrusted ? 0 : 1;
+
+                        Outgoing += val.Value.Direction == ConnectionDirection.Outgoing ? 1 : 0;
+                    }
+
+                    sb.Append("\nTrusted: " + Trusted +
+                        //"\n" + TL.ToString() +                                            
+                                "\nOutgoing: " + Outgoing);
+                    break;
+
+                case ConnectionMapDisplayMode.TimeSync:
+
+                    break;
+
+                case ConnectionMapDisplayMode.LedgerSync:
+
+                    break;
+
+            }
+
+            return sb.ToString();
         }
 
         private void DrawNodeGraph(DrawingContext drawingContext, Point nodeGraphOrigin)
@@ -415,30 +473,8 @@ namespace TNetD.UI
                 {
                     Node nd = nodes[np.Key];
 
-                    int Trusted = 0;
-                    int Untrusted = 0;
-                    int Outgoing = 0;
-
-                    StringBuilder TL = new StringBuilder();
-
-                    foreach (var val in nd.nodeState.ConnectedValidators)
-                    {
-                        if (val.Value.IsTrusted)
-                            TL.Append("" + val.Key.ToString().Substring(0, 4) + ",");
-
-                        Trusted += val.Value.IsTrusted ? 1 : 0;
-                        Untrusted += val.Value.IsTrusted ? 0 : 1;
-
-                        Outgoing += val.Value.Direction == ConnectionDirection.Outgoing ? 1 : 0;
-                    }
-
-                    String displayString = "" + nd.nodeConfig.NodeID + " - " + nd.PublicKey.ToString().Substring(0, 6) +
-                                                "\nTrusted: " + Trusted +
-                                                "\n" + TL.ToString() +
-                                                "\nOutgoing: " + Outgoing;
-
-                    FormattedText ft = new FormattedText(displayString,
-                        CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Courier New"), 10, Brushes.Cyan);
+                    FormattedText ft = new FormattedText(GetNodeDisplayString(nd, DisplayMode),
+                        CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Courier New"), 10, Brushes.LightCyan);
 
                     Point textPoint = v;
                     textPoint.X += 5;

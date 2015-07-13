@@ -32,6 +32,7 @@ using TNetD.Tree;
 using TNetD.Types;
 using TNetD.Time;
 using TNetD.Network.PeerDiscovery;
+using TNetD.Consensus;
 
 namespace TNetD.Nodes
 {
@@ -68,8 +69,9 @@ namespace TNetD.Nodes
         TransactionHandler transactionHandler = default(TransactionHandler);
         TimeSync timeSync = default(TimeSync);
         LedgerSync ledgerSync = default(LedgerSync);
+        Voting voting = default(Voting);
 
-        public AccountInfo AI;
+        //public AccountInfo AI;
 
         #endregion
 
@@ -115,7 +117,9 @@ namespace TNetD.Nodes
             peerDiscovery = new PeerDiscovery(nodeState, nodeConfig, networkPacketSwitch);
             peerDiscovery.AddKnownPeer(new PeerData(new NodeSocketData(nodeConfig.PublicKey, nodeConfig.ListenPortProtocol, "127.0.0.1", nodeConfig.Name), nodeState, nodeConfig));
 
-            AI = new AccountInfo(PublicKey, Money);
+            voting = new Voting(nodeConfig, nodeState, networkPacketSwitch);
+            
+            //AI = new AccountInfo(PublicKey, Money);
 
             TimerConsensus = new System.Timers.Timer();
             TimerConsensus.Elapsed += TimerConsensus_Elapsed;
@@ -286,6 +290,12 @@ namespace TNetD.Nodes
 
         #endregion
 
+
+        public ConsensusStates ConsensusState
+        {
+            get { return voting.CurrentConsensusState; }
+        }
+        
         public async Task<long> CalculateTotalMoneyInPersistentStoreAsync()
         {
             long Tres = 0;

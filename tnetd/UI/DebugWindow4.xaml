@@ -5,73 +5,80 @@
         Title="TNET DEBUG WINDOW 4 - VOTING SIMULATION" Height="520" Width="1024" Closing="Window_Closing">
 
     <Window.Resources>
-        <local:StatusToColor x:Key="ColorConverter"/>
-        <local:ByteArrayToString x:Key="ByteArrayToString"/>
-        <local:HashToString x:Key="HashToString"/>
 
+        <ResourceDictionary>
 
-        <Style x:Key="DarkRoomListViewStyle" TargetType="{x:Type ListView}">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListView">
-                        <Border Name="Border" Background="Black" BorderBrush="LightGray" BorderThickness="1" CornerRadius="2">
-                            <ScrollViewer Style="{DynamicResource {x:Static GridView.GridViewScrollViewerStyleKey}}">
-                                <ItemsPresenter />
-                            </ScrollViewer>
+            <!-- Dark Theme -->
+            <SolidColorBrush x:Key="BackgroundKey" Color="#FF181818" />
 
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsEnabled" Value="true">
-                                <Setter TargetName="Border" Property="Background" Value="Black" />
-                                <Setter TargetName="Border" Property="BorderBrush" Value="Gray" />
-                                <Setter Property="Foreground" Value="Gray" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+            <local:StatusToColor x:Key="ColorConverter"/>
+            <local:ByteArrayToString x:Key="ByteArrayToString"/>
+            <local:HashToString x:Key="HashToString"/>
 
-        <Style x:Key="ListView_DependencyCollapsedStyle" TargetType="{x:Type ListView}">
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}, Mode=FindAncestor}}" 
+            <Style x:Key="DarkRoomListViewStyle" TargetType="{x:Type ListView}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListView">
+                            <Border Name="Border" Background="Black" BorderBrush="LightGray" BorderThickness="1" CornerRadius="2">
+                                <ScrollViewer Style="{DynamicResource {x:Static GridView.GridViewScrollViewerStyleKey}}">
+                                    <ItemsPresenter />
+                                </ScrollViewer>
+
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsEnabled" Value="true">
+                                    <Setter TargetName="Border" Property="Background" Value="Black" />
+                                    <Setter TargetName="Border" Property="BorderBrush" Value="Gray" />
+                                    <Setter Property="Foreground" Value="Gray" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="ListView_DependencyCollapsedStyle" TargetType="{x:Type ListView}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}, Mode=FindAncestor}}" 
         			Value="False">
-                    <Setter Property="Visibility" Value="Collapsed" />
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
 
-        <DataTemplate x:Key="DataTemplate_TransactionDataEntity">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="360"/>
-                    <ColumnDefinition  Width="120"/>
-                </Grid.ColumnDefinitions>
+            <DataTemplate x:Key="DataTemplate_TransactionDataEntity">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="360"/>
+                        <ColumnDefinition  Width="120"/>
+                    </Grid.ColumnDefinitions>
 
-                <TextBlock Text="{Binding PublicKey, Converter={StaticResource ByteArrayToString}}" FontFamily="Consolas"  
+                    <TextBlock Text="{Binding PublicKey, Converter={StaticResource ByteArrayToString}}" FontFamily="Consolas"  
                            Margin="5,0"  HorizontalAlignment="Left"/>
 
-                <TextBlock Text="{Binding Value}" Grid.Column="1" FontFamily="Consolas"
+                    <TextBlock Text="{Binding Value}" Grid.Column="1" FontFamily="Consolas"
         			       Margin="5,0" Foreground="#FFC0A2FF" HorizontalAlignment="Right"/>
-            </Grid>
-        </DataTemplate>
+                </Grid>
+            </DataTemplate>
 
-        <DataTemplate x:Key="DataTemplate_TransactionSignature">
-            <Grid>
+            <DataTemplate x:Key="DataTemplate_TransactionSignature">
+                <Grid>
 
-                <TextBlock Text="{Binding Hex, Converter={StaticResource ByteArrayToString}}" FontFamily="Consolas"  
+                    <TextBlock Text="{Binding Hex, Converter={StaticResource ByteArrayToString}}" FontFamily="Consolas"  
                            Margin="5,0"  HorizontalAlignment="Left"/>
 
-            </Grid>
-        </DataTemplate>
+                </Grid>
+            </DataTemplate>
 
-        <SolidColorBrush x:Key="Brush_FerrariRed" Color="#FFEC2323"/>
-        <SolidColorBrush x:Key="Brush_BrightGreen" Color="#FF5DEC33"/>
-        <SolidColorBrush x:Key="Brush_DeepYellow" Color="#FFC1B430"/>
-        <LinearGradientBrush x:Key="Brush_Gradient_DeepBlue" EndPoint="0.5,1" StartPoint="0.5,0">
-            <GradientStop Color="#FF36444D" Offset="0"/>
-            <GradientStop Color="#FF113163" Offset="1"/>
-        </LinearGradientBrush>
+            <SolidColorBrush x:Key="Brush_FerrariRed" Color="#FFEC2323"/>
+            <SolidColorBrush x:Key="Brush_BrightGreen" Color="#FF5DEC33"/>
+            <SolidColorBrush x:Key="Brush_DeepYellow" Color="#FFC1B430"/>
+            <LinearGradientBrush x:Key="Brush_Gradient_DeepBlue" EndPoint="0.5,1" StartPoint="0.5,0">
+                <GradientStop Color="#FF36444D" Offset="0"/>
+                <GradientStop Color="#FF113163" Offset="1"/>
+            </LinearGradientBrush>
+
+        </ResourceDictionary>
 
     </Window.Resources>
 
@@ -89,7 +96,7 @@
             <MenuItem Header="FILE">
                 <MenuItem Name="menuItem_File_Exit" Header="Close" Click="menuItem_File_Exit_Click"/>
             </MenuItem>
-           
+
             <MenuItem Header="SIMULATION">
                 <MenuItem Name="menuItem_Simulation_Start" Header="Start" Click="menuItem_Simulation_Start_Click"/>
                 <MenuItem Name="menuItem_Simulation_Stop" Header="Stop"/>
@@ -98,7 +105,7 @@
                 <MenuItem Name="menuItem_Simulation_RamdomlyAddAccounts" Header="Add Accounts to Node_0" Click="menuItem_Simulation_RamdomlyAddAccounts_Click"/>
                 <MenuItem Name="menuItem_ResetLayout" Header="Reset Layout" Click="menuItem_ResetLayout_Click"></MenuItem>
             </MenuItem>
-          
+
             <MenuItem Header="HELP">
                 <MenuItem Header="Topics"/>
                 <MenuItem Header="About"/>
@@ -128,7 +135,7 @@
                     </ScrollViewer>
 
                     <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
-                    
+
                 </Grid>
             </TabItem>
 
@@ -172,9 +179,27 @@
                     </Grid.RowDefinitions>
                     <Label>Graph:</Label>
                     <Label Grid.Column="2">Status:</Label>
-                    <Grid Grid.Row="1" Background="{DynamicResource Brush_GraphBackground}">
-                        <local:ConnectionMap HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="connectionMap"></local:ConnectionMap>                        
-                    </Grid>                    
+                    <Grid Grid.Row="1" Background="{DynamicResource Brush_GraphBackground_Dark}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="72*"/>
+                            <ColumnDefinition Width="142*"/>
+                            <ColumnDefinition Width="132*"/>
+                            <ColumnDefinition Width="257*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="340*"/>
+                        </Grid.RowDefinitions>
+                        <local:ConnectionMap HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="connectionMap" Grid.Row="1" Grid.ColumnSpan="4"/>
+                        <ComboBox Name="comboBox_Graph_DisplayMode"  Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="120" SelectionChanged="comboBox_Graph_DisplayMode_SelectionChanged" ShouldPreserveUserEnteredPrefix="True" Height="30" Margin="8,5,14,5">
+                            <ComboBoxItem Content="Voting"/>
+                            <ComboBoxItem Content="Ledger Sync"/>
+                            <ComboBoxItem Content="Trust"/>
+                            <ComboBoxItem Content="Time Sync"/>
+                        </ComboBox>
+                        <TextBlock HorizontalAlignment="Center" Foreground="AliceBlue" TextWrapping="Wrap" Text="Mode" VerticalAlignment="Center" Height="16"  Width="44" Margin="14,12"/>
+                        <Button Name="button_Graph_ResetLayout" Click="button_Graph_ResetLayout_Click" Content="Reset Layout" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Width="110" RenderTransformOrigin="0.707,-0.067" Height="30"/>
+                    </Grid>
                     <ScrollViewer Grid.Row="1" Grid.Column="2">
                         <TextBlock x:Name="textBlock_Status_Graph" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
                     </ScrollViewer>

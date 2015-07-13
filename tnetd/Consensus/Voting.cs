@@ -17,14 +17,16 @@ using System.Collections.Concurrent;
 
 namespace TNetD.Consensus
 {
+    public enum ConsensusStates { Collect, Merge, Vote, Confirm, Apply };
+
     class Voting
     {
+        bool Enabled { get; set; }
+
         private object VotingTransactionLock = new object();
         private object ConsensusLock = new object();
-
-        public enum ConsensusStates { Collect, Merge, Vote, Confirm, Apply };
-
-        public ConsensusStates CurrentState = ConsensusStates.Collect;
+        
+        public ConsensusStates CurrentConsensusState { get; private set; }
 
         NodeConfig nodeConfig;
         NodeState nodeState;
@@ -35,8 +37,7 @@ namespace TNetD.Consensus
         /// </summary>
         ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions;
         SortedSet<Hash> mergedTransactions = new SortedSet<Hash>();
-
-
+        
         /// <summary>
         /// Set of nodes, who sent a transaction ID
         /// key: Transaction ID
@@ -45,10 +46,7 @@ namespace TNetD.Consensus
         ConcurrentDictionary<Hash, HashSet<Hash>> propagationMap;
 
         DoubleSpendBlacklist blacklist;
-
-
-
-
+        
         public Voting(NodeConfig nodeConfig, NodeState nodeState, NetworkPacketSwitch networkPacketSwitch)
         {
             this.nodeConfig = nodeConfig;
@@ -60,6 +58,8 @@ namespace TNetD.Consensus
             networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
             networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
 
+            CurrentConsensusState = ConsensusStates.Collect;
+
             Observable.Interval(TimeSpan.FromMilliseconds(1000))
                 .Subscribe(async x => await TimerCallback_Voting(x));
 
@@ -67,37 +67,40 @@ namespace TNetD.Consensus
 
         private async Task TimerCallback_Voting(Object o)
         {
-            await Task.Run(() =>
+            if (Enabled)
             {
-                lock (ConsensusLock)
+                await Task.Run(() =>
                 {
-                    switch (CurrentState)
+                    lock (ConsensusLock)
                     {
-                        case ConsensusStates.Collect:
-                            ProcessPendingTransactions();
-                            CurrentState = ConsensusStates.Merge;
-                            break;
+                        switch (CurrentConsensusState)
+                        {
+                            case ConsensusStates.Collect:
+                                ProcessPendingTransactions();
+                                CurrentConsensusState = ConsensusStates.Merge;
+                                break;
 
-                        case ConsensusStates.Merge:
-                            HandleMerge();
-                            break;
+                            case ConsensusStates.Merge:
+                                HandleMerge();
+                                break;
 
-                        case ConsensusStates.Vote:
-                            HandleVoting();
-                            break;
+                            case ConsensusStates.Vote:
+                                HandleVoting();
+                                break;
 
-                        case ConsensusStates.Confirm:
-                            HandleConfirmation();
-                            break;
+                            case ConsensusStates.Confirm:
+                                HandleConfirmation();
+                                break;
 
-                        case ConsensusStates.Apply:
-                            HandleVoting();
-                            break;
+                            case ConsensusStates.Apply:
+                                HandleVoting();
+                                break;
 
+                        }
                     }
-                }
 
-            });
+                });
+            }
         }
 
         int MergeStateCounter = 0;
@@ -166,7 +169,7 @@ namespace TNetD.Consensus
                     }
                 }
 
-                CurrentState = ConsensusStates.Vote;
+                CurrentConsensusState = ConsensusStates.Vote;
                 MergeStateCounter = 0;
             }
         }
@@ -238,7 +241,7 @@ namespace TNetD.Consensus
         {
 
 
-            CurrentState = ConsensusStates.Apply;
+            CurrentConsensusState = ConsensusStates.Apply;
         }
 
         void networkPacketSwitch_VoteMergeEvent(NetworkPacket packet)
