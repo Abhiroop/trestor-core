@@ -67,13 +67,12 @@ namespace TNetD.UI
             point = new Point();
 
             int BOUNDARY = 40;
-            int MIN_DISTANCE = 100;
-            int MIN_LINE_POINT_DISTANCE = 50;
+            int MIN_DISTANCE = 200;
+            int MIN_LINE_POINT_DISTANCE = 100;
             int MAX_TRY = 500;
 
-
-            int W = 800;// (int)ActualWidth;
-            int H = 600;// (int)ActualHeight;
+            int W = 900;
+            int H = 600;
 
             int randSpaceX = W - BOUNDARY * 2; // 50 pixels from both sides;
             int randSpaceY = H - BOUNDARY * 2;
@@ -220,74 +219,64 @@ namespace TNetD.UI
                         InvalidateVisual();
                     }));
                 }
-                catch { }                
+                catch { }
             }
         }
         private object DrawLock = new object();
 
-        private void CreateDrawingVisualRectangle(DrawingContext drawingContext, Point origin, Point start, Point end, bool oneToTwo, bool twoToOne, bool isOutgoing)
+        private void DrawGradientLine(DrawingContext drawingContext, Point origin, Point start, Point end, bool oneToTwo, bool twoToOne, bool isOutgoing)
         {
+            start.X += origin.X;
+            start.Y += origin.Y;
+
+            end.X += origin.X;
+            end.Y += origin.Y;
+
             // Color : outgoing : BlueLight/LawnGreen(trusted)
             //         incoming : Red/Magenta
 
-            Color outgoing = Colors.LightBlue;
-            Color trustedOutgoing = Colors.LawnGreen;
-            Color incoming = Colors.Red;
-            Color trustedIncoming = Colors.Magenta;
+            Color outgoing = Colors.ForestGreen;
+            Color trustedOutgoing = Color.FromRgb(204, 255, 51); // Bright Green
+            Color incoming = Color.FromRgb(153, 204, 255); // Light Blue
+            Color trustedIncoming = Color.FromRgb(223, 255, 126); // Light Green
 
             Color startColor = isOutgoing ? (oneToTwo ? trustedOutgoing : outgoing) : (oneToTwo ? trustedIncoming : incoming);
 
             Color endColor = (!isOutgoing) ? (twoToOne ? trustedOutgoing : outgoing) : (twoToOne ? trustedIncoming : incoming);
 
+            //Color startColor = (oneToTwo ? Colors.LawnGreen : Colors.Red);
+            //Color endColor = (twoToOne ? Colors.LawnGreen : Colors.Red);
+
+            Pen startPen = new Pen(new SolidColorBrush(startColor), 3);
+            Pen endPen = new Pen(new SolidColorBrush(endColor), 3);
+
+            Point mid = new Point((start.X + end.X) / 2,(start.Y + end.Y) / 2);
+
+            drawingContext.DrawLine(startPen, start, mid);
+            drawingContext.DrawLine(endPen, mid, end);
+            
+            //Color endColor = (!isOutgoing) ? (twoToOne ? trustedOutgoing : outgoing) : (twoToOne ? trustedIncoming : incoming);
+
             // Create a rectangle and draw it in the DrawingContext.
-            var gradientStopCollection = new GradientStopCollection
+           /* var gradientStopCollection = new GradientStopCollection
                     {
                         new GradientStop(startColor, 0.0),
                         new GradientStop(endColor, 1.0)
                     };
 
-            var brush = new LinearGradientBrush(gradientStopCollection);
+            double deltaY = end.Y - start.Y;
+            double deltaX = end.X - start.X;
+            
+            double angleInDegrees = Math.Atan2(deltaY , deltaX) * 180 / Math.PI;
+            
+            var brush = new LinearGradientBrush(gradientStopCollection, angleInDegrees);
             var pen = new Pen(brush, 3.0);
+            
+            drawingContext.DrawLine(pen, start, end);*/
 
-            var vector1 = new Vector(start.X, start.Y);
-            var vector2 = new Vector(end.X, end.Y);
+           
 
-            if (vector1.Length < vector2.Length)
-            {
-                brush.StartPoint = new Point(1, 1);
-                brush.EndPoint = new Point(0, 0);
-            }
-
-            start.X += origin.X;
-            start.Y += origin.Y;
-              
-            /*LineGeometry g = new LineGeometry();
-            g.StartPoint = start;
-            g.EndPoint = end;
-
-            DrawingVisual dv = new DrawingVisual();
-
-
-            var layer = new DrawingGroup();
-            using (var lcontext = layer.Open())
-            {
-                lcontext.DrawGeometry(brush, pen, g);
-            }
-
-            var be = new BlurEffect
-            {
-                Radius = 3.0,
-                KernelType = KernelType.Gaussian,
-                RenderingBias = RenderingBias.Quality
-            };
-
-            //layer.SetValue(, be); //new DropShadowBitmapEffect { Color = Colors.Black, ShadowDepth = 3, Opacity = 0.5 };
-            drawingContext.PushEffect(new BlurBitmapEffect(), null);
-
-            drawingContext.DrawDrawing(layer);
-            drawingContext.Pop();*/
-
-            drawingContext.DrawLine(pen, start, end);
+            
         }
 
         class Placeholder : FrameworkElement
@@ -319,7 +308,6 @@ namespace TNetD.UI
             dc.DrawImage(rtb, targetRect);
         }
 
-
         protected override void OnRender(DrawingContext drawingContext)
         {
             lock (DrawLock)
@@ -350,46 +338,52 @@ namespace TNetD.UI
             }
         }
 
+        void PrintText(DrawingContext dc, string text, Point position)
+        {
+            FormattedText conn_text = new FormattedText(text,
+                       CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Courier New"), 12, Brushes.LightCyan);
+
+            dc.DrawText(conn_text, position);
+        }
+
         private void DrawNodeGraph(DrawingContext drawingContext, Point nodeGraphOrigin)
         {
             HashSet<HashPair> connections = new HashSet<HashPair>();
 
             foreach (var nodeData in nodes)
             {
-                Hash PK = nodeData.Key;
-                Node node = nodes[PK];
-
-                if (nodePositions.ContainsKey(PK))
+                foreach (var conns in nodeData.Value.nodeState.ConnectedValidators)
                 {
-                    Point point = nodePositions[PK];
+                    HashPair hp = new HashPair(nodeData.Key, conns.Key);
 
-                    foreach (var conns in node.nodeState.ConnectedValidators)
+                    if (!connections.Contains(hp))
                     {
-                        HashPair hp = new HashPair(PK, conns.Key);
-
-                        if (!connections.Contains(hp))
-                        {
-                            connections.Add(hp);
-                        }
+                        connections.Add(hp);
                     }
                 }
             }
 
+            PrintText(drawingContext, "Conections = " + connections.Count, new Point(30, 30));
+
             foreach (var conn in connections)
             {
-                if (nodePositions.ContainsKey(conn.HexH1) && nodePositions.ContainsKey(conn.HexH1))
+                if (nodePositions.ContainsKey(conn.HexH1) &&
+                    nodePositions.ContainsKey(conn.HexH1) &&
+                    nodes.ContainsKey(conn.HexH1) &&
+                    nodes.ContainsKey(conn.HexH2))
                 {
                     Point NP1 = nodePositions[conn.HexH1];
                     Point NP2 = nodePositions[conn.HexH2];
 
-                    if (nodes.ContainsKey(conn.HexH1) && nodes.ContainsKey(conn.HexH2))
-                    {
-                        bool is1to2Trusted = nodes[conn.HexH1].nodeState.ConnectedValidators[conn.HexH2].IsTrusted;
-                        bool isOutgoing = nodes[conn.HexH1].nodeState.ConnectedValidators[conn.HexH2].Direction == ConnectionDirection.Outgoing;
-                        bool is2to1Trusted = nodes[conn.HexH2].nodeState.ConnectedValidators[conn.HexH1].IsTrusted;
+                    Node N1 = nodes[conn.HexH1];
+                    Node N2 = nodes[conn.HexH2];
 
-                        CreateDrawingVisualRectangle(drawingContext, nodeGraphOrigin, NP1, NP2, is1to2Trusted, is2to1Trusted, isOutgoing);
-                    }
+                    bool is1to2Trusted = N1.nodeState.ConnectedValidators[conn.HexH2].IsTrusted;
+                    bool isOutgoing = nodes[conn.HexH1].nodeState.ConnectedValidators[conn.HexH2].Direction == ConnectionDirection.Outgoing;
+                    bool is2to1Trusted = N2.nodeState.ConnectedValidators[conn.HexH1].IsTrusted;
+
+                    DrawGradientLine(drawingContext, nodeGraphOrigin, NP1, NP2, is1to2Trusted, is2to1Trusted, isOutgoing);
+
                 }
             }
 
@@ -400,7 +394,20 @@ namespace TNetD.UI
                 v.Y += nodeGraphOrigin.Y;
 
                 // Circle to point the center.
-                drawingContext.DrawEllipse(Brushes.LightGray, null, v, 15, 15);
+                //drawingContext.DrawEllipse(Brushes.LightGray, null, v, 15, 15);
+
+                int rectWidth = 100;
+                int rectHeight = 50;
+
+                v.X -= rectWidth / 2;
+                v.Y -= rectHeight / 2;
+
+                Rect rectTODraw = new Rect(v, new Size(rectWidth, rectHeight));
+
+                SolidColorBrush scb_blue = new SolidColorBrush(Color.FromRgb(33, 98, 163));
+
+                drawingContext.DrawRoundedRectangle(scb_blue, null, rectTODraw, 5, 5);
+
                 /*RenderBlurred(drawingContext, 35, 35, new Rect(v, new Size(35, 35)), 10, 
                     dc => dc.DrawRectangle(new SolidColorBrush(Colors.Transparent), new Pen(Brushes.Blue, 3), new Rect(0, 0, 35, 35)));*/
 
@@ -408,12 +415,34 @@ namespace TNetD.UI
                 {
                     Node nd = nodes[np.Key];
 
-                    FormattedText ft = new FormattedText("" + nd.nodeConfig.NodeID,
-                        CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Courier New"), 12, Brushes.Black);
+                    int Trusted = 0;
+                    int Untrusted = 0;
+                    int Outgoing = 0;
+
+                    StringBuilder TL = new StringBuilder();
+
+                    foreach (var val in nd.nodeState.ConnectedValidators)
+                    {
+                        if (val.Value.IsTrusted)
+                            TL.Append("" + val.Key.ToString().Substring(0, 4) + ",");
+
+                        Trusted += val.Value.IsTrusted ? 1 : 0;
+                        Untrusted += val.Value.IsTrusted ? 0 : 1;
+
+                        Outgoing += val.Value.Direction == ConnectionDirection.Outgoing ? 1 : 0;
+                    }
+
+                    String displayString = "" + nd.nodeConfig.NodeID + " - " + nd.PublicKey.ToString().Substring(0, 6) +
+                                                "\nTrusted: " + Trusted +
+                                                "\n" + TL.ToString() +
+                                                "\nOutgoing: " + Outgoing;
+
+                    FormattedText ft = new FormattedText(displayString,
+                        CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Courier New"), 10, Brushes.Cyan);
 
                     Point textPoint = v;
-                    textPoint.X -= 5;
-                    textPoint.Y -= 5;
+                    textPoint.X += 5;
+                    textPoint.Y += 5;
 
                     drawingContext.DrawText(ft, textPoint);
                 }

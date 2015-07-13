@@ -25,11 +25,11 @@ namespace TNetD
 
             if (Compare(H1.Hex, H2.Hex) < 0)
             {
-                this.HashValue = H1.Hex.Concat(H2.Hex).ToArray();
+                this.HashValue = H2.Hex.Concat(H1.Hex).ToArray();
             }
             else
             {
-                this.HashValue = H2.Hex.Concat(H1.Hex).ToArray();
+                this.HashValue = H1.Hex.Concat(H2.Hex).ToArray();
             }
         }
 
