@@ -421,7 +421,7 @@ namespace TNetD.UI
                 }
             }
 
-            PrintText(drawingContext, "Conections = " + connections.Count, new Point(30, 30));
+            PrintText(drawingContext, "Connections = " + connections.Count, new Point(30, 30));
 
             foreach (var conn in connections)
             {
