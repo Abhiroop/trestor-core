@@ -45,7 +45,6 @@ namespace TNetD.Consensus
         /// </summary>
         ConcurrentDictionary<Hash, HashSet<Hash>> propagationMap;
 
-        DoubleSpendBlacklist blacklist;
 
         public Voting(NodeConfig nodeConfig, NodeState nodeState, NetworkPacketSwitch networkPacketSwitch)
         {
@@ -54,7 +53,6 @@ namespace TNetD.Consensus
             this.networkPacketSwitch = networkPacketSwitch;
             this.CurrentTransactions = new ConcurrentDictionary<Hash, TransactionContent>();
             this.propagationMap = new ConcurrentDictionary<Hash, HashSet<Hash>>();
-            this.blacklist = new DoubleSpendBlacklist(nodeState);
             networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
             networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
 
@@ -109,7 +107,6 @@ namespace TNetD.Consensus
 
         void HandleMerge()
         {
-            blacklist.ClearExpired();
             MergeStateCounter++;
             SendMergeRequests();
 

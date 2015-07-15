@@ -12,7 +12,6 @@ namespace TNetD.Consensus
     class TransactionChecker
     {
 
-        ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions;
         NodeState nodeState;
         DoubleSpendBlacklist blacklist;
 
@@ -20,10 +19,9 @@ namespace TNetD.Consensus
 
 
 
-        TransactionChecker(ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions, NodeState nodeState)
+        TransactionChecker(NodeState nodeState)
         {
             this.nodeState = nodeState;
-            this.CurrentTransactions = CurrentTransactions;
             blacklist = new DoubleSpendBlacklist(nodeState);
         }
 
@@ -31,8 +29,9 @@ namespace TNetD.Consensus
 
 
 
-        Ballot CreateBallot()
+        Ballot CreateBallot(ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions)
         {
+            blacklist.ClearExpired();
             SortedSet<Hash> mergedTransactions = new SortedSet<Hash>();
             Dictionary<Hash, long> temporaryBalances = new Dictionary<Hash, long>();
             foreach (KeyValuePair<Hash, TransactionContent> transaction in CurrentTransactions)
