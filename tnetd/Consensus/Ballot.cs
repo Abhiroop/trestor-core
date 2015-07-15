@@ -14,7 +14,7 @@ namespace TNetD.Consensus
 {
     class Ballot : ISerializableBase, ISignableBase
     {
-        SortedSet<Hash> TransactionIds;
+        public SortedSet<Hash> TransactionIds;
         
         /// <summary>
         /// Public key of the signer.
