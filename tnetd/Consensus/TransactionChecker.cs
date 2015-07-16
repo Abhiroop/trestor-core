@@ -19,7 +19,7 @@ namespace TNetD.Consensus
 
 
 
-        TransactionChecker(NodeState nodeState)
+        public TransactionChecker(NodeState nodeState)
         {
             this.nodeState = nodeState;
             blacklist = new DoubleSpendBlacklist(nodeState);
@@ -29,7 +29,7 @@ namespace TNetD.Consensus
 
 
 
-        Ballot CreateBallot(ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions)
+        public Ballot CreateBallot(ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions)
         {
             blacklist.ClearExpired();
             SortedSet<Hash> mergedTransactions = new SortedSet<Hash>();
@@ -104,7 +104,7 @@ namespace TNetD.Consensus
         /// <param name="temporaryBalances"></param>
         /// <param name="badaccounts"></param>
         /// <returns></returns>
-        bool Spendable(TransactionContent transaction, Dictionary<Hash, long> temporaryBalances, out List<Hash> badaccounts)
+        public bool Spendable(TransactionContent transaction, Dictionary<Hash, long> temporaryBalances, out List<Hash> badaccounts)
         {
             badaccounts = new List<Hash>();
             bool spendable = true;

@@ -36,7 +36,8 @@ namespace TNetD.Consensus
         /// ID and content of current transactions
         /// </summary>
         ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions;
-        SortedSet<Hash> mergedTransactions = new SortedSet<Hash>();
+        Ballot ballot;
+        TransactionChecker tchecker;
 
         /// <summary>
         /// Set of nodes, who sent a transaction ID
@@ -55,6 +56,7 @@ namespace TNetD.Consensus
             this.propagationMap = new ConcurrentDictionary<Hash, HashSet<Hash>>();
             networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
             networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
+            TransactionChecker tcheck = new TransactionChecker(nodeState);
 
             CurrentConsensusState = ConsensusStates.Collect;
 
@@ -110,9 +112,13 @@ namespace TNetD.Consensus
             MergeStateCounter++;
             SendMergeRequests();
 
-
-            //CurrentConsensusState = ConsensusStates.Vote;
-            //MergeStateCounter = 0;
+            // after 5 rounds: assemble ballot
+            if (MergeStateCounter >= 5)
+            {
+                ballot = tchecker.CreateBallot(CurrentTransactions);
+                CurrentConsensusState = ConsensusStates.Vote;
+                MergeStateCounter = 0;
+            }
         }
 
 
@@ -157,6 +163,11 @@ namespace TNetD.Consensus
             }
         }
 
+        /// <summary>
+        /// sends a request to get transaction data for all transaction IDs in the sorted hash
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="transactions"></param>
         void sendFetchRequest(Hash node, SortedSet<Hash> transactions)
         {
             FetchRequestMsg message = new FetchRequestMsg();
@@ -170,11 +181,16 @@ namespace TNetD.Consensus
             networkPacketSwitch.AddToQueue(node, packet);
         }
 
+        /// <summary>
+        /// responds to a fetch request, sending all requested transaction data
+        /// </summary>
+        /// <param name="packet"></param>
         void ProcessFetchRequest(NetworkPacket packet)
         {
             FetchRequestMsg message = new FetchRequestMsg();
             message.Deserialize(packet.Data);
 
+            // collect transaction data
             FetchResponseMsg response = new FetchResponseMsg();
             foreach (Hash id in message.IDs)
             {
@@ -189,6 +205,10 @@ namespace TNetD.Consensus
             networkPacketSwitch.AddToQueue(packet.PublicKeySource, rpacket);
         }
 
+        /// <summary>
+        /// process the response to a fetch request, i.e. add the transactions to CurrentTransactions
+        /// </summary>
+        /// <param name="packet"></param>
         void ProcessFetchResponse(NetworkPacket packet)
         {
             if (networkPacketSwitch.VerifyPendingPacket(packet))
@@ -196,15 +216,26 @@ namespace TNetD.Consensus
                 FetchResponseMsg message = new FetchResponseMsg();
                 message.Deserialize(packet.Data);
 
+                //check each transaction for signature validity and basic spendability
                 foreach (KeyValuePair<Hash, TransactionContent> transaction in message.transactions)
                 {
-                    if (transaction.Value.VerifySignature() == TransactionProcessingResult.Accepted)
+                    //check signature
+                    if (transaction.Value.VerifySignature() == TransactionProcessingResult.Accepted) 
                     {
-                        CurrentTransactions.AddOrUpdate(transaction.Key, transaction.Value, (ok, ov) => ov);
+                        //check spendability
+                        List<Hash> badaccounts = new List<Hash>();
+                        if (tchecker.Spendable(transaction.Value, new Dictionary<Hash, long>(), out badaccounts))
+                        {
+                            CurrentTransactions.AddOrUpdate(transaction.Key, transaction.Value, (ok, ov) => ov);
+                        }
+                        else 
+                        { 
+                            //could blacklist accounts here although not necessary
+                        }
                     }
                     else
                     {
-                        // TODO: blacklist peer 
+                        //could blacklist peer for sending transaction with invalid signature
                     }
                 }
             }
@@ -229,6 +260,10 @@ namespace TNetD.Consensus
             networkPacketSwitch.AddToQueue(sender, response);
         }
 
+        /// <summary>
+        /// respond to merge request by sending a list of all hashes of known (not expired) transactions
+        /// </summary>
+        /// <param name="packet"></param>
         void ProcessMergeResponse(NetworkPacket packet)
         {
             if (networkPacketSwitch.VerifyPendingPacket(packet))
@@ -251,6 +286,9 @@ namespace TNetD.Consensus
             }
         }
 
+        /// <summary>
+        /// request a list of all known transactions from each connected validator
+        /// </summary>
         void SendMergeRequests()
         {
             foreach (var node in nodeState.ConnectedValidators)
