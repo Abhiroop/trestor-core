@@ -241,11 +241,34 @@ namespace TNetD.Consensus
             }
         }
 
+
+        /// <summary>
+        /// request a list of all known transactions from each connected validator
+        /// note that message has no content
+        /// </summary>
+        void SendMergeRequests()
+        {
+            foreach (var node in nodeState.ConnectedValidators)
+            {
+                Hash token = TNetUtils.GenerateNewToken();
+                NetworkPacket request = new NetworkPacket();
+                request.PublicKeySource = nodeConfig.PublicKey;
+                request.Token = token;
+                request.Type = PacketType.TPT_CONS_MERGE_REQUEST;
+                networkPacketSwitch.AddToQueue(node.Key, request);
+            }
+        }
+
+        /// <summary>
+        /// respond to a merge request by sending a list of all hashes of known transactions
+        /// </summary>
+        /// <param name="packet"></param>
         void ProcessMergeRequest(NetworkPacket packet)
         {
             Hash sender = packet.PublicKeySource;
             Hash token = packet.Token;
 
+            //add all transaction IDs from CurrentTransactions
             MergeResponseMsg message = new MergeResponseMsg();
             foreach (KeyValuePair<Hash, TransactionContent> transaction in CurrentTransactions)
             {
@@ -286,21 +309,7 @@ namespace TNetD.Consensus
             }
         }
 
-        /// <summary>
-        /// request a list of all known transactions from each connected validator
-        /// </summary>
-        void SendMergeRequests()
-        {
-            foreach (var node in nodeState.ConnectedValidators)
-            {
-                Hash token = TNetUtils.GenerateNewToken();
-                NetworkPacket request = new NetworkPacket();
-                request.PublicKeySource = nodeConfig.PublicKey;
-                request.Token = token;
-                request.Type = PacketType.TPT_CONS_MERGE_REQUEST;
-                networkPacketSwitch.AddToQueue(node.Key, request);
-            }
-        }
+
 
         void networkPacketSwitch_VoteEvent(Network.NetworkPacket packet)
         {
