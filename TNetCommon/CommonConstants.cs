@@ -14,6 +14,8 @@ using TNetD.Json.REST;
 
 namespace TNetD
 {
+    public enum NodeOperationType { Centralized, Distributed } 
+
     public static class Common
     {
         public static RNGCryptoServiceProvider rngCsp = new RNGCryptoServiceProvider();
@@ -59,6 +61,7 @@ namespace TNetD
         public static readonly int UI_TextBox_Max_Length = 20000;
 
         public static readonly NetworkType NetworkType = Address.NetworkType.TestNet;
+        public static readonly NodeOperationType NodeOperationType = NodeOperationType.Distributed;
 
         public static readonly string RpcHost = "localhost";// "localhost";
 

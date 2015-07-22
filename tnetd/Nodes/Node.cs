@@ -118,6 +118,11 @@ namespace TNetD.Nodes
             peerDiscovery.AddKnownPeer(new PeerData(new NodeSocketData(nodeConfig.PublicKey, nodeConfig.ListenPortProtocol, "127.0.0.1", nodeConfig.Name), nodeState, nodeConfig));
 
             voting = new Voting(nodeConfig, nodeState, networkPacketSwitch);
+
+            if(Common.NodeOperationType == NodeOperationType.Distributed)
+            {
+                voting.Enabled = true;
+            }
             
             //AI = new AccountInfo(PublicKey, Money);
 
@@ -275,8 +280,10 @@ namespace TNetD.Nodes
                 TimerEventProcessed = false;
 
                 // // // // // // // // //
-
-                transactionHandler.ProcessPendingTransactions();
+                if (Common.NodeOperationType == NodeOperationType.Centralized)
+                {
+                    transactionHandler.ProcessPendingTransactions();
+                }
 
                 // // // // // // // // //
             }

@@ -29,10 +29,10 @@ namespace TNetD.Nodes
         {
             lock (TransactionLock)
             {
-
                 try
                 {
-                    if (nodeState.IncomingTransactionMap.IncomingTransactions.Count > 0)
+                    if ((nodeState.IncomingTransactionMap.IncomingTransactions.Count > 0) && 
+                        (Common.NodeOperationType == NodeOperationType.Centralized))
                     {
                         Queue<TransactionContent> transactionContentStack = new Queue<TransactionContent>();
 

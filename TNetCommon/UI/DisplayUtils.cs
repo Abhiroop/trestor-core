@@ -12,7 +12,7 @@ using System.Windows.Media;
 
 namespace TNetD
 {
-    public enum DisplayType 
+    public enum DisplayType
     {
         /// <summary>
         /// [0] : General Messages
@@ -37,13 +37,13 @@ namespace TNetD
         /// <summary>
         /// [4] : Authentication Failure / Bad Signature
         /// </summary>
-        AuthFailure, 
+        AuthFailure,
 
         /// <summary>
         /// [5] : Invalid Transactions / Malformed Packets.
         /// </summary>
         BadData,
- 
+
         /// <summary>
         /// [5] : Should not ahppen for good code.
         /// </summary>
@@ -102,6 +102,13 @@ namespace TNetD
         public static void Display(String Message, Exception ex)
         {
             Display(Message + " - " + ex.Message, DisplayType.Exception);
+        }
+
+        public static void Display(String Message, Exception ex, bool stackTrace)
+        {
+            string msg = Message + " - " + ex.Message;
+            if (stackTrace) msg += " | ST: " + ex.StackTrace;
+            Display(msg, DisplayType.Exception);
         }
     }
 

@@ -21,7 +21,7 @@ namespace TNetD.Consensus
 
     class Voting
     {
-        bool Enabled { get; set; }
+        public bool Enabled { get; set; }
 
         private object VotingTransactionLock = new object();
         private object ConsensusLock = new object();
@@ -37,7 +37,7 @@ namespace TNetD.Consensus
         /// </summary>
         ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions;
         Ballot ballot;
-        TransactionChecker tchecker;
+        TransactionChecker transactionChecker = default(TransactionChecker);
 
         /// <summary>
         /// Set of nodes, who sent a transaction ID
@@ -46,6 +46,7 @@ namespace TNetD.Consensus
         /// </summary>
         ConcurrentDictionary<Hash, HashSet<Hash>> propagationMap;
 
+        System.Timers.Timer TimerVoting = default(System.Timers.Timer);
 
         public Voting(NodeConfig nodeConfig, NodeState nodeState, NetworkPacketSwitch networkPacketSwitch)
         {
@@ -56,50 +57,74 @@ namespace TNetD.Consensus
             this.propagationMap = new ConcurrentDictionary<Hash, HashSet<Hash>>();
             networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
             networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
-            TransactionChecker tcheck = new TransactionChecker(nodeState);
+            transactionChecker = new TransactionChecker(nodeState);
 
             CurrentConsensusState = ConsensusStates.Collect;
 
-            Observable.Interval(TimeSpan.FromMilliseconds(1000))
-                .Subscribe(async x => await TimerCallback_Voting(x));
+            /*Observable.Interval(TimeSpan.FromMilliseconds(1000))
+                .Subscribe(async x => await TimerCallback_Voting(x));*/
+
+            TimerVoting = new System.Timers.Timer();
+            TimerVoting.Elapsed += TimerVoting_Elapsed;
+            TimerVoting.Enabled = Enabled;
+            TimerVoting.Interval = 1000;
+            TimerVoting.Start();
 
         }
 
-        private async Task TimerCallback_Voting(Object o)
+        void TimerVoting_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            VotingEvent();
+        }
+
+       /* private async Task TimerCallback_Voting(Object o)
         {
             if (Enabled)
             {
                 await Task.Run(() =>
                 {
-                    lock (ConsensusLock)
-                    {
-                        switch (CurrentConsensusState)
-                        {
-                            case ConsensusStates.Collect:
-                                ProcessPendingTransactions();
-                                CurrentConsensusState = ConsensusStates.Merge;
-                                break;
-
-                            case ConsensusStates.Merge:
-                                HandleMerge();
-                                break;
-
-                            case ConsensusStates.Vote:
-                                HandleVoting();
-                                break;
-
-                            case ConsensusStates.Confirm:
-                                HandleConfirmation();
-                                break;
-
-                            case ConsensusStates.Apply:
-                                HandleVoting();
-                                break;
-
-                        }
-                    }
+                    VotingEvent();
 
                 });
+            }
+        }*/
+
+        private void VotingEvent()
+        {
+            try
+            {
+                lock (ConsensusLock)
+                {
+                    switch (CurrentConsensusState)
+                    {
+                        case ConsensusStates.Collect:
+                            ProcessPendingTransactions();
+                            CurrentConsensusState = ConsensusStates.Merge;
+                            break;
+
+                        case ConsensusStates.Merge:
+                            HandleMerge();
+                            break;
+
+                        case ConsensusStates.Vote:
+                            HandleVoting();
+                            break;
+
+                        case ConsensusStates.Confirm:
+                            HandleConfirmation();
+                            break;
+
+                        case ConsensusStates.Apply:
+                            HandleVoting();
+                            break;
+
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                DisplayUtils.Display("TimerCallback_Voting", ex, true);
             }
         }
 
@@ -115,7 +140,7 @@ namespace TNetD.Consensus
             // after 5 rounds: assemble ballot
             if (MergeStateCounter >= 5)
             {
-                ballot = tchecker.CreateBallot(CurrentTransactions);
+                ballot = transactionChecker.CreateBallot(CurrentTransactions);
                 CurrentConsensusState = ConsensusStates.Vote;
                 MergeStateCounter = 0;
             }
@@ -220,16 +245,16 @@ namespace TNetD.Consensus
                 foreach (KeyValuePair<Hash, TransactionContent> transaction in message.transactions)
                 {
                     //check signature
-                    if (transaction.Value.VerifySignature() == TransactionProcessingResult.Accepted) 
+                    if (transaction.Value.VerifySignature() == TransactionProcessingResult.Accepted)
                     {
                         //check spendability
                         List<Hash> badaccounts = new List<Hash>();
-                        if (tchecker.Spendable(transaction.Value, new Dictionary<Hash, long>(), out badaccounts))
+                        if (transactionChecker.Spendable(transaction.Value, new Dictionary<Hash, long>(), out badaccounts))
                         {
                             CurrentTransactions.AddOrUpdate(transaction.Key, transaction.Value, (ok, ov) => ov);
                         }
-                        else 
-                        { 
+                        else
+                        {
                             //could blacklist accounts here although not necessary
                         }
                     }
@@ -309,8 +334,6 @@ namespace TNetD.Consensus
             }
         }
 
-
-
         void networkPacketSwitch_VoteEvent(Network.NetworkPacket packet)
         {
             switch (packet.Type)
@@ -336,10 +359,10 @@ namespace TNetD.Consensus
         {
             lock (VotingTransactionLock)
             {
-
                 try
                 {
-                    if (nodeState.IncomingTransactionMap.IncomingTransactions.Count > 0)
+                    if ((nodeState.IncomingTransactionMap.IncomingTransactions.Count > 0) &&
+                        (Common.NodeOperationType == NodeOperationType.Distributed))
                     {
 
                         lock (nodeState.IncomingTransactionMap.transactionLock)
@@ -359,14 +382,12 @@ namespace TNetD.Consensus
                         }
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
 
                 }
             }
         }
-
-
 
 
     }
