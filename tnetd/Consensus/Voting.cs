@@ -67,7 +67,7 @@ namespace TNetD.Consensus
             TimerVoting = new System.Timers.Timer();
             TimerVoting.Elapsed += TimerVoting_Elapsed;
             TimerVoting.Enabled = Enabled;
-            TimerVoting.Interval = 1000;
+            TimerVoting.Interval = 500;
             TimerVoting.Start();
 
         }
@@ -115,7 +115,7 @@ namespace TNetD.Consensus
                             break;
 
                         case ConsensusStates.Apply:
-                            HandleVoting();
+                            HandleApply();
                             break;
 
                     }
@@ -145,28 +145,26 @@ namespace TNetD.Consensus
                 MergeStateCounter = 0;
             }
         }
-
-
-
+        
         void HandleVoting()
         {
             VotingStateCounter++;
 
-
+            CurrentConsensusState = ConsensusStates.Confirm;
         }
 
         void HandleConfirmation()
         {
             ConfirmationStateCounter++;
 
-
+            CurrentConsensusState = ConsensusStates.Apply;
         }
 
         void HandleApply()
         {
 
 
-            CurrentConsensusState = ConsensusStates.Apply;
+            CurrentConsensusState = ConsensusStates.Collect;
         }
 
         void networkPacketSwitch_VoteMergeEvent(NetworkPacket packet)
