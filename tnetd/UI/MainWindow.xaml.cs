@@ -44,7 +44,9 @@ namespace TNetD
 
         List<Node> nodes = new List<Node>();
 
-        Thread background_Load;
+        List<Thread> runningNodes = new List<Thread>();
+
+        
 
         public MainWindow()
         {
@@ -56,10 +58,7 @@ namespace TNetD
 
             lv_TX.ItemsSource = _tranxData;
 
-            background_Load = new Thread(LoadNodes);
-
-            background_Load.Start();
-
+            
             Title += " | " + Common.NetworkType.ToString();
 
 
@@ -67,6 +66,15 @@ namespace TNetD
             //tmr_UI.Elapsed += tmr_UI_Elapsed;
             //tmr_UI.Start();
 
+        }
+
+        private void START_NODES()
+        {
+            Thread backgroundLoad;
+            backgroundLoad = new Thread(LoadNodes);
+            backgroundLoad.Start();
+
+            runningNodes.Add(backgroundLoad);
         }
 
         /*void tmr_UI_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -123,7 +131,7 @@ namespace TNetD
 
         void LoadNodes()
         {
-            //AddNode(0);
+            AddNode(0);
             //AddNode(1);
         }
 
@@ -239,17 +247,20 @@ namespace TNetD
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            STOP_NODES();          
+        }
+
+        private void STOP_NODES()
+        {
             foreach (Node nd in nodes)
             {
                 nd.StopNode();
             }
 
-            if (background_Load != null)
+            foreach (Thread thr in runningNodes)
             {
-                if (background_Load.IsAlive)
-                {
-                    background_Load.Abort();
-                }
+                if (thr.IsAlive)
+                    thr.Abort();
             }
         }
 
@@ -257,6 +268,8 @@ namespace TNetD
 
         private void menuItem_Server_Start_Click(object sender, RoutedEventArgs e)
         {
+            START_NODES();
+
             /*SingleTransactionFactory stf = new SingleTransactionFactory(nodes[0].PublicKey, nodes[1].PublicKey, Constants.random.Next(100, 1000), Constants.random.Next(10, 150000));
 
             byte[] tranxData = stf.GetTransactionData();
@@ -280,10 +293,12 @@ namespace TNetD
 
         private void menuItem_Server_Stop_Click(object sender, RoutedEventArgs e)
         {
-            NodeConfig nc = new NodeConfig(0);
+            /*NodeConfig nc = new NodeConfig(0);
             NodeConfig nc1 = new NodeConfig(1);
 
-            IPersistentTransactionStore transactionStore = new SQLiteTransactionStore(nc);
+            IPersistentTransactionStore transactionStore = new SQLiteTransactionStore(nc);*/
+
+            STOP_NODES();
         }
 
         private void lv_TX_MouseUp(object sender, MouseButtonEventArgs e)
