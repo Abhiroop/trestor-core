@@ -70,7 +70,17 @@ namespace TNetD.Consensus
             TimerVoting.Interval = 500;
             TimerVoting.Start();
 
+            Print("class Voting created");
         }
+
+
+        private void Print(String message)
+        {
+            DisplayUtils.Display(" Node " + nodeConfig.NodeID + " | Voting: " + message);
+        }
+
+
+
 
         void TimerVoting_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
@@ -202,6 +212,7 @@ namespace TNetD.Consensus
             packet.PublicKeySource = nodeConfig.PublicKey;
             packet.Type = PacketType.TPT_CONS_TX_FETCH_REQUEST;
             networkPacketSwitch.AddToQueue(node, packet);
+            Print("fetch request sent");
         }
 
         /// <summary>
@@ -226,6 +237,7 @@ namespace TNetD.Consensus
             rpacket.PublicKeySource = nodeConfig.PublicKey;
             rpacket.Type = PacketType.TPT_CONS_TX_FETCH_RESPONSE;
             networkPacketSwitch.AddToQueue(packet.PublicKeySource, rpacket);
+            Print("fetch request processed");
         }
 
         /// <summary>
@@ -262,6 +274,7 @@ namespace TNetD.Consensus
                     }
                 }
             }
+            Print("fetch response processed");
         }
 
 
@@ -280,6 +293,7 @@ namespace TNetD.Consensus
                 request.Type = PacketType.TPT_CONS_MERGE_REQUEST;
                 networkPacketSwitch.AddToQueue(node.Key, request);
             }
+            Print("merge requests sent");
         }
 
         /// <summary>
@@ -304,6 +318,7 @@ namespace TNetD.Consensus
             response.Data = message.Serialize();
             response.Type = PacketType.TPT_CONS_MERGE_RESPONSE;
             networkPacketSwitch.AddToQueue(sender, response);
+            Print("merge request processed");
         }
 
         /// <summary>
@@ -330,6 +345,7 @@ namespace TNetD.Consensus
                 }
                 sendFetchRequest(packet.PublicKeySource, newTransactions);
             }
+            Print("merge response processed");
         }
 
         void networkPacketSwitch_VoteEvent(Network.NetworkPacket packet)

@@ -138,7 +138,7 @@ namespace TNetD
 
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 2; i++)
             {
                 AddNode(i);
             }
