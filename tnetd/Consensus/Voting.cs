@@ -21,6 +21,8 @@ namespace TNetD.Consensus
 
     class Voting
     {
+        public bool DebuggingMessages { get; set; }
+
         public bool Enabled { get; set; }
 
         private object VotingTransactionLock = new object();
@@ -72,15 +74,13 @@ namespace TNetD.Consensus
 
             Print("class Voting created");
         }
-
-
+        
         private void Print(String message)
         {
-            DisplayUtils.Display(" Node " + nodeConfig.NodeID + " | Voting: " + message);
+            if(DebuggingMessages)
+                DisplayUtils.Display(" Node " + nodeConfig.NodeID + " | Voting: " + message);
         }
-
-
-
+        
 
         void TimerVoting_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
