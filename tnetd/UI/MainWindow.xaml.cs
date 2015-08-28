@@ -25,6 +25,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TNetD.Address;
+using TNetD.Helpers;
 using TNetD.Ledgers;
 using TNetD.Network.Networking;
 using TNetD.Nodes;
@@ -42,14 +43,16 @@ namespace TNetD
     {
         ObservableCollection<TransactionContent> _tranxData = new ObservableCollection<TransactionContent>();
 
+        MessageViewModel viewModel = new MessageViewModel();
+
         List<Node> nodes = new List<Node>();
 
         List<Thread> runningNodes = new List<Thread>();
-
         
-
         public MainWindow()
         {
+            this.DataContext = viewModel;
+
             Common.Initialize();
 
             InitializeComponent();

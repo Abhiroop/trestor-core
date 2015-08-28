@@ -72,6 +72,8 @@ namespace TNetD.Consensus
             TimerVoting.Interval = 500;
             TimerVoting.Start();
 
+            DebuggingMessages = true;
+
             Print("class Voting created");
         }
         

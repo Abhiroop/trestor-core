@@ -76,8 +76,8 @@ namespace TNetD
         public static short VectorToInt16(byte[] data)
         {
             short result;
-            result = (short)data[0];
-            result |= (short)(((short)data[1]) << 8);
+            result = (short)(data[0] | (((uint)data[1]) << 8));
+            
             return result;
         }
 
