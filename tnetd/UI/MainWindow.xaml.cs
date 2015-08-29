@@ -51,7 +51,7 @@ namespace TNetD
         
         public MainWindow()
         {
-            this.DataContext = viewModel;
+            DataContext = viewModel;
 
             Common.Initialize();
 
@@ -60,14 +60,8 @@ namespace TNetD
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
 
             lv_TX.ItemsSource = _tranxData;
-
-            
+                        
             Title += " | " + Common.NetworkType.ToString();
-
-
-            //System.Timers.Timer tmr_UI = new System.Timers.Timer(100);
-            //tmr_UI.Elapsed += tmr_UI_Elapsed;
-            //tmr_UI.Start();
 
         }
 
@@ -138,20 +132,16 @@ namespace TNetD
             //AddNode(1);
         }
 
-        void DisplayUtils_DisplayText(string Text, Color color, DisplayType type)
+        void DisplayUtils_DisplayText ( DisplayMessageType displayMessage )
         {
-            if (type >= Constants.DebugLevel)
+            if (displayMessage.DisplayType >= Constants.DebugLevel)
             {
                 try
                 {
                     this.Dispatcher.Invoke(new Action(() =>
                     {
-                        if (textBlock_Log.Text.Length > Common.UI_TextBox_Max_Length)
-                        {
-                            textBlock_Log.Text = "";
-                        }
-
-                        textBlock_Log.Inlines.Add(new Run(Text + "\n") { Foreground = new SolidColorBrush(color) });
+                        viewModel.ProcessSkips();
+                        viewModel.LogMessages.Add(displayMessage);
                     }));
                 }
                 catch { }

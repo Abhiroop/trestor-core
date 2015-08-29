@@ -212,9 +212,8 @@
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Ledgers\Ledger.cs" />
     <Compile Include="Nodes\Node.cs" />
-    <Compile Include="Utils\Helpers\LogMessageType.cs" />
     <Compile Include="Utils\Helpers\IObjectGenerator.cs" />
-    <Compile Include="Utils\Helpers\ViewModel.cs" />
+    <Compile Include="Utils\Helpers\MessageViewModel.cs" />
     <Compile Include="Utils\Helpers\VirtualLists.cs" />
     <Compile Include="Utils\INIFile.cs" />
     <Compile Include="Network\Networking\PacketCodec.cs" />

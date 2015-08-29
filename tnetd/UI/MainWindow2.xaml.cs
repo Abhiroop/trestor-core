@@ -34,6 +34,7 @@ using TNetD.PersistentStore;
 using TNetD.Transactions;
 using TNetD.Tree;
 using TNetD.UI;
+using TNetD.Helpers;
 
 namespace TNetD
 {
@@ -44,11 +45,15 @@ namespace TNetD
     {
         object TimerLock = new object();
 
+        MessageViewModel viewModel = new MessageViewModel();
+
         List<Node> nodes = new List<Node>();
         Random rng = new Random();
-
+        
         public MainWindow2()
         {
+            DataContext = viewModel;
+
             Common.Initialize();
 
             InitializeComponent();
@@ -66,7 +71,7 @@ namespace TNetD
         {
             lock (TimerLock)
             {
-                String connString = TNetUtils.GetNodeConnectionInfoString(nodes);
+                string connString = TNetUtils.GetNodeConnectionInfoString(nodes);
 
                 try
                 {
@@ -110,31 +115,21 @@ namespace TNetD
 
         }
 
-        void DisplayUtils_DisplayText(string Text, Color color, DisplayType type)
+        void DisplayUtils_DisplayText(DisplayMessageType displayMessage)
         {
-            if (type >= Constants.DebugLevel)
+            if (displayMessage.DisplayType >= Constants.DebugLevel)
             {
                 try
                 {
                     this.Dispatcher.Invoke(new Action(() =>
                     {
-                        if (textBlock_Log.Text.Length > Common.UI_TextBox_Max_Length)
-                        {
-                            textBlock_Log.Text = "";
-                        }
-
-                        textBlock_Log.Inlines.Add(new Run(Text + "\n") { Foreground = new SolidColorBrush(color) });
+                        viewModel.ProcessSkips();
+                        viewModel.LogMessages.Add(displayMessage);
                     }));
                 }
                 catch { }
             }
         }
-
-
-
-
-
-
 
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
         {

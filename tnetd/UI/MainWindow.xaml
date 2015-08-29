@@ -8,7 +8,7 @@
         <local:StatusToColor x:Key="ColorConverter"/>
         <local:ByteArrayToString x:Key="ByteArrayToString"/>
         <local:HashToString x:Key="HashToString"/>
-
+        <local:DateTimeToTimeString x:Key="DateTimeToTimeString"/>
 
         <Style x:Key="DarkRoomListViewStyle" TargetType="{x:Type ListView}">
             <Setter Property="Template">
@@ -112,7 +112,7 @@
             <MenuItem Header="TOOLS">
                 <MenuItem Name="menu_CreateTransaction" Click="menu_CreateTransaction_Click" Header="Create Transaction"/>
                 <MenuItem Name="menu_CreateAccount" Click="menu_CreateAccount_Click"  Header="Create Account"/>
-                <MenuItem Name="menu_BannedNames" Click="menu_BannedNames_Click"  Header="Recreate Banned Name List"/>                
+                <MenuItem Name="menu_BannedNames" Click="menu_BannedNames_Click"  Header="Recreate Banned Name List"/>
             </MenuItem>
             <MenuItem Header="HELP">
                 <MenuItem Header="Topics"/>
@@ -135,18 +135,38 @@
                     </Grid.RowDefinitions>
                     <Label>Log:</Label>
                     <Label Grid.Column="2">Status:</Label>
-                    <ScrollViewer Grid.Row="1">
+
+                    <ListBox Grid.Row="1" ItemsSource="{Binding LogMessages}"  Background="#FF1E1E1E" Foreground="#FF8ACD3A" >
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Time, Converter= {StaticResource DateTimeToTimeString}}" 
+                                               Foreground="Plum" Grid.Column="0" />
+
+                                    <TextBlock Text="{Binding Text}"
+                                               Foreground="{Binding TextColor}" Grid.Column="1"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!--ScrollViewer Grid.Row="1">
                         <TextBlock x:Name="textBlock_Log" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" TextWrapping="Wrap" RenderOptions.BitmapScalingMode="LowQuality"/>
-                    </ScrollViewer>
+                    </-->
+
                     <ScrollViewer Grid.Row="1" Grid.Column="2">
                         <TextBlock x:Name="textBlock_Status" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" TextWrapping="Wrap" RenderOptions.BitmapScalingMode="LowQuality"/>
                     </ScrollViewer>
 
                     <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
-                    
+
                 </Grid>
             </TabItem>
-           
+
             <TabItem Header="Transactions">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -283,6 +303,38 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Canzone Popolare (Francia, 1500 ca.)" FontSize="14" FontWeight="Bold" Margin="5,0,5,1" Foreground="#FFA2D5FF"></TextBlock>
                                 <TextBlock Grid.Column="1" Text="8465 Trests" FontWeight="Bold" Margin="5,0,5,1" Foreground="#FFC0A2FF"/>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+
+            </TabItem>
+            <TabItem Header="History2">
+                <Grid Background="#FF1E1E1E" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="9*"/>
+                            <RowDefinition Height="7*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="600"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Canzone Popolare (Francia, 1500 ca.)" Grid.Column="1" Foreground="#FFA2D5FF"></TextBlock>
+                                <TextBlock Grid.Column="0" Text="8465 Trests" FontWeight="Bold"  Foreground="#FFC0A2FF"/>
                             </Grid>
                         </StackPanel>
                     </Grid>

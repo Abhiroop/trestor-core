@@ -26,6 +26,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TNetD.Address;
+using TNetD.Helpers;
 using TNetD.Ledgers;
 using TNetD.Network.Networking;
 using TNetD.Nodes;
@@ -42,11 +43,12 @@ namespace TNetD
     public partial class DebugWindow4 : Window
     {
         object TimerLock = new object();
-
+        MessageViewModel viewModel = new MessageViewModel();
         List<Node> nodes = new List<Node>();
 
         public DebugWindow4()
         {
+            DataContext = viewModel;
             Common.Initialize();
 
             InitializeComponent();
@@ -110,20 +112,16 @@ namespace TNetD
 
         }
 
-        void DisplayUtils_DisplayText(string Text, Color color, DisplayType type)
+        void DisplayUtils_DisplayText(DisplayMessageType displayMessage)
         {
-            if (type >= Constants.DebugLevel)
+            if (displayMessage.DisplayType >= Constants.DebugLevel)
             {
                 try
                 {
                     this.Dispatcher.Invoke(new Action(() =>
                     {
-                        if (textBlock_Log.Text.Length > Common.UI_TextBox_Max_Length)
-                        {
-                            textBlock_Log.Text = "";
-                        }
-
-                        textBlock_Log.Inlines.Add(new Run(Text + "\n") { Foreground = new SolidColorBrush(color) });
+                        viewModel.ProcessSkips();
+                        viewModel.LogMessages.Add(displayMessage);
                     }));
                 }
                 catch { }

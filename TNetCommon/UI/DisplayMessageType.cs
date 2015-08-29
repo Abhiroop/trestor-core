@@ -7,13 +7,14 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
 
-namespace TNetD.Helpers
+namespace TNetD
 {
-    class LogMessageType : INotifyPropertyChanged
+    public class DisplayMessageType : INotifyPropertyChanged
     {      
         string text = string.Empty;
-        Color textColor = Colors.Green;
-        DisplayType messageType = DisplayType.Info;
+        Brush textColor = Brushes.Green;
+        DisplayType displayType = DisplayType.Info;
+        DateTime time;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -28,14 +29,21 @@ namespace TNetD.Helpers
             }
         }
 
-        // The constructor is private to enforce the factory pattern. 
-        private LogMessageType()
+        public DisplayMessageType()
         {
-            text = string.Empty;
-            textColor = Colors.Green;
-            messageType = DisplayType.Info;
+            this.text = string.Empty;
+            this.textColor = Brushes.Green;
+            this.displayType = DisplayType.Info;
         }
-             
+
+        public DisplayMessageType(string text, Brush textColor, DisplayType displayType, DateTime time)
+        {
+            this.text = text;
+            this.textColor = textColor;
+            this.displayType = displayType;
+            this.time = time;
+        }
+
         public string Text
         {
             get
@@ -53,7 +61,24 @@ namespace TNetD.Helpers
             }
         }
 
-        public Color TextColor
+        public DateTime Time
+        {
+            get
+            {
+                return this.time;
+            }
+
+            set
+            {
+                if (value != this.time)
+                {
+                    this.time = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
+        public Brush TextColor
         {
             get
             {
@@ -70,18 +95,18 @@ namespace TNetD.Helpers
             }
         }
 
-        public DisplayType MessageType
+        public DisplayType DisplayType
         {
             get
             {
-                return this.messageType;
+                return this.displayType;
             }
 
             set
             {
-                if (value != this.messageType)
+                if (value != this.displayType)
                 {
-                    this.messageType = value;
+                    this.displayType = value;
                     NotifyPropertyChanged();
                 }
             }
