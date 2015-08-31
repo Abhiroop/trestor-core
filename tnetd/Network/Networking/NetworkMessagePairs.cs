@@ -20,7 +20,7 @@ namespace TNetD.Network.Networking
         public NetworkMessagePairs()
         {
             Pairs.Add(PacketType.TPT_CONS_MERGE_REQUEST, PacketType.TPT_CONS_MERGE_RESPONSE);
-            Pairs.Add(PacketType.TPT_CONS_TX_FETCH_REQUEST, PacketType.TPT_CONS_TX_FETCH_RESPONSE);
+            Pairs.Add(PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST, PacketType.TPT_CONS_MERGE_TX_FETCH_RESPONSE);
             Pairs.Add(PacketType.TPT_CONS_BALLOT_REQUEST, PacketType.TPT_CONS_BALLOT_RESPONSE);
             Pairs.Add(PacketType.TPT_CONS_BALLOT_AGREE_REQUEST, PacketType.TPT_CONS_BALLOT_AGREE_RESPONSE);
 

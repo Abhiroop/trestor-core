@@ -82,9 +82,10 @@ namespace TNetD.Nodes
 
             switch (packet.Type)
             {
-
                 case PacketType.TPT_CONS_MERGE_REQUEST:
                 case PacketType.TPT_CONS_MERGE_RESPONSE:
+                case PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST:
+                case PacketType.TPT_CONS_MERGE_TX_FETCH_RESPONSE:
 
                     if (VoteMergeEvent != null) VoteMergeEvent(packet);
 

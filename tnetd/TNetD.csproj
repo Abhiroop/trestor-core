@@ -133,6 +133,7 @@
     <Compile Include="Consensus\TransactionChecker.cs" />
     <Compile Include="Consensus\VoteType.cs" />
     <Compile Include="Consensus\Voting.cs" />
+    <Compile Include="Consensus\VotingRequests.cs" />
     <Compile Include="Ledgers\GenesisRawData.cs" />
     <Compile Include="Network\FakeNetwork.cs" />
     <Compile Include="Network\Networking\ConnectionProperties.cs" />
