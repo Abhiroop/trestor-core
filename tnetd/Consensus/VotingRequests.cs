@@ -199,6 +199,53 @@ namespace TNetD.Consensus
         }
 
 
+        void SendBallotRequests()
+        {
+            LedgerCloseData lcd;
+            bool ok = nodeState.PersistentCloseHistory.GetLastRowData(out lcd);
+
+            // TODO: OF okay = false make sure that the ledger is synced first before voting.
+                                
+            foreach (var node in nodeState.ConnectedValidators)
+            {
+                // Create BallotRequestMessage
+                BallotRequestMessage brp = new BallotRequestMessage();
+                brp.LedgerCloseSequence = lcd.SequenceNumber;
+
+                // Create NetworkPacket and send
+                NetworkPacket request = new NetworkPacket();
+                request.PublicKeySource = nodeConfig.PublicKey;
+                request.Token = TNetUtils.GenerateNewToken();
+                request.Data = brp.Serialize();
+                request.Type = PacketType.TPT_CONS_BALLOT_REQUEST;
+
+                networkPacketSwitch.AddToQueue(node.Key, request);
+            }
+
+            Print("Ballot requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
+        }
+        
+
+        void ProcessBallotRequest(NetworkPacket packet)
+        {
+            Hash sender = packet.PublicKeySource;
+            Hash token = packet.Token;
+
+            //add all transaction IDs from CurrentTransactions
+            MergeResponseMsg message = new MergeResponseMsg();
+            foreach (KeyValuePair<Hash, TransactionContent> transaction in CurrentTransactions)
+            {
+                message.transactions.Add(transaction.Key);
+            }
+
+            NetworkPacket response = new NetworkPacket();
+            response.Token = token;
+            response.PublicKeySource = nodeConfig.PublicKey;
+            response.Data = message.Serialize();
+            response.Type = PacketType.TPT_CONS_MERGE_RESPONSE;
+            networkPacketSwitch.AddToQueue(sender, response);
+            Print("merge request processed");
+        }
 
     }
 }

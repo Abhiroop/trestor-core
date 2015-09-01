@@ -108,6 +108,9 @@ namespace TNetD.Consensus
              }
          }*/
 
+        bool isBallotValid = false;
+
+
         #region State-Machine
 
         private void VotingEvent()
@@ -119,6 +122,7 @@ namespace TNetD.Consensus
                     switch (CurrentConsensusState)
                     {
                         case ConsensusStates.Collect:
+                            isBallotValid = false;
                             ProcessPendingTransactions();
                             CurrentConsensusState = ConsensusStates.Merge;
                             break;
@@ -151,13 +155,18 @@ namespace TNetD.Consensus
         
         void HandleMerge()
         {
-            MergeStateCounter++;
-            SendMergeRequests();
+            if (MergeStateCounter < 1) // TWEAK-POINT: Trim value.
+            {
+                SendMergeRequests();
+            }
 
-            // after 5 rounds: assemble ballot
+            MergeStateCounter++;
+            
+            // After 5 rounds: assemble ballot
             if (MergeStateCounter >= 5)
             {
                 ballot = transactionChecker.CreateBallot(CurrentTransactions);
+                isBallotValid = true; // Yayy.
                 CurrentConsensusState = ConsensusStates.Vote;
                 MergeStateCounter = 0;
             }
@@ -165,14 +174,27 @@ namespace TNetD.Consensus
         
         void HandleVoting()
         {
+            if (VotingStateCounter < 1) // TWEAK-POINT: Trim value.
+            {
+                SendBallotRequests();
+            }
+
             VotingStateCounter++;
-            
+
             // We will perform dummy voting cycles even when there are no transactions. those will
             // have a different counter, called ConsensusCount, the default is LedgerClose, the ledger close one 
-            // is the one associated
+            // is the one associated.
+
+            // Request Ballots.            
+
+            if (VotingStateCounter >= 5)
+            {
+
+                VotingStateCounter = 0;
+                CurrentConsensusState = ConsensusStates.Confirm;
+            }
 
 
-            CurrentConsensusState = ConsensusStates.Confirm;
         }
 
         void HandleConfirmation()
@@ -184,7 +206,7 @@ namespace TNetD.Consensus
 
         void HandleApply()
         {
-
+            
 
             CurrentConsensusState = ConsensusStates.Collect;
         }
@@ -213,7 +235,7 @@ namespace TNetD.Consensus
             }
         }
 
-        void networkPacketSwitch_VoteEvent(Network.NetworkPacket packet)
+        void networkPacketSwitch_VoteEvent(NetworkPacket packet)
         {
             switch (packet.Type)
             {
@@ -221,15 +243,18 @@ namespace TNetD.Consensus
                     break;
 
                 case PacketType.TPT_CONS_BALLOT_REQUEST:
+                    ProcessBallotRequest(packet);
                     break;
 
                 case PacketType.TPT_CONS_BALLOT_RESPONSE:
+
                     break;
 
-                case PacketType.TPT_CONS_BALLOT_AGREE_REQUEST:
+                case PacketType.TPT_CONS_VOTE_AGREE_REQUEST:
+
                     break;
 
-                case PacketType.TPT_CONS_BALLOT_AGREE_RESPONSE:
+                case PacketType.TPT_CONS_VOTE_AGREE_RESPONSE:
                     break;
             }
         }
