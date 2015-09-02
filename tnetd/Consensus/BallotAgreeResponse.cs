@@ -2,6 +2,7 @@
 //  @Author: Arpan Jati
 //  @Date: June 2015 
 
+using Chaos.NaCl;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,6 +86,13 @@ namespace TNetD.Consensus
         public void UpdateSignature(byte[] signature)
         {
             this.Signature = new Hash(signature);
+        }
+
+        public bool VerifySignature(Hash publicKey)
+        {
+            if (publicKey.Hex.Length != 32) return false;
+
+            return Ed25519.Verify(Signature.Hex, GetSignatureData(), publicKey.Hex);
         }
 
     }

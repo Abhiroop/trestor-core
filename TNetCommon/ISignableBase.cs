@@ -1,6 +1,7 @@
 ﻿
+
 // @Author : Arpan Jati
-// @Date: June 2015
+// @Date: June 2015 | Sept 2015
 
 using System;
 using System.Collections.Generic;
@@ -11,8 +12,11 @@ using System.Threading.Tasks;
 namespace TNetD
 {
     public interface ISignableBase
-    {
+    { 
         byte [] GetSignatureData();
+
         void UpdateSignature(byte[] signature);
+
+        bool VerifySignature(Hash PublicKey);
     }
 }

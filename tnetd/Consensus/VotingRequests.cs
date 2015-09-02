@@ -124,10 +124,9 @@ namespace TNetD.Consensus
                     }
                 }
             }
-            Print("fetch response processed");
+            Print("Fetch Response Processed");
         }
-
-
+        
         /// <summary>
         /// request a list of all known transactions from each connected validator
         /// note that message has no content
@@ -205,7 +204,7 @@ namespace TNetD.Consensus
             bool ok = nodeState.PersistentCloseHistory.GetLastRowData(out lcd);
 
             // TODO: OF okay = false make sure that the ledger is synced first before voting.
-                                
+
             foreach (var node in nodeState.ConnectedValidators)
             {
                 // Create BallotRequestMessage
@@ -224,27 +223,41 @@ namespace TNetD.Consensus
 
             Print("Ballot requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
         }
-        
+
 
         void ProcessBallotRequest(NetworkPacket packet)
         {
+            BallotResponseMessage brm = new BallotResponseMessage();
+
+            if (isBallotValid)
+            {
+                brm.ballot = ballot;
+                brm.goodBallot = true;
+            }
+
             Hash sender = packet.PublicKeySource;
             Hash token = packet.Token;
-
-            //add all transaction IDs from CurrentTransactions
-            MergeResponseMsg message = new MergeResponseMsg();
-            foreach (KeyValuePair<Hash, TransactionContent> transaction in CurrentTransactions)
-            {
-                message.transactions.Add(transaction.Key);
-            }
 
             NetworkPacket response = new NetworkPacket();
             response.Token = token;
             response.PublicKeySource = nodeConfig.PublicKey;
-            response.Data = message.Serialize();
-            response.Type = PacketType.TPT_CONS_MERGE_RESPONSE;
+            response.Data = brm.Serialize();
+            response.Type = PacketType.TPT_CONS_BALLOT_RESPONSE;
             networkPacketSwitch.AddToQueue(sender, response);
-            Print("merge request processed");
+
+            Print("ProcessBallotRequest Replied to " + sender);
+        }
+
+        void ProcessBallotResponse(NetworkPacket packet)
+        {
+            if (networkPacketSwitch.VerifyPendingPacket(packet))
+            {
+                BallotResponseMessage message = new BallotResponseMessage();
+                message.Deserialize(packet.Data);
+                               
+            }
+
+            Print("Ballot Response Processed");
         }
 
     }

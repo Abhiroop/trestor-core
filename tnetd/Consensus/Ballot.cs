@@ -1,9 +1,10 @@
 ﻿
 //  @Author: Arpan Jati | Stephan Verbuecheln
-//  @Date: June 2015 
+//  @Date: June 2015 | Sept 2015
 
 using TNetD.Protocol;
 using System.Collections.Generic;
+using Chaos.NaCl;
 
 namespace TNetD.Consensus
 {
@@ -28,8 +29,13 @@ namespace TNetD.Consensus
         public Ballot(long ledgerCloseSequence)
         {
             Init();
-
             LedgerCloseSequence = ledgerCloseSequence;
+        }
+
+        public Ballot()
+        {
+            Init();
+            LedgerCloseSequence = 0;
         }
 
         public bool Add(Hash TransactionID)
@@ -54,17 +60,16 @@ namespace TNetD.Consensus
         public byte[] Serialize()
         {
             List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
-
-            PDTs.Add(ProtocolPackager.Pack(LedgerCloseSequence, 0));
-
+            
             foreach (Hash txId in TransactionIds)
             {
-                PDTs.Add(ProtocolPackager.Pack(txId, 1));
+                PDTs.Add(ProtocolPackager.Pack(txId, 0));
             }
 
-            PDTs.Add(ProtocolPackager.Pack(PublicKey, 2));
-            PDTs.Add(ProtocolPackager.Pack(Signature, 3));
-            PDTs.Add(ProtocolPackager.PackVarint(Timestamp, 4));
+            PDTs.Add(ProtocolPackager.Pack(LedgerCloseSequence, 1));
+            PDTs.Add(ProtocolPackager.PackVarint(Timestamp, 2));
+            PDTs.Add(ProtocolPackager.Pack(PublicKey, 3));
+            PDTs.Add(ProtocolPackager.Pack(Signature, 4));            
 
             return ProtocolPackager.PackRaw(PDTs);
         }
@@ -83,27 +88,27 @@ namespace TNetD.Consensus
                 switch (PDT.NameType)
                 {
                     case 0:
-                        ProtocolPackager.UnpackVarint(PDT, 0, ref LedgerCloseSequence);
-                        break;
-
-                    case 1:
                         Hash txID;
-                        if (ProtocolPackager.UnpackHash(PDT, 1, out txID))
+                        if (ProtocolPackager.UnpackHash(PDT, 0, out txID))
                         {
                             TransactionIds.Add(txID);
                         }
                         break;
 
+                    case 1:
+                        ProtocolPackager.UnpackVarint(PDT, 1, ref LedgerCloseSequence);
+                        break;
+
                     case 2:
-                        ProtocolPackager.UnpackHash(PDT, 2, out PublicKey);
+                        ProtocolPackager.UnpackVarint(PDT, 2, ref Timestamp);
                         break;
 
                     case 3:
-                        ProtocolPackager.UnpackHash(PDT, 3, out Signature);
-                        break;
+                        ProtocolPackager.UnpackHash(PDT, 3, out PublicKey);
+                        break;                 
 
                     case 4:
-                        ProtocolPackager.UnpackVarint(PDT, 4, ref Timestamp);
+                        ProtocolPackager.UnpackHash(PDT, 4, out Signature);
                         break;
                 }
             }
@@ -112,12 +117,16 @@ namespace TNetD.Consensus
         public byte[] GetSignatureData()
         {
             List<byte> data = new List<byte>();
+
             foreach (Hash transaction in TransactionIds)
             {
                 data.AddRange(transaction.Hex);
             }
-            data.AddRange(PublicKey.Hex);
+
+            data.AddRange(Conversions.Int64ToVector(LedgerCloseSequence));
             data.AddRange(Conversions.Int64ToVector(Timestamp));
+            data.AddRange(PublicKey.Hex);
+
             return data.ToArray();
         }
 
@@ -125,6 +134,14 @@ namespace TNetD.Consensus
         {
             this.Signature = new Hash(signature);
         }
+
+        public bool VerifySignature(Hash publicKey)
+        {
+            if (publicKey.Hex.Length != 32) return false;
+
+            return Ed25519.Verify(Signature.Hex, GetSignatureData(), publicKey.Hex);
+        }
+
 
     }
 }

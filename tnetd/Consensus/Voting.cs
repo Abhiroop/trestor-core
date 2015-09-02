@@ -165,7 +165,7 @@ namespace TNetD.Consensus
             // LCL + 1
             long ledgerCloseSequence = nodeState.Ledger.LedgerCloseData.SequenceNumber + 1;
 
-            // After 5 rounds: assemble ballot
+            // After 5 rounds: Assemble Ballot
             if (MergeStateCounter >= 5)
             {
                 ballot = transactionChecker.CreateBallot(CurrentTransactions, ledgerCloseSequence);
@@ -188,13 +188,13 @@ namespace TNetD.Consensus
             // have a different counter, called ConsensusCount, the default is LedgerClose, the ledger close one 
             // is the one associated.
 
-            // Request Ballots.            
+            // Request Ballots.
 
             if (VotingStateCounter >= 5)
             {
-
                 VotingStateCounter = 0;
                 CurrentConsensusState = ConsensusStates.Confirm;
+
             }
 
 
