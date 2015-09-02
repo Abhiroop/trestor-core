@@ -151,6 +151,7 @@
     <Compile Include="Nodes\NodeSocketData.cs" />
     <Compile Include="Nodes\TransactionHandler.cs" />
     <Compile Include="Nodes\LedgerSync.cs" />
+    <Compile Include="PersistentStore\IPersistentCloseHistory.cs" />
     <Compile Include="SyncFramework\IndexedVector.cs" />
     <Compile Include="SyncFramework\Packets\LedgerSyncRequest.cs" />
     <Compile Include="SyncFramework\Packets\TransactionContentSet.cs" />

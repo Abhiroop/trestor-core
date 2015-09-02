@@ -84,13 +84,13 @@ namespace TNetD.Consensus
 
             Print("class Voting created");
         }
-        
+
         private void Print(string message)
         {
-            if(DebuggingMessages)
+            if (DebuggingMessages)
                 DisplayUtils.Display(" Node " + nodeConfig.NodeID + " | Voting: " + message);
         }
-        
+
         void TimerVoting_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             VotingEvent();
@@ -152,7 +152,7 @@ namespace TNetD.Consensus
                 DisplayUtils.Display("TimerCallback_Voting", ex, true);
             }
         }
-        
+
         void HandleMerge()
         {
             if (MergeStateCounter < 1) // TWEAK-POINT: Trim value.
@@ -161,17 +161,20 @@ namespace TNetD.Consensus
             }
 
             MergeStateCounter++;
-            
+
+            // LCL + 1
+            long ledgerCloseSequence = nodeState.Ledger.LedgerCloseData.SequenceNumber + 1;
+
             // After 5 rounds: assemble ballot
             if (MergeStateCounter >= 5)
             {
-                ballot = transactionChecker.CreateBallot(CurrentTransactions);
+                ballot = transactionChecker.CreateBallot(CurrentTransactions, ledgerCloseSequence);
                 isBallotValid = true; // Yayy.
                 CurrentConsensusState = ConsensusStates.Vote;
                 MergeStateCounter = 0;
             }
         }
-        
+
         void HandleVoting()
         {
             if (VotingStateCounter < 1) // TWEAK-POINT: Trim value.
@@ -206,13 +209,13 @@ namespace TNetD.Consensus
 
         void HandleApply()
         {
-            
+
 
             CurrentConsensusState = ConsensusStates.Collect;
         }
 
         #endregion
-        
+
 
         #region Packet Handling
 

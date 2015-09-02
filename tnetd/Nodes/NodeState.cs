@@ -26,10 +26,11 @@ namespace TNetD.Nodes
     {
         public Dictionary<Hash, DifficultyTimeData> WorkProofMap = new Dictionary<Hash, DifficultyTimeData>();
 
-        public Ledger Ledger;
+        public Ledger Ledger = default(Ledger);
 
         public IPersistentAccountStore PersistentAccountStore;
         public IPersistentTransactionStore PersistentTransactionStore;
+
         public SQLiteBannedNames PersistentBannedNameStore;
         public SQLiteCloseHistory PersistentCloseHistory;
 
@@ -63,7 +64,7 @@ namespace TNetD.Nodes
             PersistentBannedNameStore = new SQLiteBannedNames(nodeConfig);
             PersistentCloseHistory = new SQLiteCloseHistory(nodeConfig);
 
-            Ledger = new Ledger(PersistentAccountStore);
+            Ledger = new Ledger(PersistentAccountStore, PersistentCloseHistory);
 
             TransactionStateManager = new TransactionStateManager();
             IncomingTransactionMap = new IncomingTransactionMap(this, nodeConfig, TransactionStateManager);

@@ -20,7 +20,7 @@ namespace TNetD.PersistentStore
     /// <summary>
     /// Stores Ledger Close History in an SQLite database.
     /// </summary>
-    class SQLiteCloseHistory
+    class SQLiteCloseHistory : IPersistentCloseHistory
     {
         SQLiteConnection sqliteConnection = default(SQLiteConnection);
 
@@ -288,8 +288,7 @@ namespace TNetD.PersistentStore
 
             return new Tuple<DBResponse, long>(response, removed);
         }
-
-
+        
         public bool GetLastRowData(out LedgerCloseData lastCloseData)
         {
             bool _found = false;
