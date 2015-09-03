@@ -56,9 +56,9 @@ namespace TNetD.Consensus
 
     partial class Voting
     {
-        int MergeStateCounter = 0;
-        int VotingStateCounter = 0;
-        int ConfirmationStateCounter = 0;
+        int mergeStateCounter = 0;
+        int votingStateCounter = 0;
+        int confirmationStateCounter = 0;
 
         public bool DebuggingMessages { get; set; }
 
@@ -68,6 +68,8 @@ namespace TNetD.Consensus
         private object ConsensusLock = new object();
         
         private int previousRoundVoters = 0;
+
+        private long ledgerCloseSequence = 0;
 
         public ConsensusStates CurrentConsensusState { get; private set; }
 
@@ -79,15 +81,18 @@ namespace TNetD.Consensus
         /// ID and content of current transactions
         /// </summary>
         ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions;
-        Ballot ballot;
+        Ballot ballot, finalBallot;
         TransactionChecker transactionChecker = default(TransactionChecker);
 
+        /// <summary>
+        /// A Map to handle all the incoming votes.
+        /// </summary>
         VoteMap voteMap;
-
+        
         /// <summary>
         /// Set of nodes, who sent a transaction ID
-        /// key: Transaction ID
-        /// value: Set of nodes
+        /// Key: Transaction ID
+        /// Value: Set of nodes
         /// </summary>
         ConcurrentDictionary<Hash, HashSet<Hash>> propagationMap;
         
@@ -146,7 +151,8 @@ namespace TNetD.Consensus
          }*/
 
         bool isBallotValid = false;
-
+        bool isFinalBallotValid = false;
+        bool isAcceptMapValid = false;
 
         #region State-Machine
 
@@ -160,6 +166,12 @@ namespace TNetD.Consensus
                     {
                         case ConsensusStates.Collect:
                             isBallotValid = false;
+                            isFinalBallotValid = false;
+                            isAcceptMapValid = false;
+
+                            // LCS = LCL + 1     
+                            ledgerCloseSequence = nodeState.Ledger.LedgerCloseData.SequenceNumber + 1;
+
                             ProcessPendingTransactions();
                             CurrentConsensusState = ConsensusStates.Merge;
                             break;
@@ -169,6 +181,7 @@ namespace TNetD.Consensus
                             break;
 
                         case ConsensusStates.Vote:
+                            
                             HandleVoting();
                             break;
 
@@ -192,46 +205,45 @@ namespace TNetD.Consensus
 
         void HandleMerge()
         {
-            if (MergeStateCounter < 1) // TWEAK-POINT: Trim value.
+            if (mergeStateCounter < 1) // TWEAK-POINT: Trim value.
             {
                 SendMergeRequests();
             }
 
-            MergeStateCounter++;
+            mergeStateCounter++;
             
             // After 5 rounds: Assemble Ballot
-            if (MergeStateCounter >= 5)
+            if (mergeStateCounter >= 5)
             {
                 CreateBallot();
 
                 isBallotValid = true; // Yayy.
                 voteMap.Reset();
                 CurrentConsensusState = ConsensusStates.Vote;
-                MergeStateCounter = 0;
+                mergeStateCounter = 0;
             }
         }
 
         private void CreateBallot()
-        {
-            // LCL + 1
-            long ledgerCloseSequence = nodeState.Ledger.LedgerCloseData.SequenceNumber + 1;
+        {       
             ballot = transactionChecker.CreateBallot(CurrentTransactions, ledgerCloseSequence);
+            ballot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(ballot.GetSignatureData()));
         }
 
         void HandleVoting()
         {
-            if (VotingStateCounter < 6) // TWEAK-POINT: Trim value.
+            if (votingStateCounter < 8) // TWEAK-POINT: Trim value.
             {
-                if (VotingStateCounter % 2 == 0)
+                if (votingStateCounter % 2 == 0)
                 {
                     SendBallotRequests();
                 }
                 else
                 {
-                    HashSet<Hash> missingTransactions;
+                    Dictionary<Hash, HashSet<Hash>> missingTransactions;
                     voteMap.GetMissingTransactions(ballot, out missingTransactions);
 
-                    sendFetchRequest()
+                    sendFetchRequests(missingTransactions);
                 }
             }
             else
@@ -240,7 +252,7 @@ namespace TNetD.Consensus
 
             }
 
-            VotingStateCounter++;
+            votingStateCounter++;
 
             // We will perform dummy voting cycles even when there are no transactions. those will
             // have a different counter, called ConsensusCount, the default is LedgerClose, the ledger close one 
@@ -248,11 +260,20 @@ namespace TNetD.Consensus
 
             // Request Ballots
 
-            if (VotingStateCounter >= 6)
+            if (votingStateCounter >= 8)
             {
-                VotingStateCounter = 0;
-                CurrentConsensusState = ConsensusStates.Confirm;
+                votingStateCounter = 0;
+                
+                finalBallot = new Ballot(ledgerCloseSequence);
+                finalBallot.PublicKey = nodeConfig.PublicKey;
+                finalBallot.TransactionIds = voteMap.FilterTransactionsByVotes(ballot, Constants.CONS_FINAL_VOTING_THRESHOLD_PERC);
+                finalBallot.Timestamp = nodeState.NetworkTime;
+                
+                finalBallot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(finalBallot.GetSignatureData()));
 
+                isFinalBallotValid = true; // TODO: CRITICAL THINK THINK, TESTS !!                
+
+                CurrentConsensusState = ConsensusStates.Confirm;
             }
 
 
@@ -260,9 +281,23 @@ namespace TNetD.Consensus
 
         void HandleConfirmation()
         {
-            ConfirmationStateCounter++;
+            if(confirmationStateCounter <= 2)
+            {
+                if(isFinalBallotValid)
+                {
+                    
+                }
 
-            CurrentConsensusState = ConsensusStates.Apply;
+            }
+
+            confirmationStateCounter++;
+
+            if(confirmationStateCounter >= 8)
+            {
+
+                CurrentConsensusState = ConsensusStates.Apply; // Verify Confirmation
+            }
+
         }
 
         void HandleApply()

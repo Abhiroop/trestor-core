@@ -1,8 +1,10 @@
-﻿using System;
+﻿//
+//  @Author: Arpan Jati
+//  @Date: 4th September 2015 
+//
+
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TNetD.Consensus
 {
@@ -49,55 +51,34 @@ namespace TNetD.Consensus
 
             int votersCount = map.Count;
 
-            if (votersCount < Common.VOTE_MIN_VOTERS)
+            if (votersCount < Constants.VOTE_MIN_VOTERS)
             {
                 DisplayUtils.Display("Insufficient number of Voters :" + votersCount, DisplayType.ImportantInfo);
             }
             else
             {
-                // Assemble the current transaction set, from the votes.
-
-                // Key is TxID, Value id the list of PK's
-                Dictionary<Hash, HashSet<Hash>> txSet = new Dictionary<Hash, HashSet<Hash>>();
-
-                foreach (var ballotKVP in map)
-                {
-                    foreach (var txid in ballotKVP.Value.TransactionIds)
-                    {
-                        if (txSet.ContainsKey(txid))
-                        {
-                            txSet[txid].Add(ballotKVP.Key);
-                        }
-                        else
-                        {
-                            HashSet<Hash> pkList = new HashSet<Hash>();
-                            pkList.Add(ballotKVP.Key);
-
-                            txSet.Add(txid, pkList);
-                        }
-                    }
-                }
+                Dictionary<Hash, HashSet<Hash>> voteSet = AssembleVotes();
 
                 // Now that the transaction set is built, make sure to check if we have all the transactions,
                 // If yes, great, else fetch transactions with more than 50 percent of nodes.
 
                 // CRITICAL: ADD SUPPORT FOR -ve votes.
 
-                foreach(var tx in txSet)
-                {                    
-                    if(!myBallot.TransactionIds.Contains(tx.Key))
+                foreach (var vote in voteSet)
+                {
+                    if (!myBallot.TransactionIds.Contains(vote.Key))
                     {
                         // Check percentage
 
                         // Number of +ve Voters
-                        float perc = (tx.Value.Count * 100.0F) / votersCount;
+                        float perc = (vote.Value.Count * 100.0F) / votersCount;
 
-                        if(perc >= Common.VOTE_VOTE_STAGE_FETCH_THRESHOLD_PERC)
+                        if (perc >= Constants.CONS_VOTE_STAGE_FETCH_THRESHOLD_PERC)
                         {
                             // Fetch the transcation and update ballot.
 
-                            Hash txID = tx.Key;
-                            Hash pk = tx.Value.ElementAt(0);
+                            Hash txID = vote.Key;
+                            Hash pk = vote.Value.ElementAt(0);
 
                             if (missingTransactions.ContainsKey(pk))
                             {
@@ -109,11 +90,87 @@ namespace TNetD.Consensus
                                 txids.Add(txID);
 
                                 missingTransactions.Add(pk, txids);
-                            }                            
+                            }
                         }
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Assemble the current transaction set, from the votes.
+        /// Key: TxID, | Values: Voter PublicKeys
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<Hash, HashSet<Hash>> AssembleVotes()
+        {
+            // Key is TxID, Value id the list of PK's
+            Dictionary<Hash, HashSet<Hash>> voteSet = new Dictionary<Hash, HashSet<Hash>>();
+
+            foreach (var ballotKVP in map)
+            {
+                foreach (var txid in ballotKVP.Value.TransactionIds)
+                {
+                    if (voteSet.ContainsKey(txid))
+                    {
+                        voteSet[txid].Add(ballotKVP.Key);
+                    }
+                    else
+                    {
+                        HashSet<Hash> pkList = new HashSet<Hash>();
+                        pkList.Add(ballotKVP.Key);
+
+                        voteSet.Add(txid, pkList);
+                    }
+                }
+            }
+
+            return voteSet;
+        }
+
+        /// <summary>
+        /// Used to create the final Ballot.
+        /// </summary>
+        /// <param name="myBallot"></param>
+        /// <param name="Percentage"></param>
+        /// <param name="transactionIDs"></param>
+        public SortedSet<Hash> FilterTransactionsByVotes(Ballot myBallot, float percentage)
+        {
+            SortedSet<Hash> transactionIDs = new SortedSet<Hash>();
+
+            int votersCount = map.Count;
+
+            if (votersCount < Constants.VOTE_MIN_VOTERS)
+            {
+                DisplayUtils.Display("Insufficient number of Voters :" + votersCount, DisplayType.ImportantInfo);
+            }
+            else
+            {
+                Dictionary<Hash, HashSet<Hash>> voteSet = AssembleVotes();
+                       
+                // CRITICAL: ADD SUPPORT FOR -ve votes.
+
+                foreach (var vote in voteSet)
+                {
+                    if (myBallot.TransactionIds.Contains(vote.Key))
+                    {
+                        // Check percentage
+
+                        // Number of +ve Voters
+                        float perc = (vote.Value.Count * 100.0F) / votersCount;
+
+                        if (perc >= percentage)
+                        {
+                            // Fetch the transcation and update ballot.
+
+                            Hash txID = vote.Key;
+                            transactionIDs.Add(txID);
+                        }
+                    }
+                }
+            }
+
+            return transactionIDs;
         }
 
         public void Reset()

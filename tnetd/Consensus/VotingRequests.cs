@@ -11,7 +11,6 @@ namespace TNetD.Consensus
 {
     partial class Voting
     {
-
         public void ProcessPendingTransactions()
         {
             lock (VotingTransactionLock)
@@ -62,16 +61,16 @@ namespace TNetD.Consensus
             packet.PublicKeySource = nodeConfig.PublicKey;
             packet.Type = PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST;
             networkPacketSwitch.AddToQueue(node, packet);
-            Print("fetch request sent");
+            Print("Fetch Request Sent to " + node);
         }
-        
+
         /// <summary>
         /// The key of the dictionary is the PK of the destination, and the value is the list of associated txID's.
         /// </summary>
         /// <param name="requests"></param>
-        void sendFetchRequests(Dictionary<Hash,HashSet<Hash>> requests)
+        void sendFetchRequests(Dictionary<Hash, HashSet<Hash>> requests)
         {
-            foreach(var request in requests)
+            foreach (var request in requests)
             {
                 sendFetchRequests(request.Key, request.Value);
             }
@@ -99,7 +98,7 @@ namespace TNetD.Consensus
             rpacket.PublicKeySource = nodeConfig.PublicKey;
             rpacket.Type = PacketType.TPT_CONS_MERGE_TX_FETCH_RESPONSE;
             networkPacketSwitch.AddToQueue(packet.PublicKeySource, rpacket);
-            Print("fetch request processed");
+            Print("Fetch Request From " + packet.PublicKeySource + " Processed");
         }
 
         /// <summary>
@@ -147,9 +146,9 @@ namespace TNetD.Consensus
                 CreateBallot();
             }
 
-            Print("Fetch Response Processed");
+            Print("Fetch Response From " + packet.PublicKeySource + " Processed");
         }
-        
+
         /// <summary>
         /// request a list of all known transactions from each connected validator
         /// note that message has no content
@@ -165,7 +164,7 @@ namespace TNetD.Consensus
                 request.Type = PacketType.TPT_CONS_MERGE_REQUEST;
                 networkPacketSwitch.AddToQueue(node.Key, request);
             }
-            Print("merge requests sent");
+            Print("Merge Requests Sent to " + nodeState.ConnectedValidators.Count + " Validators");
         }
 
         /// <summary>
@@ -190,7 +189,7 @@ namespace TNetD.Consensus
             response.Data = message.Serialize();
             response.Type = PacketType.TPT_CONS_MERGE_RESPONSE;
             networkPacketSwitch.AddToQueue(sender, response);
-            Print("merge request processed");
+            Print("Merge Request from " + packet.PublicKeySource + " Processed");
         }
 
         /// <summary>
@@ -218,7 +217,7 @@ namespace TNetD.Consensus
 
                 sendFetchRequests(packet.PublicKeySource, newTransactions);
             }
-            Print("merge response processed");
+            Print("Merge Response from " + packet.PublicKeySource + " Processed");
         }
 
 
@@ -276,7 +275,7 @@ namespace TNetD.Consensus
         {
             if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
-                if(CurrentConsensusState == ConsensusStates.Vote)
+                if (CurrentConsensusState == ConsensusStates.Vote)
                 {
                     BallotResponseMessage message = new BallotResponseMessage();
                     message.Deserialize(packet.Data);
@@ -284,7 +283,7 @@ namespace TNetD.Consensus
                     if (message.goodBallot)
                     {
                         // We should be voting for the next ballot.
-                        if (message.ballot.LedgerCloseSequence + 1 == nodeState.Ledger.LedgerCloseData.SequenceNumber)
+                        if (message.ballot.LedgerCloseSequence == ledgerCloseSequence)
                         {
                             // Sender and ballot keys must be same
                             if (message.ballot.PublicKey == packet.PublicKeySource)
@@ -301,7 +300,7 @@ namespace TNetD.Consensus
                 }
             }
 
-            Print("Ballot Response Processed");
+            Print("Ballot Response from " + packet.PublicKeySource + " Processed");
         }
 
     }

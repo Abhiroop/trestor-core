@@ -53,8 +53,26 @@ namespace TNetD
         public static readonly int SIM_REFRESH_MS = 50;
         public static readonly int SIM_REFRESH_MS_SIM = 50;
 
-        public static readonly int CONS_TRUSTED_VALIDATOR_THRESHOLD_PERC = 50;
-        public static readonly int CONS_VOTING_ACCEPTANCE_THRESHOLD_PERC = 75;
+        // VOTING CONSTANTS
+
+        public static readonly int VOTE_MIN_VOTERS = 5;
+
+        /// <summary>
+        /// 50%. If a transaction is voted for by more than this percentage of voters,
+        /// but, we dont have it, fetch it.
+        /// This should be a rare case and the previous merge stage should have distributed the
+        /// transactions properly.
+        /// </summary>
+        public static readonly int CONS_VOTE_STAGE_FETCH_THRESHOLD_PERC = 50;
+
+        /// <summary>
+        /// 80%. This is the percentage of voters, who should agree to the set to be accepted in the ledger.
+        /// </summary>
+        public static readonly int CONS_FINAL_VOTING_THRESHOLD_PERC = 80;
+
+        /// <summary>
+        /// ////////////////////////////////////////////////
+        /// </summary>
 
         public static readonly int SYNC_LEAF_COUNT_THRESHOLD = 200;
 

@@ -5,6 +5,8 @@
 using TNetD.Protocol;
 using System.Collections.Generic;
 using Chaos.NaCl;
+using System.Security.Cryptography;
+using System.Linq;
 
 namespace TNetD.Consensus
 {
@@ -112,9 +114,10 @@ namespace TNetD.Consensus
                         break;
                 }
             }
-        }
 
-        public byte[] GetSignatureData()
+        }
+        
+        public byte[] GetHashData()
         {
             List<byte> data = new List<byte>();
 
@@ -124,10 +127,30 @@ namespace TNetD.Consensus
             }
 
             data.AddRange(Conversions.Int64ToVector(LedgerCloseSequence));
-            data.AddRange(Conversions.Int64ToVector(Timestamp));
             data.AddRange(PublicKey.Hex);
 
             return data.ToArray();
+        }
+
+        public byte[] GetSignatureData()
+        {
+            List<byte> data = new List<byte>();
+
+            data.AddRange(GetHashData());
+            data.AddRange(Conversions.Int64ToVector(Timestamp));
+
+            return data.ToArray();
+        }
+
+        /// <summary>
+        /// Everytime the Hash is recomputed.
+        /// </summary>
+        public Hash BallotDataHash
+        {
+            get
+            {
+                return new Hash((new SHA512Cng()).ComputeHash(GetHashData()).Take(32).ToArray() );
+            }
         }
 
         public void UpdateSignature(byte[] signature)
