@@ -21,7 +21,38 @@ using System.Collections.Concurrent;
 
 namespace TNetD.Consensus
 {
-    public enum ConsensusStates { Collect, Merge, Vote, Confirm, Apply };
+    #region Enums
+
+
+    public enum ConsensusStates
+    {
+        /// <summary>
+        /// Initial Collection of pending transactions.
+        /// </summary>
+        Collect,
+
+        /// <summary>
+        /// Merge pending transaction by asking and fetching for transactions.
+        /// </summary>
+        Merge,
+
+        /// <summary>
+        /// Send requests to get ballots and finalise votes.
+        /// </summary>
+        Vote,
+
+        /// <summary>
+        /// Re-Confirm Votes by sending singel requests to all the voters.
+        /// </summary>
+        Confirm,
+
+        /// <summary>
+        /// Apply to ledger.
+        /// </summary>
+        Apply
+    };
+
+    #endregion
 
     partial class Voting
     {
@@ -59,9 +90,7 @@ namespace TNetD.Consensus
         /// value: Set of nodes
         /// </summary>
         ConcurrentDictionary<Hash, HashSet<Hash>> propagationMap;
-
         
-
         System.Timers.Timer TimerVoting = default(System.Timers.Timer);
 
         public Voting(NodeConfig nodeConfig, NodeState nodeState, NetworkPacketSwitch networkPacketSwitch)
@@ -169,25 +198,46 @@ namespace TNetD.Consensus
             }
 
             MergeStateCounter++;
-
-            // LCL + 1
-            long ledgerCloseSequence = nodeState.Ledger.LedgerCloseData.SequenceNumber + 1;
-
+            
             // After 5 rounds: Assemble Ballot
             if (MergeStateCounter >= 5)
             {
-                ballot = transactionChecker.CreateBallot(CurrentTransactions, ledgerCloseSequence);
+                CreateBallot();
+
                 isBallotValid = true; // Yayy.
+                voteMap.Reset();
                 CurrentConsensusState = ConsensusStates.Vote;
                 MergeStateCounter = 0;
             }
         }
 
+        private void CreateBallot()
+        {
+            // LCL + 1
+            long ledgerCloseSequence = nodeState.Ledger.LedgerCloseData.SequenceNumber + 1;
+            ballot = transactionChecker.CreateBallot(CurrentTransactions, ledgerCloseSequence);
+        }
+
         void HandleVoting()
         {
-            if (VotingStateCounter < 1) // TWEAK-POINT: Trim value.
+            if (VotingStateCounter < 6) // TWEAK-POINT: Trim value.
             {
-                SendBallotRequests();
+                if (VotingStateCounter % 2 == 0)
+                {
+                    SendBallotRequests();
+                }
+                else
+                {
+                    HashSet<Hash> missingTransactions;
+                    voteMap.GetMissingTransactions(ballot, out missingTransactions);
+
+                    sendFetchRequest()
+                }
+            }
+            else
+            {
+                // Verify the received
+
             }
 
             VotingStateCounter++;
@@ -196,9 +246,9 @@ namespace TNetD.Consensus
             // have a different counter, called ConsensusCount, the default is LedgerClose, the ledger close one 
             // is the one associated.
 
-            // Request Ballots.
+            // Request Ballots
 
-            if (VotingStateCounter >= 5)
+            if (VotingStateCounter >= 6)
             {
                 VotingStateCounter = 0;
                 CurrentConsensusState = ConsensusStates.Confirm;

@@ -47,11 +47,11 @@ namespace TNetD.Consensus
         }
 
         /// <summary>
-        /// sends a request to get transaction data for all transaction IDs in the sorted hash
+        /// Sends a request to get transaction data for all transaction IDs in the sorted hash
         /// </summary>
         /// <param name="node"></param>
         /// <param name="transactions"></param>
-        void sendFetchRequest(Hash node, SortedSet<Hash> transactions)
+        void sendFetchRequests(Hash node, HashSet<Hash> transactions)
         {
             FetchRequestMsg message = new FetchRequestMsg();
             message.IDs = transactions;
@@ -63,6 +63,18 @@ namespace TNetD.Consensus
             packet.Type = PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST;
             networkPacketSwitch.AddToQueue(node, packet);
             Print("fetch request sent");
+        }
+        
+        /// <summary>
+        /// The key of the dictionary is the PK of the destination, and the value is the list of associated txID's.
+        /// </summary>
+        /// <param name="requests"></param>
+        void sendFetchRequests(Dictionary<Hash,HashSet<Hash>> requests)
+        {
+            foreach(var request in requests)
+            {
+                sendFetchRequests(request.Key, request.Value);
+            }
         }
 
         /// <summary>
@@ -96,34 +108,45 @@ namespace TNetD.Consensus
         /// <param name="packet"></param>
         void ProcessFetchResponse(NetworkPacket packet)
         {
-            if (networkPacketSwitch.VerifyPendingPacket(packet))
+            if (CurrentConsensusState == ConsensusStates.Merge || CurrentConsensusState == ConsensusStates.Vote)
             {
-                FetchResponseMsg message = new FetchResponseMsg();
-                message.Deserialize(packet.Data);
-
-                //check each transaction for signature validity and basic spendability
-                foreach (KeyValuePair<Hash, TransactionContent> transaction in message.transactions)
+                if (networkPacketSwitch.VerifyPendingPacket(packet))
                 {
-                    //check signature
-                    if (transaction.Value.VerifySignature() == TransactionProcessingResult.Accepted)
+                    FetchResponseMsg message = new FetchResponseMsg();
+                    message.Deserialize(packet.Data);
+
+                    //check each transaction for signature validity and basic spendability
+                    foreach (KeyValuePair<Hash, TransactionContent> transaction in message.transactions)
                     {
-                        //check spendability
-                        List<Hash> badaccounts = new List<Hash>();
-                        if (transactionChecker.Spendable(transaction.Value, new Dictionary<Hash, long>(), out badaccounts))
+                        //check signature
+                        if (transaction.Value.VerifySignature() == TransactionProcessingResult.Accepted)
                         {
-                            CurrentTransactions.AddOrUpdate(transaction.Key, transaction.Value, (ok, ov) => ov);
+                            //check spendability
+                            List<Hash> badaccounts = new List<Hash>();
+                            if (transactionChecker.Spendable(transaction.Value, new Dictionary<Hash, long>(), out badaccounts))
+                            {
+                                CurrentTransactions.AddOrUpdate(transaction.Key, transaction.Value, (ok, ov) => ov);
+                            }
+                            else
+                            {
+                                //could blacklist accounts here although not necessary
+                            }
                         }
                         else
                         {
-                            //could blacklist accounts here although not necessary
+                            //could blacklist peer for sending transaction with invalid signature
                         }
-                    }
-                    else
-                    {
-                        //could blacklist peer for sending transaction with invalid signature
                     }
                 }
             }
+
+            if (CurrentConsensusState == ConsensusStates.Vote)
+            {
+                // Update Ballot Accordingly.
+
+                CreateBallot();
+            }
+
             Print("Fetch Response Processed");
         }
         
@@ -180,7 +203,7 @@ namespace TNetD.Consensus
             {
                 MergeResponseMsg message = new MergeResponseMsg();
                 message.Deserialize(packet.Data);
-                SortedSet<Hash> newTransactions = new SortedSet<Hash>();
+                HashSet<Hash> newTransactions = new HashSet<Hash>();
 
                 foreach (Hash transaction in message.transactions)
                 {
@@ -192,7 +215,8 @@ namespace TNetD.Consensus
                     //add sender to propagationMap
                     propagationMap[transaction].Add(packet.PublicKeySource);
                 }
-                sendFetchRequest(packet.PublicKeySource, newTransactions);
+
+                sendFetchRequests(packet.PublicKeySource, newTransactions);
             }
             Print("merge response processed");
         }

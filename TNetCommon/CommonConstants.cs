@@ -70,6 +70,14 @@ namespace TNetD
         public static readonly int VOTE_MIN_VOTERS = 5;
 
         /// <summary>
+        /// 50%. If a transaction is voted for by more than this percentage of voters,
+        /// but, we dont have it, fetch it.
+        /// This should be a rare case and the previous merge stage should have distributed the
+        /// transactions properly.
+        /// </summary>
+        public static readonly int VOTE_VOTE_STAGE_FETCH_THRESHOLD_PERC = 50;
+
+        /// <summary>
         /// Minimum allowable Account Name Length
         /// </summary>
         public static readonly int Pref_MinNameLength = 2;
