@@ -252,10 +252,29 @@ namespace TNetD.Consensus
         {
             if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
-                BallotResponseMessage message = new BallotResponseMessage();
-                message.Deserialize(packet.Data);
-                
-                                 
+                if(CurrentConsensusState == ConsensusStates.Vote)
+                {
+                    BallotResponseMessage message = new BallotResponseMessage();
+                    message.Deserialize(packet.Data);
+
+                    if (message.goodBallot)
+                    {
+                        // We should be voting for the next ballot.
+                        if (message.ballot.LedgerCloseSequence + 1 == nodeState.Ledger.LedgerCloseData.SequenceNumber)
+                        {
+                            // Sender and ballot keys must be same
+                            if (message.ballot.PublicKey == packet.PublicKeySource)
+                            {
+                                // Signature should be valid.
+                                if (message.ballot.VerifySignature(packet.PublicKeySource))
+                                {
+                                    voteMap.AddBallot(message.ballot);
+
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             Print("Ballot Response Processed");

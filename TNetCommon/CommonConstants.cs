@@ -65,6 +65,10 @@ namespace TNetD
 
         public static readonly string RpcHost = "localhost";// "localhost";
 
+        // VOTING CONSTANTS
+
+        public static readonly int VOTE_MIN_VOTERS = 5;
+
         /// <summary>
         /// Minimum allowable Account Name Length
         /// </summary>

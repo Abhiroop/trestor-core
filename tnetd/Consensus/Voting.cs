@@ -35,6 +35,8 @@ namespace TNetD.Consensus
 
         private object VotingTransactionLock = new object();
         private object ConsensusLock = new object();
+        
+        private int previousRoundVoters = 0;
 
         public ConsensusStates CurrentConsensusState { get; private set; }
 
@@ -48,6 +50,8 @@ namespace TNetD.Consensus
         ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions;
         Ballot ballot;
         TransactionChecker transactionChecker = default(TransactionChecker);
+
+        VoteMap voteMap;
 
         /// <summary>
         /// Set of nodes, who sent a transaction ID
@@ -67,6 +71,8 @@ namespace TNetD.Consensus
             this.networkPacketSwitch = networkPacketSwitch;
             this.CurrentTransactions = new ConcurrentDictionary<Hash, TransactionContent>();
             this.propagationMap = new ConcurrentDictionary<Hash, HashSet<Hash>>();
+            this.voteMap = new VoteMap();
+
             networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
             networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
             transactionChecker = new TransactionChecker(nodeState);
