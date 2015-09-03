@@ -254,7 +254,8 @@ namespace TNetD.Consensus
             {
                 BallotResponseMessage message = new BallotResponseMessage();
                 message.Deserialize(packet.Data);
-                               
+                
+                                 
             }
 
             Print("Ballot Response Processed");

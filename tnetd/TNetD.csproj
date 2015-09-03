@@ -132,6 +132,7 @@
     <Compile Include="Consensus\MergeResponseMsg.cs" />
     <Compile Include="Consensus\DoubleSpendBlacklist.cs" />
     <Compile Include="Consensus\TransactionChecker.cs" />
+    <Compile Include="Consensus\VoteMap.cs" />
     <Compile Include="Consensus\VoteType.cs" />
     <Compile Include="Consensus\Voting.cs" />
     <Compile Include="Consensus\VotingRequests.cs" />

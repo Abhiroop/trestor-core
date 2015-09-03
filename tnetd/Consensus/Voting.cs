@@ -56,6 +56,8 @@ namespace TNetD.Consensus
         /// </summary>
         ConcurrentDictionary<Hash, HashSet<Hash>> propagationMap;
 
+        
+
         System.Timers.Timer TimerVoting = default(System.Timers.Timer);
 
         public Voting(NodeConfig nodeConfig, NodeState nodeState, NetworkPacketSwitch networkPacketSwitch)
@@ -250,7 +252,7 @@ namespace TNetD.Consensus
                     break;
 
                 case PacketType.TPT_CONS_BALLOT_RESPONSE:
-
+                    ProcessBallotResponse(packet);
                     break;
 
                 case PacketType.TPT_CONS_VOTE_AGREE_REQUEST:
