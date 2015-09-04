@@ -59,64 +59,10 @@ namespace TNetD.Consensus
             LedgerCloseSequence = 0;
         }
         
-        public byte[] Serialize()
-        {
-            List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
-            
-            foreach (Hash txId in TransactionIds)
-            {
-                PDTs.Add(ProtocolPackager.Pack(txId, 0));
-            }
-
-            PDTs.Add(ProtocolPackager.Pack(LedgerCloseSequence, 1));
-            PDTs.Add(ProtocolPackager.PackVarint(Timestamp, 2));
-            PDTs.Add(ProtocolPackager.Pack(PublicKey, 3));
-            PDTs.Add(ProtocolPackager.Pack(Signature, 4));            
-
-            return ProtocolPackager.PackRaw(PDTs);
-        }
-
-        public void Deserialize(byte[] Data)
-        {
-            Init();
-
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
-            int cnt = 0;
-
-            while (cnt < (int)PDTs.Count)
-            {
-                ProtocolDataType PDT = PDTs[cnt++];
-
-                switch (PDT.NameType)
-                {
-                    case 0:
-                        Hash txID;
-                        if (ProtocolPackager.UnpackHash(PDT, 0, out txID))
-                        {
-                            TransactionIds.Add(txID);
-                        }
-                        break;
-
-                    case 1:
-                        ProtocolPackager.UnpackVarint(PDT, 1, ref LedgerCloseSequence);
-                        break;
-
-                    case 2:
-                        ProtocolPackager.UnpackVarint(PDT, 2, ref Timestamp);
-                        break;
-
-                    case 3:
-                        ProtocolPackager.UnpackHash(PDT, 3, out PublicKey);
-                        break;                 
-
-                    case 4:
-                        ProtocolPackager.UnpackHash(PDT, 4, out Signature);
-                        break;
-                }
-            }
-
-        }
-        
+        /// <summary>
+        /// Returns data to be hashed. This conatains all fields except timestamp.
+        /// </summary>
+        /// <returns></returns>
         public byte[] GetHashData()
         {
             List<byte> data = new List<byte>();
@@ -153,6 +99,70 @@ namespace TNetD.Consensus
             }
         }
 
+        #region Serialization
+
+        public byte[] Serialize()
+        {
+            List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
+
+            foreach (Hash txId in TransactionIds)
+            {
+                PDTs.Add(ProtocolPackager.Pack(txId, 0));
+            }
+
+            PDTs.Add(ProtocolPackager.Pack(LedgerCloseSequence, 1));
+            PDTs.Add(ProtocolPackager.PackVarint(Timestamp, 2));
+            PDTs.Add(ProtocolPackager.Pack(PublicKey, 3));
+            PDTs.Add(ProtocolPackager.Pack(Signature, 4));
+
+            return ProtocolPackager.PackRaw(PDTs);
+        }
+
+        public void Deserialize(byte[] Data)
+        {
+            Init();
+
+            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
+            int cnt = 0;
+
+            while (cnt < (int)PDTs.Count)
+            {
+                ProtocolDataType PDT = PDTs[cnt++];
+
+                switch (PDT.NameType)
+                {
+                    case 0:
+                        Hash txID;
+                        if (ProtocolPackager.UnpackHash(PDT, 0, out txID))
+                        {
+                            TransactionIds.Add(txID);
+                        }
+                        break;
+
+                    case 1:
+                        ProtocolPackager.UnpackVarint(PDT, 1, ref LedgerCloseSequence);
+                        break;
+
+                    case 2:
+                        ProtocolPackager.UnpackVarint(PDT, 2, ref Timestamp);
+                        break;
+
+                    case 3:
+                        ProtocolPackager.UnpackHash(PDT, 3, out PublicKey);
+                        break;
+
+                    case 4:
+                        ProtocolPackager.UnpackHash(PDT, 4, out Signature);
+                        break;
+                }
+            }
+
+        }
+
+        #endregion
+
+        #region Signatures
+
         public void UpdateSignature(byte[] signature)
         {
             this.Signature = new Hash(signature);
@@ -165,6 +175,7 @@ namespace TNetD.Consensus
             return Ed25519.Verify(Signature.Hex, GetSignatureData(), publicKey.Hex);
         }
 
+        #endregion
 
     }
 }

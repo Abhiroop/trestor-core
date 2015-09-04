@@ -11,11 +11,11 @@ using TNetD.Protocol;
 
 namespace TNetD.Consensus
 {
-    class BallotRequestMessage : ISerializableBase
+    class VoteRequestMessage : ISerializableBase
     {
         public long LedgerCloseSequence;
 
-        public BallotRequestMessage()
+        public VoteRequestMessage()
         {
             LedgerCloseSequence = 0;
         }

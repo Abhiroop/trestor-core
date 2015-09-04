@@ -124,10 +124,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Consensus\Ballot.cs" />
-    <Compile Include="Consensus\BallotConfirmRequest.cs" />
-    <Compile Include="Consensus\BallotConfirmResponse.cs" />
-    <Compile Include="Consensus\BallotRequestMessage.cs" />
-    <Compile Include="Consensus\BallotResponseMessage.cs" />
+    <Compile Include="Consensus\VoteConfirmRequest.cs" />
+    <Compile Include="Consensus\VoteConfirmResponse.cs" />
+    <Compile Include="Consensus\VoteRequestMessage.cs" />
+    <Compile Include="Consensus\VoteResponseMessage.cs" />
     <Compile Include="Consensus\FetchMessages.cs" />
     <Compile Include="Consensus\MergeResponseMsg.cs" />
     <Compile Include="Consensus\DoubleSpendBlacklist.cs" />

@@ -11,13 +11,13 @@ using TNetD.Protocol;
 
 namespace TNetD.Consensus
 {
-    class BallotConfirmRequest : ISerializableBase
+    class VoteConfirmRequest : ISerializableBase
     {
         public Hash PublicKey;
         public Hash BallotHash;
         public long LedgerCloseSequence;
         
-        public BallotConfirmRequest()
+        public VoteConfirmRequest()
         {
             Init();
         }

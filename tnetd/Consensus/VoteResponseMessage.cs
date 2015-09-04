@@ -7,19 +7,19 @@ using System.Collections.Generic;
 
 namespace TNetD.Consensus
 {
-    class BallotResponseMessage : ISerializableBase
+    class VoteResponseMessage : ISerializableBase
     {
         public Ballot ballot;
 
         public bool goodBallot;
 
-        public BallotResponseMessage(Ballot ballot, bool goodBallot)
+        public VoteResponseMessage(Ballot ballot, bool goodBallot)
         {
             this.ballot = ballot;
             this.goodBallot = goodBallot;
         }
 
-        public BallotResponseMessage()
+        public VoteResponseMessage()
         {
             this.ballot = new Ballot();
             this.goodBallot = false;

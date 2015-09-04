@@ -172,7 +172,7 @@ namespace TNetD.Consensus
                             // LCS = LCL + 1     
                             ledgerCloseSequence = nodeState.Ledger.LedgerCloseData.SequenceNumber + 1;
 
-                            ProcessPendingTransactions();
+                            processPendingTransactions();
                             CurrentConsensusState = ConsensusStates.Merge;
                             break;
 
@@ -207,7 +207,7 @@ namespace TNetD.Consensus
         {
             if (mergeStateCounter < 1) // TWEAK-POINT: Trim value.
             {
-                SendMergeRequests();
+                sendMergeRequests();
             }
 
             mergeStateCounter++;
@@ -236,7 +236,7 @@ namespace TNetD.Consensus
             {
                 if (votingStateCounter % 2 == 0)
                 {
-                    SendBallotRequests();
+                    sendVoteRequests();
                 }
                 else
                 {
@@ -285,7 +285,7 @@ namespace TNetD.Consensus
             {
                 if(isFinalBallotValid)
                 {
-                    
+                    // Send Confirmation
                 }
 
             }
@@ -317,16 +317,16 @@ namespace TNetD.Consensus
             switch (packet.Type)
             {
                 case PacketType.TPT_CONS_MERGE_REQUEST:
-                    ProcessMergeRequest(packet);
+                    processMergeRequest(packet);
                     break;
                 case PacketType.TPT_CONS_MERGE_RESPONSE:
-                    ProcessMergeResponse(packet);
+                    processMergeResponse(packet);
                     break;
                 case PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST:
-                    ProcessFetchRequest(packet);
+                    processFetchRequest(packet);
                     break;
                 case PacketType.TPT_CONS_MERGE_TX_FETCH_RESPONSE:
-                    ProcessFetchResponse(packet);
+                    processFetchResponse(packet);
                     break;
             }
         }
@@ -338,19 +338,19 @@ namespace TNetD.Consensus
                 case PacketType.TPT_CONS_STATE:
                     break;
 
-                case PacketType.TPT_CONS_BALLOT_REQUEST:
-                    ProcessBallotRequest(packet);
+                case PacketType.TPT_CONS_VOTE_REQUEST:
+                    processVoteRequest(packet);
                     break;
 
-                case PacketType.TPT_CONS_BALLOT_RESPONSE:
-                    ProcessBallotResponse(packet);
+                case PacketType.TPT_CONS_VOTE_RESPONSE:
+                    processVoteResponse(packet);
                     break;
 
-                case PacketType.TPT_CONS_VOTE_AGREE_REQUEST:
+                case PacketType.TPT_CONS_CONFIRM_REQUEST:
 
                     break;
 
-                case PacketType.TPT_CONS_VOTE_AGREE_RESPONSE:
+                case PacketType.TPT_CONS_CONFIRM_RESPONSE:
                     break;
             }
         }

@@ -21,8 +21,8 @@ namespace TNetD.Network.Networking
         {
             Pairs.Add(PacketType.TPT_CONS_MERGE_REQUEST, PacketType.TPT_CONS_MERGE_RESPONSE);
             Pairs.Add(PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST, PacketType.TPT_CONS_MERGE_TX_FETCH_RESPONSE);
-            Pairs.Add(PacketType.TPT_CONS_BALLOT_REQUEST, PacketType.TPT_CONS_BALLOT_RESPONSE);
-            Pairs.Add(PacketType.TPT_CONS_VOTE_AGREE_REQUEST, PacketType.TPT_CONS_VOTE_AGREE_RESPONSE);
+            Pairs.Add(PacketType.TPT_CONS_VOTE_REQUEST, PacketType.TPT_CONS_VOTE_RESPONSE);
+            Pairs.Add(PacketType.TPT_CONS_CONFIRM_REQUEST, PacketType.TPT_CONS_CONFIRM_RESPONSE);
 
             Pairs.Add(PacketType.TPT_LSYNC_ROOT_REQUEST, PacketType.TPT_LSYNC_ROOT_RESPONSE);
             Pairs.Add(PacketType.TPT_LSYNC_NODE_REQUEST, PacketType.TPT_LSYNC_NODE_RESPONSE);

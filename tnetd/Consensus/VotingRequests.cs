@@ -11,7 +11,7 @@ namespace TNetD.Consensus
 {
     partial class Voting
     {
-        public void ProcessPendingTransactions()
+        public void processPendingTransactions()
         {
             lock (VotingTransactionLock)
             {
@@ -80,7 +80,7 @@ namespace TNetD.Consensus
         /// responds to a fetch request, sending all requested transaction data
         /// </summary>
         /// <param name="packet"></param>
-        void ProcessFetchRequest(NetworkPacket packet)
+        void processFetchRequest(NetworkPacket packet)
         {
             FetchRequestMsg message = new FetchRequestMsg();
             message.Deserialize(packet.Data);
@@ -105,7 +105,7 @@ namespace TNetD.Consensus
         /// process the response to a fetch request, i.e. add the transactions to CurrentTransactions
         /// </summary>
         /// <param name="packet"></param>
-        void ProcessFetchResponse(NetworkPacket packet)
+        void processFetchResponse(NetworkPacket packet)
         {
             if (CurrentConsensusState == ConsensusStates.Merge || CurrentConsensusState == ConsensusStates.Vote)
             {
@@ -153,7 +153,7 @@ namespace TNetD.Consensus
         /// request a list of all known transactions from each connected validator
         /// note that message has no content
         /// </summary>
-        void SendMergeRequests()
+        void sendMergeRequests()
         {
             foreach (var node in nodeState.ConnectedValidators)
             {
@@ -171,7 +171,7 @@ namespace TNetD.Consensus
         /// respond to a merge request by sending a list of all hashes of known transactions
         /// </summary>
         /// <param name="packet"></param>
-        void ProcessMergeRequest(NetworkPacket packet)
+        void processMergeRequest(NetworkPacket packet)
         {
             Hash sender = packet.PublicKeySource;
             Hash token = packet.Token;
@@ -196,7 +196,7 @@ namespace TNetD.Consensus
         /// respond to merge request by sending a list of all hashes of known (not expired) transactions
         /// </summary>
         /// <param name="packet"></param>
-        void ProcessMergeResponse(NetworkPacket packet)
+        void processMergeResponse(NetworkPacket packet)
         {
             if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
@@ -221,7 +221,7 @@ namespace TNetD.Consensus
         }
 
 
-        void SendBallotRequests()
+        void sendVoteRequests()
         {
             LedgerCloseData lcd;
             bool ok = nodeState.PersistentCloseHistory.GetLastRowData(out lcd);
@@ -231,7 +231,7 @@ namespace TNetD.Consensus
             foreach (var node in nodeState.ConnectedValidators)
             {
                 // Create BallotRequestMessage
-                BallotRequestMessage brp = new BallotRequestMessage();
+                VoteRequestMessage brp = new VoteRequestMessage();
                 brp.LedgerCloseSequence = lcd.SequenceNumber;
 
                 // Create NetworkPacket and send
@@ -239,18 +239,18 @@ namespace TNetD.Consensus
                 request.PublicKeySource = nodeConfig.PublicKey;
                 request.Token = TNetUtils.GenerateNewToken();
                 request.Data = brp.Serialize();
-                request.Type = PacketType.TPT_CONS_BALLOT_REQUEST;
+                request.Type = PacketType.TPT_CONS_VOTE_REQUEST;
 
                 networkPacketSwitch.AddToQueue(node.Key, request);
             }
 
-            Print("Ballot requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
+            Print("Vote requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
         }
 
 
-        void ProcessBallotRequest(NetworkPacket packet)
+        void processVoteRequest(NetworkPacket packet)
         {
-            BallotResponseMessage brm = new BallotResponseMessage();
+            VoteResponseMessage brm = new VoteResponseMessage();
 
             if (isBallotValid)
             {
@@ -265,19 +265,19 @@ namespace TNetD.Consensus
             response.Token = token;
             response.PublicKeySource = nodeConfig.PublicKey;
             response.Data = brm.Serialize();
-            response.Type = PacketType.TPT_CONS_BALLOT_RESPONSE;
+            response.Type = PacketType.TPT_CONS_VOTE_RESPONSE;
             networkPacketSwitch.AddToQueue(sender, response);
 
-            Print("ProcessBallotRequest Replied to " + sender);
+            Print("Vote Request Replied to " + sender);
         }
 
-        void ProcessBallotResponse(NetworkPacket packet)
+        void processVoteResponse(NetworkPacket packet)
         {
             if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
                 if (CurrentConsensusState == ConsensusStates.Vote)
                 {
-                    BallotResponseMessage message = new BallotResponseMessage();
+                    VoteResponseMessage message = new VoteResponseMessage();
                     message.Deserialize(packet.Data);
 
                     if (message.goodBallot)
@@ -300,7 +300,7 @@ namespace TNetD.Consensus
                 }
             }
 
-            Print("Ballot Response from " + packet.PublicKeySource + " Processed");
+            Print("Vote Response from " + packet.PublicKeySource + " Processed");
         }
 
     }
