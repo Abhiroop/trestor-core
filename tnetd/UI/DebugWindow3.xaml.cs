@@ -118,6 +118,7 @@ namespace TNetD
                 {
                     this.Dispatcher.Invoke(new Action(() =>
                     {
+                        displayMessage.Text = displayMessage.Text.Trim();
                         viewModel.ProcessSkips();
                         viewModel.LogMessages.Add(displayMessage);
                     }));
