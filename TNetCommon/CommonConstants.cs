@@ -70,7 +70,7 @@ namespace TNetD
         public static readonly string RPC_HOST = "localhost";// "localhost";
 
         public static readonly bool GLOBAL_VERBOSE_DEBUGGING_ENABLED = true;
-        
+        public static readonly bool GLOBAL_EXCEPTION_STACKTRACE_DISPLAY_ENABLED = true;
 
         /// <summary>
         /// Minimum allowable Account Name Length

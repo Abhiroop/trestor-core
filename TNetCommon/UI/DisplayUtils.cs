@@ -100,7 +100,9 @@ namespace TNetD
 
         public static void Display(String Message, Exception ex)
         {
-            Display(Message + " - " + ex.Message, DisplayType.Exception);
+            string msg = Message + " - " + ex.Message;
+            if (Common.GLOBAL_EXCEPTION_STACKTRACE_DISPLAY_ENABLED) msg += " | ST: " + ex.StackTrace;
+            Display(msg, DisplayType.Exception);
         }
 
         public static void Display(String Message, Exception ex, bool stackTrace)
