@@ -61,7 +61,7 @@ namespace TNetD
 
             lv_TX.ItemsSource = _tranxData;
                         
-            Title += " | " + Common.NetworkType.ToString();
+            Title += " | " + Common.NETWORK_TYPE.ToString();
 
         }
 
@@ -168,11 +168,11 @@ namespace TNetD
             {
                 N_H[0] = (byte)(i);
 
-                Common.rngCsp.GetBytes(N_H);
+                Common.SECURE_RNG.GetBytes(N_H);
 
                 accounts.Add(new Hash(N_H));
 
-                long _taks = Common.random.Next(0, 1000000000);
+                long _taks = Common.NORMAL_RNG.Next(0, 1000000000);
 
                 taka += _taks;
 
@@ -326,7 +326,7 @@ namespace TNetD
             {
                 List<AccountInfo> aiData = new List<AccountInfo>();
 
-                string[] Accs = Common.NetworkType == NetworkType.MainNet ? GenesisRawData.MainNet : GenesisRawData.TestNet;
+                string[] Accs = Common.NETWORK_TYPE == NetworkType.MainNet ? GenesisRawData.MainNet : GenesisRawData.TestNet;
 
                 foreach (string acc in Accs)
                 {

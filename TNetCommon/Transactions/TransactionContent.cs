@@ -253,14 +253,14 @@ namespace TNetD.Transactions
             if (Sources.Count != Signatures.Count)
                 return TransactionProcessingResult.InsufficientSignatureCount;
 
-            if (transactionFee < Common.NETWORK_Min_Transaction_Fee)
+            if (transactionFee < Common.NETWORK_MIN_TRANSACTION_FEE)
             {
                 return TransactionProcessingResult.InsufficientFees;
             }
 
             for (int i = 0; i < (int)Sources.Count; i++)
             {
-                if (Sources[i].Value < Common.NETWORK_Min_Transaction_Value_SrcDest)
+                if (Sources[i].Value < Common.NETWORK_TRANSACTION_SRCDEST_MIN_COUNT)
                     return TransactionProcessingResult.NoProperSources;
 
                 incoming += Sources[i].Value;
@@ -268,7 +268,7 @@ namespace TNetD.Transactions
 
             for (int i = 0; i < (int)Destinations.Count; i++)
             {
-                if (Destinations[i].Value < Common.NETWORK_Min_Transaction_Value_SrcDest)
+                if (Destinations[i].Value < Common.NETWORK_TRANSACTION_SRCDEST_MIN_COUNT)
                     return TransactionProcessingResult.NoProperDestinations;
 
                 outgoing += Destinations[i].Value;

@@ -71,7 +71,7 @@ namespace TNetD.Transactions
                 if (TransactionProcessingMap.TryGetValue(key, out transactionState))
                 {
                     TimeSpan span = (NOW - transactionState.FetchTimeUTC);
-                    if (span.TotalSeconds > Common.TransactionStatus_Persist_Seconds)
+                    if (span.TotalSeconds > Common.TRANSACTION_STATUS_PERSIST_SECONDS)
                     {
                         TransactionProcessingMap.TryRemove(key, out transactionState);
                     }

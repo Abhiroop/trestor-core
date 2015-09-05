@@ -56,7 +56,7 @@ namespace TNetD
 
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
 
-            Title += " | " + Common.NetworkType.ToString();
+            Title += " | " + Common.NETWORK_TYPE.ToString();
 
             System.Timers.Timer tmr_UI = new System.Timers.Timer(1000);
             tmr_UI.Elapsed += tmr_UI_Elapsed;
@@ -179,12 +179,12 @@ namespace TNetD
             for (int i = 0; i < 5000; i++)
             {
                 byte[] N_H = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
-                Common.rngCsp.GetBytes(N_H);
+                Common.SECURE_RNG.GetBytes(N_H);
 
                 Hash h = new Hash(N_H);
 
-                AccountInfo ai = new AccountInfo(h, Common.random.Next(79382, 823649238),
-                    "name_" + Common.random.Next(0, 823649238), AccountState.Normal, NetworkType.TestNet, AccountType.TestNormal, 0);
+                AccountInfo ai = new AccountInfo(h, Common.NORMAL_RNG.Next(79382, 823649238),
+                    "name_" + Common.NORMAL_RNG.Next(0, 823649238), AccountState.Normal, NetworkType.TestNet, AccountType.TestNormal, 0);
 
                 nodes[0].nodeState.Ledger.AddUserToLedger(ai);
             }

@@ -86,11 +86,11 @@ namespace TNetTest
             byte[] _rand_1 = new byte[32];
             byte[] _rand_2 = new byte[32];
 
-            Common.rngCsp.GetBytes(_rand_1);
-            Common.rngCsp.GetBytes(_rand_2);
+            Common.SECURE_RNG.GetBytes(_rand_1);
+            Common.SECURE_RNG.GetBytes(_rand_2);
 
             long fee = 0; // Common.random.Next(Common.NETWORK_Min_Transaction_Fee, Common.NETWORK_Min_Transaction_Fee * 2);
-            long value = /*(long)(10000000000000L * Common.random.NextDouble());*/  Common.random.Next(1000, 50000000);
+            long value = /*(long)(10000000000000L * Common.random.NextDouble());*/  Common.NORMAL_RNG.Next(1000, 50000000);
 
             byte[] PrivSeedSender = Src.RandomPrivate;
             string SenderName = Src.Name;
@@ -125,7 +125,7 @@ namespace TNetTest
                 await tf.StartNew(new Action(delegate
                 {
 
-                    string SER_DATA = JsonConvert.SerializeObject(new JS_TransactionReply(tc), Common.JsonSerializerSettings);
+                    string SER_DATA = JsonConvert.SerializeObject(new JS_TransactionReply(tc), Common.JSON_SERIALIZER_SETTINGS);
 
                     WriteLog("\nSending:" + SER_DATA);
 
@@ -261,7 +261,7 @@ namespace TNetTest
             {
                 TaskFactory tf = new TaskFactory();
             
-                string SER_DATA = JsonConvert.SerializeObject(new JS_TransactionReply(tc), Common.JsonSerializerSettings);
+                string SER_DATA = JsonConvert.SerializeObject(new JS_TransactionReply(tc), Common.JSON_SERIALIZER_SETTINGS);
 
                 WriteLog("\nSending:" + SER_DATA);
 

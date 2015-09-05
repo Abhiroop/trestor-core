@@ -32,7 +32,7 @@ namespace TNetD.Nodes
                 try
                 {
                     if ((nodeState.IncomingTransactionMap.IncomingTransactions.Count > 0) && 
-                        (Common.NodeOperationType == NodeOperationType.Centralized))
+                        (Common.NODE_OPERATION_TYPE == NodeOperationType.Centralized))
                     {
                         Queue<TransactionContent> transactionContentStack = new Queue<TransactionContent>();
 
@@ -132,7 +132,7 @@ namespace TNetD.Nodes
                                             }
                                         }
 
-                                        if (!Common.IsTransactionFeeEnabled) // Transaction fee not allowed here !!
+                                        if (!Common.TRANSACTION_FEE_ENABLED) // Transaction fee not allowed here !!
                                         {
                                             if (transactionContent.TransactionFee > 0)
                                             {
@@ -310,7 +310,7 @@ namespace TNetD.Nodes
                                                 (badTX_TransactionFee ? "\nbadTX_TransactionFee" : "") +
                                                 (badTX_AccountAddress ? "\nbadTX_AccountAddress" : "") + "\n" +
 
-                                                JsonConvert.SerializeObject(transactionContent, Common.JsonSerializerSettings)
+                                                JsonConvert.SerializeObject(transactionContent, Common.JSON_SERIALIZER_SETTINGS)
 
                                                 + "\n", DisplayType.BadData);
                                         }
@@ -386,15 +386,15 @@ namespace TNetD.Nodes
                                 if (ledgerAccount.LastTransactionTime != persistentAccount.LastTransactionTime)
                                 {
                                     throw new Exception("Persistent DB or Ledger unauthorized overwrite Time. #1 : \nLedgerAccount : " +
-                                     JsonConvert.SerializeObject(ledgerAccount, Common.JsonSerializerSettings) + "\nPersistentAccount :" +
-                                     JsonConvert.SerializeObject(persistentAccount, Common.JsonSerializerSettings) + "\n");
+                                     JsonConvert.SerializeObject(ledgerAccount, Common.JSON_SERIALIZER_SETTINGS) + "\nPersistentAccount :" +
+                                     JsonConvert.SerializeObject(persistentAccount, Common.JSON_SERIALIZER_SETTINGS) + "\n");
                                 }
 
                                 if (ledgerAccount.Money != persistentAccount.Money)
                                 {
                                     throw new Exception("Persistent DB or Ledger unauthorized overwrite Value. #1 : \nLedgerAccount : " +
-                                     JsonConvert.SerializeObject(ledgerAccount, Common.JsonSerializerSettings) + "\nPersistentAccount :" +
-                                     JsonConvert.SerializeObject(persistentAccount, Common.JsonSerializerSettings) + "\n");
+                                     JsonConvert.SerializeObject(ledgerAccount, Common.JSON_SERIALIZER_SETTINGS) + "\nPersistentAccount :" +
+                                     JsonConvert.SerializeObject(persistentAccount, Common.JSON_SERIALIZER_SETTINGS) + "\n");
                                 }
                             }
                             else

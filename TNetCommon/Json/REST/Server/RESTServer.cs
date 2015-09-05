@@ -386,7 +386,7 @@ namespace Grapevine.Server
                     this.IsListening = true;
                     this._listener.Prefixes.Add(this.BaseUrl);
 
-                    if(Common.NetworkType == TNetD.Address.NetworkType.MainNet)
+                    if(Common.NETWORK_TYPE == TNetD.Address.NetworkType.MainNet)
                     {
                         this._listener.Prefixes.Add(this.BaseUrlHttp);
                         this._listener.Prefixes.Add(this.BaseUrlHttps);

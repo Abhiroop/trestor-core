@@ -117,7 +117,7 @@ namespace TNetD.Nodes
 
             voting = new Voting(nodeConfig, nodeState, networkPacketSwitch);
 
-            if(Common.NodeOperationType == NodeOperationType.Distributed)
+            if(Common.NODE_OPERATION_TYPE == NodeOperationType.Distributed)
             {
                 voting.Enabled = true;
             }
@@ -229,7 +229,7 @@ namespace TNetD.Nodes
             
             if (NodeStatusEvent != null)
             {
-                var json = JsonConvert.SerializeObject(nodeState.NodeInfo.GetResponse(), Common.JsonSerializerSettings);
+                var json = JsonConvert.SerializeObject(nodeState.NodeInfo.GetResponse(), Common.JSON_SERIALIZER_SETTINGS);
                 NodeStatusEvent(json, nodeConfig.NodeID);
             }
         }
@@ -278,7 +278,7 @@ namespace TNetD.Nodes
                 TimerEventProcessed = false;
 
                 // // // // // // // // //
-                if (Common.NodeOperationType == NodeOperationType.Centralized)
+                if (Common.NODE_OPERATION_TYPE == NodeOperationType.Centralized)
                 {
                     transactionHandler.ProcessPendingTransactions();
                 }

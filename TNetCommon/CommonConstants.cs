@@ -18,11 +18,10 @@ namespace TNetD
 
     public static class Common
     {
-        public static RNGCryptoServiceProvider rngCsp = new RNGCryptoServiceProvider();
+        public static Random NORMAL_RNG = new Random();
+        public static RNGCryptoServiceProvider SECURE_RNG = new RNGCryptoServiceProvider();
 
-        public static readonly Encoding Encoding28591 = Encoding.GetEncoding(28591);
-
-        public static Random random = new Random();
+        public static readonly Encoding Encoding28591 = Encoding.GetEncoding(28591);        
 
         public static readonly int LEN_TRANSACTION_ID = 32;
         public static readonly int KEYLEN_PUBLIC = 32;
@@ -30,16 +29,21 @@ namespace TNetD
         public static readonly int KEYLEN_PRIVATE_EXPANDED = 64;
         public static readonly int KEYLEN_SIGNATURE = 64;
 
-        public static readonly bool IsTransactionFeeEnabled = false;
+        // /////////////////////////////  CRITICAL SETTINGS  //////////////////////////////////
 
-        public static readonly int TransactionStaleTimer_Minutes = 20; // Deviation of 1 minute. // Critical Fix
+        public static readonly bool TRANSACTION_FEE_ENABLED = false;
 
-        public static readonly int TransactionStatus_Persist_Seconds = 60;
+        public static readonly int TRANSACTION_STALE_TIMER_MINUTES = 20; // Deviation of 1 minute. // Critical Fix
+        
+        public static readonly int NETWORK_MIN_TRANSACTION_FEE = 0; //100000; // ~ 0.1 US Cent, approx, initial value.
 
-        public static readonly int NETWORK_Min_Transaction_Fee = 0; //100000; // ~ 0.1 US Cent, approx, initial value.
+        public static readonly int NETWORK_TRANSACTION_SRCDEST_MIN_COUNT = 1; // Atleast a singel source and destination
 
-        public static readonly int NETWORK_Min_Transaction_Value_SrcDest = 1;
-        public static readonly int NETWORK_Min_Transaction_TotalValue = 1;
+        public static readonly int NETWORK_MIN_TRANSACTION_TOTAL_VALUE = 1; // Minimum transaction of 1 trest.
+
+        // /////////////////////////////////////////////////////////////////////////////////////
+
+        public static readonly int TRANSACTION_STATUS_PERSIST_SECONDS = 60;
 
         /// <summary>
         /// Token length in bytes (8 => 2^64 possibilities)
@@ -56,33 +60,35 @@ namespace TNetD
         /// </summary>
         public static readonly long LSYNC_MAX_REQUESTED_NODES = 256;
 
-        public static JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings();
+        public static JsonSerializerSettings JSON_SERIALIZER_SETTINGS = new JsonSerializerSettings();
 
         public static readonly int UI_TextBox_Max_Length = 20000;
 
-        public static readonly NetworkType NetworkType = Address.NetworkType.TestNet;
-        public static readonly NodeOperationType NodeOperationType = NodeOperationType.Distributed;
+        public static readonly NetworkType NETWORK_TYPE = Address.NetworkType.TestNet;
+        public static readonly NodeOperationType NODE_OPERATION_TYPE = NodeOperationType.Distributed;
 
-        public static readonly string RpcHost = "localhost";// "localhost";
+        public static readonly string RPC_HOST = "localhost";// "localhost";
+
+        public static readonly bool GLOBAL_VERBOSE_DEBUGGING_ENABLED = true;
         
 
         /// <summary>
         /// Minimum allowable Account Name Length
         /// </summary>
-        public static readonly int Pref_MinNameLength = 2;
+        public static readonly int PREF_MIN_NAME_LENGTH = 2;
 
         /// <summary>
         /// Maximum allowable name length.
         /// </summary>
-        public static readonly int Pref_MaxNameLength = 20;
+        public static readonly int PREF_MAX_NAME_LENGTH = 20;
 
         /// <summary>
         ///  TODO: BAD/ REMOVE STATIC METHOD
         /// </summary>
         public static void Initialize()
         {
-            JsonSerializerSettings.Converters.Add(new BytesToHexConverter());
-            JsonSerializerSettings.Formatting = Formatting.Indented;
+            JSON_SERIALIZER_SETTINGS.Converters.Add(new BytesToHexConverter());
+            JSON_SERIALIZER_SETTINGS.Formatting = Formatting.Indented;
         }
 
     }

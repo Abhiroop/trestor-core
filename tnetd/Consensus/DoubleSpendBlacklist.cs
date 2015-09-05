@@ -55,7 +55,7 @@ namespace TNetD.Consensus
             foreach (KeyValuePair<Hash, long> kvp in blacklist)
             {
                 long timediff = (long)(DateTime.FromFileTimeUtc(ntime) - DateTime.FromFileTimeUtc(kvp.Value)).TotalSeconds;
-                if (timediff > KEEP_EXPIRED + Common.TransactionStaleTimer_Minutes * 60)
+                if (timediff > KEEP_EXPIRED + Common.TRANSACTION_STALE_TIMER_MINUTES * 60)
                 {
                     long value;
                     blacklist.TryRemove(kvp.Key, out value);

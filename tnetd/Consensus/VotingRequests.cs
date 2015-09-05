@@ -18,7 +18,7 @@ namespace TNetD.Consensus
                 try
                 {
                     if ((nodeState.IncomingTransactionMap.IncomingTransactions.Count > 0) &&
-                        (Common.NodeOperationType == NodeOperationType.Distributed))
+                        (Common.NODE_OPERATION_TYPE == NodeOperationType.Distributed))
                     {
 
                         lock (nodeState.IncomingTransactionMap.transactionLock)

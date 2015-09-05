@@ -60,7 +60,7 @@ namespace TNetD
 
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
 
-            Title += " | " + Common.NetworkType.ToString();
+            Title += " | " + Common.NETWORK_TYPE.ToString();
 
             System.Timers.Timer tmr_UI = new System.Timers.Timer(1000);
             tmr_UI.Elapsed += tmr_UI_Elapsed;

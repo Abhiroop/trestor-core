@@ -355,7 +355,7 @@ namespace TNetD.Network.Networking
                             if (iClient.WorkProven)
                             {
                                 //DisplayUtils.Display("Work Proved", DisplayType.Info);
-                                Common.rngCsp.GetBytes(iClient.DHRandomBytes);
+                                Common.SECURE_RNG.GetBytes(iClient.DHRandomBytes);
 
                                 iClient.DHPrivateKey = Curve25519.ClampPrivateKey(iClient.DHRandomBytes);
                                 iClient.DHPublicKey = Curve25519.GetPublicKey(iClient.DHPrivateKey);
@@ -517,7 +517,7 @@ namespace TNetD.Network.Networking
             try
             {
                 byte[] nonce = new byte[8];
-                Common.rngCsp.GetBytes(nonce);
+                Common.SECURE_RNG.GetBytes(nonce);
 
                 byte[] counter_sender_data = Utils.GetLengthAsBytes((int)client.PacketCounter).Concat(Data).ToArray();
 

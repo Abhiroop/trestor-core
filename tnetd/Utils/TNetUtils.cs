@@ -16,7 +16,7 @@ namespace TNetD
         public static Hash GenerateNewToken()
         {
             byte[] randBytes = new byte[Common.NETWORK_TOKEN_LENGTH];            
-            Common.rngCsp.GetBytes(randBytes);
+            Common.SECURE_RNG.GetBytes(randBytes);
             return new Hash(randBytes);
         }
 

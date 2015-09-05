@@ -65,15 +65,15 @@ namespace TNetD.Address
         {
             byte[] PrivateSecretSeed = new byte[Common.KEYLEN_PRIVATE];
 
-            Common.rngCsp.GetBytes(PrivateSecretSeed);
+            Common.SECURE_RNG.GetBytes(PrivateSecretSeed);
 
             byte[] PublicKey;
             byte[] SecretKeyExpanded;
 
             Ed25519.KeyPairFromSeed(out PublicKey, out SecretKeyExpanded, PrivateSecretSeed);
 
-            byte[] Address = GetAddress(PublicKey, Name, Common.NetworkType,
-                (Common.NetworkType == NetworkType.MainNet) ?
+            byte[] Address = GetAddress(PublicKey, Name, Common.NETWORK_TYPE,
+                (Common.NETWORK_TYPE == NetworkType.MainNet) ?
                 AccountType.MainNormal : AccountType.TestNormal);
 
             string ADD = Base58Encoding.EncodeWithCheckSum(Address);

@@ -19,9 +19,9 @@ namespace TNetD
 
         public static bool ValidateUserName(string userName)
         {
-            if ((userName.Length <= Common.Pref_MinNameLength)) return false;
+            if ((userName.Length <= Common.PREF_MIN_NAME_LENGTH)) return false;
 
-            if ((userName.Length > Common.Pref_MaxNameLength)) return false;
+            if ((userName.Length > Common.PREF_MAX_NAME_LENGTH)) return false;
 
             if (userName != userName.ToLowerInvariant()) return false;
 
@@ -224,7 +224,7 @@ namespace TNetD
 
             while (ints.Count < Count)
             {
-                int Rand = Common.random.Next(0, maxNumber);
+                int Rand = Common.NORMAL_RNG.Next(0, maxNumber);
 
                 if (!ints.Contains(Rand) && (notEqualTo != Rand))
                 {

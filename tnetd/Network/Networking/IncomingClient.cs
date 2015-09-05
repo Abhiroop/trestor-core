@@ -68,7 +68,7 @@ namespace TNetD.Network.Networking
             byte[] time = BitConverter.GetBytes(DateTime.UtcNow.ToFileTimeUtc());
             byte[] workRand = new byte[16];
 
-            Common.rngCsp.GetBytes(workRand);
+            Common.SECURE_RNG.GetBytes(workRand);
 
             Array.Copy(workRand, 0, WorkTask, 0, 16);
             Array.Copy(time, 0, WorkTask, 16, 8);

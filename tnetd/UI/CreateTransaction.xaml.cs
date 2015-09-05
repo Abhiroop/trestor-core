@@ -66,7 +66,7 @@ namespace TNetD.UI
                 {
                     if (check_Json.IsChecked.Value)
                     {
-                        tb_TX_Hex.Text = JsonConvert.SerializeObject(new JS_TransactionReply(tc), Common.JsonSerializerSettings);
+                        tb_TX_Hex.Text = JsonConvert.SerializeObject(new JS_TransactionReply(tc), Common.JSON_SERIALIZER_SETTINGS);
                     }
                     else
                     {
@@ -90,15 +90,15 @@ namespace TNetD.UI
             byte [] _rand_1 = new byte[32];
             byte [] _rand_2 = new byte[32];
 
-            Common.rngCsp.GetBytes(_rand_1);
-            Common.rngCsp.GetBytes(_rand_2);
+            Common.SECURE_RNG.GetBytes(_rand_1);
+            Common.SECURE_RNG.GetBytes(_rand_2);
 
             tb_SenderPrivate.Text = HexUtil.ToString(_rand_1);
             tb_DestPrivate.Text = HexUtil.ToString(_rand_2);
 
-            tb_Fee.Text = Common.random.Next(Common.NETWORK_Min_Transaction_Fee, Common.NETWORK_Min_Transaction_Fee * 2) + "";
+            tb_Fee.Text = Common.NORMAL_RNG.Next(Common.NETWORK_MIN_TRANSACTION_FEE, Common.NETWORK_MIN_TRANSACTION_FEE * 2) + "";
 
-            tb_Value.Text = Common.random.Next(1000, 50000000) + "";
+            tb_Value.Text = Common.NORMAL_RNG.Next(1000, 50000000) + "";
 
 
         }

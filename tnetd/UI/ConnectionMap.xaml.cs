@@ -85,8 +85,8 @@ namespace TNetD.UI
             {
                 // Calculate coordinates.
 
-                int randX = Common.random.Next(0, randSpaceX) + BOUNDARY;
-                int randY = Common.random.Next(0, randSpaceY) + BOUNDARY;
+                int randX = Common.NORMAL_RNG.Next(0, randSpaceX) + BOUNDARY;
+                int randY = Common.NORMAL_RNG.Next(0, randSpaceY) + BOUNDARY;
 
                 Point newPoint = new Point(randX, randY);
 

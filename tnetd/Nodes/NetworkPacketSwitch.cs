@@ -65,7 +65,7 @@ namespace TNetD.Nodes
 
         async Task SendInitialize(Hash publicKey)
         {
-            await Task.Delay(Common.random.Next(500, 1000)); // Wait a random delay before connecting.
+            await Task.Delay(Common.NORMAL_RNG.Next(500, 1000)); // Wait a random delay before connecting.
             NetworkPacketQueueEntry npqe = new NetworkPacketQueueEntry(publicKey,
                 new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_HELLO, new byte[0]));
 
