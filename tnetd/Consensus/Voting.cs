@@ -306,7 +306,6 @@ namespace TNetD.Consensus
                     // Send Confirmation
                     sendConfirmationRequests();
                 }
-
             }
 
             confirmationStateCounter++;
@@ -325,7 +324,7 @@ namespace TNetD.Consensus
         {
             if (isFinalConfirmedVotersValid)
             {
-                // Check that the confirmed voters are all trusted,
+                // Check that the confirmed voters are all trusted
 
                 int trustedConfirmedVoters = 0;
 
@@ -337,9 +336,21 @@ namespace TNetD.Consensus
                     }
                 }
 
-                if (trustedConfirmedVoters >= Constants.VOTE_MIN_VOTERS)
+                int totalTrustedConnections = nodeState.ConnectedValidators.Where(node => node.Value.IsTrusted).Count();
+
+                if ((trustedConfirmedVoters >= Constants.VOTE_MIN_VOTERS) &&
+                    (totalTrustedConnections >= Constants.VOTE_MIN_VOTERS))
                 {
-                    //double percentage = 
+                    double percentage = ((double)trustedConfirmedVoters * 100.0) / (double)totalTrustedConnections;
+
+                    if(percentage >= Constants.CONS_FINAL_VOTING_THRESHOLD_PERC)
+                    {
+                        DisplayUtils.Display("Voting Successful. Applying to ledger.");
+
+
+
+                    }
+
                 }
 
                 DisplayUtils.Display("Finished Voting Round.");

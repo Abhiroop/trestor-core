@@ -69,7 +69,7 @@ namespace TNetD
         /// 80%. This is the percentage of voters, who should agree to the set to be accepted in the ledger.
         /// </summary>
         public static readonly int CONS_FINAL_VOTING_THRESHOLD_PERC = 80;
-
+        
         /// <summary>
         /// ////////////////////////////////////////////////
         /// </summary>
