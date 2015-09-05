@@ -60,6 +60,8 @@ namespace TNetD.Consensus
         int votingStateCounter = 0;
         int confirmationStateCounter = 0;
 
+        public bool VerboseDebugging = false;
+
         public bool DebuggingMessages { get; set; }
 
         public bool Enabled { get; set; }
@@ -113,7 +115,7 @@ namespace TNetD.Consensus
             this.networkPacketSwitch = networkPacketSwitch;
             this.CurrentTransactions = new ConcurrentDictionary<Hash, TransactionContent>();
             this.propagationMap = new ConcurrentDictionary<Hash, HashSet<Hash>>();
-            this.voteMap = new VoteMap();
+            this.voteMap = new VoteMap(nodeConfig, nodeState);
             synchronizedVoters = new HashSet<Hash>();
             finalConfirmedVoters = new HashSet<Hash>();
 
@@ -134,13 +136,13 @@ namespace TNetD.Consensus
 
             DebuggingMessages = true;
 
-            Print("class Voting created");
+            Print("Class \"Voting\" created");
         }
 
         private void Print(string message)
         {
             if (DebuggingMessages)
-                DisplayUtils.Display(" Node " + nodeConfig.NodeID + " | Voting: " + message);
+                DisplayUtils.Display("V:" + nodeConfig.ID() + ": " + message);
         }
 
         void TimerVoting_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -199,7 +201,6 @@ namespace TNetD.Consensus
                             break;
 
                         case ConsensusStates.Vote:
-
                             HandleVoting();
                             break;
 
@@ -239,6 +240,8 @@ namespace TNetD.Consensus
                 voteMap.Reset();
                 CurrentConsensusState = ConsensusStates.Vote;
                 mergeStateCounter = 0;
+
+                Print("Merge Finished.");
             }
         }
 
@@ -296,6 +299,8 @@ namespace TNetD.Consensus
                 isFinalBallotValid = true; // TODO: CRITICAL THINK THINK, TESTS !!                
 
                 CurrentConsensusState = ConsensusStates.Confirm;
+
+                Print("Voting Finished.");
             }
         }
 
@@ -319,6 +324,8 @@ namespace TNetD.Consensus
                 isFinalConfirmedVotersValid = true;
 
                 CurrentConsensusState = ConsensusStates.Apply; // Verify Confirmation
+
+                Print("Confirm Finished.");
             }
         }
 
@@ -345,19 +352,18 @@ namespace TNetD.Consensus
                 {
                     double percentage = ((double)trustedConfirmedVoters * 100.0) / (double)totalTrustedConnections;
 
-                    if(percentage >= Constants.CONS_FINAL_VOTING_THRESHOLD_PERC)
+                    if (percentage >= Constants.CONS_FINAL_VOTING_THRESHOLD_PERC)
                     {
-                        DisplayUtils.Display("Voting Successful. Applying to ledger.");
-
+                        Print("Voting Successful. Applying to ledger.");
 
 
                     }
 
                 }
 
-                DisplayUtils.Display("Finished Voting Round.");
-
                 CurrentConsensusState = ConsensusStates.Collect;
+
+                Print("Apply Finished. Consensus Finished.");
             }
         }
 

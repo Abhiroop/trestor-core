@@ -61,7 +61,8 @@ namespace TNetD.Consensus
             packet.PublicKeySource = nodeConfig.PublicKey;
             packet.Type = PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST;
             networkPacketSwitch.AddToQueue(node, packet);
-            Print("Fetch Request Sent to " + node);
+
+            if (VerboseDebugging) Print("Fetch Request Sent to " + node);
         }
 
         /// <summary>
@@ -98,7 +99,8 @@ namespace TNetD.Consensus
             rpacket.PublicKeySource = nodeConfig.PublicKey;
             rpacket.Type = PacketType.TPT_CONS_MERGE_TX_FETCH_RESPONSE;
             networkPacketSwitch.AddToQueue(packet.PublicKeySource, rpacket);
-            Print("Fetch Request From " + packet.PublicKeySource + " Processed");
+
+            if (VerboseDebugging) Print("Fetch Request From " + packet.PublicKeySource + " Processed");
         }
 
         /// <summary>
@@ -146,7 +148,7 @@ namespace TNetD.Consensus
                 CreateBallot();
             }
 
-            Print("Fetch Response From " + packet.PublicKeySource + " Processed");
+            if (VerboseDebugging) Print("Fetch Response From " + packet.PublicKeySource + " Processed");
         }
 
         /// <summary>
@@ -164,7 +166,8 @@ namespace TNetD.Consensus
                 request.Type = PacketType.TPT_CONS_MERGE_REQUEST;
                 networkPacketSwitch.AddToQueue(node.Key, request);
             }
-            Print("Merge Requests Sent to " + nodeState.ConnectedValidators.Count + " Validators");
+
+            if (VerboseDebugging) Print("Merge Requests Sent to " + nodeState.ConnectedValidators.Count + " Validators");
         }
 
         /// <summary>
@@ -189,7 +192,8 @@ namespace TNetD.Consensus
             response.Data = message.Serialize();
             response.Type = PacketType.TPT_CONS_MERGE_RESPONSE;
             networkPacketSwitch.AddToQueue(sender, response);
-            Print("Merge Request from " + packet.PublicKeySource + " Processed");
+
+            if (VerboseDebugging) Print("Merge Request from " + packet.PublicKeySource + " Processed");
         }
 
         /// <summary>
@@ -217,7 +221,8 @@ namespace TNetD.Consensus
 
                 sendFetchRequests(packet.PublicKeySource, newTransactions);
             }
-            Print("Merge Response from " + packet.PublicKeySource + " Processed");
+
+            if (VerboseDebugging) Print("Merge Response from " + packet.PublicKeySource + " Processed");
         }
 
         void sendVoteRequests()
@@ -238,7 +243,7 @@ namespace TNetD.Consensus
                 networkPacketSwitch.AddToQueue(node.Key, request);
             }
 
-            Print("Vote requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
+            if (VerboseDebugging) Print("Vote requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
         }
 
         void processVoteRequest(NetworkPacket packet)
@@ -251,7 +256,7 @@ namespace TNetD.Consensus
             if (voteRequest.LedgerCloseSequence == ledgerCloseSequence)
             {
                 voteResponse.isSynced = true;
-               
+
                 if (isBallotValid)
                 {
                     voteResponse.ballot = ballot;
@@ -262,6 +267,9 @@ namespace TNetD.Consensus
             {
                 voteResponse.goodBallot = false;
                 voteResponse.isSynced = false;
+
+                Print("LCS (PVReq) Mismatch for " + GetTrustedName(packet.PublicKeySource) +
+                    " : " + voteRequest.LedgerCloseSequence + "!=" + ledgerCloseSequence);
             }
 
             NetworkPacket response = new NetworkPacket();
@@ -271,7 +279,7 @@ namespace TNetD.Consensus
             response.Type = PacketType.TPT_CONS_VOTE_RESPONSE;
             networkPacketSwitch.AddToQueue(packet.PublicKeySource, response);
 
-            Print("Vote Request Replied to " + packet.PublicKeySource);
+            if (VerboseDebugging) Print("Vote Request Replied to " + packet.PublicKeySource);
         }
 
         void processVoteResponse(NetworkPacket packet)
@@ -299,11 +307,16 @@ namespace TNetD.Consensus
                                 }
                             }
                         }
+                        else
+                        {
+                            Print("LCS Mismatch (PVResp) for " + GetTrustedName(packet.PublicKeySource) +
+                                " : " + message.ballot.LedgerCloseSequence + "!=" + ledgerCloseSequence);
+                        }
                     }
                 }
             }
 
-            Print("Vote Response from " + packet.PublicKeySource + " Processed");
+            if (VerboseDebugging) Print("Vote Response from " + packet.PublicKeySource + " Processed");
         }
 
         void sendConfirmationRequests()
@@ -325,7 +338,16 @@ namespace TNetD.Consensus
                 networkPacketSwitch.AddToQueue(node.Key, request);
             }
 
-            Print("Confirmation Requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
+            if (VerboseDebugging) Print("Confirmation Requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
+        }
+
+        string GetTrustedName(Hash publicKey)
+        {
+            if (nodeConfig.TrustedNodes.ContainsKey(publicKey))
+            {
+                return nodeConfig.TrustedNodes[publicKey].Name;
+            }
+            else return "NOT_TRUSTED : " + publicKey.ToString().Substring(0,12);
         }
 
         void processConfirmRequest(NetworkPacket packet)
@@ -351,6 +373,9 @@ namespace TNetD.Consensus
                 // If the peer is not synced, there no point sending the ballot anyway.
                 voteConfirmResponse.IsSynced = false;
                 voteConfirmResponse.BallotGood = false;
+
+                Print("LCS (PCReq) Mismatch for " + GetTrustedName(packet.PublicKeySource)
+                    + " : " + voteConfirmRequest.LedgerCloseSequence + "!=" + ledgerCloseSequence);
             }
 
             Hash token = TNetUtils.GenerateNewToken();
@@ -362,9 +387,9 @@ namespace TNetD.Consensus
 
             networkPacketSwitch.AddToQueue(packet.PublicKeySource, request);
 
-            Print("Confirm Response sent to " + packet.PublicKeySource);
+            if (VerboseDebugging) Print("Confirm Response sent to " + packet.PublicKeySource);
         }
-     
+
         void processConfirmResponse(NetworkPacket packet)
         {
             if (networkPacketSwitch.VerifyPendingPacket(packet))
@@ -379,7 +404,7 @@ namespace TNetD.Consensus
                         if (response.FinalBallot.PublicKey == packet.PublicKeySource)
                         {
                             Ballot receivedBallot = response.FinalBallot;
-                            
+
                             if (isFinalBallotValid)
                             {
                                 // Verify ballot signature.
@@ -408,9 +433,9 @@ namespace TNetD.Consensus
                         }
                     }
                 }
-            }           
+            }
 
-            Print("Vote Confirm Response from '" + packet.PublicKeySource + "' Processed");
+            if (VerboseDebugging) Print("Vote Confirm Response from '" + packet.PublicKeySource + "' Processed");
         }
 
 

@@ -1,22 +1,29 @@
-﻿//
+﻿
+//
 //  @Author: Arpan Jati
 //  @Date: 4th September 2015 
 //
 
 using System.Collections.Generic;
 using System.Linq;
+using TNetD.Nodes;
 
 namespace TNetD.Consensus
 {
     class VoteMap
     {
+        NodeConfig nodeConfig;
+        NodeState nodeState;
+
         // Key: PublicKey
         Dictionary<Hash, Ballot> map = default(Dictionary<Hash, Ballot>);
 
-        public VoteMap()
+        public VoteMap(NodeConfig nodeConfig, NodeState nodeState)
         {
-            map = new Dictionary<Hash, Ballot>();
+            this.nodeConfig = nodeConfig;
+            this.nodeState = nodeState;
 
+            map = new Dictionary<Hash, Ballot>();
         }
 
         /// <summary>
@@ -53,7 +60,7 @@ namespace TNetD.Consensus
 
             if (votersCount < Constants.VOTE_MIN_VOTERS)
             {
-                DisplayUtils.Display("Insufficient number of Voters :" + votersCount, DisplayType.ImportantInfo);
+                DisplayUtils.Display(nodeConfig.ID() + " Insufficient number of Voters :" + votersCount, DisplayType.ImportantInfo);
             }
             else
             {
@@ -142,7 +149,7 @@ namespace TNetD.Consensus
 
             if (votersCount < Constants.VOTE_MIN_VOTERS)
             {
-                DisplayUtils.Display("Insufficient number of Voters :" + votersCount, DisplayType.ImportantInfo);
+                DisplayUtils.Display(nodeConfig.ID() + " Insufficient number of Voters :" + votersCount, DisplayType.ImportantInfo);
             }
             else
             {

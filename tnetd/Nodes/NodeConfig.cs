@@ -141,6 +141,15 @@ namespace TNetD.Nodes
             Name = GetInitString("Info", "Name", "name" + HexUtil.ToString(RAND_PART).ToLowerInvariant());
         }
 
+        /// <summary>
+        /// Returns a string correcponding to the NodeID
+        /// </summary>
+        /// <returns></returns>
+        public string ID()
+        {
+            return "Node_" + NodeID;
+        }
+
         void LoadTrustedNodes()
         {
             if (File.Exists(File_TrustedNodes))
