@@ -45,7 +45,7 @@ namespace TNetD.Consensus
                         ProtocolPackager.UnpackHash(PDT, 0, out PublicKey);               
                         break;
 
-                    case 2:
+                    case 1:
                         ProtocolPackager.UnpackVarint(PDT, 1, ref LedgerCloseSequence);
                         break;
 

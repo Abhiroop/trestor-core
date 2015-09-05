@@ -356,14 +356,21 @@ namespace TNetD.Consensus
                     {
                         Print("Voting Successful. Applying to ledger.");
 
-
                     }
-
+                    else
+                    {
+                        Print("Voting Unsuccessful. Consesus percentage: " + percentage);
+                    }
+                }
+                else
+                {
+                    Print("Voting Unsuccessful. Not Enough Trusted Voters. Trusted Voters: " + trustedConfirmedVoters +
+                        " Trusted Conns :" + totalTrustedConnections);
                 }
 
                 CurrentConsensusState = ConsensusStates.Collect;
 
-                Print("Apply Finished. Consensus Finished.");
+               // Print("Apply Finished. Consensus Finished.");
             }
         }
 

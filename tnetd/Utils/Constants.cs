@@ -10,14 +10,14 @@ using TNetD.Json.REST;
 namespace TNetD
 {
     static class Constants
-    {        
+    {
         /// <summary>
         /// Depth at which hash tree leaves are stored.
         /// Its highly critical to tree hash generation and synchronisation.
         /// Cannot be changed once the network starts working.
         /// </summary>
         public static readonly int HashTree_NodeListDepth = 8;
-               
+
         public static readonly int GlobalNodes = 100;
 
         public static readonly int Connections_PerNode_Max = 20;
@@ -32,12 +32,12 @@ namespace TNetD
         /// This is the percentage at which the node begins to vote for a packet.
         /// </summary>
         public static readonly int Consensus_BeginForwarding = 50;
-        
+
         public static readonly int PacketLimitPerSecond = 10;
         public static readonly int DataLimitPerSecond = 512 * 1024; // Bytes per second.
 
         //public static List<Node> GlobalNodeList = new List<Node>();
-     
+
         /// ////////////////////////
 
         /// <summary>
@@ -48,14 +48,17 @@ namespace TNetD
 
         public static readonly long DB_HISTORY_LIMIT = 1000;
         public static readonly long DB_HISTORY_TX_LIMIT = 100000; // TODO: SET TO GOOD LIMITS
-       
+
         public static readonly int VALIDATOR_COUNT = 5;
         public static readonly int SIM_REFRESH_MS = 50;
         public static readonly int SIM_REFRESH_MS_SIM = 50;
 
         // VOTING CONSTANTS
 
-        public static readonly int VOTE_MIN_VOTERS = 5;
+        /// <summary>
+        /// Minimim number of voters needed excluding us. Example: for the 5 node system, the value should be 4.
+        /// </summary>
+        public static readonly int VOTE_MIN_VOTERS = 4;
 
         /// <summary>
         /// 50%. If a transaction is voted for by more than this percentage of voters,
@@ -69,7 +72,7 @@ namespace TNetD
         /// 80%. This is the percentage of voters, who should agree to the set to be accepted in the ledger.
         /// </summary>
         public static readonly int CONS_FINAL_VOTING_THRESHOLD_PERC = 80;
-        
+
         /// <summary>
         /// ////////////////////////////////////////////////
         /// </summary>
@@ -93,20 +96,20 @@ namespace TNetD
 
         public static int PREFS_APP_TCP_BUFFER_SIZE = 4096;// 512 * 1024;
 
-        public static long PREFS_MAX_RPC_POST_CONTENT_LENGTH = 50*1024; // 50 KiB 
-                
+        public static long PREFS_MAX_RPC_POST_CONTENT_LENGTH = 50 * 1024; // 50 KiB 
+
         public static byte TransportVersion = 1;
         public static byte ProtocolVersion = 1;
 
         public static int Difficulty = 8; // 17;
-              
+
         // ////////////////////// Counters ////////////////
 
         public static int GlobalReceivedPackets = 0;
         public static int GlobalReceivedBytes = 0;
         public static int GlobalSentPackets = 0;
         public static int GlobalSentBytes = 0;
-        
+
 
         public static long SERVER_GLOBAL_PACKETS = 0;
         public static long SERVER_GLOBAL_DATA_PACKETS = 0;
@@ -137,19 +140,19 @@ namespace TNetD
 
         public static readonly int Node_UpdateFrequencyLedgerSyncMS = 100;
         public static readonly int Node_UpdateFrequencyLedgerSyncMS_Root = 2000;
-               
-        
+
+
         /// <summary>
         /// Minimum Level to be displayed.
         /// </summary>
         public static readonly DisplayType DebugLevel = DisplayType.Info;
-        
+
         /// <summary>
         /// Number of pending work proofs, before new entries are rejected.
         /// </summary>
         public static readonly int WorkProofQueueLength = 50000;
-        
-        
-        
+
+
+
     }
 }
