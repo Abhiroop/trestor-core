@@ -1,22 +1,17 @@
 ﻿
 //  @Author: Arpan Jati
-//  @Date: June 2015 
+//  @Date: 5th September 2015 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TNetD.Protocol;
+using System.Collections.Generic;
 
 namespace TNetD.Consensus
 {
     class VoteConfirmRequest : ISerializableBase
     {
         public Hash PublicKey;
-        public Hash BallotHash;
         public long LedgerCloseSequence;
-        
+
         public VoteConfirmRequest()
         {
             Init();
@@ -25,7 +20,6 @@ namespace TNetD.Consensus
         public void Init()
         {
             PublicKey = new Hash();
-            PublicKey = new Hash();
             LedgerCloseSequence = 0;
         }
 
@@ -33,8 +27,7 @@ namespace TNetD.Consensus
         {
             List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
             PDTs.Add(ProtocolPackager.Pack(PublicKey, 0));
-            PDTs.Add(ProtocolPackager.Pack(BallotHash, 1));
-            PDTs.Add(ProtocolPackager.Pack(LedgerCloseSequence, 2));
+            PDTs.Add(ProtocolPackager.Pack(LedgerCloseSequence, 1));
             return ProtocolPackager.PackRaw(PDTs);
         }
 
@@ -52,17 +45,13 @@ namespace TNetD.Consensus
                         ProtocolPackager.UnpackHash(PDT, 0, out PublicKey);                        
                         break;
 
-                    case 1:
-                        ProtocolPackager.UnpackHash(PDT, 1, out BallotHash);
+                    case 2:
+                        ProtocolPackager.UnpackInt64(PDT, 1, ref LedgerCloseSequence);
                         break;
 
-                    case 2:
-                        ProtocolPackager.UnpackInt64(PDT, 2, ref LedgerCloseSequence);
-                        break;
                 }
             }
         }
-        
 
     }
 }

@@ -220,19 +220,13 @@ namespace TNetD.Consensus
             Print("Merge Response from " + packet.PublicKeySource + " Processed");
         }
 
-
         void sendVoteRequests()
         {
-            LedgerCloseData lcd;
-            bool ok = nodeState.PersistentCloseHistory.GetLastRowData(out lcd);
-
-            // TODO: OF okay = false make sure that the ledger is synced first before voting.
-
             foreach (var node in nodeState.ConnectedValidators)
             {
                 // Create BallotRequestMessage
                 VoteRequestMessage brp = new VoteRequestMessage();
-                brp.LedgerCloseSequence = lcd.SequenceNumber;
+                brp.LedgerCloseSequence = ledgerCloseSequence;
 
                 // Create NetworkPacket and send
                 NetworkPacket request = new NetworkPacket();
@@ -247,28 +241,37 @@ namespace TNetD.Consensus
             Print("Vote requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
         }
 
-
         void processVoteRequest(NetworkPacket packet)
         {
-            VoteResponseMessage brm = new VoteResponseMessage();
+            VoteRequestMessage voteRequest = new VoteRequestMessage();
+            voteRequest.Deserialize(packet.Data);
 
-            if (isBallotValid)
+            VoteResponseMessage voteResponse = new VoteResponseMessage();
+
+            if (voteRequest.LedgerCloseSequence == ledgerCloseSequence)
             {
-                brm.ballot = ballot;
-                brm.goodBallot = true;
+                voteResponse.isSynced = true;
+
+                if (isBallotValid)
+                {
+                    voteResponse.ballot = ballot;
+                    voteResponse.goodBallot = true;
+                }
+            }
+            else
+            {
+                voteResponse.goodBallot = false;
+                voteResponse.isSynced = false;
             }
 
-            Hash sender = packet.PublicKeySource;
-            Hash token = packet.Token;
-
             NetworkPacket response = new NetworkPacket();
-            response.Token = token;
+            response.Token = packet.Token;
             response.PublicKeySource = nodeConfig.PublicKey;
-            response.Data = brm.Serialize();
+            response.Data = voteResponse.Serialize();
             response.Type = PacketType.TPT_CONS_VOTE_RESPONSE;
-            networkPacketSwitch.AddToQueue(sender, response);
+            networkPacketSwitch.AddToQueue(packet.PublicKeySource, response);
 
-            Print("Vote Request Replied to " + sender);
+            Print("Vote Request Replied to " + packet.PublicKeySource);
         }
 
         void processVoteResponse(NetworkPacket packet)
@@ -302,6 +305,114 @@ namespace TNetD.Consensus
 
             Print("Vote Response from " + packet.PublicKeySource + " Processed");
         }
+
+        void sendConfirmationRequests()
+        {
+            foreach (var node in nodeState.ConnectedValidators)
+            {
+                // Create VoteConfirmRequest
+                VoteConfirmRequest vcr = new VoteConfirmRequest();
+                vcr.LedgerCloseSequence = ledgerCloseSequence;
+                vcr.PublicKey = nodeConfig.PublicKey;
+
+                // Create NetworkPacket and send
+                NetworkPacket request = new NetworkPacket();
+                request.PublicKeySource = nodeConfig.PublicKey;
+                request.Token = TNetUtils.GenerateNewToken();
+                request.Data = vcr.Serialize();
+                request.Type = PacketType.TPT_CONS_CONFIRM_REQUEST;
+
+                networkPacketSwitch.AddToQueue(node.Key, request);
+            }
+
+            Print("Confirmation Requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
+        }
+
+        void processConfirmRequest(NetworkPacket packet)
+        {
+            VoteConfirmRequest voteConfirmRequest = new VoteConfirmRequest();
+            voteConfirmRequest.Deserialize(packet.Data);
+
+            VoteConfirmResponse voteConfirmResponse = new VoteConfirmResponse();
+
+            if (voteConfirmRequest.LedgerCloseSequence == ledgerCloseSequence &&
+                voteConfirmRequest.PublicKey == packet.PublicKeySource)
+            {
+                voteConfirmResponse.IsSynced = true;
+
+                if (isFinalBallotValid)
+                {
+                    voteConfirmResponse.BallotGood = true;
+                    voteConfirmResponse.FinalBallot = finalBallot;
+                }
+            }
+            else
+            {
+                // If the peer is not synced, there no point sending the ballot anyway.
+                voteConfirmResponse.IsSynced = false;
+                voteConfirmResponse.BallotGood = false;
+            }
+
+            Hash token = TNetUtils.GenerateNewToken();
+            NetworkPacket request = new NetworkPacket();
+            request.PublicKeySource = nodeConfig.PublicKey;
+            request.Token = token;
+            request.Data = voteConfirmResponse.Serialize();
+            request.Type = PacketType.TPT_CONS_CONFIRM_RESPONSE;
+
+            networkPacketSwitch.AddToQueue(packet.PublicKeySource, request);
+
+            Print("Confirm Response sent to " + packet.PublicKeySource);
+        }
+     
+        void processConfirmResponse(NetworkPacket packet)
+        {
+            if (networkPacketSwitch.VerifyPendingPacket(packet))
+            {
+                if (CurrentConsensusState == ConsensusStates.Confirm)
+                {
+                    VoteConfirmResponse response = new VoteConfirmResponse();
+                    response.Deserialize(packet.Data);
+
+                    if (response.BallotGood && response.IsSynced)
+                    {
+                        if (response.FinalBallot.PublicKey == packet.PublicKeySource)
+                        {
+                            Ballot receivedBallot = response.FinalBallot;
+                            
+                            if (isFinalBallotValid)
+                            {
+                                // Verify ballot signature.
+                                if (receivedBallot.VerifySignature(packet.PublicKeySource))
+                                {
+                                    // Assert that the voter should be already on the list
+                                    if (synchronizedVoters.Contains(packet.PublicKeySource))
+                                    {
+                                        // Validate ballot similarity
+                                        if (voteMap.CheckVoterSyncState(finalBallot, receivedBallot))
+                                        {
+                                            // Valiate ballot timestamp
+                                            if (Utils.CheckTimeCloseness(finalBallot.Timestamp, receivedBallot.Timestamp, 1500))
+                                            {
+                                                // Extra check, the voter should not vote twice anyway.
+                                                if (!finalConfirmedVoters.Contains(packet.PublicKeySource))
+                                                {
+                                                    finalConfirmedVoters.Add(packet.PublicKeySource);
+                                                }
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }           
+
+            Print("Vote Confirm Response from '" + packet.PublicKeySource + "' Processed");
+        }
+
 
     }
 }

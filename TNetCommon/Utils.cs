@@ -1,6 +1,6 @@
 ﻿
 // @Author : Arpan Jati
-// @Date: Dec 2014
+// @Date: Dec 2014 | Sept 2015
 
 using System;
 using System.Collections.Generic;
@@ -49,6 +49,29 @@ namespace TNetD
         {
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             return Convert.ToInt64((date - epoch).TotalSeconds);
+        }
+        
+        /// <summary>
+        /// Returns true if A and B have difference less than timeMS (milliseconds).
+        /// </summary>
+        /// <param name="aFileTimeUTC"></param>
+        /// <param name="bFileTimeUTC"></param>
+        /// <param name="timeMS"></param>
+        /// <returns></returns>
+        public static bool CheckTimeCloseness(long aFileTimeUTC, long bFileTimeUTC, double timeMS)
+        {
+            DateTime a = DateTime.FromFileTimeUtc(aFileTimeUTC);
+            DateTime b = DateTime.FromFileTimeUtc(bFileTimeUTC);
+
+            TimeSpan tsp = a - b;
+
+            double absMs = Math.Abs(tsp.TotalMilliseconds);
+
+            if (absMs < timeMS)
+            {
+                return true;
+            }
+            else return false;
         }
 
         public static bool ByteArrayEquals(byte[] x, int xOffset, byte[] y, int yOffset, int length)

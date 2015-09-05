@@ -12,10 +12,12 @@ namespace TNetD.Consensus
         public Ballot ballot;
 
         public bool goodBallot;
+        public bool isSynced;
 
-        public VoteResponseMessage(Ballot ballot, bool goodBallot)
+        public VoteResponseMessage(Ballot ballot, bool goodBallot, bool isSynced)
         {
             this.ballot = ballot;
+            this.isSynced = isSynced;
             this.goodBallot = goodBallot;
         }
 
@@ -23,6 +25,7 @@ namespace TNetD.Consensus
         {
             this.ballot = new Ballot();
             this.goodBallot = false;
+            this.isSynced = false;
         }
 
         public byte[] Serialize()
@@ -31,6 +34,7 @@ namespace TNetD.Consensus
 
             PDTs.Add(ProtocolPackager.Pack(ballot.Serialize(), 0));                        
             PDTs.Add(ProtocolPackager.Pack(goodBallot, 1));
+            PDTs.Add(ProtocolPackager.Pack(isSynced, 2));
 
             return ProtocolPackager.PackRaw(PDTs);
         }
@@ -57,9 +61,12 @@ namespace TNetD.Consensus
                         break;
 
                     case 1:
-
                         ProtocolPackager.UnpackBool(PDT, 1, ref goodBallot);
-                        break;                  
+                        break;
+
+                    case 2:
+                        ProtocolPackager.UnpackBool(PDT, 2, ref isSynced);
+                        break;
                 }
             }
         }

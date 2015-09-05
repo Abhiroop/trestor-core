@@ -5,8 +5,6 @@
 using TNetD.Protocol;
 using System.Collections.Generic;
 using Chaos.NaCl;
-using System.Security.Cryptography;
-using System.Linq;
 
 namespace TNetD.Consensus
 {
@@ -57,46 +55,6 @@ namespace TNetD.Consensus
             Signature = new Hash();
             Timestamp = 0;
             LedgerCloseSequence = 0;
-        }
-        
-        /// <summary>
-        /// Returns data to be hashed. This conatains all fields except timestamp.
-        /// </summary>
-        /// <returns></returns>
-        public byte[] GetHashData()
-        {
-            List<byte> data = new List<byte>();
-
-            foreach (Hash transaction in TransactionIds)
-            {
-                data.AddRange(transaction.Hex);
-            }
-
-            data.AddRange(Conversions.Int64ToVector(LedgerCloseSequence));
-            data.AddRange(PublicKey.Hex);
-
-            return data.ToArray();
-        }
-
-        public byte[] GetSignatureData()
-        {
-            List<byte> data = new List<byte>();
-
-            data.AddRange(GetHashData());
-            data.AddRange(Conversions.Int64ToVector(Timestamp));
-
-            return data.ToArray();
-        }
-
-        /// <summary>
-        /// Everytime the Hash is recomputed.
-        /// </summary>
-        public Hash BallotDataHash
-        {
-            get
-            {
-                return new Hash((new SHA512Cng()).ComputeHash(GetHashData()).Take(32).ToArray() );
-            }
         }
 
         #region Serialization
@@ -163,11 +121,31 @@ namespace TNetD.Consensus
 
         #region Signatures
 
+        /// <summary>
+        /// Returns data to be signed.
+        /// </summary>
+        /// <returns></returns>
+        public byte[] GetSignatureData()
+        {
+            List<byte> data = new List<byte>();
+
+            foreach (Hash transaction in TransactionIds)
+            {
+                data.AddRange(transaction.Hex);
+            }
+
+            data.AddRange(Conversions.Int64ToVector(LedgerCloseSequence));
+            data.AddRange(Conversions.Int64ToVector(Timestamp));
+            data.AddRange(PublicKey.Hex);
+
+            return data.ToArray();
+        }
+
         public void UpdateSignature(byte[] signature)
         {
             this.Signature = new Hash(signature);
         }
-
+        
         public bool VerifySignature(Hash publicKey)
         {
             if (publicKey.Hex.Length != 32) return false;

@@ -173,10 +173,67 @@ namespace TNetD.Consensus
             return transactionIDs;
         }
 
+        /// <summary>
+        /// Checks if both Ballots have same transactions.
+        /// TODO: USE a HASH based version (THINK !)
+        /// It will return true for empty ballots :)
+        /// </summary>
+        /// <param name="myBallot"></param>
+        /// <param name="peerBallot"></param>
+        /// <returns></returns>
+        public bool CheckVoterSyncState(Ballot myBallot, Ballot peerBallot)
+        {
+            if (myBallot.LedgerCloseSequence != peerBallot.LedgerCloseSequence)
+            {
+                return false;
+            }
+
+            if (myBallot.TransactionIds.Count != peerBallot.TransactionIds.Count)
+            {
+                return false;
+            }
+
+            // Critical: Time Sync
+
+            foreach (var txID in myBallot.TransactionIds)
+            {
+                if (!peerBallot.TransactionIds.Contains(txID))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Calculates a list of voters who have the exact same ballot as us.
+        /// CRITICAL: Make sure that all the voters have good finalBallot beforehand.
+        /// </summary>
+        /// <param name="finalBallot"></param>
+        /// <returns></returns>
+        public HashSet<Hash> GetSynchronisedVoters(Ballot finalBallot)
+        {
+            HashSet<Hash> synchronisedVoters = new HashSet<Hash>();
+
+            foreach(var voter in map)
+            {
+                if(CheckVoterSyncState(finalBallot, voter.Value))
+                {
+                    synchronisedVoters.Add(voter.Key);
+                }
+            }
+
+            return synchronisedVoters;
+        }
+
         public void Reset()
         {
             map.Clear();
         }
+
+
+
 
     }
 }

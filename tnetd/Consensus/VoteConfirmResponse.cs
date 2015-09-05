@@ -1,6 +1,6 @@
 ﻿
 //  @Author: Arpan Jati
-//  @Date: June 2015 
+//  @Date: 5 Sept 2015 
 
 using Chaos.NaCl;
 using System;
@@ -12,14 +12,11 @@ using TNetD.Protocol;
 
 namespace TNetD.Consensus
 {
-    class VoteConfirmResponse : ISerializableBase, ISignableBase
+    class VoteConfirmResponse : ISerializableBase
     {
-
-        public Hash SignerPublicKey;
-        public Hash BallotHash;
-        public long LedgerCloseSequence;
-
-        public Hash Signature;
+        public Ballot FinalBallot;
+        public bool BallotGood;
+        public bool IsSynced;
 
         public VoteConfirmResponse()
         {
@@ -28,20 +25,17 @@ namespace TNetD.Consensus
 
         public void Init()
         {
-            SignerPublicKey = new Hash();
-            BallotHash = new Hash();
-            Signature = new Hash();
-            LedgerCloseSequence = 0;
+            FinalBallot = new Ballot();
+            BallotGood = false;
+            IsSynced = false;
         }
 
         public byte[] Serialize()
         {
             List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
-            PDTs.Add(ProtocolPackager.Pack(SignerPublicKey, 0));
-            PDTs.Add(ProtocolPackager.Pack(BallotHash, 1));
-            PDTs.Add(ProtocolPackager.Pack(LedgerCloseSequence, 2));
-            PDTs.Add(ProtocolPackager.Pack(Signature, 3));
-
+            PDTs.Add(ProtocolPackager.Pack(FinalBallot.Serialize(), 0));
+            PDTs.Add(ProtocolPackager.Pack(BallotGood, 1));
+            PDTs.Add(ProtocolPackager.Pack(IsSynced, 2));
             return ProtocolPackager.PackRaw(PDTs);
         }
 
@@ -55,45 +49,29 @@ namespace TNetD.Consensus
             {
                 switch (PDT.NameType)
                 {
+
                     case 0:
-                        ProtocolPackager.UnpackHash(PDT, 0, out SignerPublicKey);
+                        byte[] data = new byte[0];
+                        ProtocolPackager.UnpackByteVector(PDT, 0, ref data);
+                        if (data.Length > 0)
+                        {
+                            Ballot blt = new Ballot();
+                            blt.Deserialize(data);
+                        }
+
                         break;
 
                     case 1:
-                        ProtocolPackager.UnpackHash(PDT, 1, out BallotHash);
+                        ProtocolPackager.UnpackBool(PDT, 1, ref BallotGood);
                         break;
 
                     case 2:
-                        ProtocolPackager.UnpackInt64(PDT, 2, ref LedgerCloseSequence);
-                        break;
-
-                    case 3:
-                        ProtocolPackager.UnpackHash(PDT, 3, out Signature);
+                        ProtocolPackager.UnpackBool(PDT, 2, ref IsSynced);
                         break;
                 }
             }
         }
 
-        public byte[] GetSignatureData()
-        {
-            List<byte> data = new List<byte>();
-            data.AddRange(SignerPublicKey.Hex);
-            data.AddRange(BallotHash.Hex);
-            data.AddRange(Conversions.Int64ToVector(LedgerCloseSequence));
-            return data.ToArray();
-        }
-
-        public void UpdateSignature(byte[] signature)
-        {
-            this.Signature = new Hash(signature);
-        }
-
-        public bool VerifySignature(Hash publicKey)
-        {
-            if (publicKey.Hex.Length != 32) return false;
-
-            return Ed25519.Verify(Signature.Hex, GetSignatureData(), publicKey.Hex);
-        }
-
+       
     }
 }

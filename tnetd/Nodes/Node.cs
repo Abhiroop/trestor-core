@@ -70,9 +70,7 @@ namespace TNetD.Nodes
         TimeSync timeSync = default(TimeSync);
         LedgerSync ledgerSync = default(LedgerSync);
         Voting voting = default(Voting);
-
-        //public AccountInfo AI;
-
+        
         #endregion
 
         #region ConstructorsAndTimers
