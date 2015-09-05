@@ -23,7 +23,7 @@ namespace TNetD.Consensus
 
         public VoteResponseMessage()
         {
-            this.ballot = new Ballot();
+            this.ballot = new Ballot(0);
             this.goodBallot = false;
             this.isSynced = false;
         }
@@ -54,8 +54,7 @@ namespace TNetD.Consensus
                         byte[] data = null;
                         if (ProtocolPackager.UnpackByteVector(PDT, 0, ref data))
                         {
-                            Ballot blt = new Ballot();
-                            blt.Deserialize(data);
+                            ballot.Deserialize(data);
                         }
 
                         break;

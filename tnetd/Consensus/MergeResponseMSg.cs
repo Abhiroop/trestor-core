@@ -2,11 +2,7 @@
 //  @Author: Stephan Verbuecheln
 //  @Date: June 2015 
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TNetD.Protocol;
 
 namespace TNetD.Consensus
@@ -22,23 +18,23 @@ namespace TNetD.Consensus
 
         public byte[] Serialize()
         {
-            ProtocolDataType[] PDTs = new ProtocolDataType[transactions.Count];
-            int i = 0;
+            List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
             foreach (Hash transaction in transactions)
             {
-                PDTs[i] = ProtocolPackager.Pack(transaction, 0);
-                i++;
+                PDTs.Add(ProtocolPackager.Pack(transaction, 0));
             }
             return ProtocolPackager.PackRaw(PDTs);
         }
 
         public void Deserialize(byte[] data)
         {
+            transactions.Clear();
+
             List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(data);
-            foreach (ProtocolDataType p in PDTs)
+            foreach (ProtocolDataType pdt in PDTs)
             {
                 Hash t = new Hash();
-                ProtocolPackager.UnpackHash(p, 0, out t);
+                ProtocolPackager.UnpackHash(pdt, 0, out t);
                 transactions.Add(t);
             }
         }

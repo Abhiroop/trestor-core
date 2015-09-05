@@ -2,11 +2,7 @@
 //  @Author: Arpan Jati
 //  @Date: June 2015 
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TNetD.Protocol;
 
 namespace TNetD.Consensus
@@ -33,13 +29,8 @@ namespace TNetD.Consensus
 
             if (PDTs.Count == 1)
             {
-                long lcs = 0;
-                if (ProtocolPackager.UnpackVarint(PDTs[0], 0, ref lcs))
-                {
-                    LedgerCloseSequence = lcs;
-                }
+                ProtocolPackager.UnpackVarint(PDTs[0], 0, ref LedgerCloseSequence);               
             }
-
         }
     }
 }

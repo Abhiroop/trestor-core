@@ -27,7 +27,7 @@ namespace TNetD.Consensus
         {
             List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
             PDTs.Add(ProtocolPackager.Pack(PublicKey, 0));
-            PDTs.Add(ProtocolPackager.Pack(LedgerCloseSequence, 1));
+            PDTs.Add(ProtocolPackager.PackVarint(LedgerCloseSequence, 1));
             return ProtocolPackager.PackRaw(PDTs);
         }
 
@@ -42,11 +42,11 @@ namespace TNetD.Consensus
                 switch (PDT.NameType)
                 {
                     case 0:
-                        ProtocolPackager.UnpackHash(PDT, 0, out PublicKey);                        
+                        ProtocolPackager.UnpackHash(PDT, 0, out PublicKey);               
                         break;
 
                     case 2:
-                        ProtocolPackager.UnpackInt64(PDT, 1, ref LedgerCloseSequence);
+                        ProtocolPackager.UnpackVarint(PDT, 1, ref LedgerCloseSequence);
                         break;
 
                 }

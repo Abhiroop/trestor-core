@@ -64,6 +64,8 @@ namespace TNetD.Consensus
 
         public void Deserialize(byte[] data)
         {
+            transactions.Clear();
+
             List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(data);
             foreach (ProtocolDataType pdt in PDTs)
             {

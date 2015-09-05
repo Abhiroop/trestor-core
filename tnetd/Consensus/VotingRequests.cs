@@ -251,7 +251,7 @@ namespace TNetD.Consensus
             if (voteRequest.LedgerCloseSequence == ledgerCloseSequence)
             {
                 voteResponse.isSynced = true;
-
+               
                 if (isBallotValid)
                 {
                     voteResponse.ballot = ballot;

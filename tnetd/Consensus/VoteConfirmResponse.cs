@@ -25,7 +25,7 @@ namespace TNetD.Consensus
 
         public void Init()
         {
-            FinalBallot = new Ballot();
+            FinalBallot = new Ballot(0);
             BallotGood = false;
             IsSynced = false;
         }
@@ -55,7 +55,7 @@ namespace TNetD.Consensus
                         ProtocolPackager.UnpackByteVector(PDT, 0, ref data);
                         if (data.Length > 0)
                         {
-                            Ballot blt = new Ballot();
+                            Ballot blt = new Ballot(0);
                             blt.Deserialize(data);
                         }
 

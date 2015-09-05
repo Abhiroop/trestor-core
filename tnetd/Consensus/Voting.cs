@@ -176,17 +176,19 @@ namespace TNetD.Consensus
                     switch (CurrentConsensusState)
                     {
                         case ConsensusStates.Collect:
+
+                            // LCS = LCL + 1     
+                            ledgerCloseSequence = nodeState.Ledger.LedgerCloseData.SequenceNumber + 1;
+
                             isBallotValid = false;
                             isFinalBallotValid = false;
                             isAcceptMapValid = false;
                             isFinalConfirmedVotersValid = false;
                             voteMap.Reset();
-                            finalBallot = new Ballot();
-                            ballot = new Ballot();
+                            finalBallot = new Ballot(ledgerCloseSequence);
+                            ballot = new Ballot(ledgerCloseSequence);
                             finalConfirmedVoters = new HashSet<Hash>();
 
-                            // LCS = LCL + 1     
-                            ledgerCloseSequence = nodeState.Ledger.LedgerCloseData.SequenceNumber + 1;
 
                             processPendingTransactions();
                             CurrentConsensusState = ConsensusStates.Merge;

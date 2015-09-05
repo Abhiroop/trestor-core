@@ -32,11 +32,11 @@ namespace TNetD.Consensus
             LedgerCloseSequence = ledgerCloseSequence;
         }
 
-        public Ballot()
-        {
-            Init();
-            LedgerCloseSequence = 0;
-        }
+        /* public Ballot()
+         {
+             Init();
+             LedgerCloseSequence = 0;
+         }*/
 
         public bool Add(Hash TransactionID)
         {
@@ -68,7 +68,7 @@ namespace TNetD.Consensus
                 PDTs.Add(ProtocolPackager.Pack(txId, 0));
             }
 
-            PDTs.Add(ProtocolPackager.Pack(LedgerCloseSequence, 1));
+            PDTs.Add(ProtocolPackager.PackVarint(LedgerCloseSequence, 1));
             PDTs.Add(ProtocolPackager.PackVarint(Timestamp, 2));
             PDTs.Add(ProtocolPackager.Pack(PublicKey, 3));
             PDTs.Add(ProtocolPackager.Pack(Signature, 4));
@@ -81,12 +81,9 @@ namespace TNetD.Consensus
             Init();
 
             List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
-            int cnt = 0;
-
-            while (cnt < (int)PDTs.Count)
+            
+            foreach (var PDT in PDTs)
             {
-                ProtocolDataType PDT = PDTs[cnt++];
-
                 switch (PDT.NameType)
                 {
                     case 0:
@@ -114,7 +111,6 @@ namespace TNetD.Consensus
                         break;
                 }
             }
-
         }
 
         #endregion
@@ -145,7 +141,7 @@ namespace TNetD.Consensus
         {
             this.Signature = new Hash(signature);
         }
-        
+
         public bool VerifySignature(Hash publicKey)
         {
             if (publicKey.Hex.Length != 32) return false;
