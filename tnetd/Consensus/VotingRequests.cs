@@ -338,7 +338,7 @@ namespace TNetD.Consensus
                 networkPacketSwitch.AddToQueue(node.Key, request);
             }
 
-           if (VerboseDebugging) Print("Confirmation Requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
+            if (VerboseDebugging) Print("Confirmation Requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
         }
 
         string GetTrustedName(Hash publicKey)
@@ -347,7 +347,7 @@ namespace TNetD.Consensus
             {
                 return nodeConfig.TrustedNodes[publicKey].Name;
             }
-            else return "NOT_TRUSTED : " + publicKey.ToString().Substring(0,12);
+            else return "NOT_TRUSTED : " + publicKey.ToString().Substring(0, 12);
         }
 
         void processConfirmRequest(NetworkPacket packet)
@@ -377,7 +377,7 @@ namespace TNetD.Consensus
                 Print("LCS (PCReq) Mismatch for " + GetTrustedName(packet.PublicKeySource)
                     + " : " + voteConfirmRequest.LedgerCloseSequence + "!=" + ledgerCloseSequence);
             }
-            
+
             NetworkPacket request = new NetworkPacket();
             request.PublicKeySource = nodeConfig.PublicKey;
             request.Token = packet.Token;
@@ -418,14 +418,8 @@ namespace TNetD.Consensus
                                             // Valiate ballot timestamp
                                             if (Utils.CheckTimeCloseness(finalBallot.Timestamp, receivedBallot.Timestamp, 1500))
                                             {
-                                                // Extra check, the voter should not vote twice anyway.
-                                                if (!finalConfirmedVoters.Contains(packet.PublicKeySource))
-                                                {
-                                                    if (packet.PublicKeySource == null)
-                                                        DisplayUtils.Display("VERY_BAD_01", DisplayType.Warning);
+                                                finalVoters.Add(packet.PublicKeySource, ledgerCloseSequence);
 
-                                                    finalConfirmedVoters.Add(packet.PublicKeySource);
-                                                }
 
                                             }
                                         }

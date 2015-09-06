@@ -124,6 +124,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Consensus\Ballot.cs" />
+    <Compile Include="Consensus\FinalVoters.cs" />
     <Compile Include="Consensus\VoteConfirmRequest.cs" />
     <Compile Include="Consensus\VoteConfirmResponse.cs" />
     <Compile Include="Consensus\VoteRequestMessage.cs" />
