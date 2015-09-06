@@ -4,6 +4,7 @@
 //  @Date: 4th September 2015 
 //
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TNetD.Nodes;
@@ -33,15 +34,22 @@ namespace TNetD.Consensus
         /// <param name="ballot"></param>
         public void AddBallot(Ballot ballot)
         {
-            if (map.ContainsKey(ballot.PublicKey))
-            {
-                // Update
-                map[ballot.PublicKey] = ballot;
+            try {
+
+                if (map.ContainsKey(ballot.PublicKey))
+                {
+                    // Update
+                    map[ballot.PublicKey] = ballot;
+                }
+                else
+                {
+                    // Insert
+                    map.Add(ballot.PublicKey, ballot);
+                }
             }
-            else
+            catch(Exception e)
             {
-                // Insert
-                map.Add(ballot.PublicKey, ballot);
+                DisplayUtils.Display("AddBallot", e);
             }
         }
         

@@ -55,8 +55,7 @@ namespace TNetD.Consensus
                         ProtocolPackager.UnpackByteVector(PDT, 0, ref data);
                         if (data.Length > 0)
                         {
-                            Ballot blt = new Ballot(0);
-                            blt.Deserialize(data);
+                            FinalBallot.Deserialize(data);
                         }
 
                         break;

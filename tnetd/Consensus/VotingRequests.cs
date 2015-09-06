@@ -338,7 +338,8 @@ namespace TNetD.Consensus
                 networkPacketSwitch.AddToQueue(node.Key, request);
             }
 
-            if (VerboseDebugging) Print("Confirmation Requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
+           // if (VerboseDebugging)
+                Print("Confirmation Requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
         }
 
         string GetTrustedName(Hash publicKey)
@@ -377,17 +378,17 @@ namespace TNetD.Consensus
                 Print("LCS (PCReq) Mismatch for " + GetTrustedName(packet.PublicKeySource)
                     + " : " + voteConfirmRequest.LedgerCloseSequence + "!=" + ledgerCloseSequence);
             }
-
-            Hash token = TNetUtils.GenerateNewToken();
+            
             NetworkPacket request = new NetworkPacket();
             request.PublicKeySource = nodeConfig.PublicKey;
-            request.Token = token;
+            request.Token = packet.Token;
             request.Data = voteConfirmResponse.Serialize();
             request.Type = PacketType.TPT_CONS_CONFIRM_RESPONSE;
 
             networkPacketSwitch.AddToQueue(packet.PublicKeySource, request);
 
-            if (VerboseDebugging) Print("Confirm Response sent to " + packet.PublicKeySource);
+            //if (VerboseDebugging)
+                Print("Confirm Response sent to " + packet.PublicKeySource);
         }
 
         void processConfirmResponse(NetworkPacket packet)
@@ -435,7 +436,8 @@ namespace TNetD.Consensus
                 }
             }
 
-            if (VerboseDebugging) Print("Vote Confirm Response from '" + packet.PublicKeySource + "' Processed");
+            //if (VerboseDebugging)
+                Print("Vote Confirm Response from '" + packet.PublicKeySource + "' Processed");
         }
 
 
