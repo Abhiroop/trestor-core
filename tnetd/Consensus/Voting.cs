@@ -22,8 +22,7 @@ using System.Collections.Concurrent;
 namespace TNetD.Consensus
 {
     #region Enums
-
-
+    
     public enum ConsensusStates
     {
         /// <summary>
@@ -97,7 +96,7 @@ namespace TNetD.Consensus
         /// A list of voters who have confirmed to have the same final ballot as us.
         /// If this is above above some threshold, we should apply all the changes to ledger and move on.
         /// </summary>
-        HashSet<Hash> finalConfirmedVoters;
+        FinalVoters finalVoters;
 
         /// <summary>
         /// Set of nodes, who sent a transaction ID
@@ -117,7 +116,7 @@ namespace TNetD.Consensus
             this.propagationMap = new ConcurrentDictionary<Hash, HashSet<Hash>>();
             this.voteMap = new VoteMap(nodeConfig, nodeState);
             synchronizedVoters = new HashSet<Hash>();
-            finalConfirmedVoters = new HashSet<Hash>();
+            finalVoters = new FinalVoters();
 
             networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
             networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
@@ -189,8 +188,7 @@ namespace TNetD.Consensus
                             voteMap.Reset();
                             finalBallot = new Ballot(ledgerCloseSequence);
                             ballot = new Ballot(ledgerCloseSequence);
-                            finalConfirmedVoters = new HashSet<Hash>();
-
+                            finalVoters.Reset(ledgerCloseSequence);
 
                             processPendingTransactions();
                             CurrentConsensusState = ConsensusStates.Merge;
@@ -294,7 +292,7 @@ namespace TNetD.Consensus
 
                 synchronizedVoters = voteMap.GetSynchronisedVoters(finalBallot);
 
-                finalConfirmedVoters = new HashSet<Hash>(); // Maybe repeat, but okay.
+                finalVoters.Reset(ledgerCloseSequence); // Maybe repeat, but okay.
 
                 isFinalBallotValid = true; // TODO: CRITICAL THINK THINK, TESTS !!                
 
@@ -337,9 +335,9 @@ namespace TNetD.Consensus
 
                 int trustedConfirmedVoters = 0;
 
-                if (finalConfirmedVoters == null) Print("BAD_1");
+                if (finalVoters.Voters == null) Print("BAD_1");
                 
-                foreach (var voter in finalConfirmedVoters)
+                foreach (var voter in finalVoters.Voters)
                 {
                     if (voter == null)
                         Print("BAD_2");

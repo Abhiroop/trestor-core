@@ -128,8 +128,9 @@ namespace TNetD
 
                         if (!listBox_Log.IsMouseOver)
                         {
-                            listBox_Log.Items.MoveCurrentToLast();
-                            listBox_Log.ScrollIntoView(listBox_Log.Items.CurrentItem);
+                            //listBox_Log.Items.MoveCurrentToLast();
+                            //listBox_Log.ScrollIntoView(listBox_Log.Items.CurrentItem);
+                            try { listBox_Log.ScrollIntoView(listBox_Log.Items[listBox_Log.Items.Count - 1]); } catch { }
                         }
                     }));
                 }
