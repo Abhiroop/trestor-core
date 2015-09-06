@@ -34,31 +34,27 @@ namespace TNetD.Consensus
         /// <param name="ballot"></param>
         public void AddBallot(Ballot ballot)
         {
-            try {
+            if (map == null)
+                DisplayUtils.Display("VERY_BAD_02", DisplayType.Warning);
 
-                if (map.ContainsKey(ballot.PublicKey))
-                {
-                    // Update
-                    map[ballot.PublicKey] = ballot;
-                }
-                else
-                {
-                    // Insert
-                    map.Add(ballot.PublicKey, ballot);
-                }
-            }
-            catch(Exception e)
+            if (map.ContainsKey(ballot.PublicKey))
             {
-                DisplayUtils.Display("AddBallot", e);
+                // Update
+                map[ballot.PublicKey] = ballot;
+            }
+            else
+            {
+                // Insert
+                map.Add(ballot.PublicKey, ballot);
             }
         }
-        
+
         /// <summary>
         /// Returns a Dictionary, Key is PublicKey, values are a set of required Transactions.
         /// </summary>
         /// <param name="myBallot"></param>
         /// <param name="missingTransactions"></param>
-        public void GetMissingTransactions(Ballot myBallot, out Dictionary<Hash,HashSet<Hash>> missingTransactions)
+        public void GetMissingTransactions(Ballot myBallot, out Dictionary<Hash, HashSet<Hash>> missingTransactions)
         {
             missingTransactions = new Dictionary<Hash, HashSet<Hash>>();
 
@@ -162,7 +158,7 @@ namespace TNetD.Consensus
             else
             {
                 Dictionary<Hash, HashSet<Hash>> voteSet = AssembleVotes();
-                       
+
                 // CRITICAL: ADD SUPPORT FOR -ve votes.
 
                 foreach (var vote in voteSet)
@@ -231,9 +227,9 @@ namespace TNetD.Consensus
         {
             HashSet<Hash> synchronisedVoters = new HashSet<Hash>();
 
-            foreach(var voter in map)
+            foreach (var voter in map)
             {
-                if(CheckVoterSyncState(finalBallot, voter.Value))
+                if (CheckVoterSyncState(finalBallot, voter.Value))
                 {
                     synchronisedVoters.Add(voter.Key);
                 }

@@ -53,6 +53,8 @@ namespace TNetD
 
             InitializeComponent();
 
+            
+
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
 
             Title += " | " + Common.NETWORK_TYPE.ToString();
@@ -123,6 +125,12 @@ namespace TNetD
                         displayMessage.Text = displayMessage.Text.Trim();
                         viewModel.ProcessSkips();
                         viewModel.LogMessages.Add(displayMessage);
+
+                        if (!listBox_Log.IsMouseOver)
+                        {
+                            listBox_Log.Items.MoveCurrentToLast();
+                            listBox_Log.ScrollIntoView(listBox_Log.Items.CurrentItem);
+                        }
                     }));
                 }
                 catch { }
@@ -131,7 +139,7 @@ namespace TNetD
 
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 6; i++)
             {
                 AddNode(i);
             }
@@ -193,7 +201,6 @@ namespace TNetD
 
                 nodes[0].nodeState.Ledger.AddUserToLedger(ai);
             }
-
         }
 
         private void menuItem_ResetLayout_Click(object sender, RoutedEventArgs e)

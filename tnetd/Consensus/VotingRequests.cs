@@ -338,8 +338,7 @@ namespace TNetD.Consensus
                 networkPacketSwitch.AddToQueue(node.Key, request);
             }
 
-           // if (VerboseDebugging)
-                Print("Confirmation Requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
+           if (VerboseDebugging) Print("Confirmation Requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
         }
 
         string GetTrustedName(Hash publicKey)
@@ -387,8 +386,7 @@ namespace TNetD.Consensus
 
             networkPacketSwitch.AddToQueue(packet.PublicKeySource, request);
 
-            //if (VerboseDebugging)
-                Print("Confirm Response sent to " + packet.PublicKeySource);
+            if (VerboseDebugging) Print("Confirm Response sent to " + packet.PublicKeySource);
         }
 
         void processConfirmResponse(NetworkPacket packet)
@@ -423,6 +421,9 @@ namespace TNetD.Consensus
                                                 // Extra check, the voter should not vote twice anyway.
                                                 if (!finalConfirmedVoters.Contains(packet.PublicKeySource))
                                                 {
+                                                    if (packet.PublicKeySource == null)
+                                                        DisplayUtils.Display("VERY_BAD_01", DisplayType.Warning);
+
                                                     finalConfirmedVoters.Add(packet.PublicKeySource);
                                                 }
 
@@ -436,8 +437,7 @@ namespace TNetD.Consensus
                 }
             }
 
-            //if (VerboseDebugging)
-                Print("Vote Confirm Response from '" + packet.PublicKeySource + "' Processed");
+            if (VerboseDebugging) Print("Vote Confirm Response from '" + packet.PublicKeySource + "' Processed");
         }
 
 

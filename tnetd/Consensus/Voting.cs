@@ -136,13 +136,13 @@ namespace TNetD.Consensus
 
             DebuggingMessages = true;
 
-            Print("Class \"Voting\" created");
+            Print("Class \"Voting\" created.");
         }
 
         private void Print(string message)
         {
             if (DebuggingMessages)
-                DisplayUtils.Display("V:" + nodeConfig.ID() + ": " + message);
+                DisplayUtils.Display("V:" +ledgerCloseSequence + ": "+ nodeConfig.ID() + ": " + message);
         }
 
         void TimerVoting_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -180,7 +180,7 @@ namespace TNetD.Consensus
                         case ConsensusStates.Collect:
 
                             // LCS = LCL + 1     
-                            ledgerCloseSequence = nodeState.Ledger.LedgerCloseData.SequenceNumber + 1;
+                            // ledgerCloseSequence = nodeState.Ledger.LedgerCloseData.SequenceNumber + 1;
 
                             isBallotValid = false;
                             isFinalBallotValid = false;
@@ -337,8 +337,15 @@ namespace TNetD.Consensus
 
                 int trustedConfirmedVoters = 0;
 
+                if (finalConfirmedVoters == null) Print("BAD_1");
+                
                 foreach (var voter in finalConfirmedVoters)
                 {
+                    if (voter == null)
+                        Print("BAD_2");
+
+                    if(nodeConfig.TrustedNodes == null) Print("BAD_3");
+
                     if (nodeConfig.TrustedNodes.ContainsKey(voter))
                     {
                         trustedConfirmedVoters++;
@@ -356,6 +363,7 @@ namespace TNetD.Consensus
                     {
                         Print("Voting Successful. Applying to ledger.");
 
+                        ledgerCloseSequence++;
                     }
                     else
                     {

@@ -128,7 +128,7 @@
                     </Grid.RowDefinitions>
                     <Label>Log:</Label>
                     <Label Grid.Column="2">Status:</Label>
-                    <ListBox Grid.Row="1" ItemsSource="{Binding LogMessages}"  Background="#FF1E1E1E" Foreground="#FF8ACD3A" >
+                    <ListBox Name="listBox_Log" Grid.Row="1" ItemsSource="{Binding LogMessages}"  Background="#FF1E1E1E" Foreground="#FF8ACD3A">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
