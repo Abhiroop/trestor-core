@@ -230,6 +230,17 @@ namespace TNetD.Consensus
             }
         }
 
+        string GetTxCount(Ballot ballot)
+        {
+            if (ballot.TransactionIds.Count > 0)
+            {
+
+                return "" + ballot.TransactionIds.Count + " Txns";
+            }
+            
+            return "";
+        }
+
         void HandleMerge()
         {
             if (mergeStateCounter < 1) // TWEAK-POINT: Trim value.
@@ -249,7 +260,7 @@ namespace TNetD.Consensus
                 CurrentConsensusState = ConsensusStates.Vote;
                 mergeStateCounter = 0;
 
-                Print("Merge Finished.");
+                Print("Merge Finished. " + GetTxCount(ballot));
             }
         }
 
@@ -308,7 +319,7 @@ namespace TNetD.Consensus
 
                 CurrentConsensusState = ConsensusStates.Confirm;
 
-                Print("Voting Finished.");
+                Print("Voting Finished. " + GetTxCount(finalBallot));
             }
         }
 
@@ -333,7 +344,7 @@ namespace TNetD.Consensus
 
                 CurrentConsensusState = ConsensusStates.Apply; // Verify Confirmation
 
-                Print("Confirm Finished.");
+                Print("Confirm Finished. " + GetTxCount(finalBallot));
             }
         }
 
@@ -370,7 +381,7 @@ namespace TNetD.Consensus
 
                     if (percentage >= Constants.CONS_FINAL_VOTING_THRESHOLD_PERC)
                     {
-                        Print("Voting Successful. Applying to ledger.");
+                        Print("Voting Successful. Applying to ledger. " + GetTxCount(finalBallot));
 
                         LedgerCloseSequence++;
                     }
