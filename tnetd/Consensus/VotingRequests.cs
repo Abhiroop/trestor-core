@@ -269,6 +269,7 @@ namespace TNetD.Consensus
             if (voteRequest.LedgerCloseSequence == LedgerCloseSequence)
             {
                 voteResponse.isSynced = true;
+                voteMessageCounter.IncrementVotes();
 
                 if (isBallotValid)
                 {
@@ -316,8 +317,7 @@ namespace TNetD.Consensus
                                 // Signature should be valid.
                                 if (message.ballot.VerifySignature(packet.PublicKeySource))
                                 {
-                                    voteMap.AddBallot(message.ballot);
-                                    voteMessageCounter.IncrementVotes();
+                                    voteMap.AddBallot(message.ballot);                                    
 
                                 }
                             }
@@ -377,6 +377,7 @@ namespace TNetD.Consensus
                 voteConfirmRequest.PublicKey == packet.PublicKeySource)
             {
                 voteConfirmResponse.IsSynced = true;
+                voteMessageCounter.IncrementConfirmations();
 
                 if (isFinalBallotValid)
                 {
@@ -435,8 +436,7 @@ namespace TNetD.Consensus
                                             if (Utils.CheckTimeCloseness(finalBallot.Timestamp, receivedBallot.Timestamp, 1500))
                                             {
                                                 finalVoters.Add(packet.PublicKeySource, LedgerCloseSequence);
-                                                voteMessageCounter.IncrementConfirmations();
-
+                                                
                                             }
                                         }
                                     }

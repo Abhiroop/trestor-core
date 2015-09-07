@@ -18,6 +18,7 @@ using System.Collections.Concurrent;
 using TNetD.Crypto;
 using TNetD.Nodes;
 using System.Threading.Tasks;
+using System.Reactive.Linq;
 
 namespace TNetD.Network.Networking
 {
@@ -41,13 +42,16 @@ namespace TNetD.Network.Networking
 
         Random rnd = new Random();
 
-        Timer updateTimer;
+        //Timer updateTimer;
 
         public OutgoingConnection(NodeSocketData nodeSocketData, NodeConfig nodeConfig)
         {
             this.nodeConfig = nodeConfig;
             this.nodeSocketData = nodeSocketData;
-            updateTimer = new Timer(TimerCallback, null, 0, Constants.Network_UpdateFrequencyMS);
+            //updateTimer = new Timer(TimerCallback, null, 0, Constants.Network_UpdateFrequencyMS);
+
+            Observable.Interval(TimeSpan.FromMilliseconds(Constants.Network_UpdateFrequencyMS))
+                .Subscribe(async x => await TimerCallback(x));
 
             Connect();
         }
@@ -57,7 +61,7 @@ namespace TNetD.Network.Networking
             outgoingQueue.Enqueue(npqe);
         }
 
-        private void TimerCallback(Object o)
+        private async Task TimerCallback(Object o)
         {
             try
             {
@@ -70,7 +74,7 @@ namespace TNetD.Network.Networking
                         if (outgoingQueue.TryDequeue(out np))
                         {
                             //DisplayUtils.Display("SENDING OC Packet: " + np.Type + " | From: " + np.PublicKeySource + " | Data Length : " + np.Data.Length);
-                            SendData(np.Serialize());
+                            await SendData(np.Serialize());
                         }
                     }
                 }
@@ -323,7 +327,7 @@ namespace TNetD.Network.Networking
             return sb.ToString();
         }
 
-        async void SendData(byte[] Data)
+        async Task SendData(byte[] Data)
         {
             try
             {

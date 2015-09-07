@@ -70,8 +70,6 @@ namespace TNetD.Consensus
         private object VotingTransactionLock = new object();
         private object ConsensusLock = new object();
 
-        private int previousRoundVoters = 0;
-
         public long LedgerCloseSequence { get; private set; } = 0;
 
         public ConsensusStates CurrentConsensusState { get; private set; }
@@ -107,7 +105,7 @@ namespace TNetD.Consensus
         /// </summary>
         ConcurrentDictionary<Hash, HashSet<Hash>> propagationMap;
 
-        VoteMessageCounter voteMessageCounter = default(VoteMessageCounter);
+        VoteMessageCounter voteMessageCounter;
 
         System.Timers.Timer TimerVoting = default(System.Timers.Timer);
 
@@ -138,7 +136,7 @@ namespace TNetD.Consensus
 
             TimerVoting = new System.Timers.Timer();
             TimerVoting.Elapsed += TimerVoting_Elapsed;
-            TimerVoting.Enabled = Enabled;
+            TimerVoting.Enabled = Enabled;           
             TimerVoting.Interval = 500;
             TimerVoting.Start();
 
@@ -197,8 +195,7 @@ namespace TNetD.Consensus
                             voteMap.Reset();
                             finalBallot = new Ballot(LedgerCloseSequence);
                             ballot = new Ballot(LedgerCloseSequence);
-                            finalVoters.Reset(LedgerCloseSequence);
-                            voteMessageCounter.ResetAll();
+                            finalVoters.Reset(LedgerCloseSequence);                            
 
                             processPendingTransactions();
                             CurrentConsensusState = ConsensusStates.Merge;
@@ -237,7 +234,7 @@ namespace TNetD.Consensus
 
                 return "" + ballot.TransactionIds.Count + " Txns";
             }
-            
+
             return "";
         }
 
@@ -258,6 +255,7 @@ namespace TNetD.Consensus
                 isBallotValid = true; // Yayy.
                 voteMap.Reset();
                 CurrentConsensusState = ConsensusStates.Vote;
+                voteMessageCounter.ResetVotes();
                 mergeStateCounter = 0;
 
                 Print("Merge Finished. " + GetTxCount(ballot));
@@ -269,6 +267,9 @@ namespace TNetD.Consensus
             ballot = transactionChecker.CreateBallot(CurrentTransactions, LedgerCloseSequence);
             ballot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(ballot.GetSignatureData()));
         }
+
+        int extraVotingDelayCycles = 0; // Wait for all the voters to send their requests.
+        int extraConfirmationDelayCycles = 0;
 
         void HandleVoting()
         {
@@ -286,10 +287,20 @@ namespace TNetD.Consensus
                     sendFetchRequests(missingTransactions);
                 }
             }
-            else
+            else // Initial Sync Part is over.
             {
                 // Verify the received
+                if (voteMessageCounter.Votes < voteMessageCounter.PreviousVotes)
+                {
+                    // Okay, all the votes have not reached till now.
+                    if (extraVotingDelayCycles < 10)
+                    {
+                        extraVotingDelayCycles++;
 
+                        Print("Waiting for pending voting requests : " + voteMessageCounter.Votes +
+                            "/" + voteMessageCounter.PreviousVotes + " Received");
+                    }
+                }
             }
 
             votingStateCounter++;
@@ -300,9 +311,10 @@ namespace TNetD.Consensus
 
             // Request Ballots
 
-            if (votingStateCounter >= 8)
+            if (votingStateCounter - extraVotingDelayCycles >= 12)
             {
                 votingStateCounter = 0;
+                extraVotingDelayCycles = 0;
 
                 finalBallot.Reset(LedgerCloseSequence);
                 finalBallot.PublicKey = nodeConfig.PublicKey;
@@ -319,6 +331,9 @@ namespace TNetD.Consensus
 
                 CurrentConsensusState = ConsensusStates.Confirm;
 
+                voteMessageCounter.SetPreviousVotes();
+                voteMessageCounter.ResetConfirmations();
+
                 Print("Voting Finished. " + GetTxCount(finalBallot));
             }
         }
@@ -333,16 +348,33 @@ namespace TNetD.Consensus
                     sendConfirmationRequests();
                 }
             }
+            else
+            {
+                if (voteMessageCounter.Confirmations < voteMessageCounter.PreviousConfirmations)
+                {
+                    // Okay, all the votes have not reached till now.
+                    if (extraConfirmationDelayCycles < 10)
+                    {
+                        extraConfirmationDelayCycles++;
+
+                        Print("Waiting for pending confirmation requests : " + voteMessageCounter.Confirmations +
+                            "/" + voteMessageCounter.PreviousConfirmations + " Received");
+                    }
+                }
+            }
 
             confirmationStateCounter++;
 
-            if (confirmationStateCounter >= 5)
+            if (confirmationStateCounter - extraConfirmationDelayCycles >= 6)
             {
                 confirmationStateCounter = 0;
+                extraConfirmationDelayCycles = 0;
 
                 isFinalConfirmedVotersValid = true;
 
                 CurrentConsensusState = ConsensusStates.Apply; // Verify Confirmation
+
+                voteMessageCounter.SetPreviousConfirmations();
 
                 Print("Confirm Finished. " + GetTxCount(finalBallot));
             }

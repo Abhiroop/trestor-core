@@ -31,21 +31,33 @@ namespace TNetD.Consensus
             previousConfirmations = 0;
         }
 
+        /// <summary>
+        /// Thread Safe
+        /// </summary>
         public void IncrementVotes()
         {
             Interlocked.Increment(ref votes);
         }
 
+        /// <summary>
+        /// Thread Safe
+        /// </summary>
         public void IncrementConfirmations()
         {
             Interlocked.Increment(ref confirmations);
         }
 
+        /// <summary>
+        /// Thread Safe
+        /// </summary>
         public void ResetVotes()
         {
             Interlocked.Exchange(ref votes, 0);
         }
 
+        /// <summary>
+        /// Thread Safe
+        /// </summary>
         public void ResetConfirmations()
         {
             Interlocked.Exchange(ref confirmations, 0);
@@ -59,16 +71,14 @@ namespace TNetD.Consensus
             previousConfirmations = 0;
         }
 
-        public void SetPreviousVotes(int previousVotes)
+        public void SetPreviousVotes()
         {
-            this.previousVotes = previousVotes;
+            this.previousVotes = votes;
         }
 
-        public void SetPreviousConfirmations(int previousConfirmations)
+        public void SetPreviousConfirmations()
         {
-            this.previousConfirmations = previousConfirmations;
+            this.previousConfirmations = confirmations;
         }
-
-
     }
 }
