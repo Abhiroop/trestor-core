@@ -11,17 +11,24 @@ namespace TNetD.Consensus
     /// <summary>
     /// A thread safe class for managing received message counts.
     /// </summary>
-    class ReceivedMessages
+    class VoteMessageCounter
     {
+        private int previousVotes, previousConfirmations;
+
         private int votes, confirmations;
 
         public int Votes { get { return votes; } }
         public int Confirmations { get { return confirmations; } }
 
-        public ReceivedMessages()
+        public int PreviousVotes { get { return previousVotes; } }
+        public int PreviousConfirmations { get { return previousConfirmations; } }
+
+        public VoteMessageCounter()
         {
             votes = 0;
             confirmations = 0;
+            previousVotes = 0;
+            previousConfirmations = 0;
         }
 
         public void IncrementVotes()
@@ -48,7 +55,20 @@ namespace TNetD.Consensus
         {
             Interlocked.Exchange(ref votes, 0);
             Interlocked.Exchange(ref confirmations, 0);
+            previousVotes = 0;
+            previousConfirmations = 0;
         }
+
+        public void SetPreviousVotes(int previousVotes)
+        {
+            this.previousVotes = previousVotes;
+        }
+
+        public void SetPreviousConfirmations(int previousConfirmations)
+        {
+            this.previousConfirmations = previousConfirmations;
+        }
+
 
     }
 }

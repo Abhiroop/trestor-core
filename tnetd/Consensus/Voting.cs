@@ -107,7 +107,7 @@ namespace TNetD.Consensus
         /// </summary>
         ConcurrentDictionary<Hash, HashSet<Hash>> propagationMap;
 
-        ReceivedMessages receivedMessages = default(ReceivedMessages);
+        VoteMessageCounter voteMessageCounter = default(VoteMessageCounter);
 
         System.Timers.Timer TimerVoting = default(System.Timers.Timer);
 
@@ -131,7 +131,7 @@ namespace TNetD.Consensus
 
             CurrentConsensusState = ConsensusStates.Collect;
 
-            receivedMessages = new ReceivedMessages();
+            voteMessageCounter = new VoteMessageCounter();
 
             /*Observable.Interval(TimeSpan.FromMilliseconds(1000))
                 .Subscribe(async x => await TimerCallback_Voting(x));*/
@@ -198,7 +198,7 @@ namespace TNetD.Consensus
                             finalBallot = new Ballot(LedgerCloseSequence);
                             ballot = new Ballot(LedgerCloseSequence);
                             finalVoters.Reset(LedgerCloseSequence);
-                            receivedMessages.ResetAll();
+                            voteMessageCounter.ResetAll();
 
                             processPendingTransactions();
                             CurrentConsensusState = ConsensusStates.Merge;

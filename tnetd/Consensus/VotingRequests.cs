@@ -61,12 +61,14 @@ namespace TNetD.Consensus
             FetchRequestMsg message = new FetchRequestMsg();
             message.IDs = transactions;
             Hash token = TNetUtils.GenerateNewToken();
-            NetworkPacket packet = new NetworkPacket();
-            packet.Data = message.Serialize();
-            packet.Token = token;
-            packet.PublicKeySource = nodeConfig.PublicKey;
-            packet.Type = PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST;
-            networkPacketSwitch.AddToQueue(node, packet);
+            
+            networkPacketSwitch.AddToQueue(node, new NetworkPacket()
+            {
+                Data = message.Serialize(),
+                Token = token,
+                PublicKeySource = nodeConfig.PublicKey,
+                Type = PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST
+            });
 
             if (VerboseDebugging) Print("Fetch Request Sent to " + node);
         }
@@ -98,13 +100,14 @@ namespace TNetD.Consensus
             {
                 response.transactions.Add(id, CurrentTransactions[id]);
             }
-
-            NetworkPacket rpacket = new NetworkPacket();
-            rpacket.Data = response.Serialize();
-            rpacket.Token = packet.Token;
-            rpacket.PublicKeySource = nodeConfig.PublicKey;
-            rpacket.Type = PacketType.TPT_CONS_MERGE_TX_FETCH_RESPONSE;
-            networkPacketSwitch.AddToQueue(packet.PublicKeySource, rpacket);
+            
+            networkPacketSwitch.AddToQueue(packet.PublicKeySource, new NetworkPacket()
+            {
+                Data = response.Serialize(),
+                Token = packet.Token,
+                PublicKeySource = nodeConfig.PublicKey,
+                Type = PacketType.TPT_CONS_MERGE_TX_FETCH_RESPONSE
+            });
 
             if (VerboseDebugging) Print("Fetch Request From " + packet.PublicKeySource + " Processed");
         }
@@ -166,11 +169,13 @@ namespace TNetD.Consensus
             foreach (var node in nodeState.ConnectedValidators)
             {
                 Hash token = TNetUtils.GenerateNewToken();
-                NetworkPacket request = new NetworkPacket();
-                request.PublicKeySource = nodeConfig.PublicKey;
-                request.Token = token;
-                request.Type = PacketType.TPT_CONS_MERGE_REQUEST;
-                networkPacketSwitch.AddToQueue(node.Key, request);
+                
+                networkPacketSwitch.AddToQueue(node.Key, new NetworkPacket()
+                {
+                    PublicKeySource = nodeConfig.PublicKey,
+                    Token = token,
+                    Type = PacketType.TPT_CONS_MERGE_REQUEST
+                });
             }
 
             if (VerboseDebugging) Print("Merge Requests Sent to " + nodeState.ConnectedValidators.Count + " Validators");
@@ -191,13 +196,14 @@ namespace TNetD.Consensus
             {
                 message.transactions.Add(transaction.Key);
             }
-
-            NetworkPacket response = new NetworkPacket();
-            response.Token = token;
-            response.PublicKeySource = nodeConfig.PublicKey;
-            response.Data = message.Serialize();
-            response.Type = PacketType.TPT_CONS_MERGE_RESPONSE;
-            networkPacketSwitch.AddToQueue(sender, response);
+            
+            networkPacketSwitch.AddToQueue(sender, new NetworkPacket()
+            {
+                Token = token,
+                PublicKeySource = nodeConfig.PublicKey,
+                Data = message.Serialize(),
+                Type = PacketType.TPT_CONS_MERGE_RESPONSE
+            });
 
             if (VerboseDebugging) Print("Merge Request from " + packet.PublicKeySource + " Processed");
         }
@@ -240,13 +246,14 @@ namespace TNetD.Consensus
                 brp.LedgerCloseSequence = LedgerCloseSequence;
 
                 // Create NetworkPacket and send
-                NetworkPacket request = new NetworkPacket();
-                request.PublicKeySource = nodeConfig.PublicKey;
-                request.Token = TNetUtils.GenerateNewToken();
-                request.Data = brp.Serialize();
-                request.Type = PacketType.TPT_CONS_VOTE_REQUEST;
-
-                networkPacketSwitch.AddToQueue(node.Key, request);
+                 
+                networkPacketSwitch.AddToQueue(node.Key, new NetworkPacket()
+                {
+                    PublicKeySource = nodeConfig.PublicKey,
+                    Token = TNetUtils.GenerateNewToken(),
+                    Data = brp.Serialize(),
+                    Type = PacketType.TPT_CONS_VOTE_REQUEST
+                });
             }
 
             if (VerboseDebugging) Print("Vote requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
@@ -278,12 +285,13 @@ namespace TNetD.Consensus
                     " : " + voteRequest.LedgerCloseSequence + "!=" + LedgerCloseSequence);
             }
 
-            NetworkPacket response = new NetworkPacket();
-            response.Token = packet.Token;
-            response.PublicKeySource = nodeConfig.PublicKey;
-            response.Data = voteResponse.Serialize();
-            response.Type = PacketType.TPT_CONS_VOTE_RESPONSE;
-            networkPacketSwitch.AddToQueue(packet.PublicKeySource, response);
+            networkPacketSwitch.AddToQueue(packet.PublicKeySource, new NetworkPacket()
+            {
+                Token = packet.Token,
+                PublicKeySource = nodeConfig.PublicKey,
+                Data = voteResponse.Serialize(),
+                Type = PacketType.TPT_CONS_VOTE_RESPONSE
+            });
 
             if (VerboseDebugging) Print("Vote Request Replied to " + packet.PublicKeySource);
         }
@@ -309,7 +317,7 @@ namespace TNetD.Consensus
                                 if (message.ballot.VerifySignature(packet.PublicKeySource))
                                 {
                                     voteMap.AddBallot(message.ballot);
-                                    receivedMessages.IncrementVotes();
+                                    voteMessageCounter.IncrementVotes();
 
                                 }
                             }
@@ -335,14 +343,15 @@ namespace TNetD.Consensus
                 vcr.LedgerCloseSequence = LedgerCloseSequence;
                 vcr.PublicKey = nodeConfig.PublicKey;
 
-                // Create NetworkPacket and send
-                NetworkPacket request = new NetworkPacket();
-                request.PublicKeySource = nodeConfig.PublicKey;
-                request.Token = TNetUtils.GenerateNewToken();
-                request.Data = vcr.Serialize();
-                request.Type = PacketType.TPT_CONS_CONFIRM_REQUEST;
+                // Create NetworkPacket and Send           
 
-                networkPacketSwitch.AddToQueue(node.Key, request);
+                networkPacketSwitch.AddToQueue(node.Key, new NetworkPacket()
+                {
+                    PublicKeySource = nodeConfig.PublicKey,
+                    Token = TNetUtils.GenerateNewToken(),
+                    Data = vcr.Serialize(),
+                    Type = PacketType.TPT_CONS_CONFIRM_REQUEST
+                });
             }
 
             if (VerboseDebugging) Print("Confirmation Requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
@@ -384,14 +393,14 @@ namespace TNetD.Consensus
                 Print("LCS (PCReq) Mismatch for " + GetTrustedName(packet.PublicKeySource)
                     + " : " + voteConfirmRequest.LedgerCloseSequence + "!=" + LedgerCloseSequence);
             }
-
-            NetworkPacket request = new NetworkPacket();
-            request.PublicKeySource = nodeConfig.PublicKey;
-            request.Token = packet.Token;
-            request.Data = voteConfirmResponse.Serialize();
-            request.Type = PacketType.TPT_CONS_CONFIRM_RESPONSE;
-
-            networkPacketSwitch.AddToQueue(packet.PublicKeySource, request);
+            
+            networkPacketSwitch.AddToQueue(packet.PublicKeySource, new NetworkPacket()
+            {
+                PublicKeySource = nodeConfig.PublicKey,
+                Token = packet.Token,
+                Data = voteConfirmResponse.Serialize(),
+                Type = PacketType.TPT_CONS_CONFIRM_RESPONSE
+            });
 
             if (VerboseDebugging) Print("Confirm Response sent to " + packet.PublicKeySource);
         }
@@ -426,7 +435,7 @@ namespace TNetD.Consensus
                                             if (Utils.CheckTimeCloseness(finalBallot.Timestamp, receivedBallot.Timestamp, 1500))
                                             {
                                                 finalVoters.Add(packet.PublicKeySource, LedgerCloseSequence);
-                                                receivedMessages.IncrementConfirmations();
+                                                voteMessageCounter.IncrementConfirmations();
 
                                             }
                                         }
