@@ -5,20 +5,19 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace TNetD.Consensus
 {
     class FinalVoters
     {
-        HashSet<Hash> voters;
+        public HashSet<Hash> Voters { get; }
 
         long ledgerCloseSequence = 0;
 
         public FinalVoters()
         {
             ledgerCloseSequence = 0;
-            voters = new HashSet<Hash>();
+            Voters = new HashSet<Hash>();
         }
 
         /// <summary>
@@ -30,25 +29,17 @@ namespace TNetD.Consensus
             this.ledgerCloseSequence = ledgerCloseSequence;
         }
 
-        public HashSet<Hash> Voters
-        {
-            get
-            {
-                return voters;
-            }
-        }
-
         public bool Add(Hash voter, long ledgerCloseSequence)
         {
             if(this.ledgerCloseSequence == ledgerCloseSequence)
             {
                 if (voter != null)
                 {
-                    if (!voters.Contains(voter))
+                    if (!Voters.Contains(voter))
                     {
                         if (voter.Hex.Length == Common.KEYLEN_PUBLIC)
                         {
-                            voters.Add(voter); // SUPER !
+                            Voters.Add(voter); // SUPER !
                         }
                         else
                         {
@@ -67,13 +58,13 @@ namespace TNetD.Consensus
 
         public void Reset()
         {
-            voters.Clear();
+            Voters.Clear();
             ledgerCloseSequence = 0;
         }
 
         public void Reset(long ledgerCloseSequence)
         {
-            voters.Clear();
+            Voters.Clear();
             this.ledgerCloseSequence = ledgerCloseSequence;
         }
     }

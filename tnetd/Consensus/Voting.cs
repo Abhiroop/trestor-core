@@ -22,7 +22,7 @@ using System.Collections.Concurrent;
 namespace TNetD.Consensus
 {
     #region Enums
-    
+
     public enum ConsensusStates
     {
         /// <summary>
@@ -69,8 +69,8 @@ namespace TNetD.Consensus
         private object ConsensusLock = new object();
 
         private int previousRoundVoters = 0;
-
-        private long ledgerCloseSequence = 0;
+        
+        public long LedgerCloseSequence { get; private set; } = 0;
 
         public ConsensusStates CurrentConsensusState { get; private set; }
 
@@ -118,6 +118,9 @@ namespace TNetD.Consensus
             synchronizedVoters = new HashSet<Hash>();
             finalVoters = new FinalVoters();
 
+            finalBallot = new Ballot();
+            ballot = new Ballot();
+
             networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
             networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
             transactionChecker = new TransactionChecker(nodeState);
@@ -141,7 +144,7 @@ namespace TNetD.Consensus
         private void Print(string message)
         {
             if (DebuggingMessages)
-                DisplayUtils.Display("V:" +ledgerCloseSequence + ": "+ nodeConfig.ID() + ": " + message);
+                DisplayUtils.Display("V:" + LedgerCloseSequence + ": " + nodeConfig.ID() + ": " + message);
         }
 
         void TimerVoting_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -186,9 +189,9 @@ namespace TNetD.Consensus
                             isAcceptMapValid = false;
                             isFinalConfirmedVotersValid = false;
                             voteMap.Reset();
-                            finalBallot = new Ballot(ledgerCloseSequence);
-                            ballot = new Ballot(ledgerCloseSequence);
-                            finalVoters.Reset(ledgerCloseSequence);
+                            finalBallot = new Ballot(LedgerCloseSequence);
+                            ballot = new Ballot(LedgerCloseSequence);
+                            finalVoters.Reset(LedgerCloseSequence);
 
                             processPendingTransactions();
                             CurrentConsensusState = ConsensusStates.Merge;
@@ -245,7 +248,7 @@ namespace TNetD.Consensus
 
         private void CreateBallot()
         {
-            ballot = transactionChecker.CreateBallot(CurrentTransactions, ledgerCloseSequence);
+            ballot = transactionChecker.CreateBallot(CurrentTransactions, LedgerCloseSequence);
             ballot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(ballot.GetSignatureData()));
         }
 
@@ -283,7 +286,7 @@ namespace TNetD.Consensus
             {
                 votingStateCounter = 0;
 
-                finalBallot = new Ballot(ledgerCloseSequence);
+                finalBallot.Reset(LedgerCloseSequence);
                 finalBallot.PublicKey = nodeConfig.PublicKey;
                 finalBallot.TransactionIds = voteMap.FilterTransactionsByVotes(ballot, Constants.CONS_FINAL_VOTING_THRESHOLD_PERC);
                 finalBallot.Timestamp = nodeState.NetworkTime;
@@ -292,7 +295,7 @@ namespace TNetD.Consensus
 
                 synchronizedVoters = voteMap.GetSynchronisedVoters(finalBallot);
 
-                finalVoters.Reset(ledgerCloseSequence); // Maybe repeat, but okay.
+                finalVoters.Reset(LedgerCloseSequence); // Maybe repeat, but okay.
 
                 isFinalBallotValid = true; // TODO: CRITICAL THINK THINK, TESTS !!                
 
@@ -336,13 +339,13 @@ namespace TNetD.Consensus
                 int trustedConfirmedVoters = 0;
 
                 if (finalVoters.Voters == null) Print("BAD_1");
-                
+
                 foreach (var voter in finalVoters.Voters)
                 {
                     if (voter == null)
                         Print("BAD_2");
 
-                    if(nodeConfig.TrustedNodes == null) Print("BAD_3");
+                    if (nodeConfig.TrustedNodes == null) Print("BAD_3");
 
                     if (nodeConfig.TrustedNodes.ContainsKey(voter))
                     {
@@ -361,7 +364,7 @@ namespace TNetD.Consensus
                     {
                         Print("Voting Successful. Applying to ledger.");
 
-                        ledgerCloseSequence++;
+                        LedgerCloseSequence++;
                     }
                     else
                     {
@@ -376,7 +379,7 @@ namespace TNetD.Consensus
 
                 CurrentConsensusState = ConsensusStates.Collect;
 
-               // Print("Apply Finished. Consensus Finished.");
+                // Print("Apply Finished. Consensus Finished.");
             }
         }
 

@@ -26,17 +26,17 @@ namespace TNetD.Consensus
 
         public long Timestamp;
 
-        public Ballot(long ledgerCloseSequence)
+        public Ballot() : this(0)
         {
-            Init();
-            LedgerCloseSequence = ledgerCloseSequence;
+            
         }
 
-        /* public Ballot()
-         {
-             Init();
-             LedgerCloseSequence = 0;
-         }*/
+        public Ballot(long ledgerCloseSequence)
+        {
+            TransactionIds = new SortedSet<Hash>();
+            Reset();
+            LedgerCloseSequence = ledgerCloseSequence;
+        }
 
         public bool Add(Hash TransactionID)
         {
@@ -48,13 +48,18 @@ namespace TNetD.Consensus
             return false;
         }
 
-        void Init()
+        public void Reset()
         {
-            TransactionIds = new SortedSet<Hash>();
+            Reset(0);
+        }
+
+        public void Reset(long ledgerCloseSequence)
+        {
+            TransactionIds.Clear();
             PublicKey = new Hash();
             Signature = new Hash();
             Timestamp = 0;
-            LedgerCloseSequence = 0;
+            LedgerCloseSequence = ledgerCloseSequence;
         }
 
         #region Serialization
@@ -78,7 +83,7 @@ namespace TNetD.Consensus
 
         public void Deserialize(byte[] Data)
         {
-            Init();
+            Reset();
 
             List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
             
@@ -144,7 +149,9 @@ namespace TNetD.Consensus
 
         public bool VerifySignature(Hash publicKey)
         {
-            if (publicKey.Hex.Length != 32) return false;
+            if (publicKey.Hex.Length != Common.KEYLEN_PUBLIC) return false;
+
+            if (Signature.Hex.Length != Common.KEYLEN_SIGNATURE) return false;
 
             return Ed25519.Verify(Signature.Hex, GetSignatureData(), publicKey.Hex);
         }

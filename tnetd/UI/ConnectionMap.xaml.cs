@@ -362,7 +362,8 @@ namespace TNetD.UI
 
                     sb.Append(
                         "\nState: " + nd.ConsensusState +
-                        "\nRoot: " + ((rh.Length >= 8) ? rh.Substring(0, 8) : "Empty")
+                        "\nRoot: " + ((rh.Length >= 8) ? rh.Substring(0, 8) : "Empty") +
+                        "\nLCS:" + nd.voting.LedgerCloseSequence                       
                         );
 
                     break;
@@ -455,7 +456,7 @@ namespace TNetD.UI
                 //drawingContext.DrawEllipse(Brushes.LightGray, null, v, 15, 15);
 
                 int rectWidth = 100;
-                int rectHeight = 50;
+                int rectHeight = 60;
 
                 v.X -= rectWidth / 2;
                 v.Y -= rectHeight / 2;

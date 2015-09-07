@@ -65,11 +65,13 @@ namespace TNetD.Nodes
         /// </summary>
         public NetworkPacketSwitch networkPacketSwitch = default(NetworkPacketSwitch);
 
+        public Voting voting = default(Voting);
+
         RpcHandlers rpcHandlers = default(RpcHandlers);        
         TransactionHandler transactionHandler = default(TransactionHandler);
         TimeSync timeSync = default(TimeSync);
         LedgerSync ledgerSync = default(LedgerSync);
-        Voting voting = default(Voting);
+        
         
         #endregion
 
