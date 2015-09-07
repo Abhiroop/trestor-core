@@ -61,8 +61,8 @@ namespace TNetD.UI
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             DateTime dt = (DateTime)value;
-            
-            return dt.ToLongTimeString();
+
+            return dt.Hour + ":" + dt.Minute.ToString("00") + ":" + dt.Second.ToString("00") + "." + dt.Millisecond.ToString("000");//   dt.ToLongTimeString();
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

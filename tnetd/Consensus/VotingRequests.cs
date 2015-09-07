@@ -1,4 +1,10 @@
-﻿using System;
+﻿
+//
+//  @Author: Arpan Jati
+//  @Date: September 2015 
+//
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -303,6 +309,7 @@ namespace TNetD.Consensus
                                 if (message.ballot.VerifySignature(packet.PublicKeySource))
                                 {
                                     voteMap.AddBallot(message.ballot);
+                                    receivedMessages.IncrementVotes();
 
                                 }
                             }
@@ -419,7 +426,7 @@ namespace TNetD.Consensus
                                             if (Utils.CheckTimeCloseness(finalBallot.Timestamp, receivedBallot.Timestamp, 1500))
                                             {
                                                 finalVoters.Add(packet.PublicKeySource, LedgerCloseSequence);
-
+                                                receivedMessages.IncrementConfirmations();
 
                                             }
                                         }

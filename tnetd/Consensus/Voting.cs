@@ -1,4 +1,5 @@
-﻿//
+﻿
+//
 //  @Author: Arpan Jati | Stephan Verbuecheln
 //  @Date: June 2015 
 // The voting and consensus is handled by two files. 
@@ -58,6 +59,7 @@ namespace TNetD.Consensus
         int mergeStateCounter = 0;
         int votingStateCounter = 0;
         int confirmationStateCounter = 0;
+        int applyStateCounter = 0;
 
         public bool VerboseDebugging = false;
 
@@ -69,7 +71,7 @@ namespace TNetD.Consensus
         private object ConsensusLock = new object();
 
         private int previousRoundVoters = 0;
-        
+
         public long LedgerCloseSequence { get; private set; } = 0;
 
         public ConsensusStates CurrentConsensusState { get; private set; }
@@ -105,6 +107,8 @@ namespace TNetD.Consensus
         /// </summary>
         ConcurrentDictionary<Hash, HashSet<Hash>> propagationMap;
 
+        ReceivedMessages receivedMessages = default(ReceivedMessages);
+
         System.Timers.Timer TimerVoting = default(System.Timers.Timer);
 
         public Voting(NodeConfig nodeConfig, NodeState nodeState, NetworkPacketSwitch networkPacketSwitch)
@@ -126,6 +130,8 @@ namespace TNetD.Consensus
             transactionChecker = new TransactionChecker(nodeState);
 
             CurrentConsensusState = ConsensusStates.Collect;
+
+            receivedMessages = new ReceivedMessages();
 
             /*Observable.Interval(TimeSpan.FromMilliseconds(1000))
                 .Subscribe(async x => await TimerCallback_Voting(x));*/
@@ -192,6 +198,7 @@ namespace TNetD.Consensus
                             finalBallot = new Ballot(LedgerCloseSequence);
                             ballot = new Ballot(LedgerCloseSequence);
                             finalVoters.Reset(LedgerCloseSequence);
+                            receivedMessages.ResetAll();
 
                             processPendingTransactions();
                             CurrentConsensusState = ConsensusStates.Merge;
@@ -332,7 +339,8 @@ namespace TNetD.Consensus
 
         void HandleApply()
         {
-            if (isFinalConfirmedVotersValid)
+            // Have some delay before apply to allow others to catch up.
+            if (isFinalConfirmedVotersValid && (applyStateCounter == 6))
             {
                 // Check that the confirmed voters are all trusted
 
@@ -377,10 +385,18 @@ namespace TNetD.Consensus
                         " Trusted Conns :" + totalTrustedConnections);
                 }
 
-                CurrentConsensusState = ConsensusStates.Collect;
-
                 // Print("Apply Finished. Consensus Finished.");
             }
+
+            applyStateCounter++;
+
+            if (applyStateCounter > 8)
+            {
+                CurrentConsensusState = ConsensusStates.Collect;
+
+                applyStateCounter = 0;
+            }
+
         }
 
         #endregion
