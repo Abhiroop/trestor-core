@@ -416,6 +416,8 @@ namespace TNetD.Consensus
                     {
                         Print("Voting Successful. Applying to ledger. " + GetTxCount(finalBallot));
 
+                        ApplyToLedger(finalBallot);
+
                         LedgerCloseSequence++;
                     }
                     else
@@ -439,6 +441,21 @@ namespace TNetD.Consensus
                 CurrentConsensusState = ConsensusStates.Collect;
 
                 applyStateCounter = 0;
+            }
+
+        }
+
+        void ApplyToLedger(Ballot applyBallot)
+        {
+
+            foreach(var tx in ballot.TransactionIds)
+            {
+                if(CurrentTransactions.ContainsKey(tx))
+                {
+                    TransactionContent tc;
+                    CurrentTransactions.TryRemove(tx, out tc);                    
+                }
+
             }
 
         }
