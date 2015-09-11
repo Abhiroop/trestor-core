@@ -16,6 +16,8 @@ namespace TNetD.Network.Networking
 
     class SecureNetwork
     {
+        private object SecureNetworkTimerLock = new object();
+
         public event PacketReceivedHandler PacketReceived;
 
         Timer updateTimer;
@@ -70,56 +72,59 @@ namespace TNetD.Network.Networking
             incomingConnectionHander.StopAndExit();
         }
 
-        private void TimerCallback(Object o)
+        private void TimerCallback(object o)
         {
-            try
+            lock(SecureNetworkTimerLock)
             {
-                // Check outgoing queue for new packet requests.
-
-                while (outgoingPacketQueue.Count > 0)
+                try
                 {
-                    NetworkPacketQueueEntry npqe;
-                    if (outgoingPacketQueue.TryDequeue(out npqe))
+                    // Check outgoing queue for new packet requests.
+
+                    while (outgoingPacketQueue.Count > 0)
                     {
-                        if (outgoingConnections.ContainsKey(npqe.PublicKeyDestination)) // Already Connected (outgoing), Just send a packet.
+                        NetworkPacketQueueEntry npqe;
+                        if (outgoingPacketQueue.TryDequeue(out npqe))
                         {
-                            outgoingConnections[npqe.PublicKeyDestination].EnqueuePacket(npqe.Packet);
-                        }
-
-                        else if (incomingConnectionHander.IsConnected(npqe.PublicKeyDestination))  // Already Connected (incoming), Just send a packet.
-                        {
-                            incomingConnectionHander.EnqueuePacket(npqe);
-                        }
-
-                        else // Create a new outgoing connection and queue a packet.
-                        {
-                            if ((nodeConfig.TrustedNodes.ContainsKey(npqe.PublicKeyDestination)) &&
-                                (npqe.PublicKeyDestination != nodeConfig.PublicKey))
+                            if (outgoingConnections.ContainsKey(npqe.PublicKeyDestination)) // Already Connected (outgoing), Just send a packet.
                             {
-                                var socketInfo = nodeConfig.TrustedNodes[npqe.PublicKeyDestination];
-
-                                OutgoingConnection oc = new OutgoingConnection(socketInfo, nodeConfig);
-                                oc.PacketReceived += process_PacketReceived;
-
-                                oc.EnqueuePacket(npqe.Packet);
-
-                                outgoingConnections.Add(npqe.PublicKeyDestination, oc);
+                                outgoingConnections[npqe.PublicKeyDestination].EnqueuePacket(npqe.Packet);
                             }
-                            else
-                            {
-                                // The public key is not described / no-connection information. 
-                                // Fetch information from other nodes and try again.
 
-                                DisplayUtils.Display("Could not find " + npqe.PublicKeyDestination.ToString());
+                            else if (incomingConnectionHander.IsConnected(npqe.PublicKeyDestination))  // Already Connected (incoming), Just send a packet.
+                            {
+                                incomingConnectionHander.EnqueuePacket(npqe);
+                            }
+
+                            else // Create a new outgoing connection and queue a packet.
+                            {
+                                if ((nodeConfig.TrustedNodes.ContainsKey(npqe.PublicKeyDestination)) &&
+                                    (npqe.PublicKeyDestination != nodeConfig.PublicKey))
+                                {
+                                    var socketInfo = nodeConfig.TrustedNodes[npqe.PublicKeyDestination];
+
+                                    OutgoingConnection oc = new OutgoingConnection(socketInfo, nodeConfig);
+                                    oc.PacketReceived += process_PacketReceived;
+
+                                    oc.EnqueuePacket(npqe.Packet);
+
+                                    outgoingConnections.Add(npqe.PublicKeyDestination, oc);
+                                }
+                                else
+                                {
+                                    // The public key is not described / no-connection information. 
+                                    // Fetch information from other nodes and try again.
+
+                                    DisplayUtils.Display("Could not find " + npqe.PublicKeyDestination.ToString());
+                                }
                             }
                         }
                     }
                 }
-            }
-            catch (System.Exception ex)
-            {
-                DisplayUtils.Display("SecureNetwork.TimerCallback()", ex);
-            }
+                catch (System.Exception ex)
+                {
+                    DisplayUtils.Display("SecureNetwork.TimerCallback()", ex);
+                }
+            }            
         }
 
         private void ConnectionTimerCallback(Object o)

@@ -65,7 +65,7 @@ namespace TNetD.Consensus
 
         public bool DebuggingMessages { get; set; }
 
-        public bool Enabled { get; set; }
+        public bool Enabled { get; set; } = false;
 
         private object VotingTransactionLock = new object();
         private object ConsensusLock = new object();
@@ -96,7 +96,7 @@ namespace TNetD.Consensus
         /// A list of voters who have confirmed to have the same final ballot as us.
         /// If this is above above some threshold, we should apply all the changes to ledger and move on.
         /// </summary>
-        FinalVoters finalVoters;
+        //FinalVoters finalVoters;
 
         /// <summary>
         /// Set of nodes, who sent a transaction ID
@@ -118,7 +118,7 @@ namespace TNetD.Consensus
             this.propagationMap = new ConcurrentDictionary<Hash, HashSet<Hash>>();
             this.voteMap = new VoteMap(nodeConfig, nodeState);
             synchronizedVoters = new HashSet<Hash>();
-            finalVoters = new FinalVoters();
+            //finalVoters = new FinalVoters();
 
             finalBallot = new Ballot();
             ballot = new Ballot();
@@ -136,7 +136,7 @@ namespace TNetD.Consensus
 
             TimerVoting = new System.Timers.Timer();
             TimerVoting.Elapsed += TimerVoting_Elapsed;
-            TimerVoting.Enabled = Enabled;           
+            TimerVoting.Enabled = true;           
             TimerVoting.Interval = 500;
             TimerVoting.Start();
 
@@ -153,7 +153,8 @@ namespace TNetD.Consensus
 
         void TimerVoting_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            VotingEvent();
+            if(Enabled)
+                VotingEvent();
         }
 
         /* private async Task TimerCallback_Voting(Object o)
@@ -195,7 +196,7 @@ namespace TNetD.Consensus
                             voteMap.Reset();
                             finalBallot = new Ballot(LedgerCloseSequence);
                             ballot = new Ballot(LedgerCloseSequence);
-                            finalVoters.Reset(LedgerCloseSequence);                            
+                            //finalVoters.Reset(LedgerCloseSequence);                            
 
                             processPendingTransactions();
                             CurrentConsensusState = ConsensusStates.Merge;
@@ -210,7 +211,7 @@ namespace TNetD.Consensus
                             break;
 
                         case ConsensusStates.Confirm:
-                            HandleConfirmation();
+                            //HandleConfirmation();
                             break;
 
                         case ConsensusStates.Apply:
@@ -269,7 +270,7 @@ namespace TNetD.Consensus
         }
 
         int extraVotingDelayCycles = 0; // Wait for all the voters to send their requests.
-        int extraConfirmationDelayCycles = 0;
+        //int extraConfirmationDelayCycles = 0;
 
         void HandleVoting()
         {
@@ -325,11 +326,11 @@ namespace TNetD.Consensus
 
                 synchronizedVoters = voteMap.GetSynchronisedVoters(finalBallot);
 
-                finalVoters.Reset(LedgerCloseSequence); // Maybe repeat, but okay.
+                //finalVoters.Reset(LedgerCloseSequence); // Maybe repeat, but okay.
 
                 isFinalBallotValid = true; // TODO: CRITICAL THINK THINK, TESTS !!                
 
-                CurrentConsensusState = ConsensusStates.Confirm;
+                CurrentConsensusState = ConsensusStates.Apply; // SKIP CONFIRMATION (Maybe not needed afterall)
 
                 voteMessageCounter.SetPreviousVotes();
                 voteMessageCounter.ResetConfirmations();
@@ -338,7 +339,7 @@ namespace TNetD.Consensus
             }
         }
 
-        void HandleConfirmation()
+       /* void HandleConfirmation()
         {
             if (confirmationStateCounter < 1) // Send it once only.
             {
@@ -378,20 +379,20 @@ namespace TNetD.Consensus
 
                 Print("Confirm Finished. " + GetTxCount(finalBallot));
             }
-        }
+        }*/
 
         void HandleApply()
         {
             // Have some delay before apply to allow others to catch up.
-            if (isFinalConfirmedVotersValid && (applyStateCounter == 6))
+            if (isFinalBallotValid && (applyStateCounter == 1)) // DISABLE CONFIRMATION
             {
                 // Check that the confirmed voters are all trusted
 
-                int trustedConfirmedVoters = 0;
+                int trustedSynchronizedVoters = 0;
 
-                if (finalVoters.Voters == null) Print("BAD_1");
+                if (synchronizedVoters == null) Print("BAD_1");
 
-                foreach (var voter in finalVoters.Voters)
+                foreach (var voter in synchronizedVoters)
                 {
                     if (voter == null)
                         Print("BAD_2");
@@ -400,16 +401,16 @@ namespace TNetD.Consensus
 
                     if (nodeConfig.TrustedNodes.ContainsKey(voter))
                     {
-                        trustedConfirmedVoters++;
+                        trustedSynchronizedVoters++;
                     }
                 }
 
                 int totalTrustedConnections = nodeState.ConnectedValidators.Where(node => node.Value.IsTrusted).Count();
 
-                if ((trustedConfirmedVoters >= Constants.VOTE_MIN_VOTERS) &&
+                if ((trustedSynchronizedVoters >= Constants.VOTE_MIN_VOTERS) &&
                     (totalTrustedConnections >= Constants.VOTE_MIN_VOTERS))
                 {
-                    double percentage = ((double)trustedConfirmedVoters * 100.0) / (double)totalTrustedConnections;
+                    double percentage = ((double)trustedSynchronizedVoters * 100.0) / (double)totalTrustedConnections;
 
                     if (percentage >= Constants.CONS_FINAL_VOTING_THRESHOLD_PERC)
                     {
@@ -424,7 +425,7 @@ namespace TNetD.Consensus
                 }
                 else
                 {
-                    Print("Voting Unsuccessful. Not Enough Trusted Voters. Trusted Voters: " + trustedConfirmedVoters +
+                    Print("Voting Unsuccessful. Not Enough Trusted Voters. Trusted Voters: " + trustedSynchronizedVoters +
                         " Trusted Conns :" + totalTrustedConnections);
                 }
 
@@ -433,7 +434,7 @@ namespace TNetD.Consensus
 
             applyStateCounter++;
 
-            if (applyStateCounter > 8)
+            if (applyStateCounter > 2)
             {
                 CurrentConsensusState = ConsensusStates.Collect;
 
@@ -481,11 +482,11 @@ namespace TNetD.Consensus
                     break;
 
                 case PacketType.TPT_CONS_CONFIRM_REQUEST:
-                    processConfirmRequest(packet);
+                    //processConfirmRequest(packet);
                     break;
 
                 case PacketType.TPT_CONS_CONFIRM_RESPONSE:
-                    processConfirmResponse(packet);
+                    //processConfirmResponse(packet);
                     break;
             }
         }

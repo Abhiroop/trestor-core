@@ -86,7 +86,7 @@ namespace TNetD
 
         ///////////////////////////////////////////////////////   1000000000000000 = 100 Billion * [10^6] / 100 Genesis Accounts
 
-        public static readonly int Network_UpdateFrequencyMS = 50;
+        public static readonly int Network_UpdateFrequencyMS = 80;
         public static readonly int Network_ConnectionUpdateFrequencyMS = 2000;
         public static readonly int Network_DefaultListenPort = 2015;
 

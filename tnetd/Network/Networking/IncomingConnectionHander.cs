@@ -21,6 +21,8 @@ namespace TNetD.Network.Networking
 {
     class IncomingConnectionHander
     {
+        public object TimerLock = new object();
+
         public event PacketReceivedHandler PacketReceived;
 
         NodeConfig nodeConfig;
@@ -37,10 +39,10 @@ namespace TNetD.Network.Networking
 
             listener = new TcpListener(IPAddress.Any, ListenPort);
             timer = new Timer(TimerCallback_Housekeeping, null, 0, 2000);
-            //timer_hello = new Timer(TimerCallback_Hello, null, 0, 500);
+            timer_hello = new Timer(TimerCallback_Hello, null, 0, Constants.Network_UpdateFrequencyMS);
 
-            Observable.Interval(TimeSpan.FromMilliseconds(Constants.Network_UpdateFrequencyMS))
-                .Subscribe(async x => await TimerCallback_Hello(x));
+            /*Observable.Interval(TimeSpan.FromMilliseconds(Constants.Network_UpdateFrequencyMS))
+                .Subscribe(async x => await TimerCallback_Hello(x));*/
 
             ServicePointManager.DefaultConnectionLimit = 32768;
 
@@ -83,34 +85,52 @@ namespace TNetD.Network.Networking
         /// <returns></returns>
         public bool EnqueuePacket(NetworkPacketQueueEntry npqe)
         {
+            if (npqe == null)
+                DisplayUtils.Display(nameof(npqe) + " is NULL. EnqueuePacket 1");
+
             if (IncomingConnections.ContainsKey(npqe.PublicKeyDestination))
             {
+                if (npqe == null)
+                    DisplayUtils.Display(nameof(npqe) + " is NULL. EnqueuePacket 2");
+
                 outgoingQueue.Enqueue(npqe);
                 return true;
             }
             else return false;
         }
 
-        private async Task TimerCallback_Hello(Object o)
+        private void TimerCallback_Hello(Object o)
         {
-            try
+            lock(TimerLock)
             {
-                while (outgoingQueue.Count > 0)
+                try
                 {
-                    NetworkPacketQueueEntry npqe = outgoingQueue.Dequeue();
-
-                    if (IncomingConnections.ContainsKey(npqe.PublicKeyDestination))
+                    while (outgoingQueue.Count > 0)
                     {
-                        //DisplayUtils.Display("SENDING IC Packet: " + npqe.Packet.Type + " | From: " + npqe.Packet.PublicKeySource + " | Data Length : " + npqe.Packet.Data.Length);
-                        await SendData(npqe.Packet.Serialize(), IncomingConnections[npqe.PublicKeyDestination]);
-                    }
-                }
+                        NetworkPacketQueueEntry npqe = outgoingQueue.Dequeue();
 
-            }
-            catch(Exception ex)
-            {
-                DisplayUtils.Display("Exception while Sending Packet", ex);
-            }           
+                        if (IncomingConnections == null)
+                            DisplayUtils.Display(nameof(IncomingConnections) + " is NULL. ICH Timer");
+
+                        if (npqe == null)
+                            DisplayUtils.Display(nameof(npqe) + " is NULL. ICH Timer");
+
+                        if (npqe.PublicKeyDestination == null)
+                            DisplayUtils.Display(nameof(npqe) + " is NULL. ICH Timer");
+
+                        if (IncomingConnections.ContainsKey(npqe.PublicKeyDestination))
+                        {
+                            //DisplayUtils.Display("SENDING IC Packet: " + npqe.Packet.Type + " | From: " + npqe.Packet.PublicKeySource + " | Data Length : " + npqe.Packet.Data.Length);
+                            SendData(npqe.Packet.Serialize(), IncomingConnections[npqe.PublicKeyDestination]);
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    DisplayUtils.Display("Exception while Sending Packet", ex);
+                }
+            }   
 
             /*
 

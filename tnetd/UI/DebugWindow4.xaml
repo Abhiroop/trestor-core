@@ -103,8 +103,12 @@
                 <MenuItem Name="menuItem_Simulation_Stop" Header="Stop"/>
                 <MenuItem Name="menuItem_Simulation_Restart" Header="Restart" />
                 <Separator/>
+                <MenuItem Name="menuItem_EnableVoting" Header="Enable Voting" Click="menuItem_EnableVoting_Click" />
+                <MenuItem Name="menuItem_DisableVoting" Header="Disable Voting" Click="menuItem_DisableVoting_Click"/>
+                <Separator/>
                 <MenuItem Name="menuItem_Simulation_RamdomlyAddAccounts" Header="Add Accounts to Node_0" Click="menuItem_Simulation_RamdomlyAddAccounts_Click"/>
-                <MenuItem Name="menuItem_ResetLayout" Header="Reset Layout" Click="menuItem_ResetLayout_Click"></MenuItem>
+                <MenuItem Name="menuItem_ResetLedgerToGenesis" Header="Reset Ledger to Genesis" Click="menuItem_ResetLedgerToGenesis_Click"/>
+                    <MenuItem Name="menuItem_ResetLayout" Header="Reset Layout" Click="menuItem_ResetLayout_Click"></MenuItem>
             </MenuItem>
 
             <MenuItem Header="HELP">

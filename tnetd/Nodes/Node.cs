@@ -121,7 +121,7 @@ namespace TNetD.Nodes
 
             if(Common.NODE_OPERATION_TYPE == NodeOperationType.Distributed)
             {
-                voting.Enabled = true;
+                // voting.Enabled = true;
             }
             
             //AI = new AccountInfo(PublicKey, Money);
@@ -161,6 +161,19 @@ namespace TNetD.Nodes
             //peerDiscovery.Start(30 * 1000);
 
             DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
+        }
+
+        public bool VotingEnabled
+        {
+            get
+            {
+                return voting.Enabled;
+            }
+
+            set
+            {
+                voting.Enabled = value;
+            }
         }
 
         void TimerTimeSync_Elapsed(object sender, ElapsedEventArgs e)
