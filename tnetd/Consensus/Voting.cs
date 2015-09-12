@@ -24,6 +24,7 @@ namespace TNetD.Consensus
 {
     #region Enums
 
+
     public enum ConsensusStates
     {
         /// <summary>
@@ -51,6 +52,7 @@ namespace TNetD.Consensus
         /// </summary>
         Apply
     };
+    public enum VotingStates { None, Step40, Step60, Step75, Step80, Done };
 
     #endregion
 
@@ -296,11 +298,83 @@ namespace TNetD.Consensus
             ballot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(ballot.GetSignatureData()));
         }
 
+        int MAX_EXTRA_VOTING_STEP_WAIT_CYCLES = 4;
         int extraVotingDelayCycles = 0; // Wait for all the voters to send their requests.
+        bool currentVotingRequestSent = false;
+
         //int extraConfirmationDelayCycles = 0;
+
+        VotingStates CurrentVotingState = VotingStates.None;
+
+        void ResetMicroVoting()
+        {
+            extraVotingDelayCycles = 0;
+            currentVotingRequestSent = false;
+        }
+
+        enum VoteNextState { Wait, Next }
+
+        VoteNextState CheckReceivedExpectedVotePackets()
+        {
+            if (voteMessageCounter.Votes < voteMessageCounter.PreviousVotes)
+            {
+                if (extraVotingDelayCycles < MAX_EXTRA_VOTING_STEP_WAIT_CYCLES)
+                {
+                    extraVotingDelayCycles++;
+                    Print("Waiting for pending voting requests : " + voteMessageCounter.Votes +
+                    "/" + voteMessageCounter.PreviousVotes + " Received");
+
+                    return VoteNextState.Wait;
+                }
+            }
+
+            return VoteNextState.Next;
+        }
 
         void HandleVoting()
         {
+
+            switch (CurrentVotingState)
+            {
+                case VotingStates.None:
+                    // Pre-Voting Stuff !! 
+                    CurrentVotingState = VotingStates.Step40;
+                    break;
+
+                case VotingStates.Step40:
+                                        
+                    if (!currentVotingRequestSent)
+                    {
+                        voteMessageCounter.ResetVotes();
+                        sendVoteRequests();
+                        currentVotingRequestSent = true;
+                    }
+                    
+                    if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
+                    {
+                        ResetMicroVoting();
+
+                        voteMessageCounter.SetPreviousVotes();
+                        CurrentVotingState = VotingStates.Done;
+                    }
+
+                    break;
+
+                case VotingStates.Step60:
+                    break;
+
+                case VotingStates.Step75:
+                    break;
+
+                case VotingStates.Step80:
+                    break;
+
+                case VotingStates.Done:
+                    PostVotingOperations();
+                    break;
+            }
+
+            /*
             if (votingStateCounter < 8) // TWEAK-POINT: Trim value.
             {
                 if (votingStateCounter % 2 == 0)
@@ -344,26 +418,31 @@ namespace TNetD.Consensus
                 votingStateCounter = 0;
                 extraVotingDelayCycles = 0;
 
-                finalBallot.Reset(LedgerCloseSequence);
-                finalBallot.PublicKey = nodeConfig.PublicKey;
-                finalBallot.AddRange(voteMap.FilterTransactionsByVotes(ballot, Constants.CONS_FINAL_VOTING_THRESHOLD_PERC));
-                finalBallot.Timestamp = nodeState.NetworkTime;
-
-                finalBallot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(finalBallot.GetSignatureData()));
-
-                synchronizedVoters = voteMap.GetSynchronisedVoters(finalBallot);
-
-                //finalVoters.Reset(LedgerCloseSequence); // Maybe repeat, but okay.
-
-                isFinalBallotValid = true; // TODO: CRITICAL THINK THINK, TESTS !!                
-
-                CurrentConsensusState = ConsensusStates.Apply; // SKIP CONFIRMATION (Maybe not needed afterall)
-
-                voteMessageCounter.SetPreviousVotes();
-                voteMessageCounter.ResetConfirmations();
+                PostVotingOperations();
 
                 Print("Voting Finished. " + GetTxCount(finalBallot));
-            }
+            }*/
+        }
+
+        private void PostVotingOperations()
+        {
+            finalBallot.Reset(LedgerCloseSequence);
+            finalBallot.PublicKey = nodeConfig.PublicKey;
+            finalBallot.AddRange(voteMap.FilterTransactionsByVotes(ballot, Constants.CONS_FINAL_VOTING_THRESHOLD_PERC));
+            finalBallot.Timestamp = nodeState.NetworkTime;
+
+            finalBallot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(finalBallot.GetSignatureData()));
+
+            synchronizedVoters = voteMap.GetSynchronisedVoters(finalBallot);
+
+            //finalVoters.Reset(LedgerCloseSequence); // Maybe repeat, but okay.
+
+            isFinalBallotValid = true; // TODO: CRITICAL THINK THINK, TESTS !!                
+
+            CurrentConsensusState = ConsensusStates.Apply; // SKIP CONFIRMATION (Maybe not needed afterall)
+            CurrentVotingState = VotingStates.None;
+
+            voteMessageCounter.ResetConfirmations();
         }
 
         /* void HandleConfirmation()

@@ -27,8 +27,8 @@ namespace TNetD.Consensus
         {
             votes = 0;
             confirmations = 0;
-            previousVotes = 0;
-            previousConfirmations = 0;
+            previousVotes = 4;
+            previousConfirmations = 4;
         }
 
         /// <summary>

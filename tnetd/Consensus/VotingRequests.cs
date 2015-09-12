@@ -255,9 +255,10 @@ namespace TNetD.Consensus
                 // Create BallotRequestMessage
                 VoteRequestMessage brp = new VoteRequestMessage();
                 brp.LedgerCloseSequence = LedgerCloseSequence;
+                brp.VotingState = CurrentVotingState;
 
                 // Create NetworkPacket and send
-                 
+
                 networkPacketSwitch.AddToQueue(node.Key, new NetworkPacket()
                 {
                     PublicKeySource = nodeConfig.PublicKey,
@@ -279,19 +280,19 @@ namespace TNetD.Consensus
 
             if (voteRequest.LedgerCloseSequence == LedgerCloseSequence)
             {
-                voteResponse.isSynced = true;
+                voteResponse.IsSynced = true;
                 voteMessageCounter.IncrementVotes();
 
                 if (isBallotValid)
                 {
-                    voteResponse.ballot = ballot;
-                    voteResponse.goodBallot = true;
+                    voteResponse.Ballot = ballot;
+                    voteResponse.GoodBallot = true;
                 }
             }
             else
             {
-                voteResponse.goodBallot = false;
-                voteResponse.isSynced = false;
+                voteResponse.GoodBallot = false;
+                voteResponse.IsSynced = false;
 
                 Print("LCS (PVReq) Mismatch for " + GetTrustedName(packet.PublicKeySource) +
                     " : " + voteRequest.LedgerCloseSequence + "!=" + LedgerCloseSequence);
@@ -317,18 +318,18 @@ namespace TNetD.Consensus
                     VoteResponseMessage message = new VoteResponseMessage();
                     message.Deserialize(packet.Data);
 
-                    if (message.goodBallot)
+                    if (message.GoodBallot)
                     {
                         // We should be voting for the next ballot.
-                        if (message.ballot.LedgerCloseSequence == LedgerCloseSequence)
+                        if (message.Ballot.LedgerCloseSequence == LedgerCloseSequence)
                         {
                             // Sender and ballot keys must be same
-                            if (message.ballot.PublicKey == packet.PublicKeySource)
+                            if (message.Ballot.PublicKey == packet.PublicKeySource)
                             {
                                 // Signature should be valid.
-                                if (message.ballot.VerifySignature(packet.PublicKeySource))
+                                if (message.Ballot.VerifySignature(packet.PublicKeySource))
                                 {
-                                    voteMap.AddBallot(message.ballot);                                    
+                                    voteMap.AddBallot(message.Ballot);                                    
 
                                 }
                             }
@@ -336,7 +337,7 @@ namespace TNetD.Consensus
                         else
                         {
                             Print("LCS Mismatch (PVResp) for " + GetTrustedName(packet.PublicKeySource) +
-                                " : " + message.ballot.LedgerCloseSequence + "!=" + LedgerCloseSequence);
+                                " : " + message.Ballot.LedgerCloseSequence + "!=" + LedgerCloseSequence);
                         }
                     }
                 }
