@@ -9,17 +9,17 @@ namespace TNetD.Consensus
 {
     class VoteRequestMessage : ISerializableBase
     {
-        public long LedgerCloseSequence;
+        public LedgerCloseSequence LedgerCloseSequence;
 
         public VoteRequestMessage()
         {
-            LedgerCloseSequence = 0;
+            LedgerCloseSequence = new LedgerCloseSequence(); ;
         }
 
         public byte[] Serialize()
         {
             ProtocolDataType[] PDTs = new ProtocolDataType[1];
-            PDTs[0] = ProtocolPackager.PackVarint(LedgerCloseSequence, 0);
+            PDTs[0] = ProtocolPackager.Pack(LedgerCloseSequence.Serialize(), 0);
             return ProtocolPackager.PackRaw(PDTs);
         }
 
@@ -29,7 +29,11 @@ namespace TNetD.Consensus
 
             if (PDTs.Count == 1)
             {
-                ProtocolPackager.UnpackVarint(PDTs[0], 0, ref LedgerCloseSequence);               
+                byte[] _data = new byte[0];
+                if (ProtocolPackager.UnpackByteVector(PDTs[0], 0, ref _data))
+                {
+                    LedgerCloseSequence.Deserialize(_data);
+                }
             }
         }
     }

@@ -10,7 +10,7 @@ namespace TNetD.Consensus
 {
     class Ballot : ISerializableBase, ISignableBase
     {
-        public long LedgerCloseSequence;
+        public LedgerCloseSequence LedgerCloseSequence;
 
         public SortedSet<Hash> TransactionIds;
 
@@ -26,12 +26,13 @@ namespace TNetD.Consensus
 
         public long Timestamp;
 
-        public Ballot() : this(0)
+        // Messed up constructor !
+        public Ballot() : this(new LedgerCloseSequence())
         {
-            
+
         }
 
-        public Ballot(long ledgerCloseSequence)
+        public Ballot(LedgerCloseSequence ledgerCloseSequence)
         {
             TransactionIds = new SortedSet<Hash>();
             Reset();
@@ -50,10 +51,10 @@ namespace TNetD.Consensus
 
         public void Reset()
         {
-            Reset(0);
+            Reset(new LedgerCloseSequence());
         }
 
-        public void Reset(long ledgerCloseSequence)
+        public void Reset(LedgerCloseSequence ledgerCloseSequence)
         {
             TransactionIds.Clear();
             PublicKey = new Hash();
@@ -73,7 +74,7 @@ namespace TNetD.Consensus
                 PDTs.Add(ProtocolPackager.Pack(txId, 0));
             }
 
-            PDTs.Add(ProtocolPackager.PackVarint(LedgerCloseSequence, 1));
+            PDTs.Add(ProtocolPackager.Pack(LedgerCloseSequence.Serialize(), 1));
             PDTs.Add(ProtocolPackager.PackVarint(Timestamp, 2));
             PDTs.Add(ProtocolPackager.Pack(PublicKey, 3));
             PDTs.Add(ProtocolPackager.Pack(Signature, 4));
@@ -81,11 +82,11 @@ namespace TNetD.Consensus
             return ProtocolPackager.PackRaw(PDTs);
         }
 
-        public void Deserialize(byte[] Data)
+        public void Deserialize(byte[] data)
         {
             Reset();
 
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
+            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(data);
             
             foreach (var PDT in PDTs)
             {
@@ -100,7 +101,10 @@ namespace TNetD.Consensus
                         break;
 
                     case 1:
-                        ProtocolPackager.UnpackVarint(PDT, 1, ref LedgerCloseSequence);
+                        byte[] _data = new byte[0];
+                        if (ProtocolPackager.UnpackByteVector(PDT, 1, ref _data)) {
+                            LedgerCloseSequence.Deserialize(_data);
+                        }
                         break;
 
                     case 2:
@@ -135,7 +139,8 @@ namespace TNetD.Consensus
                 data.AddRange(transaction.Hex);
             }
 
-            data.AddRange(Conversions.Int64ToVector(LedgerCloseSequence));
+            data.AddRange(Conversions.Int64ToVector(LedgerCloseSequence.Sequence));
+            data.AddRange(LedgerCloseSequence.Hash.Hex);
             data.AddRange(Conversions.Int64ToVector(Timestamp));
             data.AddRange(PublicKey.Hex);
 

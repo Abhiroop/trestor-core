@@ -20,7 +20,7 @@ namespace TNetD.Consensus
             blacklist = new DoubleSpendBlacklist(nodeState);
         }
 
-        public Ballot CreateBallot(ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions, long ledgerCloseSequence)
+        public Ballot CreateBallot(ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions, LedgerCloseSequence ledgerCloseSequence)
         {
             blacklist.ClearExpired();
             SortedSet<Hash> mergedTransactions = new SortedSet<Hash>();

@@ -70,7 +70,7 @@ namespace TNetD.Consensus
         private object VotingTransactionLock = new object();
         private object ConsensusLock = new object();
 
-        public long LedgerCloseSequence { get; private set; } = 0;
+        public LedgerCloseSequence LedgerCloseSequence { get; private set; }
 
         public ConsensusStates CurrentConsensusState { get; private set; }
 
@@ -134,6 +134,8 @@ namespace TNetD.Consensus
             /*Observable.Interval(TimeSpan.FromMilliseconds(1000))
                 .Subscribe(async x => await TimerCallback_Voting(x));*/
 
+            LedgerCloseSequence = new LedgerCloseSequence(nodeState.Ledger.LedgerCloseData);
+
             TimerVoting = new System.Timers.Timer();
             TimerVoting.Elapsed += TimerVoting_Elapsed;
             TimerVoting.Enabled = true;           
@@ -186,7 +188,7 @@ namespace TNetD.Consensus
                     {
                         case ConsensusStates.Collect:
 
-                            // LCS = LCL + 1     
+                            // LCS = LCL + 1  |  CRITICAL FIX !   
                             // ledgerCloseSequence = nodeState.Ledger.LedgerCloseData.SequenceNumber + 1;
 
                             isBallotValid = false;
@@ -418,7 +420,7 @@ namespace TNetD.Consensus
 
                         ApplyToLedger(finalBallot);
 
-                        LedgerCloseSequence++;
+                        //LedgerCloseSequence++;
                     }
                     else
                     {

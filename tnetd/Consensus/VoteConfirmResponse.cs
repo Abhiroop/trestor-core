@@ -25,7 +25,7 @@ namespace TNetD.Consensus
 
         public void Init()
         {
-            FinalBallot = new Ballot(0);
+            FinalBallot = new Ballot();
             BallotGood = false;
             IsSynced = false;
         }

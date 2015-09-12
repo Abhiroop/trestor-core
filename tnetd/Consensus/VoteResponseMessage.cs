@@ -23,7 +23,7 @@ namespace TNetD.Consensus
 
         public VoteResponseMessage()
         {
-            this.ballot = new Ballot(0);
+            this.ballot = new Ballot();
             this.goodBallot = false;
             this.isSynced = false;
         }
