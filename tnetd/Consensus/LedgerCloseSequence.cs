@@ -108,8 +108,15 @@ namespace TNetD.Consensus
         }
 
         public override string ToString()
-        {            
-            return hash + " - " + sequence;
+        {
+            if (hash.Hex.Length == 0)
+            {
+                return hash + " - " + sequence;
+            }
+            else
+            {
+                return hash.ToString().Substring(0, 6) + " - " + sequence;
+            }            
         }
 
         /// <summary>

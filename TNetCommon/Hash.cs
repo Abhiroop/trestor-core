@@ -71,7 +71,7 @@ namespace TNetD
 
         public override string ToString()
         {
-            if (HashValue.Length == 0) return "EMPTY_HASH";
+            if (HashValue.Length == 0) return "EMPTY";
 
             StringBuilder sb = new StringBuilder();
 

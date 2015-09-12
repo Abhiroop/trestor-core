@@ -65,7 +65,21 @@ namespace TNetD.Consensus
 
         public bool DebuggingMessages { get; set; }
 
-        public bool Enabled { get; set; } = false;
+        private bool enabled = false;
+
+        public bool Enabled
+        {
+            get
+            {
+                return enabled;
+            }
+
+            set
+            {
+                enabled = true;
+                InitLCS(nodeState); //FIX_TEMPORARY_TESTING MEASURE
+            }
+        }
 
         private object VotingTransactionLock = new object();
         private object ConsensusLock = new object();
@@ -134,17 +148,28 @@ namespace TNetD.Consensus
             /*Observable.Interval(TimeSpan.FromMilliseconds(1000))
                 .Subscribe(async x => await TimerCallback_Voting(x));*/
 
-            LedgerCloseSequence = new LedgerCloseSequence(nodeState.Ledger.LedgerCloseData);
-
             TimerVoting = new System.Timers.Timer();
             TimerVoting.Elapsed += TimerVoting_Elapsed;
-            TimerVoting.Enabled = true;           
+            TimerVoting.Enabled = true;
             TimerVoting.Interval = 500;
             TimerVoting.Start();
 
             DebuggingMessages = true;
 
             Print("Class \"Voting\" created.");
+        }
+
+        private void InitLCS(NodeState nodeState)
+        {
+            if (nodeState.Ledger.LedgerCloseData.LedgerHash == null)
+            {
+                // No voting has happened yet !
+                LedgerCloseSequence = new LedgerCloseSequence(0, nodeState.Ledger.GetRootHash());
+            }
+            else
+            {
+                LedgerCloseSequence = new LedgerCloseSequence(nodeState.Ledger.LedgerCloseData);
+            }
         }
 
         private void Print(string message)
@@ -155,7 +180,7 @@ namespace TNetD.Consensus
 
         void TimerVoting_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            if(Enabled)
+            if (Enabled)
                 VotingEvent();
         }
 
@@ -341,47 +366,47 @@ namespace TNetD.Consensus
             }
         }
 
-       /* void HandleConfirmation()
-        {
-            if (confirmationStateCounter < 1) // Send it once only.
-            {
-                if (isFinalBallotValid)
-                {
-                    // Send Confirmation
-                    sendConfirmationRequests();
-                }
-            }
-            else
-            {
-                if (voteMessageCounter.Confirmations < voteMessageCounter.PreviousConfirmations)
-                {
-                    // Okay, all the votes have not reached till now.
-                    if (extraConfirmationDelayCycles < 10)
-                    {
-                        extraConfirmationDelayCycles++;
+        /* void HandleConfirmation()
+         {
+             if (confirmationStateCounter < 1) // Send it once only.
+             {
+                 if (isFinalBallotValid)
+                 {
+                     // Send Confirmation
+                     sendConfirmationRequests();
+                 }
+             }
+             else
+             {
+                 if (voteMessageCounter.Confirmations < voteMessageCounter.PreviousConfirmations)
+                 {
+                     // Okay, all the votes have not reached till now.
+                     if (extraConfirmationDelayCycles < 10)
+                     {
+                         extraConfirmationDelayCycles++;
 
-                        Print("Waiting for pending confirmation requests : " + voteMessageCounter.Confirmations +
-                            "/" + voteMessageCounter.PreviousConfirmations + " Received");
-                    }
-                }
-            }
+                         Print("Waiting for pending confirmation requests : " + voteMessageCounter.Confirmations +
+                             "/" + voteMessageCounter.PreviousConfirmations + " Received");
+                     }
+                 }
+             }
 
-            confirmationStateCounter++;
+             confirmationStateCounter++;
 
-            if (confirmationStateCounter - extraConfirmationDelayCycles >= 6)
-            {
-                confirmationStateCounter = 0;
-                extraConfirmationDelayCycles = 0;
+             if (confirmationStateCounter - extraConfirmationDelayCycles >= 6)
+             {
+                 confirmationStateCounter = 0;
+                 extraConfirmationDelayCycles = 0;
 
-                isFinalConfirmedVotersValid = true;
+                 isFinalConfirmedVotersValid = true;
 
-                CurrentConsensusState = ConsensusStates.Apply; // Verify Confirmation
+                 CurrentConsensusState = ConsensusStates.Apply; // Verify Confirmation
 
-                voteMessageCounter.SetPreviousConfirmations();
+                 voteMessageCounter.SetPreviousConfirmations();
 
-                Print("Confirm Finished. " + GetTxCount(finalBallot));
-            }
-        }*/
+                 Print("Confirm Finished. " + GetTxCount(finalBallot));
+             }
+         }*/
 
         void HandleApply()
         {
@@ -450,12 +475,12 @@ namespace TNetD.Consensus
         void ApplyToLedger(Ballot applyBallot)
         {
 
-            foreach(var tx in ballot.TransactionIds)
+            foreach (var tx in ballot.TransactionIds)
             {
-                if(CurrentTransactions.ContainsKey(tx))
+                if (CurrentTransactions.ContainsKey(tx))
                 {
                     TransactionContent tc;
-                    CurrentTransactions.TryRemove(tx, out tc);                    
+                    CurrentTransactions.TryRemove(tx, out tc);
                 }
 
             }
