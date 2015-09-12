@@ -61,7 +61,7 @@ namespace TNetD.Consensus
                         break;
 
                     case 1:
-                        ProtocolPackager.UnpackHash(PDT, 0, out hash);
+                        ProtocolPackager.UnpackHash(PDT, 1, out hash);
                         break;
                 }
             }

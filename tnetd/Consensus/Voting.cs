@@ -257,10 +257,10 @@ namespace TNetD.Consensus
 
         string GetTxCount(Ballot ballot)
         {
-            if (ballot.TransactionIds.Count > 0)
+            if (ballot.TransactionCount > 0)
             {
 
-                return "" + ballot.TransactionIds.Count + " Txns";
+                return "" + ballot.TransactionCount + " Txns";
             }
 
             return "";
@@ -346,7 +346,7 @@ namespace TNetD.Consensus
 
                 finalBallot.Reset(LedgerCloseSequence);
                 finalBallot.PublicKey = nodeConfig.PublicKey;
-                finalBallot.TransactionIds = voteMap.FilterTransactionsByVotes(ballot, Constants.CONS_FINAL_VOTING_THRESHOLD_PERC);
+                finalBallot.AddRange(voteMap.FilterTransactionsByVotes(ballot, Constants.CONS_FINAL_VOTING_THRESHOLD_PERC));
                 finalBallot.Timestamp = nodeState.NetworkTime;
 
                 finalBallot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(finalBallot.GetSignatureData()));
@@ -475,7 +475,7 @@ namespace TNetD.Consensus
         void ApplyToLedger(Ballot applyBallot)
         {
 
-            foreach (var tx in ballot.TransactionIds)
+            foreach (var tx in ballot)
             {
                 if (CurrentTransactions.ContainsKey(tx))
                 {

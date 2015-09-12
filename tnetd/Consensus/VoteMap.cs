@@ -37,6 +37,9 @@ namespace TNetD.Consensus
             if (map == null)
                 DisplayUtils.Display("VERY_BAD_02", DisplayType.Warning);
 
+            if (ballot == null)
+                DisplayUtils.Display("VERY_BAD_03", DisplayType.Warning);
+
             if (map.ContainsKey(ballot.PublicKey))
             {
                 // Update
@@ -77,7 +80,7 @@ namespace TNetD.Consensus
 
                 foreach (var vote in voteSet)
                 {
-                    if (!myBallot.TransactionIds.Contains(vote.Key))
+                    if (!myBallot.Contains(vote.Key))
                     {
                         // Check percentage
 
@@ -120,7 +123,7 @@ namespace TNetD.Consensus
 
             foreach (var ballotKVP in map)
             {
-                foreach (var txid in ballotKVP.Value.TransactionIds)
+                foreach (var txid in ballotKVP.Value)
                 {
                     if (voteSet.ContainsKey(txid))
                     {
@@ -163,7 +166,7 @@ namespace TNetD.Consensus
 
                 foreach (var vote in voteSet)
                 {
-                    if (myBallot.TransactionIds.Contains(vote.Key))
+                    if (myBallot.Contains(vote.Key))
                     {
                         // Check percentage
 
@@ -199,16 +202,16 @@ namespace TNetD.Consensus
                 return false;
             }
 
-            if (myBallot.TransactionIds.Count != peerBallot.TransactionIds.Count)
+            if (myBallot.TransactionCount != peerBallot.TransactionCount)
             {
                 return false;
             }
 
             // Critical: Time Sync
 
-            foreach (var txID in myBallot.TransactionIds)
+            foreach (var txID in myBallot)
             {
-                if (!peerBallot.TransactionIds.Contains(txID))
+                if (!peerBallot.Contains(txID))
                 {
                     return false;
                 }

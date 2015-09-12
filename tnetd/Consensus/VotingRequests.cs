@@ -194,7 +194,7 @@ namespace TNetD.Consensus
             MergeResponseMsg message = new MergeResponseMsg();
             foreach (KeyValuePair<Hash, TransactionContent> transaction in CurrentTransactions)
             {
-                message.transactions.Add(transaction.Key);
+                message.AddTransaction(transaction.Key);
             }
             
             networkPacketSwitch.AddToQueue(sender, new NetworkPacket()
@@ -220,7 +220,7 @@ namespace TNetD.Consensus
                 message.Deserialize(packet.Data);
                 HashSet<Hash> newTransactions = new HashSet<Hash>();
 
-                foreach (Hash transaction in message.transactions)
+                foreach (Hash transaction in message)
                 {
                     //check whether transaction for the given ID is already known
                     if (!CurrentTransactions.ContainsKey(transaction))

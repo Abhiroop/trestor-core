@@ -5,14 +5,20 @@
 using TNetD.Protocol;
 using System.Collections.Generic;
 using Chaos.NaCl;
+using System.Collections;
 
 namespace TNetD.Consensus
 {
-    class Ballot : ISerializableBase, ISignableBase
+    class Ballot : ISerializableBase, ISignableBase, IEnumerable<Hash>
     {
         public LedgerCloseSequence LedgerCloseSequence;
 
-        public SortedSet<Hash> TransactionIds;
+        public int TransactionCount
+        {
+            get { return TransactionIds?.Count ?? 0; }
+        }
+
+        private SortedSet<Hash> TransactionIds;
 
         /// <summary>
         /// Public key of the signer.
@@ -39,6 +45,16 @@ namespace TNetD.Consensus
             LedgerCloseSequence = ledgerCloseSequence;
         }
 
+        /// <summary>
+        /// Checks if the ballot contains a transaction.
+        /// </summary>
+        /// <param name="transactionID"></param>
+        /// <returns></returns>
+        public bool Contains(Hash transactionID)
+        {
+            return TransactionIds.Contains(transactionID);
+        }
+
         public bool Add(Hash TransactionID)
         {
             if (!TransactionIds.Contains(TransactionID))
@@ -47,6 +63,18 @@ namespace TNetD.Consensus
             }
 
             return false;
+        }
+
+        public int AddRange(IEnumerable<Hash> transactionIDs)
+        {
+            int success = 0;
+
+            foreach(var txid in transactionIDs)
+            {
+                success += Add(txid) ? 1 : 0;
+            }
+
+            return success;
         }
 
         public void Reset()
@@ -159,6 +187,16 @@ namespace TNetD.Consensus
             if (Signature.Hex.Length != Common.KEYLEN_SIGNATURE) return false;
 
             return Ed25519.Verify(Signature.Hex, GetSignatureData(), publicKey.Hex);
+        }
+
+        public IEnumerator<Hash> GetEnumerator()
+        {
+            return ((IEnumerable<Hash>)TransactionIds).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<Hash>)TransactionIds).GetEnumerator();
         }
 
         #endregion

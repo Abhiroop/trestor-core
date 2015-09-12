@@ -42,12 +42,9 @@ namespace TNetD.Consensus
         public void Deserialize(byte[] Data)
         {
             List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
-            int cnt = 0;
-
-            while (cnt < (int)PDTs.Count)
-            {
-                ProtocolDataType PDT = PDTs[cnt++];
-
+            
+            foreach(var PDT in PDTs)
+            { 
                 switch (PDT.NameType)
                 {
                     case 0:

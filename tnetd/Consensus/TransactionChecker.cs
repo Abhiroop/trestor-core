@@ -82,7 +82,7 @@ namespace TNetD.Consensus
 
             ballot.Timestamp = nodeState.NetworkTime;
             ballot.PublicKey = new Hash(nodeState.NodeInfo.PublicKey);
-            ballot.TransactionIds = mergedTransactions;
+            ballot.AddRange(mergedTransactions);
 
             return ballot;
         }

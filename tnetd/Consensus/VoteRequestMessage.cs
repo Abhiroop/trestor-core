@@ -13,13 +13,13 @@ namespace TNetD.Consensus
 
         public VoteRequestMessage()
         {
-            LedgerCloseSequence = new LedgerCloseSequence(); ;
+            LedgerCloseSequence = new LedgerCloseSequence();
         }
 
         public byte[] Serialize()
         {
             ProtocolDataType[] PDTs = new ProtocolDataType[1];
-            PDTs[0] = ProtocolPackager.Pack(LedgerCloseSequence.Serialize(), 0);
+            PDTs[0] = ProtocolPackager.Pack(LedgerCloseSequence, 0);
             return ProtocolPackager.PackRaw(PDTs);
         }
 
