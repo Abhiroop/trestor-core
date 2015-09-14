@@ -91,7 +91,7 @@ namespace TNetD.Nodes
 
                     break;
 
-                case PacketType.TPT_CONS_STATE:
+                case PacketType.TPT_CONS_SYNC_REQUEST:
                 case PacketType.TPT_CONS_VOTE_REQUEST:
                 case PacketType.TPT_CONS_VOTE_RESPONSE:
                 case PacketType.TPT_CONS_CONFIRM_REQUEST:

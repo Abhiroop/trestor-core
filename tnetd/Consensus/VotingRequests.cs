@@ -61,7 +61,7 @@ namespace TNetD.Consensus
             FetchRequestMsg message = new FetchRequestMsg();
             message.IDs = transactions;
             Hash token = TNetUtils.GenerateNewToken();
-            
+
             networkPacketSwitch.AddToQueue(node, new NetworkPacket()
             {
                 Data = message.Serialize(),
@@ -100,7 +100,7 @@ namespace TNetD.Consensus
             {
                 response.transactions.Add(id, CurrentTransactions[id]);
             }
-            
+
             networkPacketSwitch.AddToQueue(packet.PublicKeySource, new NetworkPacket()
             {
                 Data = response.Serialize(),
@@ -169,7 +169,7 @@ namespace TNetD.Consensus
             foreach (var node in nodeState.ConnectedValidators)
             {
                 Hash token = TNetUtils.GenerateNewToken();
-                
+
                 networkPacketSwitch.AddToQueue(node.Key, new NetworkPacket()
                 {
                     PublicKeySource = nodeConfig.PublicKey,
@@ -196,7 +196,7 @@ namespace TNetD.Consensus
             {
                 message.AddTransaction(transaction.Key);
             }
-            
+
             networkPacketSwitch.AddToQueue(sender, new NetworkPacket()
             {
                 Token = token,
@@ -247,6 +247,112 @@ namespace TNetD.Consensus
 
             if (VerboseDebugging) Print("Merge Response from " + packet.PublicKeySource + " Processed");
         }
+
+        /// <summary>
+        /// Send sync requests to trusted nodes.
+        /// </summary>
+        void sendSyncRequests()
+        {
+            foreach (var node in nodeConfig.TrustedNodes)
+            {
+                // Create BallotRequestMessage
+                SyncMessage sm = new SyncMessage();
+                sm.LedgerCloseSequence = LedgerCloseSequence;
+                sm.ConsensusState = CurrentConsensusState;
+
+                // Create NetworkPacket and send
+
+                networkPacketSwitch.AddToQueue(node.Key, new NetworkPacket()
+                {
+                    PublicKeySource = nodeConfig.PublicKey,
+                    Token = TNetUtils.GenerateNewToken(),
+                    Data = sm.Serialize(),
+                    Type = PacketType.TPT_CONS_SYNC_REQUEST
+                });
+            }
+
+            if (VerboseDebugging) Print("Sync requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
+        }
+
+        void processSyncRequest(NetworkPacket packet)
+        {
+            SyncMessage syncRequest = new SyncMessage();
+            syncRequest.Deserialize(packet.Data);
+
+            SyncMessage syncResponse = new SyncMessage();
+
+            syncResponse.ConsensusState = CurrentConsensusState;
+            syncResponse.LedgerCloseSequence = LedgerCloseSequence;
+
+            networkPacketSwitch.AddToQueue(packet.PublicKeySource, new NetworkPacket()
+            {
+                Token = packet.Token,
+                PublicKeySource = nodeConfig.PublicKey,
+                Data = syncResponse.Serialize(),
+                Type = PacketType.TPT_CONS_SYNC_RESPONSE
+            });
+
+            if (VerboseDebugging) Print("Sync Request Replied to " + packet.PublicKeySource);
+        }
+
+        Dictionary<Hash, ConsensusStates> syncMap = new Dictionary<Hash, ConsensusStates>();
+
+        void processSyncResponse(NetworkPacket packet)
+        {
+            if (networkPacketSwitch.VerifyPendingPacket(packet))
+            {
+                if (CurrentConsensusState == ConsensusStates.Sync)
+                {
+                    // Is trusted !
+                    if (nodeConfig.TrustedNodes.ContainsKey(packet.PublicKeySource))
+                    {
+                        SyncMessage message = new SyncMessage();
+                        message.Deserialize(packet.Data);
+
+                        if (!syncMap.ContainsKey(packet.PublicKeySource))
+                        {
+                            syncMap.Add(packet.PublicKeySource, message.ConsensusState);
+                        }
+                        else
+                        {
+                            syncMap[packet.PublicKeySource] = message.ConsensusState;
+                        }
+                    }
+                }
+            }
+
+            if (VerboseDebugging) Print("Sync Response from " + packet.PublicKeySource + " Processed");
+        }
+
+        static int ConsensusStatesMemberCount = Enum.GetNames(typeof(ConsensusStates)).Length;
+
+        /// <summary>
+        /// Tuple: True means that greater than 3 nodes have replied with the same state.
+        /// </summary>
+        /// <returns></returns>
+        Tuple<ConsensusStates, bool> MedianTrustedState()
+        {
+            int[] syncers = new int[ConsensusStatesMemberCount];
+
+            foreach (var state in syncMap)
+            {
+                syncers[(int)state.Value]++;
+            }
+
+            int maxIndex = 0, maxCount = 0;
+
+            for (int i = 0; i < ConsensusStatesMemberCount; i++)
+            {
+                if (syncers[i] > maxCount)
+                {
+                    maxCount = syncers[i];
+                    maxIndex = i;
+                }
+            }
+
+            return new Tuple<ConsensusStates, bool>((ConsensusStates)maxIndex, maxCount > 3);
+        }
+
 
         void sendVoteRequests()
         {
@@ -329,7 +435,7 @@ namespace TNetD.Consensus
                                 // Signature should be valid.
                                 if (message.Ballot.VerifySignature(packet.PublicKeySource))
                                 {
-                                    voteMap.AddBallot(message.Ballot);                                    
+                                    voteMap.AddBallot(message.Ballot);
 
                                 }
                             }

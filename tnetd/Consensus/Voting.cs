@@ -24,9 +24,13 @@ namespace TNetD.Consensus
 {
     #region Enums
 
-
     public enum ConsensusStates
     {
+        /// <summary>
+        /// Synchronize the start of consensus.
+        /// </summary>
+        Sync,
+
         /// <summary>
         /// Initial Collection of pending transactions.
         /// </summary>
@@ -143,7 +147,7 @@ namespace TNetD.Consensus
             networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
             transactionChecker = new TransactionChecker(nodeState);
 
-            CurrentConsensusState = ConsensusStates.Collect;
+            CurrentConsensusState = ConsensusStates.Sync;
 
             voteMessageCounter = new VoteMessageCounter();
 
@@ -203,6 +207,9 @@ namespace TNetD.Consensus
         bool isFinalConfirmedVotersValid = false;
         bool isAcceptMapValid = false;
 
+        int syncStateCounter = 0;
+        bool syncSend = false;
+
         #region State-Machine
 
         private void VotingEvent()
@@ -213,6 +220,61 @@ namespace TNetD.Consensus
                 {
                     switch (CurrentConsensusState)
                     {
+                        case ConsensusStates.Sync:
+
+                            if (!syncSend)
+                            {
+                                syncMap.Clear();
+                                sendSyncRequests();
+                                syncSend = true;
+                            }
+                            else
+                            {
+                                var syncResults = MedianTrustedState();
+
+                                if (syncResults.Item2)
+                                {
+                                    // Great We know something
+
+                                    if (syncResults.Item1 == ConsensusStates.Sync || syncResults.Item1 == ConsensusStates.Merge)
+                                    {
+                                        // Awesome ! we can continue :)
+
+                                        CurrentConsensusState = ConsensusStates.Collect;
+                                        syncStateCounter = 0;
+                                        syncSend = false;
+
+                                        Print("Sync Done. Normal");
+                                    }
+                                    else
+                                    {
+                                        // Too bad we need to wait for sync
+                                        
+                                    }
+                                }
+                                else
+                                {
+                                    // We dont have anyone replying
+                                    // Wait a few cycles and then start anyway.
+
+                                    if (syncStateCounter > 15)
+                                    {
+                                        CurrentConsensusState = ConsensusStates.Collect;
+                                        syncStateCounter = 0;
+                                        syncSend = false;
+
+                                        Print("Sync Done. Forced");
+                                    }
+
+                                }
+
+
+                            }
+
+                            syncStateCounter++;
+
+                            break;
+
                         case ConsensusStates.Collect:
 
                             // LCS = LCL + 1  |  CRITICAL FIX !   
@@ -225,7 +287,7 @@ namespace TNetD.Consensus
                             voteMap.Reset();
                             finalBallot = new Ballot(LedgerCloseSequence);
                             ballot = new Ballot(LedgerCloseSequence);
-                            //finalVoters.Reset(LedgerCloseSequence);                            
+                            //finalVoters.Reset(LedgerCloseSequence);                   
 
                             processPendingTransactions();
                             CurrentConsensusState = ConsensusStates.Merge;
@@ -342,14 +404,14 @@ namespace TNetD.Consensus
                     break;
 
                 case VotingStates.Step40:
-                                        
+
                     if (!currentVotingRequestSent)
                     {
                         voteMessageCounter.ResetVotes();
                         sendVoteRequests();
                         currentVotingRequestSent = true;
                     }
-                    
+
                     if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
                     {
                         ResetMicroVoting();
@@ -593,7 +655,7 @@ namespace TNetD.Consensus
         {
             switch (packet.Type)
             {
-                case PacketType.TPT_CONS_STATE:
+                case PacketType.TPT_CONS_SYNC_REQUEST:
                     break;
 
                 case PacketType.TPT_CONS_VOTE_REQUEST:

@@ -40,6 +40,9 @@ namespace TNetD.Consensus
             if (ballot == null)
                 DisplayUtils.Display("VERY_BAD_03", DisplayType.Warning);
 
+            if (ballot.PublicKey == null)
+                DisplayUtils.Display("VERY_BAD_04", DisplayType.Warning);
+
             if (map.ContainsKey(ballot.PublicKey))
             {
                 // Update
