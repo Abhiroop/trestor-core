@@ -4,6 +4,8 @@
 //  @Date: September 2015 
 //
 
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace TNetD.Consensus
@@ -13,21 +15,27 @@ namespace TNetD.Consensus
     /// </summary>
     class VoteMessageCounter
     {
-        private int previousVotes, previousConfirmations;
+        object vmcLock = new object();
 
-        private int votes, confirmations;
+        HashSet<Hash> uniqueResponders = new HashSet<Hash>();
+
+        //private int previousVotes;
+        private int previousConfirmations;
+
+        private int votes;
+        private int confirmations;
 
         public int Votes { get { return votes; } }
         public int Confirmations { get { return confirmations; } }
 
-        public int PreviousVotes { get { return previousVotes; } }
+        public int UniqueVoteResponders { get { return uniqueResponders.Count; } }
         public int PreviousConfirmations { get { return previousConfirmations; } }
 
         public VoteMessageCounter()
         {
-            votes = 0;
+            //votes = 0;
             confirmations = 0;
-            previousVotes = 4;
+            // previousVotes = 4;
             previousConfirmations = 4;
         }
 
@@ -55,6 +63,14 @@ namespace TNetD.Consensus
             Interlocked.Exchange(ref votes, 0);
         }
 
+        public void ResetUniqueVoters()
+        {
+            lock (vmcLock)
+            {
+                uniqueResponders.Clear();
+            }
+        }
+
         /// <summary>
         /// Thread Safe
         /// </summary>
@@ -63,17 +79,23 @@ namespace TNetD.Consensus
             Interlocked.Exchange(ref confirmations, 0);
         }
 
-        public void ResetAll()
+        /*public void ResetAll()
         {
             Interlocked.Exchange(ref votes, 0);
             Interlocked.Exchange(ref confirmations, 0);
-            previousVotes = 0;
+            //previousVotes = 0;
             previousConfirmations = 0;
-        }
+        }*/
 
-        public void SetPreviousVotes()
+        public void UpdateVoters(Hash publicKey)
         {
-            this.previousVotes = votes;
+            lock (vmcLock)
+            {
+                if (!uniqueResponders.Contains(publicKey))
+                {
+                    uniqueResponders.Add(publicKey);
+                }
+            }
         }
 
         public void SetPreviousConfirmations()

@@ -220,6 +220,8 @@ namespace TNetD.Consensus
                 message.Deserialize(packet.Data);
                 HashSet<Hash> newTransactions = new HashSet<Hash>();
 
+                voteMessageCounter.UpdateVoters(packet.PublicKeySource);
+
                 foreach (Hash transaction in message)
                 {
                     //check whether transaction for the given ID is already known

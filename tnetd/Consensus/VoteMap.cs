@@ -13,6 +13,8 @@ namespace TNetD.Consensus
 {
     class VoteMap
     {
+        object AddLock = new object();
+
         NodeConfig nodeConfig;
         NodeState nodeState;
 
@@ -34,33 +36,36 @@ namespace TNetD.Consensus
         /// <param name="ballot"></param>
         public void AddBallot(Ballot ballot)
         {
-            if (map == null)
-                DisplayUtils.Display("VERY_BAD_02", DisplayType.Warning);
-
-            if (ballot == null)
-                DisplayUtils.Display("VERY_BAD_03", DisplayType.Warning);
-
-            if (ballot.PublicKey == null)
-                DisplayUtils.Display("VERY_BAD_04", DisplayType.Warning);
-
-            try
+            lock (AddLock)
             {
-                if (map.ContainsKey(ballot.PublicKey))
-                {
-                    // Update
-                    map[ballot.PublicKey] = ballot;
-                }
-                else
-                {
-                    // Insert
-                    var v = new KeyValuePair<Hash, Ballot>(ballot.PublicKey, ballot);
+                if (map == null)
+                    DisplayUtils.Display("VERY_BAD_02", DisplayType.Warning);
 
-                    map.Add(v.Key, v.Value);
-                }
-            }
-            catch (Exception ex)
-            {
+                if (ballot == null)
+                    DisplayUtils.Display("VERY_BAD_03", DisplayType.Warning);
 
+                if (ballot.PublicKey == null)
+                    DisplayUtils.Display("VERY_BAD_04", DisplayType.Warning);
+
+                try
+                {
+                    if (map.ContainsKey(ballot.PublicKey))
+                    {
+                        // Update
+                        map[ballot.PublicKey] = ballot;
+                    }
+                    else
+                    {
+                        // Insert
+                        var v = new KeyValuePair<Hash, Ballot>(ballot.PublicKey, ballot);
+
+                        map.Add(v.Key, v.Value);
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                }
             }
         }
 

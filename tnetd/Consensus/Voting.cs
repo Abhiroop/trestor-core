@@ -157,7 +157,7 @@ namespace TNetD.Consensus
             TimerVoting = new System.Timers.Timer();
             TimerVoting.Elapsed += TimerVoting_Elapsed;
             TimerVoting.Enabled = true;
-            TimerVoting.Interval = 500;
+            TimerVoting.Interval = 400;
             TimerVoting.Start();
 
             DebuggingMessages = true;
@@ -237,7 +237,6 @@ namespace TNetD.Consensus
                                 if (syncResults.Item2)
                                 {
                                     // Great We know something
-
                                     if (syncResults.Item1 == ConsensusStates.Sync || syncResults.Item1 == ConsensusStates.Merge)
                                     {
                                         // Awesome ! we can continue :)
@@ -257,7 +256,7 @@ namespace TNetD.Consensus
                                     // We dont have anyone replying
                                     // Wait a few cycles and then start anyway.
 
-                                    if (syncStateCounter > 15)
+                                    if (syncStateCounter > 20)
                                     {
                                         CurrentConsensusState = ConsensusStates.Collect;
                                         syncStateCounter = 0;
@@ -281,6 +280,8 @@ namespace TNetD.Consensus
                             isAcceptMapValid = false;
                             isFinalConfirmedVotersValid = false;
                             voteMap.Reset();
+                            voteMessageCounter.ResetVotes();
+                            voteMessageCounter.ResetUniqueVoters();
                             finalBallot = new Ballot(LedgerCloseSequence);
                             ballot = new Ballot(LedgerCloseSequence);
                             //finalVoters.Reset(LedgerCloseSequence);                   
@@ -356,31 +357,29 @@ namespace TNetD.Consensus
             ballot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(ballot.GetSignatureData()));
         }
 
-        int MAX_EXTRA_VOTING_STEP_WAIT_CYCLES = 4;
+        int MAX_EXTRA_VOTING_STEP_WAIT_CYCLES = 8;
         int extraVotingDelayCycles = 0; // Wait for all the voters to send their requests.
         bool currentVotingRequestSent = false;
 
         //int extraConfirmationDelayCycles = 0;
 
         VotingStates CurrentVotingState = VotingStates.None;
-
-        void ResetMicroVoting()
-        {
-            extraVotingDelayCycles = 0;
-            currentVotingRequestSent = false;
-        }
-
+        
         enum VoteNextState { Wait, Next }
 
         VoteNextState CheckReceivedExpectedVotePackets()
         {
-            if (voteMessageCounter.Votes < voteMessageCounter.PreviousVotes)
+            if (voteMessageCounter.Votes < voteMessageCounter.UniqueVoteResponders)
             {
                 if (extraVotingDelayCycles < MAX_EXTRA_VOTING_STEP_WAIT_CYCLES)
                 {
+                    if (extraVotingDelayCycles > 0)
+                    {
+                        Print("Waiting for pending voting requests : " + voteMessageCounter.Votes +
+                        "/" + voteMessageCounter.UniqueVoteResponders + " Received");
+                    }
+
                     extraVotingDelayCycles++;
-                    Print("Waiting for pending voting requests : " + voteMessageCounter.Votes +
-                    "/" + voteMessageCounter.PreviousVotes + " Received");
 
                     return VoteNextState.Wait;
                 }
@@ -389,9 +388,14 @@ namespace TNetD.Consensus
             return VoteNextState.Next;
         }
 
+        void ResetMicroVoting()
+        {
+            extraVotingDelayCycles = 0;
+            currentVotingRequestSent = false;
+        }
+
         void HandleVoting()
         {
-
             switch (CurrentVotingState)
             {
                 case VotingStates.None:
@@ -402,8 +406,7 @@ namespace TNetD.Consensus
                 case VotingStates.Step40:
 
                     if (!currentVotingRequestSent)
-                    {
-                        voteMessageCounter.ResetVotes();
+                    {                        
                         sendVoteRequests();
                         currentVotingRequestSent = true;
                     }
@@ -411,8 +414,7 @@ namespace TNetD.Consensus
                     if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
                     {
                         ResetMicroVoting();
-
-                        voteMessageCounter.SetPreviousVotes();
+                                                
                         CurrentVotingState = VotingStates.Done;
                     }
 
@@ -549,11 +551,11 @@ namespace TNetD.Consensus
 
         void HandleApply()
         {
-            NotEnoughVoters = false;
-
             // Have some delay before apply to allow others to catch up.
             if (isFinalBallotValid && (applyStateCounter == 1)) // DISABLE CONFIRMATION
             {
+                NotEnoughVoters = false;
+
                 // Check that the confirmed voters are all trusted
 
                 int trustedSynchronizedVoters = 0;
