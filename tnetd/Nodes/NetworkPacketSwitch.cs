@@ -86,18 +86,19 @@ namespace TNetD.Nodes
                 case PacketType.TPT_CONS_MERGE_RESPONSE:
                 case PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST:
                 case PacketType.TPT_CONS_MERGE_TX_FETCH_RESPONSE:
-
-                    if (VoteMergeEvent != null) VoteMergeEvent(packet);
+                                        
+                    VoteMergeEvent?.Invoke(packet);
 
                     break;
 
                 case PacketType.TPT_CONS_SYNC_REQUEST:
+                case PacketType.TPT_CONS_SYNC_RESPONSE:
                 case PacketType.TPT_CONS_VOTE_REQUEST:
                 case PacketType.TPT_CONS_VOTE_RESPONSE:
                 case PacketType.TPT_CONS_CONFIRM_REQUEST:
                 case PacketType.TPT_CONS_CONFIRM_RESPONSE:
 
-                    if (VoteEvent != null) VoteEvent(packet);
+                    VoteEvent?.Invoke(packet);
 
                     break;
 
@@ -108,8 +109,8 @@ namespace TNetD.Nodes
                 case PacketType.TPT_LSYNC_LEAF_REQUEST:
                 case PacketType.TPT_LSYNC_LEAF_REQUEST_ALL:
                 case PacketType.TPT_LSYNC_LEAF_RESPONSE:
-
-                    if (LedgerSyncEvent != null) LedgerSyncEvent(packet);
+                                       
+                    LedgerSyncEvent?.Invoke(packet);
 
                     break;
 
@@ -126,17 +127,15 @@ namespace TNetD.Nodes
 
                 case PacketType.TPT_TIMESYNC_REQUEST:
                 case PacketType.TPT_TIMESYNC_RESPONSE:
-
-                    if (TimeSyncEvent != null)
-                        TimeSyncEvent(packet);
+                    
+                    TimeSyncEvent?.Invoke(packet);
 
                     break;
 
                 case PacketType.TPT_PEER_DISCOVERY_INIT:
                 case PacketType.TPT_PEER_DISCOVERY_RESPONSE:
-
-                    if (PeerDiscoveryEvent != null)
-                        PeerDiscoveryEvent(packet);
+                    
+                    PeerDiscoveryEvent?.Invoke(packet);
 
                     break;
 

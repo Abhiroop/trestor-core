@@ -230,6 +230,8 @@ namespace TNetD.Consensus
                             }
                             else
                             {
+                                syncSend = false;
+
                                 var syncResults = MedianTrustedState();
 
                                 if (syncResults.Item2)
@@ -239,17 +241,15 @@ namespace TNetD.Consensus
                                     if (syncResults.Item1 == ConsensusStates.Sync || syncResults.Item1 == ConsensusStates.Merge)
                                     {
                                         // Awesome ! we can continue :)
-
                                         CurrentConsensusState = ConsensusStates.Collect;
-                                        syncStateCounter = 0;
-                                        syncSend = false;
+                                        syncStateCounter = 0;                                        
 
-                                        Print("Sync Done. Normal");
+                                        Print("Sync Done. Normal.");
                                     }
                                     else
                                     {
                                         // Too bad we need to wait for sync
-                                        
+                                        Print("Sync Wait.");
                                     }
                                 }
                                 else
@@ -261,14 +261,10 @@ namespace TNetD.Consensus
                                     {
                                         CurrentConsensusState = ConsensusStates.Collect;
                                         syncStateCounter = 0;
-                                        syncSend = false;
-
-                                        Print("Sync Done. Forced");
+                                        
+                                        Print("Sync Done. Forced.");
                                     }
-
                                 }
-
-
                             }
 
                             syncStateCounter++;
@@ -549,8 +545,12 @@ namespace TNetD.Consensus
              }
          }*/
 
+        bool NotEnoughVoters = false;
+
         void HandleApply()
         {
+            NotEnoughVoters = false;
+
             // Have some delay before apply to allow others to catch up.
             if (isFinalBallotValid && (applyStateCounter == 1)) // DISABLE CONFIRMATION
             {
@@ -583,7 +583,7 @@ namespace TNetD.Consensus
                     if (percentage >= Constants.CONS_FINAL_VOTING_THRESHOLD_PERC)
                     {
                         Print("Voting Successful. Applying to ledger. " + GetTxCount(finalBallot));
-
+                        
                         ApplyToLedger(finalBallot);
 
                         //LedgerCloseSequence++;
@@ -597,6 +597,8 @@ namespace TNetD.Consensus
                 {
                     Print("Voting Unsuccessful. Not Enough Trusted Voters. Trusted Voters: " + trustedSynchronizedVoters +
                         " Trusted Conns :" + totalTrustedConnections);
+
+                    NotEnoughVoters = true;
                 }
 
                 // Print("Apply Finished. Consensus Finished.");
@@ -606,7 +608,10 @@ namespace TNetD.Consensus
 
             if (applyStateCounter > 2)
             {
-                CurrentConsensusState = ConsensusStates.Collect;
+                if (NotEnoughVoters)
+                    CurrentConsensusState = ConsensusStates.Sync;
+                else
+                    CurrentConsensusState = ConsensusStates.Collect;
 
                 applyStateCounter = 0;
             }
@@ -656,6 +661,11 @@ namespace TNetD.Consensus
             switch (packet.Type)
             {
                 case PacketType.TPT_CONS_SYNC_REQUEST:
+                    processSyncRequest(packet);
+                    break;
+
+                case PacketType.TPT_CONS_SYNC_RESPONSE:
+                    processSyncResponse(packet);
                     break;
 
                 case PacketType.TPT_CONS_VOTE_REQUEST:

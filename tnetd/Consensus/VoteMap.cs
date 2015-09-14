@@ -43,15 +43,24 @@ namespace TNetD.Consensus
             if (ballot.PublicKey == null)
                 DisplayUtils.Display("VERY_BAD_04", DisplayType.Warning);
 
-            if (map.ContainsKey(ballot.PublicKey))
+            try
             {
-                // Update
-                map[ballot.PublicKey] = ballot;
+                if (map.ContainsKey(ballot.PublicKey))
+                {
+                    // Update
+                    map[ballot.PublicKey] = ballot;
+                }
+                else
+                {
+                    // Insert
+                    var v = new KeyValuePair<Hash, Ballot>(ballot.PublicKey, ballot);
+
+                    map.Add(v.Key, v.Value);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // Insert
-                map.Add(ballot.PublicKey, ballot);
+
             }
         }
 
