@@ -5,6 +5,7 @@
 //
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using TNetD.Nodes;
@@ -19,14 +20,14 @@ namespace TNetD.Consensus
         NodeState nodeState;
 
         // Key: PublicKey
-        Dictionary<Hash, Ballot> map = default(Dictionary<Hash, Ballot>);
+        ConcurrentDictionary<Hash, Ballot> map = default(ConcurrentDictionary<Hash, Ballot>);
 
         public VoteMap(NodeConfig nodeConfig, NodeState nodeState)
         {
             this.nodeConfig = nodeConfig;
             this.nodeState = nodeState;
 
-            map = new Dictionary<Hash, Ballot>();
+            map = new ConcurrentDictionary<Hash, Ballot>();
         }
 
         /// <summary>
@@ -36,36 +37,15 @@ namespace TNetD.Consensus
         /// <param name="ballot"></param>
         public void AddBallot(Ballot ballot)
         {
-            lock (AddLock)
+            if (map.ContainsKey(ballot.PublicKey))
             {
-                if (map == null)
-                    DisplayUtils.Display("VERY_BAD_02", DisplayType.Warning);
-
-                if (ballot == null)
-                    DisplayUtils.Display("VERY_BAD_03", DisplayType.Warning);
-
-                if (ballot.PublicKey == null)
-                    DisplayUtils.Display("VERY_BAD_04", DisplayType.Warning);
-
-                try
-                {
-                    if (map.ContainsKey(ballot.PublicKey))
-                    {
-                        // Update
-                        map[ballot.PublicKey] = ballot;
-                    }
-                    else
-                    {
-                        // Insert
-                        var v = new KeyValuePair<Hash, Ballot>(ballot.PublicKey, ballot);
-
-                        map.Add(v.Key, v.Value);
-                    }
-                }
-                catch (Exception ex)
-                {
-
-                }
+                // Update
+                map[ballot.PublicKey] = ballot;
+            }
+            else
+            {
+                // Insert 
+                map.AddOrUpdate(ballot.PublicKey, ballot, (k, vx) => ballot);
             }
         }
 

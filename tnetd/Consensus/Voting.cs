@@ -111,7 +111,7 @@ namespace TNetD.Consensus
         /// A Map to handle all the incoming votes.
         /// </summary>
         VoteMap voteMap;
-
+        
         /// <summary>
         /// A list of voters who have confirmed to have the same final ballot as us.
         /// If this is above above some threshold, we should apply all the changes to ledger and move on.
@@ -125,6 +125,8 @@ namespace TNetD.Consensus
         /// </summary>
         ConcurrentDictionary<Hash, HashSet<Hash>> propagationMap;
 
+        ConcurrentDictionary<Hash, ConsensusStates> syncMap;
+
         VoteMessageCounter voteMessageCounter;
 
         System.Timers.Timer TimerVoting = default(System.Timers.Timer);
@@ -136,8 +138,10 @@ namespace TNetD.Consensus
             this.networkPacketSwitch = networkPacketSwitch;
             this.CurrentTransactions = new ConcurrentDictionary<Hash, TransactionContent>();
             this.propagationMap = new ConcurrentDictionary<Hash, HashSet<Hash>>();
+            this.syncMap = new ConcurrentDictionary<Hash, ConsensusStates>();
             this.voteMap = new VoteMap(nodeConfig, nodeState);
-            synchronizedVoters = new HashSet<Hash>();
+            this.synchronizedVoters = new HashSet<Hash>();
+            
             //finalVoters = new FinalVoters();
 
             finalBallot = new Ballot();
@@ -157,7 +161,7 @@ namespace TNetD.Consensus
             TimerVoting = new System.Timers.Timer();
             TimerVoting.Elapsed += TimerVoting_Elapsed;
             TimerVoting.Enabled = true;
-            TimerVoting.Interval = 400;
+            TimerVoting.Interval = 500;
             TimerVoting.Start();
 
             DebuggingMessages = true;

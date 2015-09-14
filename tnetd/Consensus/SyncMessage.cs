@@ -1,8 +1,10 @@
-﻿using System;
+﻿
+//
+//  @Author: Arpan Jati
+//  @Date: September 2015 
+//
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TNetD.Protocol;
 
 namespace TNetD.Consensus

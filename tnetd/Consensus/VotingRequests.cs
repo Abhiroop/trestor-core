@@ -5,6 +5,7 @@
 //
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -296,9 +297,7 @@ namespace TNetD.Consensus
 
             if (VerboseDebugging) Print("Sync Request Replied to " + packet.PublicKeySource);
         }
-
-        Dictionary<Hash, ConsensusStates> syncMap = new Dictionary<Hash, ConsensusStates>();
-
+        
         void processSyncResponse(NetworkPacket packet)
         {
             if (networkPacketSwitch.VerifyPendingPacket(packet))
@@ -313,7 +312,7 @@ namespace TNetD.Consensus
 
                         if (!syncMap.ContainsKey(packet.PublicKeySource))
                         {
-                            syncMap.Add(packet.PublicKeySource, message.ConsensusState);
+                            syncMap.AddOrUpdate(packet.PublicKeySource, message.ConsensusState, (k,v) => message.ConsensusState);
                         }
                         else
                         {
