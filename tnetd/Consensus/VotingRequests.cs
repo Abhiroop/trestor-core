@@ -328,7 +328,7 @@ namespace TNetD.Consensus
         static int ConsensusStatesMemberCount = Enum.GetNames(typeof(ConsensusStates)).Length;
 
         /// <summary>
-        /// Tuple: True means that greater than 3 nodes have replied with the same state.
+        /// Tuple: True means than at least 3 nodes have replied with the same state.
         /// </summary>
         /// <returns></returns>
         Tuple<ConsensusStates, bool> MedianTrustedState()
@@ -351,10 +351,9 @@ namespace TNetD.Consensus
                 }
             }
 
-            return new Tuple<ConsensusStates, bool>((ConsensusStates)maxIndex, maxCount > 3);
+            return new Tuple<ConsensusStates, bool>((ConsensusStates)maxIndex, maxCount >= 3);
         }
-
-
+        
         void sendVoteRequests()
         {
             foreach (var node in nodeState.ConnectedValidators)
@@ -385,7 +384,8 @@ namespace TNetD.Consensus
 
             VoteResponseMessage voteResponse = new VoteResponseMessage();
 
-            if (voteRequest.LedgerCloseSequence == LedgerCloseSequence)
+            if (voteRequest.LedgerCloseSequence == LedgerCloseSequence &&
+                CheckAcceptableVotingState(voteResponse.VotingState))
             {
                 voteResponse.IsSynced = true;
                 voteMessageCounter.IncrementVotes();
@@ -415,6 +415,20 @@ namespace TNetD.Consensus
 
             if (VerboseDebugging) Print("Vote Request Replied to " + packet.PublicKeySource);
         }
+        
+        bool CheckAcceptableVotingState(VotingStates _vs)
+        {
+            int vs = (int) _vs;
+            int cvs = (int) CurrentVotingState;
+
+            if (vs == cvs) return true;
+
+            if (vs == 0 && cvs == 1) return true; // THINK
+
+            if (vs == 1 && cvs == 0) return true; // THINK
+
+            return false;
+        }
 
         void processVoteResponse(NetworkPacket packet)
         {
@@ -422,21 +436,22 @@ namespace TNetD.Consensus
             {
                 if (CurrentConsensusState == ConsensusStates.Vote)
                 {
-                    VoteResponseMessage message = new VoteResponseMessage();
-                    message.Deserialize(packet.Data);
+                    VoteResponseMessage voteResponse = new VoteResponseMessage();
+                    voteResponse.Deserialize(packet.Data);
 
-                    if (message.GoodBallot)
+                    if (voteResponse.GoodBallot)
                     {
                         // We should be voting for the next ballot.
-                        if (message.Ballot.LedgerCloseSequence == LedgerCloseSequence)
+                        if (voteResponse.Ballot.LedgerCloseSequence == LedgerCloseSequence &&
+                            CheckAcceptableVotingState(voteResponse.VotingState))
                         {
                             // Sender and ballot keys must be same
-                            if (message.Ballot.PublicKey == packet.PublicKeySource)
+                            if (voteResponse.Ballot.PublicKey == packet.PublicKeySource)
                             {
                                 // Signature should be valid.
-                                if (message.Ballot.VerifySignature(packet.PublicKeySource))
+                                if (voteResponse.Ballot.VerifySignature(packet.PublicKeySource))
                                 {
-                                    voteMap.AddBallot(message.Ballot);
+                                    voteMap.AddBallot(voteResponse.Ballot);
 
                                 }
                             }
@@ -444,7 +459,7 @@ namespace TNetD.Consensus
                         else
                         {
                             Print("LCS Mismatch (PVResp) for " + GetTrustedName(packet.PublicKeySource) +
-                                " : " + message.Ballot.LedgerCloseSequence + "!=" + LedgerCloseSequence);
+                                " : " + voteResponse.Ballot.LedgerCloseSequence + "!=" + LedgerCloseSequence);
                         }
                     }
                 }

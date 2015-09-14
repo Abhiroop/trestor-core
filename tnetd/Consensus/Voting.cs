@@ -188,6 +188,12 @@ namespace TNetD.Consensus
                 DisplayUtils.Display("V:" + LedgerCloseSequence + ": " + nodeConfig.ID() + ": " + message);
         }
 
+        private void PrintImpt(string message)
+        {
+            if (DebuggingMessages)
+                DisplayUtils.Display("V:" + LedgerCloseSequence + ": " + nodeConfig.ID() + ": " + message, DisplayType.Warning);
+        }
+
         void TimerVoting_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             if (Enabled)
@@ -588,7 +594,7 @@ namespace TNetD.Consensus
 
                     if (percentage >= Constants.CONS_FINAL_VOTING_THRESHOLD_PERC)
                     {
-                        Print("Voting Successful. Applying to ledger. " + GetTxCount(finalBallot));
+                        PrintImpt("Voting Successful. Applying to ledger. " + GetTxCount(finalBallot));
                         
                         ApplyToLedger(finalBallot);
 
@@ -596,12 +602,12 @@ namespace TNetD.Consensus
                     }
                     else
                     {
-                        Print("Voting Unsuccessful. Consesus percentage: " + percentage);
+                        PrintImpt("Voting Unsuccessful. Consesus percentage: " + percentage);
                     }
                 }
                 else
                 {
-                    Print("Voting Unsuccessful. Not Enough Trusted Voters. Trusted Voters: " + trustedSynchronizedVoters +
+                    PrintImpt("Voting Unsuccessful. Not Enough Trusted Voters. Trusted Voters: " + trustedSynchronizedVoters +
                         " Trusted Conns :" + totalTrustedConnections);
 
                     NotEnoughVoters = true;
