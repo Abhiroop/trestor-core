@@ -361,7 +361,7 @@ namespace TNetD.UI
                     string rh = nd.LocalLedger.LedgerTree.GetRootHash().ToString();
 
                     sb.Append(
-                        "\nState: " + nd.ConsensusState +
+                        "\nST:" + (nd.ConsensusState ==  Consensus.ConsensusStates.Vote ? "Vote:" + nd.voting.CurrentVotingState : "" + nd.ConsensusState) +
                         "\nRoot: " + ((rh.Length >= 8) ? rh.Substring(0, 8) : "Empty") +
                         "\nLCS:" + nd.voting.LedgerCloseSequence
                         );
@@ -432,22 +432,22 @@ namespace TNetD.UI
 
                             switch (nd.voting.CurrentVotingState) // Greens
                             {
-                                case Consensus.VotingStates.None:
+                                case Consensus.VotingStates.STNone:
                                     scb = new SolidColorBrush(Color.FromRgb(68, 170, 34));
                                     break;
-                                case Consensus.VotingStates.Step40:
+                                case Consensus.VotingStates.ST40:
                                     scb = new SolidColorBrush(Color.FromRgb(65, 161, 32));
                                     break;
-                                case Consensus.VotingStates.Step60:
+                                case Consensus.VotingStates.ST60:
                                     scb = new SolidColorBrush(Color.FromRgb(59, 147, 29));
                                     break;
-                                case Consensus.VotingStates.Step75:
+                                case Consensus.VotingStates.ST75:
                                     scb = new SolidColorBrush(Color.FromRgb(54, 133, 27));
                                     break;
-                                case Consensus.VotingStates.Step80:
+                                case Consensus.VotingStates.ST80:
                                     scb = new SolidColorBrush(Color.FromRgb(48, 120, 24));
                                     break;
-                                case Consensus.VotingStates.Done:
+                                case Consensus.VotingStates.STDone:
                                     scb = new SolidColorBrush(Color.FromRgb(41, 101, 20));
                                     break;
                             }

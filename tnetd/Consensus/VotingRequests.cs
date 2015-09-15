@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using TNetD.Network;
 using TNetD.Network.Networking;
@@ -297,7 +298,7 @@ namespace TNetD.Consensus
 
             if (VerboseDebugging) Print("Sync Request Replied to " + packet.PublicKeySource);
         }
-        
+
         void processSyncResponse(NetworkPacket packet)
         {
             if (networkPacketSwitch.VerifyPendingPacket(packet))
@@ -312,7 +313,7 @@ namespace TNetD.Consensus
 
                         if (!syncMap.ContainsKey(packet.PublicKeySource))
                         {
-                            syncMap.AddOrUpdate(packet.PublicKeySource, message.ConsensusState, (k,v) => message.ConsensusState);
+                            syncMap.AddOrUpdate(packet.PublicKeySource, message.ConsensusState, (k, v) => message.ConsensusState);
                         }
                         else
                         {
@@ -353,7 +354,7 @@ namespace TNetD.Consensus
 
             return new Tuple<ConsensusStates, bool>((ConsensusStates)maxIndex, maxCount >= 3);
         }
-        
+
         void sendVoteRequests()
         {
             foreach (var node in nodeState.ConnectedValidators)
@@ -383,9 +384,10 @@ namespace TNetD.Consensus
             voteRequest.Deserialize(packet.Data);
 
             VoteResponseMessage voteResponse = new VoteResponseMessage();
+            voteResponse.VotingState = CurrentVotingState;
 
             if (voteRequest.LedgerCloseSequence == LedgerCloseSequence &&
-                CheckAcceptableVotingState(voteResponse.VotingState))
+                CheckAcceptableVotingState(voteRequest.VotingState))
             {
                 voteResponse.IsSynced = true;
                 voteMessageCounter.IncrementVotes();
@@ -402,7 +404,7 @@ namespace TNetD.Consensus
                 voteResponse.IsSynced = false;
 
                 Print("LCS (PVReq) Mismatch for " + GetTrustedName(packet.PublicKeySource) +
-                    " : " + voteRequest.LedgerCloseSequence + "!=" + LedgerCloseSequence + ", VS:" + voteResponse.VotingState + "/" + CurrentVotingState);
+                    " : " + voteRequest.LedgerCloseSequence + "!=" + LedgerCloseSequence + ", VS:" + voteRequest.VotingState + "/" + CurrentVotingState);
             }
 
             networkPacketSwitch.AddToQueue(packet.PublicKeySource, new NetworkPacket()
@@ -415,16 +417,33 @@ namespace TNetD.Consensus
 
             if (VerboseDebugging) Print("Vote Request Replied to " + packet.PublicKeySource);
         }
-        
+
         bool CheckAcceptableVotingState(VotingStates _vs)
         {
-            int vs = (int) _vs;
-            int cvs = (int) CurrentVotingState;
+            int waitCount = 0;
+
+            begin:
+
+            int vs = (int)_vs;
+            int cvs = (int)CurrentVotingState;
 
             if (vs == cvs) return true;
 
-            if (Math.Abs(vs - cvs) == 1) return true; // THINK: A difference of 1
-            
+            //if (vs == 0 && cvs == 1) return true;
+            //if (vs == 1 && cvs == 0) return true;
+
+            if (waitCount < 5)
+            {
+                waitCount++;
+                Thread.Sleep(50);
+
+                Print("Waiting for acceptable state: "+ waitCount +" VS: " + vs + " CVS: " + cvs);
+
+                goto begin;
+            }
+
+            //if (Math.Abs(vs - cvs) == 1) return true; // THINK: A difference of 1
+
             return false;
         }
 
@@ -457,7 +476,7 @@ namespace TNetD.Consensus
                         else
                         {
                             Print("LCS Mismatch (PVResp) for " + GetTrustedName(packet.PublicKeySource) +
-                                " : " + voteResponse.Ballot.LedgerCloseSequence + "!=" + LedgerCloseSequence + ", VS:" + voteResponse.VotingState +"/" + CurrentVotingState);
+                                " : " + voteResponse.Ballot.LedgerCloseSequence + "!=" + LedgerCloseSequence + ", VS:" + voteResponse.VotingState + "/" + CurrentVotingState);
                         }
                     }
                 }

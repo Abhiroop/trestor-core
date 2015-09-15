@@ -15,7 +15,7 @@ namespace TNetD.Consensus
         public VoteRequestMessage()
         {
             LedgerCloseSequence = new LedgerCloseSequence();
-            VotingState = VotingStates.None;
+            VotingState = VotingStates.STNone;
         }
 
         public byte[] Serialize()

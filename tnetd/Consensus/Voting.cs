@@ -56,7 +56,7 @@ namespace TNetD.Consensus
         /// </summary>
         Apply
     };
-    public enum VotingStates { None, Step40, Step60, Step75, Step80, Done };
+    public enum VotingStates { STNone, ST40, ST60, ST75, ST80, STDone };
 
     #endregion
 
@@ -94,7 +94,7 @@ namespace TNetD.Consensus
 
         public ConsensusStates CurrentConsensusState { get; private set; }
 
-        public VotingStates CurrentVotingState = VotingStates.None;
+        public VotingStates CurrentVotingState = VotingStates.STNone;
 
         NodeConfig nodeConfig;
         NodeState nodeState;
@@ -400,6 +400,7 @@ namespace TNetD.Consensus
 
         void ResetMicroVoting()
         {
+            voteMessageCounter.ResetVotes();
             extraVotingDelayCycles = 0;
             currentVotingRequestSent = false;
         }
@@ -408,12 +409,12 @@ namespace TNetD.Consensus
         {
             switch (CurrentVotingState)
             {
-                case VotingStates.None:
+                case VotingStates.STNone:
                     // Pre-Voting Stuff !! 
-                    CurrentVotingState = VotingStates.Step40;
+                    CurrentVotingState = VotingStates.ST40;
                     break;
 
-                case VotingStates.Step40:
+                case VotingStates.ST40:
 
                     if (!currentVotingRequestSent)
                     {                        
@@ -422,15 +423,17 @@ namespace TNetD.Consensus
                     }
 
                     if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
-                    {
+                    {                        
+                        Print("Voting Step40 Done" + voteMessageCounter.Votes +
+                        "/" + voteMessageCounter.UniqueVoteResponders + "");
+
                         ResetMicroVoting();
-                        Print("Voting Step40 Done");
-                        CurrentVotingState = VotingStates.Step60;
+                        CurrentVotingState = VotingStates.ST60;
                     }
 
                     break;
 
-                case VotingStates.Step60:
+                case VotingStates.ST60:
 
                     if (!currentVotingRequestSent)
                     {
@@ -440,14 +443,16 @@ namespace TNetD.Consensus
 
                     if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
                     {
+                        Print("Voting Step60 Done" + voteMessageCounter.Votes +
+                        "/" + voteMessageCounter.UniqueVoteResponders + "");
+
                         ResetMicroVoting();
-                        Print("Voting Step60 Done");
-                        CurrentVotingState = VotingStates.Step75;
+                        CurrentVotingState = VotingStates.ST75;
                     }
 
                     break;
 
-                case VotingStates.Step75:
+                case VotingStates.ST75:
 
                     if (!currentVotingRequestSent)
                     {
@@ -457,17 +462,35 @@ namespace TNetD.Consensus
 
                     if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
                     {
+                        Print("Voting Step75 Done" + voteMessageCounter.Votes +
+                        "/" + voteMessageCounter.UniqueVoteResponders + "");
+
                         ResetMicroVoting();
-                        Print("Voting Step75 Done");
-                        CurrentVotingState = VotingStates.Done;
+                        CurrentVotingState = VotingStates.ST80;
                     }
 
                     break;
 
-                case VotingStates.Step80:
+                case VotingStates.ST80:
+
+                    if (!currentVotingRequestSent)
+                    {
+                        sendVoteRequests();
+                        currentVotingRequestSent = true;
+                    }
+
+                    if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
+                    {
+                        Print("Voting Step80 Done" + voteMessageCounter.Votes +
+                        "/" + voteMessageCounter.UniqueVoteResponders + "");
+
+                        ResetMicroVoting();
+                        CurrentVotingState = VotingStates.STDone;
+                    }
+
                     break;
 
-                case VotingStates.Done:
+                case VotingStates.STDone:
                     PostVotingOperations();
                     break;
             }
@@ -538,7 +561,7 @@ namespace TNetD.Consensus
             isFinalBallotValid = true; // TODO: CRITICAL THINK THINK, TESTS !!                
 
             CurrentConsensusState = ConsensusStates.Apply; // SKIP CONFIRMATION (Maybe not needed afterall)
-            CurrentVotingState = VotingStates.None;
+            CurrentVotingState = VotingStates.STNone;
 
             voteMessageCounter.ResetConfirmations();
         }
