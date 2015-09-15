@@ -402,7 +402,7 @@ namespace TNetD.Consensus
                 voteResponse.IsSynced = false;
 
                 Print("LCS (PVReq) Mismatch for " + GetTrustedName(packet.PublicKeySource) +
-                    " : " + voteRequest.LedgerCloseSequence + "!=" + LedgerCloseSequence);
+                    " : " + voteRequest.LedgerCloseSequence + "!=" + LedgerCloseSequence + ", VS:" + voteResponse.VotingState + "/" + CurrentVotingState);
             }
 
             networkPacketSwitch.AddToQueue(packet.PublicKeySource, new NetworkPacket()
@@ -423,10 +423,8 @@ namespace TNetD.Consensus
 
             if (vs == cvs) return true;
 
-            if (vs == 0 && cvs == 1) return true; // THINK
-
-            if (vs == 1 && cvs == 0) return true; // THINK
-
+            if (Math.Abs(vs - cvs) == 1) return true; // THINK: A difference of 1
+            
             return false;
         }
 
@@ -459,7 +457,7 @@ namespace TNetD.Consensus
                         else
                         {
                             Print("LCS Mismatch (PVResp) for " + GetTrustedName(packet.PublicKeySource) +
-                                " : " + voteResponse.Ballot.LedgerCloseSequence + "!=" + LedgerCloseSequence);
+                                " : " + voteResponse.Ballot.LedgerCloseSequence + "!=" + LedgerCloseSequence + ", VS:" + voteResponse.VotingState +"/" + CurrentVotingState);
                         }
                     }
                 }

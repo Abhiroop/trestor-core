@@ -94,6 +94,8 @@ namespace TNetD.Consensus
 
         public ConsensusStates CurrentConsensusState { get; private set; }
 
+        public VotingStates CurrentVotingState = VotingStates.None;
+
         NodeConfig nodeConfig;
         NodeState nodeState;
         NetworkPacketSwitch networkPacketSwitch;
@@ -372,8 +374,6 @@ namespace TNetD.Consensus
         bool currentVotingRequestSent = false;
 
         //int extraConfirmationDelayCycles = 0;
-
-        VotingStates CurrentVotingState = VotingStates.None;
         
         enum VoteNextState { Wait, Next }
 
@@ -424,16 +424,44 @@ namespace TNetD.Consensus
                     if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
                     {
                         ResetMicroVoting();
-                                                
-                        CurrentVotingState = VotingStates.Done;
+                        Print("Voting Step40 Done");
+                        CurrentVotingState = VotingStates.Step60;
                     }
 
                     break;
 
                 case VotingStates.Step60:
+
+                    if (!currentVotingRequestSent)
+                    {
+                        sendVoteRequests();
+                        currentVotingRequestSent = true;
+                    }
+
+                    if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
+                    {
+                        ResetMicroVoting();
+                        Print("Voting Step60 Done");
+                        CurrentVotingState = VotingStates.Step75;
+                    }
+
                     break;
 
                 case VotingStates.Step75:
+
+                    if (!currentVotingRequestSent)
+                    {
+                        sendVoteRequests();
+                        currentVotingRequestSent = true;
+                    }
+
+                    if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
+                    {
+                        ResetMicroVoting();
+                        Print("Voting Step75 Done");
+                        CurrentVotingState = VotingStates.Done;
+                    }
+
                     break;
 
                 case VotingStates.Step80:

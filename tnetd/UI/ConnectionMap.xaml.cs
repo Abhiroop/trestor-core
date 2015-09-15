@@ -363,7 +363,7 @@ namespace TNetD.UI
                     sb.Append(
                         "\nState: " + nd.ConsensusState +
                         "\nRoot: " + ((rh.Length >= 8) ? rh.Substring(0, 8) : "Empty") +
-                        "\nLCS:" + nd.voting.LedgerCloseSequence                       
+                        "\nLCS:" + nd.voting.LedgerCloseSequence
                         );
 
                     break;
@@ -388,7 +388,7 @@ namespace TNetD.UI
                     }
 
                     sb.Append("\nTrusted: " + Trusted +
-                        //"\n" + TL.ToString() +                                            
+                                //"\n" + TL.ToString() +                                            
                                 "\nOutgoing: " + Outgoing);
                     break;
 
@@ -403,6 +403,85 @@ namespace TNetD.UI
             }
 
             return sb.ToString();
+        }
+
+        SolidColorBrush GetBackGroundColor(Node nd, ConnectionMapDisplayMode mode)
+        {
+            SolidColorBrush scb = new SolidColorBrush(Color.FromRgb(33, 98, 163)); //blue
+
+            switch (mode)
+            {
+                case ConnectionMapDisplayMode.Voting:
+
+                    switch(nd.voting.CurrentConsensusState)
+                    {
+                        case Consensus.ConsensusStates.Sync:
+                            scb = new SolidColorBrush(Color.FromRgb(204, 204, 62)); //Yellow
+                            break;
+
+
+                        case Consensus.ConsensusStates.Collect:
+                            scb = new SolidColorBrush(Color.FromRgb(230, 46, 0)); // Orange
+                            break;
+
+                        case Consensus.ConsensusStates.Merge:
+                            scb = new SolidColorBrush(Color.FromRgb(184, 0, 0)); // Red
+                            break;
+
+                        case Consensus.ConsensusStates.Vote:
+
+                            switch (nd.voting.CurrentVotingState) // Greens
+                            {
+                                case Consensus.VotingStates.None:
+                                    scb = new SolidColorBrush(Color.FromRgb(68, 170, 34));
+                                    break;
+                                case Consensus.VotingStates.Step40:
+                                    scb = new SolidColorBrush(Color.FromRgb(65, 161, 32));
+                                    break;
+                                case Consensus.VotingStates.Step60:
+                                    scb = new SolidColorBrush(Color.FromRgb(59, 147, 29));
+                                    break;
+                                case Consensus.VotingStates.Step75:
+                                    scb = new SolidColorBrush(Color.FromRgb(54, 133, 27));
+                                    break;
+                                case Consensus.VotingStates.Step80:
+                                    scb = new SolidColorBrush(Color.FromRgb(48, 120, 24));
+                                    break;
+                                case Consensus.VotingStates.Done:
+                                    scb = new SolidColorBrush(Color.FromRgb(41, 101, 20));
+                                    break;
+                            }
+
+                            break;
+
+                        case Consensus.ConsensusStates.Confirm:
+                            scb = new SolidColorBrush(Color.FromRgb(46, 184, 184)); // Teal
+                            break;
+
+
+                        case Consensus.ConsensusStates.Apply:
+                            scb = new SolidColorBrush(Color.FromRgb(41, 124, 207)); // Blue
+                            break;
+
+                    }                   
+
+                    break;
+
+                case ConnectionMapDisplayMode.Trust:
+
+                    break;
+
+                case ConnectionMapDisplayMode.TimeSync:
+
+                    break;
+
+                case ConnectionMapDisplayMode.LedgerSync:
+
+                    break;
+
+            }
+
+            return scb;
         }
 
         private void DrawNodeGraph(DrawingContext drawingContext, Point nodeGraphOrigin)
@@ -463,16 +542,20 @@ namespace TNetD.UI
 
                 Rect rectTODraw = new Rect(v, new Size(rectWidth, rectHeight));
 
-                SolidColorBrush scb_blue = new SolidColorBrush(Color.FromRgb(33, 98, 163));
-
-                drawingContext.DrawRoundedRectangle(scb_blue, null, rectTODraw, 5, 5);
-
+                //SolidColorBrush scb_blue = new SolidColorBrush(Color.FromRgb(33, 98, 163));
+                
+                //SolidColorBrush scb_calc = GetBackGroundColor()
+                
                 /*RenderBlurred(drawingContext, 35, 35, new Rect(v, new Size(35, 35)), 10, 
                     dc => dc.DrawRectangle(new SolidColorBrush(Colors.Transparent), new Pen(Brushes.Blue, 3), new Rect(0, 0, 35, 35)));*/
 
                 if (nodes.ContainsKey(np.Key))
                 {
                     Node nd = nodes[np.Key];
+
+                    SolidColorBrush scb_calc = GetBackGroundColor(nd, DisplayMode);
+
+                    drawingContext.DrawRoundedRectangle(scb_calc, null, rectTODraw, 5, 5);
 
                     FormattedText ft = new FormattedText(GetNodeDisplayString(nd, DisplayMode),
                         CultureInfo.InvariantCulture, FlowDirection.LeftToRight, new Typeface("Courier New"), 10, Brushes.LightCyan);
