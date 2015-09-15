@@ -441,151 +441,207 @@ namespace TNetD.Consensus
             isBallotValid = true;
         }
 
+
+        VotingStates HandleVotingInternal(VotingStates state, float Percentage)
+        {
+            if (!currentVotingRequestSent)
+            {
+                voteMap.Reset();
+                sendVoteRequests();
+                currentVotingRequestSent = true;
+            }
+
+            if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
+            {
+                Print("Voting " + state + " Done" + voteMessageCounter.Votes +
+                "/" + voteMessageCounter.UniqueVoteResponders + "");
+
+                VotingPostRound(Percentage);
+
+                return (state + 1);
+            }
+
+            return state;
+        }
+
         void HandleVoting()
         {
             switch (CurrentVotingState)
             {
                 case VotingStates.STNone:
-                    // Pre-Voting Stuff !!                    
+                    // Pre-Voting Stuff !! 
+                    voteMap.Reset();
                     CurrentVotingState = VotingStates.ST40;
                     break;
 
                 case VotingStates.ST40:
-
-                    if (!currentVotingRequestSent)
-                    {
-                        voteMap.Reset();
-                        sendVoteRequests();
-                        currentVotingRequestSent = true;
-                    }
-
-                    if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
-                    {
-                        Print("Voting Step40 Done" + voteMessageCounter.Votes +
-                        "/" + voteMessageCounter.UniqueVoteResponders + "");
-
-                        VotingPostRound(40);
-
-                        CurrentVotingState = VotingStates.ST60;
-                    }
-
+                    CurrentVotingState = HandleVotingInternal(CurrentVotingState, 40);
                     break;
 
                 case VotingStates.ST60:
-
-                    if (!currentVotingRequestSent)
-                    {
-                        voteMap.Reset();
-                        sendVoteRequests();
-                        currentVotingRequestSent = true;
-                    }
-
-                    if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
-                    {
-                        Print("Voting Step60 Done" + voteMessageCounter.Votes +
-                        "/" + voteMessageCounter.UniqueVoteResponders + "");
-
-                        VotingPostRound(60);
-
-                        CurrentVotingState = VotingStates.ST75;
-                    }
-
+                    CurrentVotingState = HandleVotingInternal(CurrentVotingState, 60);
                     break;
 
                 case VotingStates.ST75:
-
-                    if (!currentVotingRequestSent)
-                    {
-                        voteMap.Reset();
-                        sendVoteRequests();
-                        currentVotingRequestSent = true;
-                    }
-
-                    if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
-                    {
-                        Print("Voting Step75 Done" + voteMessageCounter.Votes +
-                        "/" + voteMessageCounter.UniqueVoteResponders + "");
-
-                        VotingPostRound(75);
-                        CurrentVotingState = VotingStates.ST80;
-                    }
-
+                    CurrentVotingState = HandleVotingInternal(CurrentVotingState, 75);
                     break;
 
                 case VotingStates.ST80:
-
-                    if (!currentVotingRequestSent)
-                    {
-                        voteMap.Reset();
-                        sendVoteRequests();
-                        currentVotingRequestSent = true;
-                    }
-
-                    if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
-                    {
-                        Print("Voting Step80 Done" + voteMessageCounter.Votes +
-                        "/" + voteMessageCounter.UniqueVoteResponders + "");
-
-                        VotingPostRound(80);
-                        CurrentVotingState = VotingStates.STDone;
-                    }
-
+                    CurrentVotingState = HandleVotingInternal(CurrentVotingState, 80);
                     break;
 
                 case VotingStates.STDone:
                     PostVotingOperations();
                     break;
             }
-
-            /*
-            if (votingStateCounter < 8) // TWEAK-POINT: Trim value.
-            {
-                if (votingStateCounter % 2 == 0)
-                {
-                    sendVoteRequests();
-                }
-                else
-                {
-                    Dictionary<Hash, HashSet<Hash>> missingTransactions;
-                    voteMap.GetMissingTransactions(ballot, out missingTransactions);
-
-                    sendFetchRequests(missingTransactions);
-                }
-            }
-            else // Initial Sync Part is over.
-            {
-                // Verify the received
-                if (voteMessageCounter.Votes < voteMessageCounter.PreviousVotes)
-                {
-                    // Okay, all the votes have not reached till now.
-                    if (extraVotingDelayCycles < 10)
-                    {
-                        extraVotingDelayCycles++;
-
-                        Print("Waiting for pending voting requests : " + voteMessageCounter.Votes +
-                            "/" + voteMessageCounter.PreviousVotes + " Received");
-                    }
-                }
-            }
-
-            votingStateCounter++;
-
-            // We will perform dummy voting cycles even when there are no transactions. those will
-            // have a different counter, called ConsensusCount, the default is LedgerClose, the ledger close one 
-            // is the one associated.
-
-            // Request Ballots
-
-            if (votingStateCounter - extraVotingDelayCycles >= 12)
-            {
-                votingStateCounter = 0;
-                extraVotingDelayCycles = 0;
-
-                PostVotingOperations();
-
-                Print("Voting Finished. " + GetTxCount(finalBallot));
-            }*/
         }
+
+        /*
+                    void HandleVoting()
+                {
+                    switch (CurrentVotingState)
+                    {
+                        case VotingStates.STNone:
+                            // Pre-Voting Stuff !!                    
+                            CurrentVotingState = VotingStates.ST40;
+                            break;
+
+                        case VotingStates.ST40:
+
+                            if (!currentVotingRequestSent)
+                            {
+                                voteMap.Reset();
+                                sendVoteRequests();
+                                currentVotingRequestSent = true;
+                            }
+
+                            if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
+                            {
+                                Print("Voting Step40 Done" + voteMessageCounter.Votes +
+                                "/" + voteMessageCounter.UniqueVoteResponders + "");
+
+                                VotingPostRound(40);
+
+                                CurrentVotingState = VotingStates.ST60;
+                            }
+
+                            break;
+
+                        case VotingStates.ST60:
+
+                            if (!currentVotingRequestSent)
+                            {
+                                voteMap.Reset();
+                                sendVoteRequests();
+                                currentVotingRequestSent = true;
+                            }
+
+                            if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
+                            {
+                                Print("Voting Step60 Done" + voteMessageCounter.Votes +
+                                "/" + voteMessageCounter.UniqueVoteResponders + "");
+
+                                VotingPostRound(60);
+
+                                CurrentVotingState = VotingStates.ST75;
+                            }
+
+                            break;
+
+                        case VotingStates.ST75:
+
+                            if (!currentVotingRequestSent)
+                            {
+                                voteMap.Reset();
+                                sendVoteRequests();
+                                currentVotingRequestSent = true;
+                            }
+
+                            if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
+                            {
+                                Print("Voting Step75 Done" + voteMessageCounter.Votes +
+                                "/" + voteMessageCounter.UniqueVoteResponders + "");
+
+                                VotingPostRound(75);
+                                CurrentVotingState = VotingStates.ST80;
+                            }
+
+                            break;
+
+                        case VotingStates.ST80:
+
+                            if (!currentVotingRequestSent)
+                            {
+                                voteMap.Reset();
+                                sendVoteRequests();
+                                currentVotingRequestSent = true;
+                            }
+
+                            if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
+                            {
+                                Print("Voting Step80 Done" + voteMessageCounter.Votes +
+                                "/" + voteMessageCounter.UniqueVoteResponders + "");
+
+                                VotingPostRound(80);
+                                CurrentVotingState = VotingStates.STDone;
+                            }
+
+                            break;
+
+                        case VotingStates.STDone:
+                            PostVotingOperations();
+                            break;
+                    }
+
+
+                    if (votingStateCounter < 8) // TWEAK-POINT: Trim value.
+                    {
+                        if (votingStateCounter % 2 == 0)
+                        {
+                            sendVoteRequests();
+                        }
+                        else
+                        {
+                            Dictionary<Hash, HashSet<Hash>> missingTransactions;
+                            voteMap.GetMissingTransactions(ballot, out missingTransactions);
+
+                            sendFetchRequests(missingTransactions);
+                        }
+                    }
+                    else // Initial Sync Part is over.
+                    {
+                        // Verify the received
+                        if (voteMessageCounter.Votes < voteMessageCounter.PreviousVotes)
+                        {
+                            // Okay, all the votes have not reached till now.
+                            if (extraVotingDelayCycles < 10)
+                            {
+                                extraVotingDelayCycles++;
+
+                                Print("Waiting for pending voting requests : " + voteMessageCounter.Votes +
+                                    "/" + voteMessageCounter.PreviousVotes + " Received");
+                            }
+                        }
+                    }
+
+                    votingStateCounter++;
+
+                    // We will perform dummy voting cycles even when there are no transactions. those will
+                    // have a different counter, called ConsensusCount, the default is LedgerClose, the ledger close one 
+                    // is the one associated.
+
+                    // Request Ballots
+
+                    if (votingStateCounter - extraVotingDelayCycles >= 12)
+                    {
+                        votingStateCounter = 0;
+                        extraVotingDelayCycles = 0;
+
+                        PostVotingOperations();
+
+                        Print("Voting Finished. " + GetTxCount(finalBallot));
+                    }
+                }*/
 
         private void PostVotingOperations()
         {
