@@ -37,7 +37,6 @@ Global
 		{FE96EA58-5212-467A-AE75-13E636055455}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{FE96EA58-5212-467A-AE75-13E636055455}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{FE96EA58-5212-467A-AE75-13E636055455}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FE96EA58-5212-467A-AE75-13E636055455}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FE96EA58-5212-467A-AE75-13E636055455}.Release|ARM.ActiveCfg = Release|Any CPU
 		{FE96EA58-5212-467A-AE75-13E636055455}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{FE96EA58-5212-467A-AE75-13E636055455}.Release|Mixed Platforms.Build.0 = Release|Any CPU

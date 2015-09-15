@@ -113,7 +113,7 @@ namespace TNetD.Consensus
         /// A Map to handle all the incoming votes.
         /// </summary>
         VoteMap voteMap;
-        
+
         /// <summary>
         /// A list of voters who have confirmed to have the same final ballot as us.
         /// If this is above above some threshold, we should apply all the changes to ledger and move on.
@@ -127,7 +127,7 @@ namespace TNetD.Consensus
         /// </summary>
         ConcurrentDictionary<Hash, HashSet<Hash>> propagationMap;
 
-        ConcurrentDictionary<Hash, ConsensusStates> syncMap;
+        ConcurrentDictionary<Hash, SyncState> syncMap;
 
         VoteMessageCounter voteMessageCounter;
 
@@ -140,10 +140,10 @@ namespace TNetD.Consensus
             this.networkPacketSwitch = networkPacketSwitch;
             this.CurrentTransactions = new ConcurrentDictionary<Hash, TransactionContent>();
             this.propagationMap = new ConcurrentDictionary<Hash, HashSet<Hash>>();
-            this.syncMap = new ConcurrentDictionary<Hash, ConsensusStates>();
+            this.syncMap = new ConcurrentDictionary<Hash, SyncState>();
             this.voteMap = new VoteMap(nodeConfig, nodeState);
             this.synchronizedVoters = new HashSet<Hash>();
-            
+
             //finalVoters = new FinalVoters();
 
             finalBallot = new Ballot();
@@ -248,12 +248,30 @@ namespace TNetD.Consensus
 
                                 if (syncResults.Item2)
                                 {
+                                    /*var syncResults2 = MedianTrustedVotingState();
+
+                                    if (syncResults2.Item2)
+                                    {
+                                        // Voting and State;
+
+                                        CurrentConsensusState = ConsensusStates.Collect;
+                                        syncStateCounter = 0;
+
+                                        Print("Sync ###### COPY MEDIAN STATE ######### Normal.");
+
+                                        if (CurrentConsensusState == ConsensusStates.Sync)
+                                            CurrentConsensusState = ConsensusStates.Merge;
+
+                                        CurrentVotingState = syncResults2.Item1;
+                                    }
+                                    */
+
                                     // Great We know something
                                     if (syncResults.Item1 == ConsensusStates.Sync || syncResults.Item1 == ConsensusStates.Merge)
                                     {
                                         // Awesome ! we can continue :)
                                         CurrentConsensusState = ConsensusStates.Collect;
-                                        syncStateCounter = 0;                                        
+                                        syncStateCounter = 0;
 
                                         Print("Sync Done. Normal.");
                                     }
@@ -272,7 +290,7 @@ namespace TNetD.Consensus
                                     {
                                         CurrentConsensusState = ConsensusStates.Collect;
                                         syncStateCounter = 0;
-                                        
+
                                         Print("Sync Done. Forced.");
                                     }
                                 }
@@ -369,12 +387,12 @@ namespace TNetD.Consensus
             ballot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(ballot.GetSignatureData()));
         }
 
-        int MAX_EXTRA_VOTING_STEP_WAIT_CYCLES = 8;
+        int MAX_EXTRA_VOTING_STEP_WAIT_CYCLES = 10;
         int extraVotingDelayCycles = 0; // Wait for all the voters to send their requests.
         bool currentVotingRequestSent = false;
 
         //int extraConfirmationDelayCycles = 0;
-        
+
         enum VoteNextState { Wait, Next }
 
         VoteNextState CheckReceivedExpectedVotePackets()
@@ -398,11 +416,29 @@ namespace TNetD.Consensus
             return VoteNextState.Next;
         }
 
-        void ResetMicroVoting()
+        void VotingPostRound(float Percentage)
         {
             voteMessageCounter.ResetVotes();
             extraVotingDelayCycles = 0;
             currentVotingRequestSent = false;
+
+            Dictionary<Hash, HashSet<Hash>> missingTransactions;
+            voteMap.GetMissingTransactions(ballot, out missingTransactions);
+
+            sendFetchRequests(missingTransactions);
+
+            //////////////////////////////////////////////////////////////////
+
+            SortedSet<Hash> passedTxs = voteMap.FilterTransactionsByVotes(ballot, Percentage);
+
+            ballot.Reset(LedgerCloseSequence);
+            ballot.PublicKey = nodeConfig.PublicKey;
+            ballot.AddRange(passedTxs);
+            ballot.Timestamp = nodeState.NetworkTime;
+
+            ballot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(ballot.GetSignatureData()));
+
+            isBallotValid = true;
         }
 
         void HandleVoting()
@@ -410,24 +446,26 @@ namespace TNetD.Consensus
             switch (CurrentVotingState)
             {
                 case VotingStates.STNone:
-                    // Pre-Voting Stuff !! 
+                    // Pre-Voting Stuff !!                    
                     CurrentVotingState = VotingStates.ST40;
                     break;
 
                 case VotingStates.ST40:
 
                     if (!currentVotingRequestSent)
-                    {                        
+                    {
+                        voteMap.Reset();
                         sendVoteRequests();
                         currentVotingRequestSent = true;
                     }
 
                     if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
-                    {                        
+                    {
                         Print("Voting Step40 Done" + voteMessageCounter.Votes +
                         "/" + voteMessageCounter.UniqueVoteResponders + "");
 
-                        ResetMicroVoting();
+                        VotingPostRound(40);
+
                         CurrentVotingState = VotingStates.ST60;
                     }
 
@@ -437,6 +475,7 @@ namespace TNetD.Consensus
 
                     if (!currentVotingRequestSent)
                     {
+                        voteMap.Reset();
                         sendVoteRequests();
                         currentVotingRequestSent = true;
                     }
@@ -446,7 +485,8 @@ namespace TNetD.Consensus
                         Print("Voting Step60 Done" + voteMessageCounter.Votes +
                         "/" + voteMessageCounter.UniqueVoteResponders + "");
 
-                        ResetMicroVoting();
+                        VotingPostRound(60);
+
                         CurrentVotingState = VotingStates.ST75;
                     }
 
@@ -456,6 +496,7 @@ namespace TNetD.Consensus
 
                     if (!currentVotingRequestSent)
                     {
+                        voteMap.Reset();
                         sendVoteRequests();
                         currentVotingRequestSent = true;
                     }
@@ -465,7 +506,7 @@ namespace TNetD.Consensus
                         Print("Voting Step75 Done" + voteMessageCounter.Votes +
                         "/" + voteMessageCounter.UniqueVoteResponders + "");
 
-                        ResetMicroVoting();
+                        VotingPostRound(75);
                         CurrentVotingState = VotingStates.ST80;
                     }
 
@@ -475,6 +516,7 @@ namespace TNetD.Consensus
 
                     if (!currentVotingRequestSent)
                     {
+                        voteMap.Reset();
                         sendVoteRequests();
                         currentVotingRequestSent = true;
                     }
@@ -484,7 +526,7 @@ namespace TNetD.Consensus
                         Print("Voting Step80 Done" + voteMessageCounter.Votes +
                         "/" + voteMessageCounter.UniqueVoteResponders + "");
 
-                        ResetMicroVoting();
+                        VotingPostRound(80);
                         CurrentVotingState = VotingStates.STDone;
                     }
 
@@ -645,8 +687,8 @@ namespace TNetD.Consensus
 
                     if (percentage >= Constants.CONS_FINAL_VOTING_THRESHOLD_PERC)
                     {
-                        PrintImpt("Voting Successful. Applying to ledger. " + GetTxCount(finalBallot));
-                        
+                        PrintImpt("Voting Successful. Applying to ledger. " + GetTxCount(finalBallot) + " | Consesus percentage: " + percentage);
+
                         ApplyToLedger(finalBallot);
 
                         //LedgerCloseSequence++;

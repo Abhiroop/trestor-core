@@ -53,6 +53,11 @@ namespace TNetD
         public static readonly int SIM_REFRESH_MS = 50;
         public static readonly int SIM_REFRESH_MS_SIM = 50;
 
+        // SYNC 
+
+        public static readonly int VOTE_MIN_SYNC_NODES = 3;
+
+
         // VOTING CONSTANTS
 
         /// <summary>

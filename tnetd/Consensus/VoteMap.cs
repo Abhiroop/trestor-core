@@ -13,9 +13,7 @@ using TNetD.Nodes;
 namespace TNetD.Consensus
 {
     class VoteMap
-    {
-        object AddLock = new object();
-
+    {       
         NodeConfig nodeConfig;
         NodeState nodeState;
 

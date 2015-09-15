@@ -71,11 +71,11 @@ namespace TNetD.UI
             point = new Point();
 
             int BOUNDARY = 40;
-            int MIN_DISTANCE = 200;
-            int MIN_LINE_POINT_DISTANCE = 100;
-            int MAX_TRY = 500;
+            int MIN_DISTANCE = 100;
+            int MIN_LINE_POINT_DISTANCE = 80;
+            int MAX_TRY = 1000;
 
-            int W = 900;
+            int W = 1500;
             int H = 600;
 
             int randSpaceX = W - BOUNDARY * 2; // 50 pixels from both sides;
@@ -120,7 +120,7 @@ namespace TNetD.UI
                             double line_pointDist = DistanceBetweenLineAndPoint(P1, P2, newPoint);
                             if (line_pointDist < MIN_LINE_POINT_DISTANCE)
                             {
-                                DisplayUtils.Display("Line point BREAK", DisplayType.Warning);
+                                //DisplayUtils.Display("Line point BREAK", DisplayType.Warning);
                                 passed = false;
                                 break;
                             }
@@ -211,7 +211,7 @@ namespace TNetD.UI
 
             InitializeComponent();
 
-            updateTimer = new Timer(TimerCallback, null, 0, 1000);
+            updateTimer = new Timer(TimerCallback, null, 0, 250);
         }
 
         private void TimerCallback(Object o)

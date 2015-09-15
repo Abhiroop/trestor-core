@@ -9,22 +9,41 @@ using TNetD.Protocol;
 
 namespace TNetD.Consensus
 {
+    class SyncState
+    {
+        public ConsensusStates ConsensusState;
+        public VotingStates VotingState;
+        public SyncState(ConsensusStates consensusState, VotingStates votingState)
+        {
+            ConsensusState = consensusState;
+            VotingState = votingState;
+        }
+    }
+
     class SyncMessage
     {
         public LedgerCloseSequence LedgerCloseSequence;
         public ConsensusStates ConsensusState;
+        public VotingStates VotingState;
+
+        public SyncState SyncState
+        {
+            get { return new SyncState(ConsensusState, VotingState); }
+        }
 
         public SyncMessage()
         {
             LedgerCloseSequence = new LedgerCloseSequence();
             ConsensusState = ConsensusStates.Sync;
+            VotingState = VotingStates.STNone;
         }
 
         public byte[] Serialize()
         {
-            ProtocolDataType[] PDTs = new ProtocolDataType[2];
+            ProtocolDataType[] PDTs = new ProtocolDataType[3];
             PDTs[0] = ProtocolPackager.Pack(LedgerCloseSequence, 0);
             PDTs[1] = ProtocolPackager.Pack((byte)ConsensusState, 1);
+            PDTs[2] = ProtocolPackager.Pack((byte)ConsensusState, 2);
             return ProtocolPackager.PackRaw(PDTs);
         }
 
@@ -50,6 +69,15 @@ namespace TNetD.Consensus
                         if (ProtocolPackager.UnpackByte(PDT, 1, ref _byte))
                         {
                             ConsensusState = (ConsensusStates)_byte;
+                        }
+
+                        break;
+
+                    case 2:
+                        byte _byte_ = 0;
+                        if (ProtocolPackager.UnpackByte(PDT, 2, ref _byte_))
+                        {
+                            VotingState = (VotingStates)_byte_;
                         }
 
                         break;
