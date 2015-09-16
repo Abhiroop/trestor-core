@@ -416,7 +416,7 @@ namespace TNetD.Consensus
             return VoteNextState.Next;
         }
 
-        void VotingPostRound(float Percentage)
+        void VotingPostRound(VotingStates state, float Percentage)
         {
             voteMessageCounter.ResetVotes();
             extraVotingDelayCycles = 0;
@@ -438,11 +438,15 @@ namespace TNetD.Consensus
 
             ballot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(ballot.GetSignatureData()));
 
-            isBallotValid = true;
+            isBallotValid = true;            
+
+            Print("Voting " + state + " Done" + voteMessageCounter.Votes +
+                "/" + voteMessageCounter.UniqueVoteResponders + " Accepted " + passedTxs.Count + 
+                " Txns, Fetching " + missingTransactions.SelectMany(p => p.Value).Count() + " Txns");
         }
 
 
-        VotingStates HandleVotingInternal(VotingStates state, float Percentage)
+        VotingStates HandleVotingInternal(VotingStates state, float percentage)
         {
             if (!currentVotingRequestSent)
             {
@@ -453,10 +457,7 @@ namespace TNetD.Consensus
 
             if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
             {
-                Print("Voting " + state + " Done" + voteMessageCounter.Votes +
-                "/" + voteMessageCounter.UniqueVoteResponders + "");
-
-                VotingPostRound(Percentage);
+                VotingPostRound(state, percentage);
 
                 return (state + 1);
             }
