@@ -36,6 +36,9 @@ namespace TNetD.UI
 
         Timer updateTimer;
 
+        double ScreenWidth = System.Windows.SystemParameters.PrimaryScreenWidth;
+        double ScreenHeight = System.Windows.SystemParameters.PrimaryScreenHeight;
+
         /// <summary>
         /// Normal distance between two points (Euclidean)
         /// </summary>
@@ -70,13 +73,13 @@ namespace TNetD.UI
             int maxTryCount = 0;
             point = new Point();
 
-            int BOUNDARY = 40;
-            int MIN_DISTANCE = 100;
-            int MIN_LINE_POINT_DISTANCE = 80;
+            int BOUNDARY = 50;
+            int MIN_DISTANCE = 200;
+            int MIN_LINE_POINT_DISTANCE = 100;
             int MAX_TRY = 1000;
 
-            int W = 1500;
-            int H = 600;
+            int W = 900;
+            int H = 500;
 
             int randSpaceX = W - BOUNDARY * 2; // 50 pixels from both sides;
             int randSpaceY = H - BOUNDARY * 2;
@@ -361,7 +364,7 @@ namespace TNetD.UI
                     string rh = nd.LocalLedger.LedgerTree.GetRootHash().ToString();
 
                     sb.Append(
-                        "\nST:" + (nd.ConsensusState ==  Consensus.ConsensusStates.Vote ? "Vote:" + nd.voting.CurrentVotingState : "" + nd.ConsensusState) +
+                        "\nST:" + (nd.ConsensusState == Consensus.ConsensusStates.Vote ? "Vote:" + nd.voting.CurrentVotingState : "" + nd.ConsensusState) +
                         "\nRoot: " + ((rh.Length >= 8) ? rh.Substring(0, 8) : "Empty") +
                         "\nLCS:" + nd.voting.LedgerCloseSequence
                         );
@@ -413,7 +416,7 @@ namespace TNetD.UI
             {
                 case ConnectionMapDisplayMode.Voting:
 
-                    switch(nd.voting.CurrentConsensusState)
+                    switch (nd.voting.CurrentConsensusState)
                     {
                         case Consensus.ConsensusStates.Sync:
                             scb = new SolidColorBrush(Color.FromRgb(204, 204, 62)); //Yellow
@@ -463,7 +466,7 @@ namespace TNetD.UI
                             scb = new SolidColorBrush(Color.FromRgb(41, 124, 207)); // Blue
                             break;
 
-                    }                   
+                    }
 
                     break;
 
@@ -543,9 +546,9 @@ namespace TNetD.UI
                 Rect rectTODraw = new Rect(v, new Size(rectWidth, rectHeight));
 
                 //SolidColorBrush scb_blue = new SolidColorBrush(Color.FromRgb(33, 98, 163));
-                
+
                 //SolidColorBrush scb_calc = GetBackGroundColor()
-                
+
                 /*RenderBlurred(drawingContext, 35, 35, new Rect(v, new Size(35, 35)), 10, 
                     dc => dc.DrawRectangle(new SolidColorBrush(Colors.Transparent), new Pen(Brushes.Blue, 3), new Rect(0, 0, 35, 35)));*/
 

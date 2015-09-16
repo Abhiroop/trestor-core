@@ -94,7 +94,8 @@ namespace TNetD.Nodes
                 case PacketType.TPT_CONS_CONFIRM_REQUEST:
                 case PacketType.TPT_CONS_CONFIRM_RESPONSE:
 
-                    await ConsensusEvent?.Invoke(packet);
+                    if(ConsensusEvent!=null)
+                        await ConsensusEvent.Invoke(packet).ConfigureAwait(false);
 
                     break;
 

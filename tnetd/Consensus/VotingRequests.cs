@@ -446,27 +446,22 @@ namespace TNetD.Consensus
         async Task<bool> CheckAcceptableVotingState(VotingStates _vs)
         {
             int waitCount = 0;
-
-            begin:
-
-            int vs = (int)_vs;
-            int cvs = (int)CurrentVotingState;
-
-            if (vs == cvs) return true;
-
+            
             //if (vs == 0 && cvs == 1) return true;
             //if (vs == 1 && cvs == 0) return true;
 
-            if (waitCount < 15)
+            while(waitCount < 10)
             {
-                waitCount++;
-                //Thread.Sleep(25);
+                int vs = (int)_vs;
+                int cvs = (int)CurrentVotingState;
 
-                await Task.Delay(250);
+                if (vs == cvs) return true;
 
-                Print("Waiting for acceptable state: "+ waitCount +" VS: " + vs + " CVS: " + cvs);
+                waitCount++;               
 
-                goto begin;
+                await Task.Delay(25);
+
+                Print("Waiting for acceptable state: "+ waitCount +" VS: " + vs + " CVS: " + cvs);                
             }
 
             //if (Math.Abs(vs - cvs) == 1) return true; // THINK: A difference of 1
