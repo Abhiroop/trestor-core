@@ -105,7 +105,8 @@ namespace TNetD.Consensus
         /// </summary>
         ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions;
         Ballot ballot, finalBallot;
-        TransactionChecker transactionChecker = default(TransactionChecker);
+        TransactionChecker transactionChecker;
+        TransactionValidator transactionValidator;
 
         HashSet<Hash> synchronizedVoters;
 
@@ -152,6 +153,7 @@ namespace TNetD.Consensus
             networkPacketSwitch.ConsensusEvent += networkPacketSwitch_ConsensusEvent;
 
             transactionChecker = new TransactionChecker(nodeState);
+            transactionValidator = new TransactionValidator(nodeConfig, nodeState);
 
             CurrentConsensusState = ConsensusStates.Sync;
 
@@ -171,6 +173,19 @@ namespace TNetD.Consensus
             Print("Class \"Voting\" created.");
         }
 
+        void UpdateLCD()
+        {
+            LedgerCloseData lcd;
+            if (nodeState.PersistentCloseHistory.GetLastRowData(out lcd))
+            {
+                LedgerCloseSequence = new LedgerCloseSequence(lcd);
+            }
+            else
+            {
+                LedgerCloseSequence = new LedgerCloseSequence(0, nodeState.Ledger.GetRootHash());
+            }
+        }
+
         private void InitLCS(NodeState nodeState)
         {
             if (nodeState.Ledger.LedgerCloseData.LedgerHash == null)
@@ -180,7 +195,15 @@ namespace TNetD.Consensus
             }
             else
             {
-                LedgerCloseSequence = new LedgerCloseSequence(nodeState.Ledger.LedgerCloseData);
+                LedgerCloseData lcd;
+                if (nodeState.PersistentCloseHistory.GetLastRowData(out lcd))
+                {
+                    LedgerCloseSequence = new LedgerCloseSequence(lcd);
+                }
+                else
+                {
+                    LedgerCloseSequence = new LedgerCloseSequence(0, nodeState.Ledger.GetRootHash());
+                }
             }
         }
 
@@ -776,7 +799,23 @@ namespace TNetD.Consensus
 
         void ApplyToLedger(Ballot applyBallot)
         {
+            var transactions = CurrentTransactions.Where(d => applyBallot.Contains(d.Key)).Select(d => d.Value);
 
+            TransactionHandlingData THD = transactionValidator.ValidateTransactions(transactions);
+
+            if (THD.AcceptedTransactions.Any())
+            {
+                transactionValidator.ApplyTransactions(THD);
+
+                PrintImpt("Applied " + THD.AcceptedTransactions.Count + " transaction !!!");
+
+                if (THD.NewAccounts.Count > 0)
+                    PrintImpt("Created " + THD.NewAccounts.Count + " account !!!");
+
+                UpdateLCD();
+            }
+
+            // Remove Txns from current set !
             foreach (var tx in ballot)
             {
                 if (CurrentTransactions.ContainsKey(tx))
@@ -784,9 +823,7 @@ namespace TNetD.Consensus
                     TransactionContent tc;
                     CurrentTransactions.TryRemove(tx, out tc);
                 }
-
             }
-
         }
 
         #endregion

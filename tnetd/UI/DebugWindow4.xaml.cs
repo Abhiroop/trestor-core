@@ -241,6 +241,7 @@ namespace TNetD
             foreach(var node in nodes)
             {
                 node.VotingEnabled = true;
+                //Thread.Sleep(1100);
             }
         }
 
