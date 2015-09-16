@@ -525,7 +525,7 @@ namespace TNetD.Network.Networking
 
                             if (iClient.PublicKey == np.PublicKeySource)
                             {
-                                PacketReceived?.Invoke(np);
+                                await PacketReceived?.Invoke(np);
                             }
                             else
                             {

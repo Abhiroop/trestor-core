@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using TNetD.Nodes;
 
 namespace TNetD.Network.Networking
@@ -196,12 +197,12 @@ namespace TNetD.Network.Networking
             }
         }
 
-        void process_PacketReceived(NetworkPacket packet)
+        async Task process_PacketReceived(NetworkPacket packet)
         {
             if (PacketReceived != null) // Relay the packet to the outer event.
             {
                 Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.NetworkPacketsIn);
-                PacketReceived(packet);
+                await PacketReceived(packet);
             }
         }
 

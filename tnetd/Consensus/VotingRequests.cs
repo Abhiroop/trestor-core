@@ -403,7 +403,7 @@ namespace TNetD.Consensus
             if (VerboseDebugging) Print("Vote requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
         }
 
-        void processVoteRequest(NetworkPacket packet)
+        async Task processVoteRequest(NetworkPacket packet)
         {
             VoteRequestMessage voteRequest = new VoteRequestMessage();
             voteRequest.Deserialize(packet.Data);
@@ -412,7 +412,7 @@ namespace TNetD.Consensus
             voteResponse.VotingState = CurrentVotingState;
 
             if (voteRequest.LedgerCloseSequence == LedgerCloseSequence &&
-                CheckAcceptableVotingState(voteRequest.VotingState))
+                await CheckAcceptableVotingState(voteRequest.VotingState))
             {
                 voteResponse.IsSynced = true;
                 voteMessageCounter.IncrementVotes();
@@ -443,7 +443,7 @@ namespace TNetD.Consensus
             if (VerboseDebugging) Print("Vote Request Replied to " + packet.PublicKeySource);
         }
 
-        bool CheckAcceptableVotingState(VotingStates _vs)
+        async Task<bool> CheckAcceptableVotingState(VotingStates _vs)
         {
             int waitCount = 0;
 
@@ -460,7 +460,9 @@ namespace TNetD.Consensus
             if (waitCount < 15)
             {
                 waitCount++;
-                Thread.Sleep(25);
+                //Thread.Sleep(25);
+
+                await Task.Delay(250);
 
                 Print("Waiting for acceptable state: "+ waitCount +" VS: " + vs + " CVS: " + cvs);
 
@@ -472,7 +474,7 @@ namespace TNetD.Consensus
             return false;
         }
 
-        void processVoteResponse(NetworkPacket packet)
+        async Task processVoteResponse(NetworkPacket packet)
         {
             if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
@@ -485,7 +487,7 @@ namespace TNetD.Consensus
                     {
                         // We should be voting for the next ballot.
                         if (voteResponse.Ballot.LedgerCloseSequence == LedgerCloseSequence &&
-                            CheckAcceptableVotingState(voteResponse.VotingState))
+                            await CheckAcceptableVotingState(voteResponse.VotingState))
                         {
                             // Sender and ballot keys must be same
                             if (voteResponse.Ballot.PublicKey == packet.PublicKeySource)

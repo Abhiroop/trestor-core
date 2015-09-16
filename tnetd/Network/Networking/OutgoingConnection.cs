@@ -22,7 +22,7 @@ using System.Reactive.Linq;
 
 namespace TNetD.Network.Networking
 {
-    public delegate void PacketReceivedHandler(NetworkPacket packet);
+    public delegate Task PacketReceivedHandler(NetworkPacket packet);
 
     class OutgoingConnection
     {
@@ -454,7 +454,7 @@ namespace TNetD.Network.Networking
 
                                 if (nodeSocketData.PublicKey == np.PublicKeySource)
                                 {
-                                    PacketReceived?.Invoke(np);
+                                    await PacketReceived?.Invoke(np);
                                 }
                                 else
                                 {

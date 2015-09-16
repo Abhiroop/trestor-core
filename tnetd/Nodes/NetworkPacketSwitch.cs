@@ -20,8 +20,9 @@ namespace TNetD.Nodes
         public event NetworkPacketEventHandler TimeSyncEvent;
         public event NetworkPacketEventHandler LedgerSyncEvent;
         public event NetworkPacketEventHandler PeerDiscoveryEvent;
-        public event NetworkPacketEventHandler VoteMergeEvent;
-        public event NetworkPacketEventHandler VoteEvent;
+
+        public delegate Task AsyncNetworkPacketEventHandler(NetworkPacket packet);
+        public event AsyncNetworkPacketEventHandler ConsensusEvent;
 
         NodeConfig nodeConfig;
         NodeState nodeState;
@@ -76,7 +77,7 @@ namespace TNetD.Nodes
         /// This will switch packets whichever it should go.
         /// </summary>
         /// <param name="packet"></param>
-        void network_PacketReceived(NetworkPacket packet)
+        async Task network_PacketReceived(NetworkPacket packet)
         {
             //DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + packet.PublicKeySource + " | Data Length : " + packet.Data.Length);
 
@@ -86,11 +87,6 @@ namespace TNetD.Nodes
                 case PacketType.TPT_CONS_MERGE_RESPONSE:
                 case PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST:
                 case PacketType.TPT_CONS_MERGE_TX_FETCH_RESPONSE:
-                                        
-                    VoteMergeEvent?.Invoke(packet);
-
-                    break;
-
                 case PacketType.TPT_CONS_SYNC_REQUEST:
                 case PacketType.TPT_CONS_SYNC_RESPONSE:
                 case PacketType.TPT_CONS_VOTE_REQUEST:
@@ -98,7 +94,7 @@ namespace TNetD.Nodes
                 case PacketType.TPT_CONS_CONFIRM_REQUEST:
                 case PacketType.TPT_CONS_CONFIRM_RESPONSE:
 
-                    VoteEvent?.Invoke(packet);
+                    await ConsensusEvent?.Invoke(packet);
 
                     break;
 

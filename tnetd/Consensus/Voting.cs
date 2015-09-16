@@ -149,8 +149,8 @@ namespace TNetD.Consensus
             finalBallot = new Ballot();
             ballot = new Ballot();
 
-            networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
-            networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
+            networkPacketSwitch.ConsensusEvent += networkPacketSwitch_ConsensusEvent;
+
             transactionChecker = new TransactionChecker(nodeState);
 
             CurrentConsensusState = ConsensusStates.Sync;
@@ -403,7 +403,7 @@ namespace TNetD.Consensus
                 {
                     if (extraVotingDelayCycles > 0)
                     {
-                        Print("Waiting for pending voting requests : " + voteMessageCounter.Votes +
+                        Print("Waiting a cycle for pending voting requests : " + voteMessageCounter.Votes +
                         "/" + voteMessageCounter.UniqueVoteResponders + " Received");
                     }
 
@@ -417,8 +417,7 @@ namespace TNetD.Consensus
         }
 
         void VotingPostRound(VotingStates state, float Percentage)
-        {
-            voteMessageCounter.ResetVotes();
+        {            
             extraVotingDelayCycles = 0;
             currentVotingRequestSent = false;
 
@@ -443,9 +442,10 @@ namespace TNetD.Consensus
             Print("Voting " + state + " Done" + voteMessageCounter.Votes +
                 "/" + voteMessageCounter.UniqueVoteResponders + " Accepted " + passedTxs.Count + 
                 " Txns, Fetching " + missingTransactions.SelectMany(p => p.Value).Count() + " Txns");
+
+            voteMessageCounter.ResetVotes();
         }
-
-
+        
         VotingStates HandleVotingInternal(VotingStates state, float percentage)
         {
             if (!currentVotingRequestSent)
@@ -718,17 +718,10 @@ namespace TNetD.Consensus
 
                 // Check that the confirmed voters are all trusted
 
-                int trustedSynchronizedVoters = 0;
-
-                if (synchronizedVoters == null) Print("BAD_1");
+                int trustedSynchronizedVoters = 0;                
 
                 foreach (var voter in synchronizedVoters)
                 {
-                    if (voter == null)
-                        Print("BAD_2");
-
-                    if (nodeConfig.TrustedNodes == null) Print("BAD_3");
-
                     if (nodeConfig.TrustedNodes.ContainsKey(voter))
                     {
                         trustedSynchronizedVoters++;
@@ -744,7 +737,8 @@ namespace TNetD.Consensus
 
                     if (percentage >= Constants.CONS_FINAL_VOTING_THRESHOLD_PERC)
                     {
-                        PrintImpt("Voting Successful. Applying to ledger. " + GetTxCount(finalBallot) + " | Consesus percentage: " + percentage);
+                        PrintImpt("Voting Successful. Applying to ledger. " + GetTxCount(finalBallot) + 
+                            " | Consesus percentage: " + percentage);
 
                         ApplyToLedger(finalBallot);
 
@@ -798,54 +792,55 @@ namespace TNetD.Consensus
         #endregion
 
         #region Packet Handling
-
-        void networkPacketSwitch_VoteMergeEvent(NetworkPacket packet)
+        
+        async Task networkPacketSwitch_ConsensusEvent(NetworkPacket packet)
         {
-            switch (packet.Type)
-            {
-                case PacketType.TPT_CONS_MERGE_REQUEST:
-                    processMergeRequest(packet);
-                    break;
-                case PacketType.TPT_CONS_MERGE_RESPONSE:
-                    processMergeResponse(packet);
-                    break;
-                case PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST:
-                    processFetchRequest(packet);
-                    break;
-                case PacketType.TPT_CONS_MERGE_TX_FETCH_RESPONSE:
-                    processFetchResponse(packet);
-                    break;
-            }
-        }
+           // await Task.Run(()=> {
 
-        void networkPacketSwitch_VoteEvent(NetworkPacket packet)
-        {
-            switch (packet.Type)
-            {
-                case PacketType.TPT_CONS_SYNC_REQUEST:
-                    processSyncRequest(packet);
-                    break;
+                switch (packet.Type)
+                {
+                    case PacketType.TPT_CONS_MERGE_REQUEST:
+                        processMergeRequest(packet);
+                        break;
+                    case PacketType.TPT_CONS_MERGE_RESPONSE:
+                        processMergeResponse(packet);
+                        break;
+                    case PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST:
+                        processFetchRequest(packet);
+                        break;
+                    case PacketType.TPT_CONS_MERGE_TX_FETCH_RESPONSE:
+                        processFetchResponse(packet);
+                        break;
 
-                case PacketType.TPT_CONS_SYNC_RESPONSE:
-                    processSyncResponse(packet);
-                    break;
+                    ///////////////////////////////////////////
 
-                case PacketType.TPT_CONS_VOTE_REQUEST:
-                    processVoteRequest(packet);
-                    break;
+                    case PacketType.TPT_CONS_SYNC_REQUEST:
+                        processSyncRequest(packet);
+                        break;
 
-                case PacketType.TPT_CONS_VOTE_RESPONSE:
-                    processVoteResponse(packet);
-                    break;
+                    case PacketType.TPT_CONS_SYNC_RESPONSE:
+                        processSyncResponse(packet);
+                        break;
 
-                case PacketType.TPT_CONS_CONFIRM_REQUEST:
-                    //processConfirmRequest(packet);
-                    break;
+                    case PacketType.TPT_CONS_VOTE_REQUEST:
+                        await processVoteRequest(packet);
+                        break;
 
-                case PacketType.TPT_CONS_CONFIRM_RESPONSE:
-                    //processConfirmResponse(packet);
-                    break;
-            }
+                    case PacketType.TPT_CONS_VOTE_RESPONSE:
+                        await processVoteResponse(packet);
+                        break;
+
+                    case PacketType.TPT_CONS_CONFIRM_REQUEST:
+                        //processConfirmRequest(packet);
+                        break;
+
+                    case PacketType.TPT_CONS_CONFIRM_RESPONSE:
+                        //processConfirmResponse(packet);
+                        break;
+                }
+
+           // });
+            
         }
 
         #endregion
