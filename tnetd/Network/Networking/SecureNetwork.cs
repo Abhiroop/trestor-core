@@ -92,7 +92,7 @@ namespace TNetD.Network.Networking
                     NetworkPacketQueueEntry npqe;
                     if (outgoingPacketQueue.TryDequeue(out npqe))
                     {
-                        await SendAsync(npqe);
+                        await SendAsync(npqe).ConfigureAwait(false);
                     }
                 }
             }
@@ -105,14 +105,11 @@ namespace TNetD.Network.Networking
                 syncLock.Release();
             }
         }
-
-        public async Task SendAsync(Hash publicKeyDestination, NetworkPacket packet)
-        {
-            await SendAsync(new NetworkPacketQueueEntry(publicKeyDestination, packet));
-        }
-
+        
         public async Task SendAsync(NetworkPacketQueueEntry npqe)
         {
+            bool success = true;
+
             if (outgoingConnections.ContainsKey(npqe.PublicKeyDestination)) // Already Connected (outgoing), Just send a packet.
             {
                 OutgoingConnection conn = outgoingConnections[npqe.PublicKeyDestination];
@@ -151,10 +148,50 @@ namespace TNetD.Network.Networking
                     // The public key is not described / no-connection information. 
                     // Fetch information from other nodes and try again.
 
+                    success = false;
+
                     DisplayUtils.Display("Could not find " + npqe.PublicKeyDestination.ToString());
                 }
             }
+
+            if (success)
+                NPQEPostTxOperations(npqe);
         }
+        
+        private void NPQEPostTxOperations(NetworkPacketQueueEntry npqe)
+        {
+            Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.NetworkPacketsOut);
+
+            if (npqe.Packet.Token.Hex.Length == Common.NETWORK_TOKEN_LENGTH)
+            {
+                if (messageTypePairs.Pairs.ContainsKey(npqe.Packet.Type))
+                {
+                    PendingNetworkRequest pnr = new PendingNetworkRequest(nodeState.SystemTime, npqe.PublicKeyDestination,
+                        messageTypePairs.Pairs[npqe.Packet.Type]);
+
+                    nodeState.PendingNetworkRequests.AddOrUpdate(npqe.Packet.Token, pnr, (k, v) => pnr);
+                }
+                else
+                {
+                    if (!messageTypePairs.Responses.Contains(npqe.Packet.Type))
+                    {
+                        DisplayUtils.Display("Non-Pair packet with valid Token.", DisplayType.CodeAssertionFailed);
+                    }
+                }
+            }
+            else
+            {
+                if (npqe.Packet.Token.Hex.Length != 0)
+                    DisplayUtils.Display("Bad token Length.", DisplayType.CodeAssertionFailed);
+            }
+        }
+        
+        public NetworkResult AddToQueue(NetworkPacketQueueEntry npqe)
+        {
+            outgoingPacketQueue.Enqueue(npqe);
+
+            return NetworkResult.Queued;
+        }      
 
         private void ConnectionTimerCallback(Object o)
         {
@@ -234,41 +271,9 @@ namespace TNetD.Network.Networking
             }
         }
 
-        public NetworkResult AddToQueue(NetworkPacketQueueEntry npqe)
-        {
-            outgoingPacketQueue.Enqueue(npqe);
-            Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.NetworkPacketsOut);
+      
 
-            if (npqe.Packet.Token.Hex.Length == Common.NETWORK_TOKEN_LENGTH)
-            {
-                if (messageTypePairs.Pairs.ContainsKey(npqe.Packet.Type))
-                {
-                    PendingNetworkRequest pnr = new PendingNetworkRequest(nodeState.SystemTime, npqe.PublicKeyDestination,
-                        messageTypePairs.Pairs[npqe.Packet.Type]);
-
-                    nodeState.PendingNetworkRequests.AddOrUpdate(npqe.Packet.Token, pnr, (k, v) => pnr);
-                }
-                else
-                {
-                    if (!messageTypePairs.Responses.Contains(npqe.Packet.Type))
-                    {
-                        DisplayUtils.Display("Non-Pair packet with valid Token.", DisplayType.CodeAssertionFailed);
-                    }
-                }
-            }
-            else
-            {
-                if (npqe.Packet.Token.Hex.Length != 0)
-                    DisplayUtils.Display("Bad token Length.", DisplayType.CodeAssertionFailed);
-            }
-
-            return NetworkResult.Queued;
-        }
-
-        public NetworkResult AddToQueue(Hash publicKeyDestination, NetworkPacket packet)
-        {
-            return AddToQueue(new NetworkPacketQueueEntry(publicKeyDestination, packet));
-        }
+       
 
     }
 }

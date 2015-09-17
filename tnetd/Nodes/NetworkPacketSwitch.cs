@@ -136,29 +136,18 @@ namespace TNetD.Nodes
 
                     break;
             }
-
         }
-
-        public NetworkResult AddToQueue(NetworkPacketQueueEntry npqe)
-        {
-            return network.AddToQueue(npqe);
-        }
-
+        
         public NetworkResult AddToQueue(Hash publicKeyDestination, NetworkPacket packet)
         {
-            return network.AddToQueue(publicKeyDestination, packet);
+            return network.AddToQueue(new NetworkPacketQueueEntry(publicKeyDestination, packet));
         }
 
         public async Task SendAsync(Hash publicKeyDestination, NetworkPacket packet)
         {
-            network.AddToQueue(new NetworkPacketQueueEntry(publicKeyDestination, packet));
+            await network.SendAsync(new NetworkPacketQueueEntry(publicKeyDestination, packet)).ConfigureAwait(false);
         }
-
-        public async Task SendAsync(NetworkPacketQueueEntry npqe)
-        {
-            await network.SendAsync(npqe);
-        }
-
+        
         public void Stop()
         {
             network.Stop();
