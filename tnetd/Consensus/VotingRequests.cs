@@ -58,13 +58,13 @@ namespace TNetD.Consensus
         /// </summary>
         /// <param name="node"></param>
         /// <param name="transactions"></param>
-        void sendFetchRequests(Hash node, HashSet<Hash> transactions)
+        async Task sendFetchRequests(Hash node, HashSet<Hash> transactions)
         {
             FetchRequestMsg message = new FetchRequestMsg();
             message.IDs = transactions;
             Hash token = TNetUtils.GenerateNewToken();
 
-            networkPacketSwitch.AddToQueue(node, new NetworkPacket()
+            await networkPacketSwitch.SendAsync(node, new NetworkPacket()
             {
                 Data = message.Serialize(),
                 Token = token,
@@ -79,11 +79,11 @@ namespace TNetD.Consensus
         /// The key of the dictionary is the PK of the destination, and the value is the list of associated txID's.
         /// </summary>
         /// <param name="requests"></param>
-        void sendFetchRequests(Dictionary<Hash, HashSet<Hash>> requests)
+        async Task sendFetchRequests(Dictionary<Hash, HashSet<Hash>> requests)
         {
             foreach (var request in requests)
             {
-                sendFetchRequests(request.Key, request.Value);
+                await sendFetchRequests(request.Key, request.Value);
             }
         }
 
@@ -91,7 +91,7 @@ namespace TNetD.Consensus
         /// responds to a fetch request, sending all requested transaction data
         /// </summary>
         /// <param name="packet"></param>
-        void processFetchRequest(NetworkPacket packet)
+        async Task processFetchRequest(NetworkPacket packet)
         {
             FetchRequestMsg message = new FetchRequestMsg();
             message.Deserialize(packet.Data);
@@ -104,7 +104,7 @@ namespace TNetD.Consensus
                     response.transactions.Add(id, CurrentTransactions[id]);
             }
 
-            networkPacketSwitch.AddToQueue(packet.PublicKeySource, new NetworkPacket()
+            await networkPacketSwitch.SendAsync(packet.PublicKeySource, new NetworkPacket()
             {
                 Data = response.Serialize(),
                 Token = packet.Token,
@@ -167,13 +167,13 @@ namespace TNetD.Consensus
         /// request a list of all known transactions from each connected validator
         /// note that message has no content
         /// </summary>
-        void sendMergeRequests()
+        async Task sendMergeRequests()
         {
             foreach (var node in nodeState.ConnectedValidators)
             {
                 Hash token = TNetUtils.GenerateNewToken();
 
-                networkPacketSwitch.AddToQueue(node.Key, new NetworkPacket()
+                await networkPacketSwitch.SendAsync(node.Key, new NetworkPacket()
                 {
                     PublicKeySource = nodeConfig.PublicKey,
                     Token = token,
@@ -188,7 +188,7 @@ namespace TNetD.Consensus
         /// respond to a merge request by sending a list of all hashes of known transactions
         /// </summary>
         /// <param name="packet"></param>
-        void processMergeRequest(NetworkPacket packet)
+        async Task processMergeRequest(NetworkPacket packet)
         {
             Hash sender = packet.PublicKeySource;
             Hash token = packet.Token;
@@ -200,7 +200,7 @@ namespace TNetD.Consensus
                 message.AddTransaction(transaction.Key);
             }
 
-            networkPacketSwitch.AddToQueue(sender, new NetworkPacket()
+            await networkPacketSwitch.SendAsync(sender, new NetworkPacket()
             {
                 Token = token,
                 PublicKeySource = nodeConfig.PublicKey,
@@ -215,7 +215,7 @@ namespace TNetD.Consensus
         /// respond to merge request by sending a list of all hashes of known (not expired) transactions
         /// </summary>
         /// <param name="packet"></param>
-        void processMergeResponse(NetworkPacket packet)
+        async Task processMergeResponse(NetworkPacket packet)
         {
             if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
@@ -247,7 +247,7 @@ namespace TNetD.Consensus
                     }
                 }
 
-                sendFetchRequests(packet.PublicKeySource, newTransactions);
+                await sendFetchRequests(packet.PublicKeySource, newTransactions);
             }
 
             if (VerboseDebugging) Print("Merge Response from " + packet.PublicKeySource + " Processed");
@@ -256,7 +256,7 @@ namespace TNetD.Consensus
         /// <summary>
         /// Send sync requests to trusted nodes.
         /// </summary>
-        void sendSyncRequests()
+        async Task sendSyncRequests()
         {
             foreach (var node in nodeConfig.TrustedNodes)
             {
@@ -267,7 +267,7 @@ namespace TNetD.Consensus
 
                 // Create NetworkPacket and send
 
-                networkPacketSwitch.AddToQueue(node.Key, new NetworkPacket()
+                await networkPacketSwitch.SendAsync(node.Key, new NetworkPacket()
                 {
                     PublicKeySource = nodeConfig.PublicKey,
                     Token = TNetUtils.GenerateNewToken(),
@@ -279,7 +279,7 @@ namespace TNetD.Consensus
             if (VerboseDebugging) Print("Sync requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
         }
 
-        void processSyncRequest(NetworkPacket packet)
+        async Task processSyncRequest(NetworkPacket packet)
         {
             SyncMessage syncRequest = new SyncMessage();
             syncRequest.Deserialize(packet.Data);
@@ -289,7 +289,7 @@ namespace TNetD.Consensus
             syncResponse.ConsensusState = CurrentConsensusState;
             syncResponse.LedgerCloseSequence = LedgerCloseSequence;
 
-            networkPacketSwitch.AddToQueue(packet.PublicKeySource, new NetworkPacket()
+            await networkPacketSwitch.SendAsync(packet.PublicKeySource, new NetworkPacket()
             {
                 Token = packet.Token,
                 PublicKeySource = nodeConfig.PublicKey,
@@ -380,7 +380,7 @@ namespace TNetD.Consensus
             return new Tuple<VotingStates, bool>((VotingStates)maxIndex, maxCount >= Constants.VOTE_MIN_SYNC_NODES);
         }
 
-        void sendVoteRequests()
+        async Task sendVoteRequests()
         {
             foreach (var node in nodeState.ConnectedValidators)
             {
@@ -391,7 +391,7 @@ namespace TNetD.Consensus
 
                 // Create NetworkPacket and send
 
-                networkPacketSwitch.AddToQueue(node.Key, new NetworkPacket()
+                await networkPacketSwitch.SendAsync(node.Key, new NetworkPacket()
                 {
                     PublicKeySource = nodeConfig.PublicKey,
                     Token = TNetUtils.GenerateNewToken(),
@@ -432,7 +432,7 @@ namespace TNetD.Consensus
                     " : " + voteRequest.LedgerCloseSequence + "!=" + LedgerCloseSequence + ", VS:" + voteRequest.VotingState + "/" + CurrentVotingState);
             }
 
-            networkPacketSwitch.AddToQueue(packet.PublicKeySource, new NetworkPacket()
+            await networkPacketSwitch.SendAsync(packet.PublicKeySource, new NetworkPacket()
             {
                 Token = packet.Token,
                 PublicKeySource = nodeConfig.PublicKey,

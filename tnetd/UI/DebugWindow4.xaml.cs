@@ -282,6 +282,9 @@ namespace TNetD
                 // Write to nodes
                 foreach (Node n in nodes)
                 {
+                    n.nodeState.PersistentTransactionStore.DeleteEverything();
+                    n.nodeState.PersistentCloseHistory.DeleteEverything();
+
                     var resp = n.nodeState.PersistentAccountStore.DeleteEverything();
 
                     n.nodeState.PersistentAccountStore.AddUpdateBatch(aiData);

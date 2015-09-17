@@ -114,26 +114,7 @@ namespace TNetD.Network.Networking
 
                     if (outgoingQueue.TryDequeue(out npqe))
                     {
-                        if (IncomingConnections == null)
-                            DisplayUtils.Display(nameof(IncomingConnections) + " is NULL. ICH Timer");
-
-                        if (npqe == null)
-                        {
-                            DisplayUtils.Display(nameof(npqe) + " is NULL. ICH Timer");
-                        }
-                        else
-                        {
-                            if (npqe.PublicKeyDestination == null)
-                                DisplayUtils.Display(nameof(npqe) + " is NULL. ICH Timer");
-                            else
-                            {
-                                if (IncomingConnections.ContainsKey(npqe.PublicKeyDestination))
-                                {
-                                    //DisplayUtils.Display("SENDING IC Packet: " + npqe.Packet.Type + " | From: " + npqe.Packet.PublicKeySource + " | Data Length : " + npqe.Packet.Data.Length);
-                                    await SendData(npqe.Packet.Serialize(), IncomingConnections[npqe.PublicKeyDestination]);
-                                }
-                            }
-                        }
+                        await SendAsync(npqe);
                     }
                 }
             }
@@ -195,11 +176,29 @@ namespace TNetD.Network.Networking
             catch { }*/
         }
 
-        private void TimerCallback_Housekeeping(Object o)
+        public async Task SendAsync(NetworkPacketQueueEntry npqe)
         {
-            /// Remove Threads
+            if (IncomingConnections.ContainsKey(npqe.PublicKeyDestination))
+            {
+                // DisplayUtils.Display("SENDING IC Packet: " + npqe.Packet.Type + " | From: " + 
+                // npqe.Packet.PublicKeySource + " | Data Length : " + npqe.Packet.Data.Length);
 
+                IncomingClient client = IncomingConnections[npqe.PublicKeyDestination];
+
+                if (client.KeyExchanged)
+                    await SendData(npqe.Packet.Serialize(), client);
+                else
+                {
+                    EnqueuePacket(npqe);
+                }
+            }
+        }
+        
+        private void TimerCallback_Housekeeping(object o)
+        {
+            // Remove Threads
             // Remove bad connections
+
             try
             {
                 List<Hash> threadsForRemoval = new List<Hash>();
@@ -216,7 +215,6 @@ namespace TNetD.Network.Networking
                     ThreadList.Remove(h);
                     DisplayUtils.Display("Removed Thread: " + HexUtil.ToString(h.Hex), DisplayType.Warning);
                 }
-
 
                 threadsForRemoval.Clear();
                 foreach (KeyValuePair<Hash, IncomingClient> kvp in IncomingConnections)

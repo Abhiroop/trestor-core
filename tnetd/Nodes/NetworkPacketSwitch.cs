@@ -135,7 +135,6 @@ namespace TNetD.Nodes
                     PeerDiscoveryEvent?.Invoke(packet);
 
                     break;
-
             }
 
         }
@@ -148,6 +147,16 @@ namespace TNetD.Nodes
         public NetworkResult AddToQueue(Hash publicKeyDestination, NetworkPacket packet)
         {
             return network.AddToQueue(publicKeyDestination, packet);
+        }
+
+        public async Task SendAsync(Hash publicKeyDestination, NetworkPacket packet)
+        {
+            network.AddToQueue(new NetworkPacketQueueEntry(publicKeyDestination, packet));
+        }
+
+        public async Task SendAsync(NetworkPacketQueueEntry npqe)
+        {
+            await network.SendAsync(npqe);
         }
 
         public void Stop()
@@ -179,8 +188,6 @@ namespace TNetD.Nodes
 
             return good;
         }
-
-
 
     }
 }

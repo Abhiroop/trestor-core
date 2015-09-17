@@ -63,7 +63,7 @@ namespace TNetD.Network.Networking
 
         private SemaphoreSlim syncLock = new SemaphoreSlim(1);
 
-        private async Task TimerCallback(Object o)
+        private async Task TimerCallback(object o)
         {
             try
             {
@@ -93,7 +93,15 @@ namespace TNetD.Network.Networking
             }
         }
 
-        UInt32 PacketCounter = 0;
+        public async Task SendAsync(NetworkPacket networkPacket)
+        {
+            if(KeyExchanged)
+            {
+                await SendData(networkPacket.Serialize());
+            }
+        }
+        
+        long PacketCounter = 0;
 
         public byte[] AuthRandom = new byte[24];
 
@@ -270,6 +278,11 @@ namespace TNetD.Network.Networking
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Sends the data asynchronously, make sure the key exchange has happeded prior to sending.
+        /// </summary>
+        /// <param name="Data"></param>
+        /// <returns></returns>
         async Task SendData(byte[] Data)
         {
             try

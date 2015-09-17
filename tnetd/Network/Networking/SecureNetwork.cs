@@ -6,6 +6,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ namespace TNetD.Network.Networking
 
         public event PacketReceivedHandler PacketReceived;
 
-        Timer updateTimer;
+        //Timer updateTimer;
         Timer connectionUpdateTimer;
         NodeConfig nodeConfig = default(NodeConfig);
         NodeState nodeState = default(NodeState);
@@ -51,7 +52,11 @@ namespace TNetD.Network.Networking
 
             incomingConnectionHander.PacketReceived += process_PacketReceived;
 
-            updateTimer = new Timer(TimerCallback, null, 0, nodeConfig.NetworkConfig.UpdateFrequencyMS);
+            Observable.Interval(TimeSpan.FromMilliseconds(Constants.Network_UpdateFrequencyMS))
+               .Subscribe(async x => await TimerCallback(x));
+
+            //updateTimer = new Timer(TimerCallback, null, 0, nodeConfig.NetworkConfig.UpdateFrequencyMS);
+
             connectionUpdateTimer = new Timer(ConnectionTimerCallback, null, 0, Constants.Network_ConnectionUpdateFrequencyMS);
         }
 
@@ -73,59 +78,82 @@ namespace TNetD.Network.Networking
             incomingConnectionHander.StopAndExit();
         }
 
-        private void TimerCallback(object o)
+        private SemaphoreSlim syncLock = new SemaphoreSlim(1);
+
+        private async Task TimerCallback(object o)
         {
-            lock(SecureNetworkTimerLock)
+            try
             {
-                try
+                await syncLock.WaitAsync();
+
+                // Check outgoing queue for new packet requests.
+                while (outgoingPacketQueue.Count > 0)
                 {
-                    // Check outgoing queue for new packet requests.
-
-                    while (outgoingPacketQueue.Count > 0)
+                    NetworkPacketQueueEntry npqe;
+                    if (outgoingPacketQueue.TryDequeue(out npqe))
                     {
-                        NetworkPacketQueueEntry npqe;
-                        if (outgoingPacketQueue.TryDequeue(out npqe))
-                        {
-                            if (outgoingConnections.ContainsKey(npqe.PublicKeyDestination)) // Already Connected (outgoing), Just send a packet.
-                            {
-                                outgoingConnections[npqe.PublicKeyDestination].EnqueuePacket(npqe.Packet);
-                            }
-
-                            else if (incomingConnectionHander.IsConnected(npqe.PublicKeyDestination))  // Already Connected (incoming), Just send a packet.
-                            {
-                                incomingConnectionHander.EnqueuePacket(npqe);
-                            }
-
-                            else // Create a new outgoing connection and queue a packet.
-                            {
-                                if ((nodeConfig.TrustedNodes.ContainsKey(npqe.PublicKeyDestination)) &&
-                                    (npqe.PublicKeyDestination != nodeConfig.PublicKey))
-                                {
-                                    var socketInfo = nodeConfig.TrustedNodes[npqe.PublicKeyDestination];
-
-                                    OutgoingConnection oc = new OutgoingConnection(socketInfo, nodeConfig);
-                                    oc.PacketReceived += process_PacketReceived;
-
-                                    oc.EnqueuePacket(npqe.Packet);
-
-                                    outgoingConnections.Add(npqe.PublicKeyDestination, oc);
-                                }
-                                else
-                                {
-                                    // The public key is not described / no-connection information. 
-                                    // Fetch information from other nodes and try again.
-
-                                    DisplayUtils.Display("Could not find " + npqe.PublicKeyDestination.ToString());
-                                }
-                            }
-                        }
+                        await SendAsync(npqe);
                     }
                 }
-                catch (System.Exception ex)
+            }
+            catch (System.Exception ex)
+            {
+                DisplayUtils.Display("SecureNetwork.TimerCallback()", ex);
+            }
+            finally
+            {
+                syncLock.Release();
+            }
+        }
+
+        public async Task SendAsync(Hash publicKeyDestination, NetworkPacket packet)
+        {
+            await SendAsync(new NetworkPacketQueueEntry(publicKeyDestination, packet));
+        }
+
+        public async Task SendAsync(NetworkPacketQueueEntry npqe)
+        {
+            if (outgoingConnections.ContainsKey(npqe.PublicKeyDestination)) // Already Connected (outgoing), Just send a packet.
+            {
+                OutgoingConnection conn = outgoingConnections[npqe.PublicKeyDestination];
+
+                if (conn.KeyExchanged)
                 {
-                    DisplayUtils.Display("SecureNetwork.TimerCallback()", ex);
+                    await outgoingConnections[npqe.PublicKeyDestination].SendAsync(npqe.Packet);
                 }
-            }            
+                else
+                {
+                    outgoingConnections[npqe.PublicKeyDestination].EnqueuePacket(npqe.Packet);
+                }
+            }
+
+            else if (incomingConnectionHander.IsConnected(npqe.PublicKeyDestination))  // Already Connected (incoming), Just send a packet.
+            {
+                await incomingConnectionHander.SendAsync(npqe);
+            }
+
+            else // Create a new outgoing connection and queue a packet.
+            {
+                if ((nodeConfig.TrustedNodes.ContainsKey(npqe.PublicKeyDestination)) &&
+                    (npqe.PublicKeyDestination != nodeConfig.PublicKey))
+                {
+                    var socketInfo = nodeConfig.TrustedNodes[npqe.PublicKeyDestination];
+
+                    OutgoingConnection oc = new OutgoingConnection(socketInfo, nodeConfig);
+                    oc.PacketReceived += process_PacketReceived;
+
+                    oc.EnqueuePacket(npqe.Packet);
+
+                    outgoingConnections.Add(npqe.PublicKeyDestination, oc);
+                }
+                else
+                {
+                    // The public key is not described / no-connection information. 
+                    // Fetch information from other nodes and try again.
+
+                    DisplayUtils.Display("Could not find " + npqe.PublicKeyDestination.ToString());
+                }
+            }
         }
 
         private void ConnectionTimerCallback(Object o)
@@ -155,7 +183,7 @@ namespace TNetD.Network.Networking
                     {
                         if (!nodeState.ConnectedValidators.ContainsKey(kvp.Value.nodeSocketData.PublicKey))
                         {
-                            nodeState.ConnectedValidators.Add(kvp.Value.nodeSocketData.PublicKey, new ConnectionProperties( ConnectionDirection.Outgoing, 
+                            nodeState.ConnectedValidators.Add(kvp.Value.nodeSocketData.PublicKey, new ConnectionProperties(ConnectionDirection.Outgoing,
                                 nodeConfig.TrustedNodes.ContainsKey(kvp.Value.nodeSocketData.PublicKey)));
                         }
                     }
