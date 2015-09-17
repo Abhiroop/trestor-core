@@ -78,7 +78,7 @@ namespace TNetD.Nodes
 
             PendingNetworkRequests = new ConcurrentDictionary<Hash, PendingNetworkRequest>();
 
-            NodeLatency = new NodeLatency(this);
+            NodeLatency = new NodeLatency(nodeConfig, this);
 
             SystemTime = DateTime.UtcNow.ToFileTimeUtc();
             NetworkTime = DateTime.UtcNow.ToFileTimeUtc();

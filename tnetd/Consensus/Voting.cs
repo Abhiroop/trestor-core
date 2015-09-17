@@ -360,6 +360,8 @@ namespace TNetD.Consensus
                         CurrentConsensusState = ConsensusStates.Collect;
                         syncStateCounter = 0;
 
+                       // bool b = nodeState.NodeLatency.GetAverageLatency(nodeConfig.PublicKey)
+
                         Print("Sync Done. Normal.");
                     }
                     else

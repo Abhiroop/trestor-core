@@ -56,15 +56,15 @@ namespace TNetD.Consensus
         /// <summary>
         /// Sends a request to get transaction data for all transaction IDs in the sorted hash
         /// </summary>
-        /// <param name="node"></param>
+        /// <param name="publicKey"></param>
         /// <param name="transactions"></param>
-        async Task sendFetchRequests(Hash node, HashSet<Hash> transactions)
+        async Task sendFetchRequests(Hash publicKey, HashSet<Hash> transactions)
         {
             FetchRequestMsg message = new FetchRequestMsg();
             message.IDs = transactions;
             Hash token = TNetUtils.GenerateNewToken();
-
-            await networkPacketSwitch.SendAsync(node, new NetworkPacket()
+            
+            await networkPacketSwitch.SendAsync(publicKey, new NetworkPacket()
             {
                 Data = message.Serialize(),
                 Token = token,
@@ -72,7 +72,7 @@ namespace TNetD.Consensus
                 Type = PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST
             });
 
-            if (VerboseDebugging) Print("Fetch Request Sent to " + node);
+            if (VerboseDebugging) Print("Fetch Request Sent to " + publicKey);
         }
 
         /// <summary>
@@ -265,12 +265,16 @@ namespace TNetD.Consensus
                 sm.LedgerCloseSequence = LedgerCloseSequence;
                 sm.ConsensusState = CurrentConsensusState;
 
+                Hash token = TNetUtils.GenerateNewToken();
+
+                nodeState.NodeLatency.StartMeasurement(node.Key, token);
+
                 // Create NetworkPacket and send
 
                 await networkPacketSwitch.SendAsync(node.Key, new NetworkPacket()
                 {
                     PublicKeySource = nodeConfig.PublicKey,
-                    Token = TNetUtils.GenerateNewToken(),
+                    Token = token,
                     Data = sm.Serialize(),
                     Type = PacketType.TPT_CONS_SYNC_REQUEST
                 });
@@ -304,6 +308,8 @@ namespace TNetD.Consensus
         {
             if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
+                nodeState.NodeLatency.StopMeasurement(packet.PublicKeySource, packet.Token);
+
                 if (CurrentConsensusState == ConsensusStates.Sync)
                 {
                     // Is trusted !

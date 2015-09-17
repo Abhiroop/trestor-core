@@ -1,6 +1,6 @@
 ﻿
 // @Author : Arpan Jati
-// @Date: Jan 2015
+// @Date: Jan 2015 | September 2015
 
 using System;
 using System.Collections.Concurrent;
@@ -270,10 +270,5 @@ namespace TNetD.Network.Networking
                 await PacketReceived(packet);
             }
         }
-
-      
-
-       
-
     }
 }
