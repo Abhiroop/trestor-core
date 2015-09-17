@@ -126,6 +126,7 @@
     <Compile Include="Consensus\Ballot.cs" />
     <Compile Include="Consensus\FinalVoters.cs" />
     <Compile Include="Consensus\LedgerCloseSequence.cs" />
+    <Compile Include="Nodes\NodeLatency.cs" />
     <Compile Include="Consensus\SyncMessage.cs" />
     <Compile Include="Consensus\TransactionValidator.cs" />
     <Compile Include="Consensus\VoteMessageCounter.cs" />

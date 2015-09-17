@@ -49,6 +49,8 @@ namespace TNetD.Nodes
         /// </summary>
         public ConcurrentDictionary<Hash, PendingNetworkRequest> PendingNetworkRequests;
 
+        public NodeLatency NodeLatency;
+
         public long SystemTime { get; set; }
 
         public long NetworkTime { get; set; }
@@ -75,6 +77,8 @@ namespace TNetD.Nodes
             ConnectedValidators = new Dictionary<Hash, ConnectionProperties>();
 
             PendingNetworkRequests = new ConcurrentDictionary<Hash, PendingNetworkRequest>();
+
+            NodeLatency = new NodeLatency(this);
 
             SystemTime = DateTime.UtcNow.ToFileTimeUtc();
             NetworkTime = DateTime.UtcNow.ToFileTimeUtc();

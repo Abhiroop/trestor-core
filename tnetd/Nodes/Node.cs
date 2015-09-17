@@ -211,6 +211,7 @@ namespace TNetD.Nodes
 
                     nodeState.TransactionStateManager.ProcessAndClear();
 
+                    nodeState.NodeLatency.Prune();
                 }
                 catch (Exception ex)
                 {

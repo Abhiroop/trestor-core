@@ -159,7 +159,7 @@ namespace TNetD.Consensus
 
             voteMessageCounter = new VoteMessageCounter();
 
-            Observable.Interval(TimeSpan.FromMilliseconds(500))
+            Observable.Interval(TimeSpan.FromMilliseconds(600))
                 .Subscribe(async x => await TimerVoting_Elapsed(x));
 
             /*TimerVoting = new System.Timers.Timer();
@@ -260,76 +260,13 @@ namespace TNetD.Consensus
         {
             try
             {
-
                 await semaphoreVoting.WaitAsync();
 
                 switch (CurrentConsensusState)
                 {
                     case ConsensusStates.Sync:
 
-                        if (!syncSend)
-                        {
-                            syncMap.Clear();
-                            await sendSyncRequests();
-                            syncSend = true;
-                        }
-                        else
-                        {
-                            syncSend = false;
-
-                            var syncResults = MedianTrustedState();
-
-                            if (syncResults.Item2)
-                            {
-                                /*var syncResults2 = MedianTrustedVotingState();
-
-                                if (syncResults2.Item2)
-                                {
-                                    // Voting and State;
-
-                                    CurrentConsensusState = ConsensusStates.Collect;
-                                    syncStateCounter = 0;
-
-                                    Print("Sync ###### COPY MEDIAN STATE ######### Normal.");
-
-                                    if (CurrentConsensusState == ConsensusStates.Sync)
-                                        CurrentConsensusState = ConsensusStates.Merge;
-
-                                    CurrentVotingState = syncResults2.Item1;
-                                }
-                                */
-
-                                // Great We know something
-                                if (syncResults.Item1 == ConsensusStates.Sync || syncResults.Item1 == ConsensusStates.Merge)
-                                {
-                                    // Awesome ! we can continue :)
-                                    CurrentConsensusState = ConsensusStates.Collect;
-                                    syncStateCounter = 0;
-
-                                    Print("Sync Done. Normal.");
-                                }
-                                else
-                                {
-                                    // Too bad we need to wait for sync
-                                    Print("Sync Wait.");
-                                }
-                            }
-                            else
-                            {
-                                // We dont have anyone replying
-                                // Wait a few cycles and then start anyway.
-
-                                if (syncStateCounter > 20)
-                                {
-                                    CurrentConsensusState = ConsensusStates.Collect;
-                                    syncStateCounter = 0;
-
-                                    Print("Sync Done. Forced.");
-                                }
-                            }
-                        }
-
-                        syncStateCounter++;
+                        await HandleSync();
 
                         break;
 
@@ -380,6 +317,73 @@ namespace TNetD.Consensus
             {
                 semaphoreVoting.Release();
             }
+        }
+
+        private async Task HandleSync()
+        {
+            if (!syncSend)
+            {
+                syncMap.Clear();
+                await sendSyncRequests();
+                syncSend = true;
+            }
+            else
+            {
+                syncSend = false;
+
+                var syncResults = MedianTrustedState();
+
+                if (syncResults.Item2)
+                {
+                    /*var syncResults2 = MedianTrustedVotingState();
+
+                    if (syncResults2.Item2)
+                    {
+                        // Voting and State;
+
+                        CurrentConsensusState = ConsensusStates.Collect;
+                        syncStateCounter = 0;
+
+                        Print("Sync ###### COPY MEDIAN STATE ######### Normal.");
+
+                        if (CurrentConsensusState == ConsensusStates.Sync)
+                            CurrentConsensusState = ConsensusStates.Merge;
+
+                        CurrentVotingState = syncResults2.Item1;
+                    }
+                    */
+
+                    // Great We know something
+                    if (syncResults.Item1 == ConsensusStates.Sync || syncResults.Item1 == ConsensusStates.Merge)
+                    {
+                        // Awesome ! we can continue :)
+                        CurrentConsensusState = ConsensusStates.Collect;
+                        syncStateCounter = 0;
+
+                        Print("Sync Done. Normal.");
+                    }
+                    else
+                    {
+                        // Too bad we need to wait for sync
+                        Print("Sync Wait.");
+                    }
+                }
+                else
+                {
+                    // We dont have anyone replying
+                    // Wait a few cycles and then start anyway.
+
+                    if (syncStateCounter > 200)
+                    {
+                        CurrentConsensusState = ConsensusStates.Collect;
+                        syncStateCounter = 0;
+
+                        Print("Sync Done. Forced.");
+                    }
+                }
+            }
+
+            syncStateCounter++;
         }
 
         string GetTxCount(Ballot ballot)
@@ -440,7 +444,7 @@ namespace TNetD.Consensus
                     if (extraVotingDelayCycles > 0)
                     {
                         Print("Waiting a cycle for pending voting requests : " + voteMessageCounter.Votes +
-                        "/" + voteMessageCounter.UniqueVoteResponders + " Received");
+                            "/" + voteMessageCounter.UniqueVoteResponders + " Received");
                     }
 
                     extraVotingDelayCycles++;
@@ -871,11 +875,11 @@ namespace TNetD.Consensus
                     break;
 
                 case PacketType.TPT_CONS_VOTE_REQUEST:
-                    await processVoteRequest(packet).ConfigureAwait(false);
+                    await processVoteRequest(packet);
                     break;
 
                 case PacketType.TPT_CONS_VOTE_RESPONSE:
-                    await processVoteResponse(packet).ConfigureAwait(false);
+                    await processVoteResponse(packet);
                     break;
 
                 case PacketType.TPT_CONS_CONFIRM_REQUEST:

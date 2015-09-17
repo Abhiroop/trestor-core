@@ -92,7 +92,7 @@ namespace TNetD.Network.Networking
                     NetworkPacketQueueEntry npqe;
                     if (outgoingPacketQueue.TryDequeue(out npqe))
                     {
-                        await SendAsync(npqe).ConfigureAwait(false);
+                        await SendAsync(npqe);
                     }
                 }
             }
