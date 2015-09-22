@@ -18,9 +18,6 @@ namespace TNetWallet.WalletOperations
 
         public byte[] Address;
 
-        public byte NetworkType = (byte) 'T';
-        public byte AccountType = (byte) 'S';
-
         private byte[] Signature;
 
         public UserRegistrationPacket(string UserName, byte[] PublicKey, byte[] ExpandedPrivateKey)
@@ -28,7 +25,7 @@ namespace TNetWallet.WalletOperations
             this.UserName = Utils.Encoding88591.GetBytes(UserName);
             this.PublicKey = PublicKey;
             this.ExpandedPrivateKey = ExpandedPrivateKey;
-            this.Address = AddressFactory.GetAddress(PublicKey, UserName, NetworkType, AccountType);
+            this.Address = AddressFactory.GetAddress(PublicKey, UserName, NetworkType.TestNet, AccountType.TestNormal);
 
             byte[] TranData = GetRegistrationData();
             Signature = Ed25519.Sign(TranData, ExpandedPrivateKey);

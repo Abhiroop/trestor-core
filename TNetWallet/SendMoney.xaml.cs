@@ -60,7 +60,7 @@ namespace TNetWallet
 
         private void button_Send_Click(object sender, RoutedEventArgs e)
         {
-            try
+           /* try
             {
                 TransactionEntity sink = new TransactionEntity(REC_KEY, long.Parse(textBox_Money.Text));
 
@@ -69,7 +69,7 @@ namespace TNetWallet
 
                 App.Network.SendCommand(SP_KEY, "TRX", tc.Serialize());
             }
-            catch { }
+            catch { }*/
         }
         
         byte[] GenerateBalancePacket(long Time)
