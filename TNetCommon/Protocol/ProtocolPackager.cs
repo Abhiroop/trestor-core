@@ -246,6 +246,18 @@ namespace TNetD.Protocol
             return PDType;
         }
 
+        /// <summary>
+        /// Essentially a PD_BYTE_VECTOR is used for packing.
+        /// </summary>
+        /// <param name="serializableValue"></param>
+        /// <param name="nameType"></param>
+        /// <returns></returns>
+        public static ProtocolDataType Pack(ISerializableBase serializableValue, byte nameType)
+        {
+            ProtocolDataType PDType = GenericPack(PDataType.PD_BYTE_VECTOR, nameType);
+            PDType.Data = serializableValue.Serialize();
+            return PDType;
+        }
 
         public static ProtocolDataType Pack(byte[] vectorValue, byte nameType)
         {

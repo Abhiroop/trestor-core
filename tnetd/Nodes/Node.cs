@@ -65,14 +65,14 @@ namespace TNetD.Nodes
         /// </summary>
         public NetworkPacketSwitch networkPacketSwitch = default(NetworkPacketSwitch);
 
+        public Voting voting = default(Voting);
+
         RpcHandlers rpcHandlers = default(RpcHandlers);        
         TransactionHandler transactionHandler = default(TransactionHandler);
         TimeSync timeSync = default(TimeSync);
         LedgerSync ledgerSync = default(LedgerSync);
-        Voting voting = default(Voting);
-
-        //public AccountInfo AI;
-
+        
+        
         #endregion
 
         #region ConstructorsAndTimers
@@ -118,6 +118,11 @@ namespace TNetD.Nodes
             peerDiscovery.AddKnownPeer(new PeerData(new NodeSocketData(nodeConfig.PublicKey, nodeConfig.ListenPortProtocol, "127.0.0.1", nodeConfig.Name), nodeState, nodeConfig));
 
             voting = new Voting(nodeConfig, nodeState, networkPacketSwitch);
+
+            if(Common.NODE_OPERATION_TYPE == NodeOperationType.Distributed)
+            {
+                // voting.Enabled = true;
+            }
             
             //AI = new AccountInfo(PublicKey, Money);
 
@@ -158,6 +163,19 @@ namespace TNetD.Nodes
             DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
         }
 
+        public bool VotingEnabled
+        {
+            get
+            {
+                return voting.Enabled;
+            }
+
+            set
+            {
+                voting.Enabled = value;
+            }
+        }
+
         void TimerTimeSync_Elapsed(object sender, ElapsedEventArgs e)
         {
             nodeState.updateTimeDifference(timeSync.SyncTime());
@@ -193,6 +211,7 @@ namespace TNetD.Nodes
 
                     nodeState.TransactionStateManager.ProcessAndClear();
 
+                    nodeState.NodeLatency.Prune();
                 }
                 catch (Exception ex)
                 {
@@ -226,7 +245,7 @@ namespace TNetD.Nodes
             
             if (NodeStatusEvent != null)
             {
-                var json = JsonConvert.SerializeObject(nodeState.NodeInfo.GetResponse(), Common.JsonSerializerSettings);
+                var json = JsonConvert.SerializeObject(nodeState.NodeInfo.GetResponse(), Common.JSON_SERIALIZER_SETTINGS);
                 NodeStatusEvent(json, nodeConfig.NodeID);
             }
         }
@@ -275,8 +294,10 @@ namespace TNetD.Nodes
                 TimerEventProcessed = false;
 
                 // // // // // // // // //
-
-                transactionHandler.ProcessPendingTransactions();
+                if (Common.NODE_OPERATION_TYPE == NodeOperationType.Centralized)
+                {
+                    transactionHandler.ProcessPendingTransactions();
+                }
 
                 // // // // // // // // //
             }

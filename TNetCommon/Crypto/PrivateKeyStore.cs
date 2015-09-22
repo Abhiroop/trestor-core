@@ -66,7 +66,7 @@ namespace TNetD.Crypto
         public bool AddToStore(string SingleAccountJson, string password)
         {
             SinglePrivateAccount spa = 
-                JsonConvert.DeserializeObject<SinglePrivateAccount>(SingleAccountJson, Common.JsonSerializerSettings);
+                JsonConvert.DeserializeObject<SinglePrivateAccount>(SingleAccountJson, Common.JSON_SERIALIZER_SETTINGS);
 
             Rfc2898DeriveBytes k1 = new Rfc2898DeriveBytes(password, spa.Salt, Kdf_Iterations);
 

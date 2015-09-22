@@ -29,13 +29,19 @@ namespace TNetD.Nodes
         {
             lock (TransactionLock)
             {
-
                 try
                 {
-                    if (nodeState.IncomingTransactionMap.IncomingTransactions.Count > 0)
+                    if ((nodeState.IncomingTransactionMap.IncomingTransactions.Count > 0) && 
+                        (Common.NODE_OPERATION_TYPE == NodeOperationType.Centralized))
                     {
-                        Queue<TransactionContent> transactionContentStack = new Queue<TransactionContent>();
+                        Dictionary<Hash, TreeDiffData> pendingDifferenceData = new Dictionary<Hash, TreeDiffData>();
+                        Dictionary<Hash, TransactionContent> acceptedTransactions = new Dictionary<Hash, TransactionContent>();
+                        List<AccountInfo> newAccounts = new List<AccountInfo>();
 
+                        long totalTransactionFees = 0;
+
+                        Queue<TransactionContent> transactionContentStack = new Queue<TransactionContent>();
+                        
                         lock (nodeState.IncomingTransactionMap.transactionLock)
                         {
                             foreach (KeyValuePair<Hash, TransactionContent> kvp in nodeState.IncomingTransactionMap.IncomingTransactions)
@@ -48,13 +54,7 @@ namespace TNetD.Nodes
                             nodeState.IncomingTransactionMap.IncomingTransactions.Clear();
                             nodeState.IncomingTransactionMap.IncomingPropagations_ALL.Clear();
                         }
-
-                        Dictionary<Hash, TreeDiffData> pendingDifferenceData = new Dictionary<Hash, TreeDiffData>();
-                        Dictionary<Hash, TransactionContent> acceptedTransactions = new Dictionary<Hash, TransactionContent>();
-                        List<AccountInfo> newAccounts = new List<AccountInfo>();
-
-                        long totalTransactionFees = 0;
-
+                        
                         while (transactionContentStack.Count > 0)
                         {
                             TransactionContent transactionContent = transactionContentStack.Dequeue();
@@ -132,7 +132,7 @@ namespace TNetD.Nodes
                                             }
                                         }
 
-                                        if (!Common.IsTransactionFeeEnabled) // Transaction fee not allowed here !!
+                                        if (!Common.TRANSACTION_FEE_ENABLED) // Transaction fee not allowed here !!
                                         {
                                             if (transactionContent.TransactionFee > 0)
                                             {
@@ -310,7 +310,7 @@ namespace TNetD.Nodes
                                                 (badTX_TransactionFee ? "\nbadTX_TransactionFee" : "") +
                                                 (badTX_AccountAddress ? "\nbadTX_AccountAddress" : "") + "\n" +
 
-                                                JsonConvert.SerializeObject(transactionContent, Common.JsonSerializerSettings)
+                                                JsonConvert.SerializeObject(transactionContent, Common.JSON_SERIALIZER_SETTINGS)
 
                                                 + "\n", DisplayType.BadData);
                                         }
@@ -386,15 +386,15 @@ namespace TNetD.Nodes
                                 if (ledgerAccount.LastTransactionTime != persistentAccount.LastTransactionTime)
                                 {
                                     throw new Exception("Persistent DB or Ledger unauthorized overwrite Time. #1 : \nLedgerAccount : " +
-                                     JsonConvert.SerializeObject(ledgerAccount, Common.JsonSerializerSettings) + "\nPersistentAccount :" +
-                                     JsonConvert.SerializeObject(persistentAccount, Common.JsonSerializerSettings) + "\n");
+                                     JsonConvert.SerializeObject(ledgerAccount, Common.JSON_SERIALIZER_SETTINGS) + "\nPersistentAccount :" +
+                                     JsonConvert.SerializeObject(persistentAccount, Common.JSON_SERIALIZER_SETTINGS) + "\n");
                                 }
 
                                 if (ledgerAccount.Money != persistentAccount.Money)
                                 {
                                     throw new Exception("Persistent DB or Ledger unauthorized overwrite Value. #1 : \nLedgerAccount : " +
-                                     JsonConvert.SerializeObject(ledgerAccount, Common.JsonSerializerSettings) + "\nPersistentAccount :" +
-                                     JsonConvert.SerializeObject(persistentAccount, Common.JsonSerializerSettings) + "\n");
+                                     JsonConvert.SerializeObject(ledgerAccount, Common.JSON_SERIALIZER_SETTINGS) + "\nPersistentAccount :" +
+                                     JsonConvert.SerializeObject(persistentAccount, Common.JSON_SERIALIZER_SETTINGS) + "\n");
                                 }
                             }
                             else

@@ -25,6 +25,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TNetD.Address;
+using TNetD.Helpers;
 using TNetD.Ledgers;
 using TNetD.Network.Networking;
 using TNetD.Nodes;
@@ -41,19 +42,21 @@ namespace TNetD
     public partial class DebugWindow3 : Window
     {
         object TimerLock = new object();
-
+        MessageViewModel viewModel = new MessageViewModel();
 
         List<Node> nodes = new List<Node>();
 
         public DebugWindow3()
         {
+            DataContext = viewModel;
+
             Common.Initialize();
 
             InitializeComponent();
 
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
 
-            Title += " | " + Common.NetworkType.ToString();
+            Title += " | " + Common.NETWORK_TYPE.ToString();
 
             System.Timers.Timer tmr_UI = new System.Timers.Timer(1000);
             tmr_UI.Elapsed += tmr_UI_Elapsed;
@@ -107,20 +110,17 @@ namespace TNetD
 
         }
 
-        void DisplayUtils_DisplayText(string Text, Color color, DisplayType type)
+        void DisplayUtils_DisplayText(DisplayMessageType displayMessage)
         {
-            if (type >= Constants.DebugLevel)
+            if (displayMessage.DisplayType >= Constants.DebugLevel)
             {
                 try
                 {
                     this.Dispatcher.Invoke(new Action(() =>
                     {
-                        if (textBlock_Log.Text.Length > Common.UI_TextBox_Max_Length)
-                        {
-                            textBlock_Log.Text = "";
-                        }
-
-                        textBlock_Log.Inlines.Add(new Run(Text + "\n") { Foreground = new SolidColorBrush(color) });
+                        displayMessage.Text = displayMessage.Text.Trim();
+                        viewModel.ProcessSkips();
+                        viewModel.LogMessages.Add(displayMessage);
                     }));
                 }
                 catch { }
@@ -179,12 +179,12 @@ namespace TNetD
             for (int i = 0; i < 5000; i++)
             {
                 byte[] N_H = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
-                Common.rngCsp.GetBytes(N_H);
+                Common.SECURE_RNG.GetBytes(N_H);
 
                 Hash h = new Hash(N_H);
 
-                AccountInfo ai = new AccountInfo(h, Common.random.Next(79382, 823649238),
-                    "name_" + Common.random.Next(0, 823649238), AccountState.Normal, NetworkType.TestNet, AccountType.TestNormal, 0);
+                AccountInfo ai = new AccountInfo(h, Common.NORMAL_RNG.Next(79382, 823649238),
+                    "name_" + Common.NORMAL_RNG.Next(0, 823649238), AccountState.Normal, NetworkType.TestNet, AccountType.TestNormal, 0);
 
                 nodes[0].nodeState.Ledger.AddUserToLedger(ai);
             }

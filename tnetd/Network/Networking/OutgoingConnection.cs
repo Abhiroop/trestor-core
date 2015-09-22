@@ -18,10 +18,11 @@ using System.Collections.Concurrent;
 using TNetD.Crypto;
 using TNetD.Nodes;
 using System.Threading.Tasks;
+using System.Reactive.Linq;
 
 namespace TNetD.Network.Networking
 {
-    public delegate void PacketReceivedHandler(NetworkPacket packet);
+    public delegate Task PacketReceivedHandler(NetworkPacket packet);
 
     class OutgoingConnection
     {
@@ -41,13 +42,16 @@ namespace TNetD.Network.Networking
 
         Random rnd = new Random();
 
-        Timer updateTimer;
+        //Timer updateTimer;
 
         public OutgoingConnection(NodeSocketData nodeSocketData, NodeConfig nodeConfig)
         {
             this.nodeConfig = nodeConfig;
             this.nodeSocketData = nodeSocketData;
-            updateTimer = new Timer(TimerCallback, null, 0, Constants.Network_UpdateFrequencyMS);
+            //updateTimer = new Timer(TimerCallback, null, 0, Constants.Network_UpdateFrequencyMS);
+
+            Observable.Interval(TimeSpan.FromMilliseconds(Constants.Network_UpdateFrequencyMS))
+                .Subscribe(async x => await TimerCallback(x));
 
             Connect();
         }
@@ -57,10 +61,14 @@ namespace TNetD.Network.Networking
             outgoingQueue.Enqueue(npqe);
         }
 
-        private void TimerCallback(Object o)
+        private SemaphoreSlim syncLock = new SemaphoreSlim(1);
+
+        private async Task TimerCallback(object o)
         {
             try
             {
+                await syncLock.WaitAsync();
+
                 if (KeyExchanged)
                 {
                     while (outgoingQueue.Count > 0)
@@ -70,18 +78,30 @@ namespace TNetD.Network.Networking
                         if (outgoingQueue.TryDequeue(out np))
                         {
                             //DisplayUtils.Display("SENDING OC Packet: " + np.Type + " | From: " + np.PublicKeySource + " | Data Length : " + np.Data.Length);
-                            SendData(np.Serialize());
+                            await SendData(np.Serialize());
                         }
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                //DisplayUtils.Display("TimerCallback", ex);
+                DisplayUtils.Display("Exception while Sending Packet: OUT: ", ex);
+            }
+            finally
+            {
+                syncLock.Release();
             }
         }
 
-        UInt32 PacketCounter = 0;
+        public async Task SendAsync(NetworkPacket networkPacket)
+        {
+            if(KeyExchanged)
+            {
+                await SendData(networkPacket.Serialize());
+            }
+        }
+        
+        long PacketCounter = 0;
 
         public byte[] AuthRandom = new byte[24];
 
@@ -108,8 +128,8 @@ namespace TNetD.Network.Networking
             {
                 byte[] DH_RandomBytes = new byte[32];
 
-                Common.rngCsp.GetBytes(DH_RandomBytes);
-                Common.rngCsp.GetBytes(AuthRandom);
+                Common.SECURE_RNG.GetBytes(DH_RandomBytes);
+                Common.SECURE_RNG.GetBytes(AuthRandom);
 
                 DH_PrivateKey = Curve25519.ClampPrivateKey(DH_RandomBytes);
                 DH_PublicKey = Curve25519.GetPublicKey(DH_PrivateKey);
@@ -163,10 +183,9 @@ namespace TNetD.Network.Networking
                     List<TransportPacket> mp = new List<TransportPacket>();
                     while (tcpClient.Connected && (tcpClient != null))
                     {
-                        bool packetGood = false;
                         if (nsRead.CanRead)
                         {
-                            int bytesRead = 0; //int byteCounter = 0; 
+                            int bytesRead = 0;
                             do
                             {
                                 bytesRead = 0;
@@ -198,7 +217,7 @@ namespace TNetD.Network.Networking
                                                 DisplayUtils.Display(NodeSocketData.GetString(nodeSocketData) + " : --- ProcessConnection:CNT:" + mp.Count, ex);
                                             }
                                         }
-                                        
+
                                         byte[] remaining = new byte[content.Length - SuccessPosition];
 
                                         Array.Copy(content, (int)SuccessPosition, remaining, 0, remaining.Length);
@@ -215,75 +234,11 @@ namespace TNetD.Network.Networking
                                 }
                             }
                             while (nsRead.DataAvailable);
-
                         }
-
-                        Thread.Sleep(75);
+                       // Thread.Sleep(75);
                     }
 
-                    nsWrite.Close();
-                    //reader.Close();
-
-
-                    //MemoryStream messageStream = new MemoryStream();
-                    //byte[] inbuffer = new byte[ClientUtils.PREFS_APP_TCP_BUFFER_SIZE];
-
-                    //List<TransportPacket> mp = new List<TransportPacket>();
-                    //while (client.Connected && (client != null))
-                    //{
-                    //    bool packetGood = false;
-                    //    if (nsRead.CanRead)
-                    //    {
-                    //        do
-                    //        {
-                    //            try
-                    //            {
-                    //                int bytesRead = nsRead.Read(inbuffer, 0, inbuffer.Length);
-
-                    //                //if (bytesRead == 0) // Connection lost
-                    //                //{
-                    //                //    DisplayUtils.Display("--- Connection lost");
-                    //                //}
-
-                    //                messageStream.Write(inbuffer, 0, bytesRead);
-                    //                if (bytesRead > 0)
-                    //                {
-                    //                    if (!nsRead.DataAvailable)
-                    //                    {
-                    //                        packetGood = PacketCodec.ValidateAndDecodeTransportPacket(messageStream.ToArray(), ref mp);
-                    //                    }
-                    //                }
-                    //            }
-                    //            catch (Exception ex)
-                    //            {
-                    //                //DisplayUtils.Display("ClientHandler : Read()", ex);
-                    //            }
-                    //        }
-                    //        while (nsRead.DataAvailable);
-                    //    }
-
-                    //    if (packetGood)
-                    //    {
-                    //        messageStream.Position = 0;
-                    //        messageStream = new MemoryStream();
-
-                    //        foreach (TransportPacket p in mp)
-                    //        {
-                    //            try
-                    //            {
-                    //                ProcessOutgoingConnectionInternal(client, p);
-                    //            }
-                    //            catch (Exception ex)
-                    //            {
-                    //                if (tc.verbosity >= Verbosity.Errors)
-                    //                DisplayUtils.Display("User: " + userIndex + ", --- ProcessOutgoing:CNT:" + mp.Count, ex);
-                    //            }
-                    //        }
-                    //    }
-                    //    Thread.Sleep(75);
-                    //}
-                    //writer.Close();
-                    ////reader.Close();
+                    nsWrite.Close();                   
                 }
             }
             catch (System.Exception ex)
@@ -323,12 +278,17 @@ namespace TNetD.Network.Networking
             return sb.ToString();
         }
 
-        async void SendData(byte[] Data)
+        /// <summary>
+        /// Sends the data asynchronously, make sure the key exchange has happeded prior to sending.
+        /// </summary>
+        /// <param name="Data"></param>
+        /// <returns></returns>
+        async Task SendData(byte[] Data)
         {
             try
             {
                 byte[] nonce = new byte[8];
-                Common.rngCsp.GetBytes(nonce);
+                Common.SECURE_RNG.GetBytes(nonce);
 
                 byte[] counter_sender_data = Utils.GetLengthAsBytes((int)PacketCounter).Concat(Data).ToArray();
 
@@ -507,14 +467,12 @@ namespace TNetD.Network.Networking
 
                                 if (nodeSocketData.PublicKey == np.PublicKeySource)
                                 {
-                                    if (PacketReceived != null)
-                                        PacketReceived(np);
+                                    await PacketReceived?.Invoke(np);
                                 }
                                 else
                                 {
                                     DisplayUtils.Display("Packet Source Outgoing Mismatch", DisplayType.Warning);
                                 }
-
                             }
                             else
                             {

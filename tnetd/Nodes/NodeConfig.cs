@@ -135,10 +135,19 @@ namespace TNetD.Nodes
 
             byte[] RAND_PART = new byte[8];
 
-            Common.rngCsp.GetBytes(RAND_PART);
+            Common.SECURE_RNG.GetBytes(RAND_PART);
 
             // TODO: FIX THIS, TAKE THIS FROM, DB
             Name = GetInitString("Info", "Name", "name" + HexUtil.ToString(RAND_PART).ToLowerInvariant());
+        }
+
+        /// <summary>
+        /// Returns a string correcponding to the NodeID
+        /// </summary>
+        /// <returns></returns>
+        public string ID()
+        {
+            return "Node_" + NodeID;
         }
 
         void LoadTrustedNodes()
@@ -227,7 +236,7 @@ namespace TNetD.Nodes
 
             // Get new port
 
-            _ListenPortProtocol = Common.random.Next(32768, 65000);
+            _ListenPortProtocol = Common.NORMAL_RNG.Next(32768, 65000);
 
             iniFile.IniWriteValue("Network", "ListenPortProtocol", _ListenPortProtocol.ToString());
 
@@ -270,7 +279,7 @@ namespace TNetD.Nodes
 
             // Get new port
 
-            _ListenPortRPC = Common.random.Next(32768, 65000);
+            _ListenPortRPC = Common.NORMAL_RNG.Next(32768, 65000);
 
             iniFile.IniWriteValue("Network", "ListenPortRPC", _ListenPortRPC.ToString());
 
@@ -308,7 +317,7 @@ namespace TNetD.Nodes
             if (_RAND.Length != 32)
             {
                 _RAND = new byte[32];
-                Common.rngCsp.GetBytes(_RAND);
+                Common.SECURE_RNG.GetBytes(_RAND);
 
                 DisplayUtils.Display(" Node " + NodeID + " Creating new PrivateKey : " + HexUtil.ToString(_RAND));
                 _iniFile.IniWriteValue("Keys", "PrivateRandom", HexUtil.ToString(_RAND));

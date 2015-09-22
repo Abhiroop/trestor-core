@@ -124,15 +124,24 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Consensus\Ballot.cs" />
-    <Compile Include="Consensus\BallotAgreeRequest.cs" />
-    <Compile Include="Consensus\BallotAgreeResponse.cs" />
-    <Compile Include="Consensus\BallotRequestMessage.cs" />
+    <Compile Include="Consensus\FinalVoters.cs" />
+    <Compile Include="Consensus\LedgerCloseSequence.cs" />
+    <Compile Include="Nodes\NodeLatency.cs" />
+    <Compile Include="Consensus\SyncMessage.cs" />
+    <Compile Include="Consensus\TransactionValidator.cs" />
+    <Compile Include="Consensus\VoteMessageCounter.cs" />
+    <Compile Include="Consensus\VoteConfirmRequest.cs" />
+    <Compile Include="Consensus\VoteConfirmResponse.cs" />
+    <Compile Include="Consensus\VoteRequestMessage.cs" />
+    <Compile Include="Consensus\VoteResponseMessage.cs" />
     <Compile Include="Consensus\FetchMessages.cs" />
     <Compile Include="Consensus\MergeResponseMsg.cs" />
     <Compile Include="Consensus\DoubleSpendBlacklist.cs" />
     <Compile Include="Consensus\TransactionChecker.cs" />
+    <Compile Include="Consensus\VoteMap.cs" />
     <Compile Include="Consensus\VoteType.cs" />
     <Compile Include="Consensus\Voting.cs" />
+    <Compile Include="Consensus\VotingRequests.cs" />
     <Compile Include="Ledgers\GenesisRawData.cs" />
     <Compile Include="Network\FakeNetwork.cs" />
     <Compile Include="Network\Networking\ConnectionProperties.cs" />
@@ -150,6 +159,7 @@
     <Compile Include="Nodes\NodeSocketData.cs" />
     <Compile Include="Nodes\TransactionHandler.cs" />
     <Compile Include="Nodes\LedgerSync.cs" />
+    <Compile Include="PersistentStore\IPersistentCloseHistory.cs" />
     <Compile Include="SyncFramework\IndexedVector.cs" />
     <Compile Include="SyncFramework\Packets\LedgerSyncRequest.cs" />
     <Compile Include="SyncFramework\Packets\TransactionContentSet.cs" />
@@ -212,6 +222,9 @@
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Ledgers\Ledger.cs" />
     <Compile Include="Nodes\Node.cs" />
+    <Compile Include="Utils\Helpers\IObjectGenerator.cs" />
+    <Compile Include="Utils\Helpers\MessageViewModel.cs" />
+    <Compile Include="Utils\Helpers\VirtualLists.cs" />
     <Compile Include="Utils\INIFile.cs" />
     <Compile Include="Network\Networking\PacketCodec.cs" />
     <Compile Include="Network\Networking\IncomingConnectionHander.cs" />

@@ -52,7 +52,7 @@ namespace TNetD.Address
         {
             bool TypesFine = ValidateNetworkType();
 
-            if (Common.NetworkType == Address.NetworkType.MainNet)
+            if (Common.NETWORK_TYPE == Address.NetworkType.MainNet)
             {
                 if (!((AccountType == AccountType.MainNormal) ||
                     (AccountType == AccountType.MainValidator) ||
@@ -80,7 +80,7 @@ namespace TNetD.Address
         /// <returns></returns>
         public bool ValidateNetworkType()
         {            
-            return NetworkType == Common.NetworkType;
+            return NetworkType == Common.NETWORK_TYPE;
         }
     }
 }

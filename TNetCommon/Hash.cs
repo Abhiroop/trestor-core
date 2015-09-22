@@ -20,7 +20,7 @@ namespace TNetD
 
         public Hash(byte[] Value)
         {
-            HashValue = (byte[])Value.Clone();
+            HashValue = (byte[])Value?.Clone() ?? new byte[0];
         }
 
         public Hash()
@@ -71,6 +71,8 @@ namespace TNetD
 
         public override string ToString()
         {
+            if (HashValue.Length == 0) return "EMPTY";
+
             StringBuilder sb = new StringBuilder();
 
             for (int i = 0; i < HashValue.Length; i++)

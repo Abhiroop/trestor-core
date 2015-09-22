@@ -1,6 +1,6 @@
 ﻿
 // @Author : Arpan Jati
-// @Date: Dec 2014
+// @Date: Dec 2014 | Sept 2015
 
 using System;
 using System.Collections.Generic;
@@ -19,9 +19,9 @@ namespace TNetD
 
         public static bool ValidateUserName(string userName)
         {
-            if ((userName.Length <= Common.Pref_MinNameLength)) return false;
+            if ((userName.Length <= Common.PREF_MIN_NAME_LENGTH)) return false;
 
-            if ((userName.Length > Common.Pref_MaxNameLength)) return false;
+            if ((userName.Length > Common.PREF_MAX_NAME_LENGTH)) return false;
 
             if (userName != userName.ToLowerInvariant()) return false;
 
@@ -49,6 +49,29 @@ namespace TNetD
         {
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             return Convert.ToInt64((date - epoch).TotalSeconds);
+        }
+        
+        /// <summary>
+        /// Returns true if A and B have difference less than timeMS (milliseconds).
+        /// </summary>
+        /// <param name="aFileTimeUTC"></param>
+        /// <param name="bFileTimeUTC"></param>
+        /// <param name="timeMS"></param>
+        /// <returns></returns>
+        public static bool CheckTimeCloseness(long aFileTimeUTC, long bFileTimeUTC, double timeMS)
+        {
+            DateTime a = DateTime.FromFileTimeUtc(aFileTimeUTC);
+            DateTime b = DateTime.FromFileTimeUtc(bFileTimeUTC);
+
+            TimeSpan tsp = a - b;
+
+            double absMs = Math.Abs(tsp.TotalMilliseconds);
+
+            if (absMs < timeMS)
+            {
+                return true;
+            }
+            else return false;
         }
 
         public static bool ByteArrayEquals(byte[] x, int xOffset, byte[] y, int yOffset, int length)
@@ -201,7 +224,7 @@ namespace TNetD
 
             while (ints.Count < Count)
             {
-                int Rand = Common.random.Next(0, maxNumber);
+                int Rand = Common.NORMAL_RNG.Next(0, maxNumber);
 
                 if (!ints.Contains(Rand) && (notEqualTo != Rand))
                 {

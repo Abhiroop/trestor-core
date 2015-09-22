@@ -26,6 +26,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TNetD.Address;
+using TNetD.Helpers;
 using TNetD.Ledgers;
 using TNetD.Network.Networking;
 using TNetD.Nodes;
@@ -42,18 +43,19 @@ namespace TNetD
     public partial class DebugWindow4 : Window
     {
         object TimerLock = new object();
-
+        MessageViewModel viewModel = new MessageViewModel();
         List<Node> nodes = new List<Node>();
 
         public DebugWindow4()
         {
+            DataContext = viewModel;
             Common.Initialize();
 
-            InitializeComponent();
+            InitializeComponent();            
 
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
 
-            Title += " | " + Common.NetworkType.ToString();
+            Title += " | " + Common.NETWORK_TYPE.ToString();
 
             comboBox_Graph_DisplayMode.SelectedIndex = 0;
 
@@ -66,7 +68,7 @@ namespace TNetD
         {
             lock (TimerLock)
             {
-                String connString = TNetUtils.GetNodeConnectionInfoString(nodes);
+                string connString = TNetUtils.GetNodeConnectionInfoString(nodes);
 
                 try
                 {
@@ -110,20 +112,24 @@ namespace TNetD
 
         }
 
-        void DisplayUtils_DisplayText(string Text, Color color, DisplayType type)
+        void DisplayUtils_DisplayText(DisplayMessageType displayMessage)
         {
-            if (type >= Constants.DebugLevel)
+            if (displayMessage.DisplayType >= Constants.DebugLevel)
             {
                 try
                 {
                     this.Dispatcher.Invoke(new Action(() =>
                     {
-                        if (textBlock_Log.Text.Length > Common.UI_TextBox_Max_Length)
-                        {
-                            textBlock_Log.Text = "";
-                        }
+                        displayMessage.Text = displayMessage.Text.Trim();
+                        viewModel.ProcessSkips();
+                        viewModel.LogMessages.Add(displayMessage);
 
-                        textBlock_Log.Inlines.Add(new Run(Text + "\n") { Foreground = new SolidColorBrush(color) });
+                        if (!listBox_Log.IsMouseOver)
+                        {
+                            //listBox_Log.Items.MoveCurrentToLast();
+                            //listBox_Log.ScrollIntoView(listBox_Log.Items.CurrentItem);
+                            try { listBox_Log.ScrollIntoView(listBox_Log.Items[listBox_Log.Items.Count - 1]); } catch { }
+                        }
                     }));
                 }
                 catch { }
@@ -132,7 +138,7 @@ namespace TNetD
 
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 6; i++)
             {
                 AddNode(i);
             }
@@ -185,16 +191,15 @@ namespace TNetD
             for (int i = 0; i < 5000; i++)
             {
                 byte[] N_H = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
-                Common.rngCsp.GetBytes(N_H);
+                Common.SECURE_RNG.GetBytes(N_H);
 
                 Hash h = new Hash(N_H);
 
-                AccountInfo ai = new AccountInfo(h, Common.random.Next(79382, 823649238),
-                    "name_" + Common.random.Next(0, 823649238), AccountState.Normal, NetworkType.TestNet, AccountType.TestNormal, 0);
+                AccountInfo ai = new AccountInfo(h, Common.NORMAL_RNG.Next(79382, 823649238),
+                    "name_" + Common.NORMAL_RNG.Next(0, 823649238), AccountState.Normal, NetworkType.TestNet, AccountType.TestNormal, 0);
 
                 nodes[0].nodeState.Ledger.AddUserToLedger(ai);
             }
-
         }
 
         private void menuItem_ResetLayout_Click(object sender, RoutedEventArgs e)
@@ -229,6 +234,65 @@ namespace TNetD
         private void button_Graph_ResetLayout_Click(object sender, RoutedEventArgs e)
         {
             connectionMap.InitNodes(nodes);
+        }
+
+        private void menuItem_EnableVoting_Click(object sender, RoutedEventArgs e)
+        {
+            foreach(var node in nodes)
+            {
+                node.VotingEnabled = true;
+                //Thread.Sleep(1100);
+            }
+        }
+
+        private void menuItem_DisableVoting_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var node in nodes)
+            {
+                node.VotingEnabled = false;
+            }
+        }
+
+        private void menuItem_ResetLedgerToGenesis_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBoxResult.Yes == MessageBox.Show("Do you really want to reset the current state. All state information will be lost.",
+               "Ledger State Reset !!!", MessageBoxButton.YesNo))
+            {
+                List<AccountInfo> aiData = new List<AccountInfo>();
+
+                string[] Accs = Common.NETWORK_TYPE == NetworkType.MainNet ? GenesisRawData.MainNet : GenesisRawData.TestNet;
+
+                foreach (string acc in Accs)
+                {
+                    AccountIdentifier AI = new AccountIdentifier();
+                    AI.Deserialize(Convert.FromBase64String(acc));
+
+                    AccountInfo ai = new AccountInfo(new Hash(AI.PublicKey), Constants.FIN_TRE_PER_GENESIS_ACCOUNT);
+
+                    ai.NetworkType = AI.AddressData.NetworkType;
+                    ai.AccountType = AI.AddressData.AccountType;
+
+                    ai.AccountState = AccountState.Normal;
+                    ai.LastTransactionTime = 0;
+                    ai.Name = AI.Name;
+
+                    aiData.Add(ai);
+                }
+
+                // Write to nodes
+                foreach (Node n in nodes)
+                {
+                    n.nodeState.PersistentTransactionStore.DeleteEverything();
+                    n.nodeState.PersistentCloseHistory.DeleteEverything();
+
+                    var resp = n.nodeState.PersistentAccountStore.DeleteEverything();
+
+                    n.nodeState.PersistentAccountStore.AddUpdateBatch(aiData);
+                }
+
+                MessageBox.Show("ACCOUNTS RESET. It will take some time to synchronise with the network to resume normal operation." +
+                    "\nApplication restart needed for proper operation.");
+            }
         }
 
         /// ///////

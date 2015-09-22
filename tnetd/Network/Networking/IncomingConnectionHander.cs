@@ -16,12 +16,15 @@ using System.Threading.Tasks;
 using TNetD.Nodes;
 using TNetD.Crypto;
 using System.Reactive.Linq;
+using System.Collections.Concurrent;
 
 namespace TNetD.Network.Networking
 {
     class IncomingConnectionHander
     {
         public event PacketReceivedHandler PacketReceived;
+
+        bool IsICHRunning = false;
 
         NodeConfig nodeConfig;
 
@@ -37,7 +40,7 @@ namespace TNetD.Network.Networking
 
             listener = new TcpListener(IPAddress.Any, ListenPort);
             timer = new Timer(TimerCallback_Housekeeping, null, 0, 2000);
-            //timer_hello = new Timer(TimerCallback_Hello, null, 0, 500);
+            //timer_hello = new Timer(TimerCallback_Hello, null, 0, Constants.Network_UpdateFrequencyMS);
 
             Observable.Interval(TimeSpan.FromMilliseconds(Constants.Network_UpdateFrequencyMS))
                 .Subscribe(async x => await TimerCallback_Hello(x));
@@ -48,7 +51,7 @@ namespace TNetD.Network.Networking
             StartListening();
         }
 
-        Queue<NetworkPacketQueueEntry> outgoingQueue = new Queue<NetworkPacketQueueEntry>();
+        ConcurrentQueue<NetworkPacketQueueEntry> outgoingQueue = new ConcurrentQueue<NetworkPacketQueueEntry>();
 
         /// <summary>
         /// Outgoing connections / Keyed on PublicKey
@@ -83,34 +86,46 @@ namespace TNetD.Network.Networking
         /// <returns></returns>
         public bool EnqueuePacket(NetworkPacketQueueEntry npqe)
         {
+            if (npqe == null)
+                DisplayUtils.Display(nameof(npqe) + " is NULL. EnqueuePacket 1");
+
             if (IncomingConnections.ContainsKey(npqe.PublicKeyDestination))
             {
+                if (npqe == null)
+                    DisplayUtils.Display(nameof(npqe) + " is NULL. EnqueuePacket 2");
+
                 outgoingQueue.Enqueue(npqe);
                 return true;
             }
             else return false;
         }
 
+        private SemaphoreSlim syncLock = new SemaphoreSlim(1);
+
         private async Task TimerCallback_Hello(Object o)
         {
             try
             {
+                await syncLock.WaitAsync();
+
                 while (outgoingQueue.Count > 0)
                 {
-                    NetworkPacketQueueEntry npqe = outgoingQueue.Dequeue();
+                    NetworkPacketQueueEntry npqe;
 
-                    if (IncomingConnections.ContainsKey(npqe.PublicKeyDestination))
+                    if (outgoingQueue.TryDequeue(out npqe))
                     {
-                        //DisplayUtils.Display("SENDING IC Packet: " + npqe.Packet.Type + " | From: " + npqe.Packet.PublicKeySource + " | Data Length : " + npqe.Packet.Data.Length);
-                        await SendData(npqe.Packet.Serialize(), IncomingConnections[npqe.PublicKeyDestination]);
+                        await SendAsync(npqe);
                     }
                 }
-
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                DisplayUtils.Display("Exception while Sending Packet", ex);
-            }           
+                DisplayUtils.Display("Exception while Sending Packet: IN: ", ex);
+            }
+            finally
+            {
+                syncLock.Release();
+            }
 
             /*
 
@@ -161,11 +176,29 @@ namespace TNetD.Network.Networking
             catch { }*/
         }
 
-        private void TimerCallback_Housekeeping(Object o)
+        public async Task SendAsync(NetworkPacketQueueEntry npqe)
         {
-            /// Remove Threads
+            if (IncomingConnections.ContainsKey(npqe.PublicKeyDestination))
+            {
+                // DisplayUtils.Display("SENDING IC Packet: " + npqe.Packet.Type + " | From: " + 
+                // npqe.Packet.PublicKeySource + " | Data Length : " + npqe.Packet.Data.Length);
 
+                IncomingClient client = IncomingConnections[npqe.PublicKeyDestination];
+
+                if (client.KeyExchanged)
+                    await SendData(npqe.Packet.Serialize(), client);
+                else
+                {
+                    EnqueuePacket(npqe);
+                }
+            }
+        }
+        
+        private void TimerCallback_Housekeeping(object o)
+        {
+            // Remove Threads
             // Remove bad connections
+
             try
             {
                 List<Hash> threadsForRemoval = new List<Hash>();
@@ -182,7 +215,6 @@ namespace TNetD.Network.Networking
                     ThreadList.Remove(h);
                     DisplayUtils.Display("Removed Thread: " + HexUtil.ToString(h.Hex), DisplayType.Warning);
                 }
-
 
                 threadsForRemoval.Clear();
                 foreach (KeyValuePair<Hash, IncomingClient> kvp in IncomingConnections)
@@ -225,12 +257,10 @@ namespace TNetD.Network.Networking
 
             try
             {
-                while (tcpClient != null)
+                while ((tcpClient != null) && IsICHRunning)
                 {
                     if (tcpClient.Connected)
                     {
-                        bool packetGood = false;
-
                         if (reader.CanRead)
                         {
                             int bytesRead = 0;
@@ -355,7 +385,7 @@ namespace TNetD.Network.Networking
                             if (iClient.WorkProven)
                             {
                                 //DisplayUtils.Display("Work Proved", DisplayType.Info);
-                                Common.rngCsp.GetBytes(iClient.DHRandomBytes);
+                                Common.SECURE_RNG.GetBytes(iClient.DHRandomBytes);
 
                                 iClient.DHPrivateKey = Curve25519.ClampPrivateKey(iClient.DHRandomBytes);
                                 iClient.DHPublicKey = Curve25519.GetPublicKey(iClient.DHPrivateKey);
@@ -493,8 +523,7 @@ namespace TNetD.Network.Networking
 
                             if (iClient.PublicKey == np.PublicKeySource)
                             {
-                                if (PacketReceived != null)
-                                    PacketReceived(np);
+                                await PacketReceived?.Invoke(np);
                             }
                             else
                             {
@@ -517,7 +546,7 @@ namespace TNetD.Network.Networking
             try
             {
                 byte[] nonce = new byte[8];
-                Common.rngCsp.GetBytes(nonce);
+                Common.SECURE_RNG.GetBytes(nonce);
 
                 byte[] counter_sender_data = Utils.GetLengthAsBytes((int)client.PacketCounter).Concat(Data).ToArray();
 
@@ -538,7 +567,7 @@ namespace TNetD.Network.Networking
             {
                 listener.Start();
 
-                while (Constants.ApplicationRunning)
+                while (Constants.ApplicationRunning && IsICHRunning)
                 {
                     IncomingClient _inClient = new IncomingClient();
                     _inClient.client = listener.AcceptTcpClient();
@@ -563,32 +592,16 @@ namespace TNetD.Network.Networking
             }
         }
 
+
         public void StopAndExit()
         {
             listener.Stop();
-
-            /* try
-             {
-                 foreach (KeyValuePair<Hash, IncomingClient> kvp in ThreadList)
-                 {
-                     if (kvp.Value.thread.IsAlive)
-                     {
-                         if (kvp.Value.client != null)
-                         {
-                             try
-                             {
-                                 kvp.Value.client.Client.Dispose();
-                             }
-                             catch { }
-                         }
-                     }
-                 }
-             }
-             catch { }*/
+            IsICHRunning = false;
         }
 
         public void StartListening()
         {
+            IsICHRunning = true;
             // Create a thread to start the listen process, everything else is done using async-await.
             ThreadStart ts = new ThreadStart(StartListeningInternal);
             Thread thr = new Thread(ts);

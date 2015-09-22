@@ -56,6 +56,36 @@ namespace TNetD.UI
         }
     }
 
+    public class DateTimeToTimeString : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            DateTime dt = (DateTime)value;
+
+            return dt.Hour + ":" + dt.Minute.ToString("00") + ":" + dt.Second.ToString("00") + "." + dt.Millisecond.ToString("000");//   dt.ToLongTimeString();
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class DateTimeToDateString : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            DateTime dt = (DateTime)value;
+
+            return dt.ToShortDateString();
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class HashToString : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

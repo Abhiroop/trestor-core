@@ -20,11 +20,14 @@ namespace TNetD.Ledgers
     {
         public enum LedgerEventType { Insert, Update, Progress };
 
+        LedgerCloseData ledgerCloseData = default(LedgerCloseData);        
+
         public delegate void LedgerEventHandler(LedgerEventType ledgerEvent, string Message);
 
         public event LedgerEventHandler LedgerEvent;
 
         IPersistentAccountStore persistentStore;
+        IPersistentCloseHistory persistentCloseHistory;
 
         /// <summary>
         /// A mapping between Adresses and Account. Later to be converted to DB based implementation.
@@ -49,14 +52,27 @@ namespace TNetD.Ledgers
             get { return _load_stats; }
         }
         
-        public Ledger(IPersistentAccountStore persistentStore)
+        public Ledger(IPersistentAccountStore persistentStore, IPersistentCloseHistory persistentCloseHistory)
         {
             this.LedgerTree = new ListHashTree();
             this.persistentStore = persistentStore;
+            this.persistentCloseHistory = persistentCloseHistory;
             this.TransactionFees = 0;
             this.TotalAmount = 0;
-            //this.CloseTime = 0;
+            this.ledgerCloseData = new LedgerCloseData();
+        }
 
+        public LedgerCloseData LedgerCloseData
+        {
+            get
+            {
+                return ledgerCloseData;
+            }
+
+            set
+            {
+                ledgerCloseData = value;
+            }
         }
 
         async public Task<long> InitializeLedger()
@@ -70,6 +86,8 @@ namespace TNetD.Ledgers
                 LedgerEvent(LedgerEventType.Progress, "Ready");
             }
 
+            bool ok = persistentCloseHistory.GetLastRowData(out ledgerCloseData);
+            
             initialLoading = false;
 
             return records;
@@ -205,15 +223,14 @@ namespace TNetD.Ledgers
 
         public bool TryFetch(Hash publicKey, out AccountInfo account)
         {
-            bool okay = false;
             LeafDataType ldt ;
             if (LedgerTree.GetNodeData(publicKey, out ldt) == TraverseResult.Success)
             {
                 account = (AccountInfo)ldt;
-                okay = true;
+                return true;
             }
             account = new AccountInfo();
-            return okay;
+            return false;
         }
 
 

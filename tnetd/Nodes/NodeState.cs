@@ -26,10 +26,11 @@ namespace TNetD.Nodes
     {
         public Dictionary<Hash, DifficultyTimeData> WorkProofMap = new Dictionary<Hash, DifficultyTimeData>();
 
-        public Ledger Ledger;
+        public Ledger Ledger = default(Ledger);
 
         public IPersistentAccountStore PersistentAccountStore;
         public IPersistentTransactionStore PersistentTransactionStore;
+
         public SQLiteBannedNames PersistentBannedNameStore;
         public SQLiteCloseHistory PersistentCloseHistory;
 
@@ -48,6 +49,8 @@ namespace TNetD.Nodes
         /// </summary>
         public ConcurrentDictionary<Hash, PendingNetworkRequest> PendingNetworkRequests;
 
+        public NodeLatency NodeLatency;
+
         public long SystemTime { get; set; }
 
         public long NetworkTime { get; set; }
@@ -63,7 +66,7 @@ namespace TNetD.Nodes
             PersistentBannedNameStore = new SQLiteBannedNames(nodeConfig);
             PersistentCloseHistory = new SQLiteCloseHistory(nodeConfig);
 
-            Ledger = new Ledger(PersistentAccountStore);
+            Ledger = new Ledger(PersistentAccountStore, PersistentCloseHistory);
 
             TransactionStateManager = new TransactionStateManager();
             IncomingTransactionMap = new IncomingTransactionMap(this, nodeConfig, TransactionStateManager);
@@ -74,6 +77,8 @@ namespace TNetD.Nodes
             ConnectedValidators = new Dictionary<Hash, ConnectionProperties>();
 
             PendingNetworkRequests = new ConcurrentDictionary<Hash, PendingNetworkRequest>();
+
+            NodeLatency = new NodeLatency(nodeConfig, this);
 
             SystemTime = DateTime.UtcNow.ToFileTimeUtc();
             NetworkTime = DateTime.UtcNow.ToFileTimeUtc();

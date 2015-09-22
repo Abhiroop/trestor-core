@@ -14,7 +14,8 @@
             <local:StatusToColor x:Key="ColorConverter"/>
             <local:ByteArrayToString x:Key="ByteArrayToString"/>
             <local:HashToString x:Key="HashToString"/>
-
+            <local:DateTimeToTimeString x:Key="DateTimeToTimeString"/>
+            
             <Style x:Key="DarkRoomListViewStyle" TargetType="{x:Type ListView}">
                 <Setter Property="Template">
                     <Setter.Value>
@@ -102,8 +103,12 @@
                 <MenuItem Name="menuItem_Simulation_Stop" Header="Stop"/>
                 <MenuItem Name="menuItem_Simulation_Restart" Header="Restart" />
                 <Separator/>
+                <MenuItem Name="menuItem_EnableVoting" Header="Enable Voting" Click="menuItem_EnableVoting_Click" />
+                <MenuItem Name="menuItem_DisableVoting" Header="Disable Voting" Click="menuItem_DisableVoting_Click"/>
+                <Separator/>
                 <MenuItem Name="menuItem_Simulation_RamdomlyAddAccounts" Header="Add Accounts to Node_0" Click="menuItem_Simulation_RamdomlyAddAccounts_Click"/>
-                <MenuItem Name="menuItem_ResetLayout" Header="Reset Layout" Click="menuItem_ResetLayout_Click"></MenuItem>
+                <MenuItem Name="menuItem_ResetLedgerToGenesis" Header="Reset Ledger to Genesis" Click="menuItem_ResetLedgerToGenesis_Click"/>
+                    <MenuItem Name="menuItem_ResetLayout" Header="Reset Layout" Click="menuItem_ResetLayout_Click"></MenuItem>
             </MenuItem>
 
             <MenuItem Header="HELP">
@@ -116,9 +121,9 @@
             <TabItem Header="Log">
                 <Grid Name="grid_Main">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="489*"/>
+                        <ColumnDefinition Width="620*"/>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="392*"/>
+                        <ColumnDefinition Width="380*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30"/>
@@ -127,11 +132,27 @@
                     </Grid.RowDefinitions>
                     <Label>Log:</Label>
                     <Label Grid.Column="2">Status:</Label>
-                    <ScrollViewer Grid.Row="1">
-                        <TextBlock x:Name="textBlock_Log" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
-                    </ScrollViewer>
+                    <ListBox Name="listBox_Log" Grid.Row="1" ItemsSource="{Binding LogMessages}"  Background="#FF1E1E1E" Foreground="#FF8ACD3A">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="85"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Time, Converter= {StaticResource DateTimeToTimeString}}" 
+                                               Foreground="Plum" Grid.Column="0" />
+
+                                    <StackPanel Orientation="Vertical" Grid.Column="1" Width="850" HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding Text}" FontFamily="Consolas" TextWrapping="Wrap"
+                                               Foreground="{Binding TextColor}" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                     <ScrollViewer Grid.Row="1" Grid.Column="2">
-                        <TextBlock x:Name="textBlock_Status" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
+                        <TextBlock x:Name="textBlock_Status" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" TextWrapping="Wrap" RenderOptions.BitmapScalingMode="LowQuality"/>
                     </ScrollViewer>
 
                     <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>

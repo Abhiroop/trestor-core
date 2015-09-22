@@ -8,7 +8,7 @@
         <local:StatusToColor x:Key="ColorConverter"/>
         <local:ByteArrayToString x:Key="ByteArrayToString"/>
         <local:HashToString x:Key="HashToString"/>
-
+        <local:DateTimeToTimeString x:Key="DateTimeToTimeString"/>
 
         <Style x:Key="DarkRoomListViewStyle" TargetType="{x:Type ListView}">
             <Setter Property="Template">
@@ -108,9 +108,9 @@
             <TabItem Header="Log">
                 <Grid Name="grid_Main">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="489*"/>
+                        <ColumnDefinition Width="620*"/>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="392*"/>
+                        <ColumnDefinition Width="380*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30"/>
@@ -119,9 +119,27 @@
                     </Grid.RowDefinitions>
                     <Label>Log:</Label>
                     <Label Grid.Column="2">Status:</Label>
-                    <ScrollViewer Grid.Row="1">
-                        <TextBlock x:Name="textBlock_Log" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
-                    </ScrollViewer>
+
+                    <ListBox Grid.Row="1" ItemsSource="{Binding LogMessages}"  Background="#FF1E1E1E" Foreground="#FF8ACD3A" >
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="85"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Time, Converter= {StaticResource DateTimeToTimeString}}" 
+                                               Foreground="Plum" Grid.Column="0" />
+
+                                    <StackPanel Orientation="Vertical" Grid.Column="1" Width="850" HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding Text}" FontFamily="Consolas" TextWrapping="Wrap"
+                                               Foreground="{Binding TextColor}" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
                     <ScrollViewer Grid.Row="1" Grid.Column="2">
                         <TextBlock x:Name="textBlock_Status" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
                     </ScrollViewer>

@@ -11,25 +11,16 @@ namespace TNetD.Consensus
 {
     class TransactionChecker
     {
-
         NodeState nodeState;
         DoubleSpendBlacklist blacklist;
-
-
-
-
-
+        
         public TransactionChecker(NodeState nodeState)
         {
             this.nodeState = nodeState;
             blacklist = new DoubleSpendBlacklist(nodeState);
         }
 
-
-
-
-
-        public Ballot CreateBallot(ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions)
+        public Ballot CreateBallot(ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions, LedgerCloseSequence ledgerCloseSequence)
         {
             blacklist.ClearExpired();
             SortedSet<Hash> mergedTransactions = new SortedSet<Hash>();
@@ -86,14 +77,16 @@ namespace TNetD.Consensus
                     }
                 }
             }
-            Ballot ballot = new Ballot();
-            ballot.TransactionIds = mergedTransactions;
+
+            Ballot ballot = new Ballot(ledgerCloseSequence);
+
+            ballot.Timestamp = nodeState.NetworkTime;
+            ballot.PublicKey = new Hash(nodeState.NodeInfo.PublicKey);
+            ballot.AddRange(mergedTransactions);
+
             return ballot;
         }
-
-
-
-
+        
         /// <summary>
         /// returns true, if transaction is spendable under the current ledger
         /// in combination with transactions from mergedTransactions
@@ -143,8 +136,6 @@ namespace TNetD.Consensus
             return spendable;
         }
     }
-
-
-
+    
 
 }

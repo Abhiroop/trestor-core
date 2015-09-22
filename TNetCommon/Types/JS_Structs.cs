@@ -91,7 +91,7 @@ namespace TNetD.Json.JS_Structs
 
         public JS_NodeInfo()
         {
-            Network = Common.NetworkType.ToString();
+            Network = Common.NETWORK_TYPE.ToString();
             this.NodeDetails = new JS_NodeDetails();
             this.LastLedgerInfo = new JS_LedgerInfo();
         }
@@ -335,7 +335,7 @@ namespace TNetD.Json.JS_Structs
 
         public void InitRequest()
         {
-            Common.rngCsp.GetBytes(ProofRequest);
+            Common.SECURE_RNG.GetBytes(ProofRequest);
         }
 
         public JS_Resp GetResponse()

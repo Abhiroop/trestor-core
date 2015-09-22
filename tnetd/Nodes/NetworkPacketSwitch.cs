@@ -20,8 +20,9 @@ namespace TNetD.Nodes
         public event NetworkPacketEventHandler TimeSyncEvent;
         public event NetworkPacketEventHandler LedgerSyncEvent;
         public event NetworkPacketEventHandler PeerDiscoveryEvent;
-        public event NetworkPacketEventHandler VoteMergeEvent;
-        public event NetworkPacketEventHandler VoteEvent;
+
+        public delegate Task AsyncNetworkPacketEventHandler(NetworkPacket packet);
+        public event AsyncNetworkPacketEventHandler ConsensusEvent;
 
         NodeConfig nodeConfig;
         NodeState nodeState;
@@ -65,7 +66,7 @@ namespace TNetD.Nodes
 
         async Task SendInitialize(Hash publicKey)
         {
-            await Task.Delay(Common.random.Next(500, 1000)); // Wait a random delay before connecting.
+            await Task.Delay(Common.NORMAL_RNG.Next(500, 1000)); // Wait a random delay before connecting.
             NetworkPacketQueueEntry npqe = new NetworkPacketQueueEntry(publicKey,
                 new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_HELLO, new byte[0]));
 
@@ -76,27 +77,25 @@ namespace TNetD.Nodes
         /// This will switch packets whichever it should go.
         /// </summary>
         /// <param name="packet"></param>
-        void network_PacketReceived(NetworkPacket packet)
+        async Task network_PacketReceived(NetworkPacket packet)
         {
             //DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + packet.PublicKeySource + " | Data Length : " + packet.Data.Length);
 
             switch (packet.Type)
             {
-
                 case PacketType.TPT_CONS_MERGE_REQUEST:
                 case PacketType.TPT_CONS_MERGE_RESPONSE:
+                case PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST:
+                case PacketType.TPT_CONS_MERGE_TX_FETCH_RESPONSE:
+                case PacketType.TPT_CONS_SYNC_REQUEST:
+                case PacketType.TPT_CONS_SYNC_RESPONSE:
+                case PacketType.TPT_CONS_VOTE_REQUEST:
+                case PacketType.TPT_CONS_VOTE_RESPONSE:
+                case PacketType.TPT_CONS_CONFIRM_REQUEST:
+                case PacketType.TPT_CONS_CONFIRM_RESPONSE:
 
-                    if (VoteMergeEvent != null) VoteMergeEvent(packet);
-
-                    break;
-
-                case PacketType.TPT_CONS_STATE:
-                case PacketType.TPT_CONS_BALLOT_REQUEST:
-                case PacketType.TPT_CONS_BALLOT_RESPONSE:
-                case PacketType.TPT_CONS_BALLOT_AGREE_REQUEST:
-                case PacketType.TPT_CONS_BALLOT_AGREE_RESPONSE:
-
-                    if (VoteEvent != null) VoteEvent(packet);
+                    if(ConsensusEvent!=null)
+                        await ConsensusEvent.Invoke(packet).ConfigureAwait(false);
 
                     break;
 
@@ -107,8 +106,8 @@ namespace TNetD.Nodes
                 case PacketType.TPT_LSYNC_LEAF_REQUEST:
                 case PacketType.TPT_LSYNC_LEAF_REQUEST_ALL:
                 case PacketType.TPT_LSYNC_LEAF_RESPONSE:
-
-                    if (LedgerSyncEvent != null) LedgerSyncEvent(packet);
+                                       
+                    LedgerSyncEvent?.Invoke(packet);
 
                     break;
 
@@ -125,34 +124,30 @@ namespace TNetD.Nodes
 
                 case PacketType.TPT_TIMESYNC_REQUEST:
                 case PacketType.TPT_TIMESYNC_RESPONSE:
-
-                    if (TimeSyncEvent != null)
-                        TimeSyncEvent(packet);
+                    
+                    TimeSyncEvent?.Invoke(packet);
 
                     break;
 
                 case PacketType.TPT_PEER_DISCOVERY_INIT:
                 case PacketType.TPT_PEER_DISCOVERY_RESPONSE:
-
-                    if (PeerDiscoveryEvent != null)
-                        PeerDiscoveryEvent(packet);
+                    
+                    PeerDiscoveryEvent?.Invoke(packet);
 
                     break;
-
             }
-
         }
-
-        public NetworkResult AddToQueue(NetworkPacketQueueEntry npqe)
-        {
-            return network.AddToQueue(npqe);
-        }
-
+        
         public NetworkResult AddToQueue(Hash publicKeyDestination, NetworkPacket packet)
         {
-            return network.AddToQueue(publicKeyDestination, packet);
+            return network.AddToQueue(new NetworkPacketQueueEntry(publicKeyDestination, packet));
         }
 
+        public async Task SendAsync(Hash publicKeyDestination, NetworkPacket packet)
+        {
+            await network.SendAsync(new NetworkPacketQueueEntry(publicKeyDestination, packet)).ConfigureAwait(false);
+        }
+        
         public void Stop()
         {
             network.Stop();
@@ -182,8 +177,6 @@ namespace TNetD.Nodes
 
             return good;
         }
-
-
 
     }
 }

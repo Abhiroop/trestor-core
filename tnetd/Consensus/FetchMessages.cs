@@ -14,11 +14,11 @@ namespace TNetD.Consensus
 {
     class FetchRequestMsg : ISerializableBase
     {
-        public SortedSet<Hash> IDs;
+        public HashSet<Hash> IDs;
 
         public FetchRequestMsg()
         {
-            IDs = new SortedSet<Hash>();
+            IDs = new HashSet<Hash>();
         }
 
         public byte[] Serialize()
@@ -42,11 +42,7 @@ namespace TNetD.Consensus
             }
         }
     }
-
-
-
-
-
+    
     class FetchResponseMsg : ISerializableBase
     {
         public Dictionary<Hash, TransactionContent> transactions;
@@ -68,6 +64,8 @@ namespace TNetD.Consensus
 
         public void Deserialize(byte[] data)
         {
+            transactions.Clear();
+
             List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(data);
             foreach (ProtocolDataType pdt in PDTs)
             {

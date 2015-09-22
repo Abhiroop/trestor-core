@@ -36,7 +36,7 @@ namespace TNetD.Nodes
             this.nodeConfig = nodeConfig;
             this.nodeState = nodeState;
 
-            restServer = new RESTServer(Common.RpcHost, nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
+            restServer = new RESTServer(Common.RPC_HOST, nodeConfig.ListenPortRPC.ToString(), "http", "index.html", null, 5, RPCRequestHandler);
 
             restServer.Start();
         }
@@ -530,7 +530,7 @@ namespace TNetD.Nodes
                     {
                         string json = inputStream.ReadToEnd();
                         JS_TransactionReply jtr = JsonConvert.DeserializeObject<JS_TransactionReply>(json,
-                            Common.JsonSerializerSettings);
+                            Common.JSON_SERIALIZER_SETTINGS);
 
                         transactionContent.Deserialize(jtr);
                     }
@@ -538,7 +538,7 @@ namespace TNetD.Nodes
                     //// TODO: CRITICAL: MAKE SURE TIME SOURCE IS CORRECT
                     long StaleSeconds = (long)Math.Abs((DateTime.FromFileTimeUtc(transactionContent.Timestamp) - DateTime.FromFileTimeUtc(nodeState.SystemTime)).TotalSeconds);
 
-                    if (StaleSeconds < (Common.TransactionStaleTimer_Minutes * 60))
+                    if (StaleSeconds < (Common.TRANSACTION_STALE_TIMER_MINUTES * 60))
                     {
                         // This is a bit Redundant / Done later too. But okay.
                         if (transactionContent.VerifySignature() == TransactionProcessingResult.Accepted)
@@ -597,7 +597,7 @@ namespace TNetD.Nodes
 
                     string json = inputStream.ReadToEnd();
                     JS_AccountRegisterRequest request = JsonConvert.DeserializeObject<JS_AccountRegisterRequest>(json,
-                        Common.JsonSerializerSettings);
+                        Common.JSON_SERIALIZER_SETTINGS);
 
                     Hash proofRequest = new Hash(request.ProofRequest);
 
@@ -611,7 +611,7 @@ namespace TNetD.Nodes
 
                             bool TypesFine = true;
 
-                            if (Common.NetworkType == NetworkType.MainNet)
+                            if (Common.NETWORK_TYPE == NetworkType.MainNet)
                             {
                                 if (AD.NetworkType != NetworkType.MainNet)
                                 {

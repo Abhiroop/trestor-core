@@ -1,6 +1,11 @@
 ﻿
+//
 //  @Author: Arpan Jati | Stephan Verbuecheln
 //  @Date: June 2015 
+// The voting and consensus is handled by two files. 
+// Voting and VotingRequests (both pertain to the same partial class Voting)
+// The basic state machine code is in Voting.cs and the rest of the handling is in VotingRequests.cs
+//
 
 using System;
 using System.Collections.Generic;
@@ -17,16 +22,79 @@ using System.Collections.Concurrent;
 
 namespace TNetD.Consensus
 {
-    public enum ConsensusStates { Collect, Merge, Vote, Confirm, Apply };
+    #region Enums
 
-    class Voting
+    public enum ConsensusStates
     {
-        bool Enabled { get; set; }
+        /// <summary>
+        /// Synchronize the start of consensus.
+        /// </summary>
+        Sync,
+
+        /// <summary>
+        /// Initial Collection of pending transactions.
+        /// </summary>
+        Collect,
+
+        /// <summary>
+        /// Merge pending transaction by asking and fetching for transactions.
+        /// </summary>
+        Merge,
+
+        /// <summary>
+        /// Send requests to get ballots and finalise votes.
+        /// </summary>
+        Vote,
+
+        /// <summary>
+        /// Re-Confirm Votes by sending singel requests to all the voters.
+        /// </summary>
+        Confirm,
+
+        /// <summary>
+        /// Apply to ledger.
+        /// </summary>
+        Apply
+    };
+    public enum VotingStates { STNone, ST40, ST60, ST75, ST80, STDone };
+
+    #endregion
+
+    partial class Voting
+    {
+        int mergeStateCounter = 0;
+        int votingStateCounter = 0;
+        int confirmationStateCounter = 0;
+        int applyStateCounter = 0;
+
+        public bool VerboseDebugging = false;
+
+        public bool DebuggingMessages { get; set; }
+
+        private bool enabled = false;
+
+        public bool Enabled
+        {
+            get
+            {
+                return enabled;
+            }
+
+            set
+            {
+                enabled = true;
+                InitLCS(nodeState); //FIX_TEMPORARY_TESTING MEASURE
+            }
+        }
 
         private object VotingTransactionLock = new object();
         private object ConsensusLock = new object();
 
+        public LedgerCloseSequence LedgerCloseSequence { get; private set; }
+
         public ConsensusStates CurrentConsensusState { get; private set; }
+
+        public VotingStates CurrentVotingState = VotingStates.STNone;
 
         NodeConfig nodeConfig;
         NodeState nodeState;
@@ -36,16 +104,35 @@ namespace TNetD.Consensus
         /// ID and content of current transactions
         /// </summary>
         ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions;
-        Ballot ballot;
-        TransactionChecker tchecker;
+        Ballot ballot, finalBallot;
+        TransactionChecker transactionChecker;
+        TransactionValidator transactionValidator;
+
+        HashSet<Hash> synchronizedVoters;
+
+        /// <summary>
+        /// A Map to handle all the incoming votes.
+        /// </summary>
+        VoteMap voteMap;
+
+        /// <summary>
+        /// A list of voters who have confirmed to have the same final ballot as us.
+        /// If this is above above some threshold, we should apply all the changes to ledger and move on.
+        /// </summary>
+        //FinalVoters finalVoters;
 
         /// <summary>
         /// Set of nodes, who sent a transaction ID
-        /// key: Transaction ID
-        /// value: Set of nodes
+        /// Key: Transaction ID
+        /// Value: Set of nodes
         /// </summary>
         ConcurrentDictionary<Hash, HashSet<Hash>> propagationMap;
 
+        ConcurrentDictionary<Hash, SyncState> syncMap;
+
+        VoteMessageCounter voteMessageCounter;
+
+        //System.Timers.Timer TimerVoting = default(System.Timers.Timer);
 
         public Voting(NodeConfig nodeConfig, NodeState nodeState, NetworkPacketSwitch networkPacketSwitch)
         {
@@ -54,320 +141,760 @@ namespace TNetD.Consensus
             this.networkPacketSwitch = networkPacketSwitch;
             this.CurrentTransactions = new ConcurrentDictionary<Hash, TransactionContent>();
             this.propagationMap = new ConcurrentDictionary<Hash, HashSet<Hash>>();
-            networkPacketSwitch.VoteEvent += networkPacketSwitch_VoteEvent;
-            networkPacketSwitch.VoteMergeEvent += networkPacketSwitch_VoteMergeEvent;
-            TransactionChecker tcheck = new TransactionChecker(nodeState);
+            this.syncMap = new ConcurrentDictionary<Hash, SyncState>();
+            this.voteMap = new VoteMap(nodeConfig, nodeState);
+            this.synchronizedVoters = new HashSet<Hash>();
 
-            CurrentConsensusState = ConsensusStates.Collect;
+            //finalVoters = new FinalVoters();
 
-            Observable.Interval(TimeSpan.FromMilliseconds(1000))
-                .Subscribe(async x => await TimerCallback_Voting(x));
+            finalBallot = new Ballot();
+            ballot = new Ballot();
 
+            networkPacketSwitch.ConsensusEvent += networkPacketSwitch_ConsensusEvent;
+
+            transactionChecker = new TransactionChecker(nodeState);
+            transactionValidator = new TransactionValidator(nodeConfig, nodeState);
+
+            CurrentConsensusState = ConsensusStates.Sync;
+
+            voteMessageCounter = new VoteMessageCounter();
+
+            Observable.Interval(TimeSpan.FromMilliseconds(600))
+                .Subscribe(async x => await TimerVoting_Elapsed(x));
+
+            /*TimerVoting = new System.Timers.Timer();
+            TimerVoting.Elapsed += TimerVoting_Elapsed;
+            TimerVoting.Enabled = true;
+            TimerVoting.Interval = 500;
+            TimerVoting.Start();*/
+
+            DebuggingMessages = true;
+
+            Print("Class \"Voting\" created.");
         }
 
-        private async Task TimerCallback_Voting(Object o)
+        void UpdateLCD()
+        {
+            LedgerCloseData lcd;
+            if (nodeState.PersistentCloseHistory.GetLastRowData(out lcd))
+            {
+                LedgerCloseSequence = new LedgerCloseSequence(lcd);
+            }
+            else
+            {
+                LedgerCloseSequence = new LedgerCloseSequence(0, nodeState.Ledger.GetRootHash());
+            }
+        }
+
+        private void InitLCS(NodeState nodeState)
+        {
+            if (nodeState.Ledger.LedgerCloseData.LedgerHash == null)
+            {
+                // No voting has happened yet !
+                LedgerCloseSequence = new LedgerCloseSequence(0, nodeState.Ledger.GetRootHash());
+            }
+            else
+            {
+                LedgerCloseData lcd;
+                if (nodeState.PersistentCloseHistory.GetLastRowData(out lcd))
+                {
+                    LedgerCloseSequence = new LedgerCloseSequence(lcd);
+                }
+                else
+                {
+                    LedgerCloseSequence = new LedgerCloseSequence(0, nodeState.Ledger.GetRootHash());
+                }
+            }
+        }
+
+        private void Print(string message)
+        {
+            if (DebuggingMessages)
+                DisplayUtils.Display("V:" + LedgerCloseSequence + ": " + nodeConfig.ID() + ": " + message);
+        }
+
+        private void PrintImpt(string message)
+        {
+            if (DebuggingMessages)
+                DisplayUtils.Display("V:" + LedgerCloseSequence + ": " + nodeConfig.ID() + ": " + message, DisplayType.Warning);
+        }
+
+        /* void TimerVoting_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+         {
+             if (Enabled)
+                 VotingEvent();
+         }*/
+
+        async Task TimerVoting_Elapsed(object sender)
         {
             if (Enabled)
+                await VotingEvent();
+        }
+
+
+        /* private async Task TimerCallback_Voting(Object o)
+         {
+             if (Enabled)
+             {
+                 await Task.Run(() =>
+                 {
+                     VotingEvent();
+
+                 });
+             }
+         }*/
+
+        bool isBallotValid = false;
+        bool isFinalBallotValid = false;
+        bool isFinalConfirmedVotersValid = false;
+        bool isAcceptMapValid = false;
+
+        int syncStateCounter = 0;
+        bool syncSend = false;
+
+        #region State-Machine
+
+        SemaphoreSlim semaphoreVoting = new SemaphoreSlim(1);
+
+        private async Task VotingEvent()
+        {
+            try
             {
-                await Task.Run(() =>
+                await semaphoreVoting.WaitAsync();
+
+                switch (CurrentConsensusState)
                 {
-                    lock (ConsensusLock)
+                    case ConsensusStates.Sync:
+
+                        await HandleSync();
+
+                        break;
+
+                    case ConsensusStates.Collect:
+
+                        // LCS = LCL + 1  |  CRITICAL FIX !   
+                        // ledgerCloseSequence = nodeState.Ledger.LedgerCloseData.SequenceNumber + 1;
+
+                        UpdateLCD();
+
+                        isBallotValid = false;
+                        isFinalBallotValid = false;
+                        isAcceptMapValid = false;
+                        isFinalConfirmedVotersValid = false;
+                        voteMap.Reset();
+                        voteMessageCounter.ResetVotes();
+                        voteMessageCounter.ResetUniqueVoters();
+                        finalBallot = new Ballot(LedgerCloseSequence);
+                        ballot = new Ballot(LedgerCloseSequence);
+                        //finalVoters.Reset(LedgerCloseSequence);                   
+
+                        processPendingTransactions();
+                        CurrentConsensusState = ConsensusStates.Merge;
+                        break;
+
+                    case ConsensusStates.Merge:
+                        await HandleMerge();
+                        break;
+
+                    case ConsensusStates.Vote:
+                        await HandleVoting();
+                        break;
+
+                    case ConsensusStates.Confirm:
+                        //HandleConfirmation();
+                        break;
+
+                    case ConsensusStates.Apply:
+                        HandleApply();
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                DisplayUtils.Display("TimerCallback_Voting", ex, true);
+            }
+            finally
+            {
+                semaphoreVoting.Release();
+            }
+        }
+
+        private async Task HandleSync()
+        {
+            if (!syncSend)
+            {
+                syncMap.Clear();
+                await sendSyncRequests();
+                syncSend = true;
+            }
+            else
+            {
+                syncSend = false;
+
+                var syncResults = MedianTrustedState();
+
+                if (syncResults.Item2)
+                {
+                    /*var syncResults2 = MedianTrustedVotingState();
+
+                    if (syncResults2.Item2)
                     {
-                        switch (CurrentConsensusState)
+                        // Voting and State;
+
+                        CurrentConsensusState = ConsensusStates.Collect;
+                        syncStateCounter = 0;
+
+                        Print("Sync ###### COPY MEDIAN STATE ######### Normal.");
+
+                        if (CurrentConsensusState == ConsensusStates.Sync)
+                            CurrentConsensusState = ConsensusStates.Merge;
+
+                        CurrentVotingState = syncResults2.Item1;
+                    }
+                    */
+
+                    // Great We know something
+                    if (syncResults.Item1 == ConsensusStates.Sync || syncResults.Item1 == ConsensusStates.Merge)
+                    {
+                        // Awesome ! we can continue :)
+                        CurrentConsensusState = ConsensusStates.Collect;
+                        syncStateCounter = 0;
+
+                       // bool b = nodeState.NodeLatency.GetAverageLatency(nodeConfig.PublicKey)
+
+                        Print("Sync Done. Normal.");
+                    }
+                    else
+                    {
+                        // Too bad we need to wait for sync
+                        Print("Sync Wait.");
+                    }
+                }
+                else
+                {
+                    // We dont have anyone replying
+                    // Wait a few cycles and then start anyway.
+
+                    if (syncStateCounter > 200)
+                    {
+                        CurrentConsensusState = ConsensusStates.Collect;
+                        syncStateCounter = 0;
+
+                        Print("Sync Done. Forced.");
+                    }
+                }
+            }
+
+            syncStateCounter++;
+        }
+
+        string GetTxCount(Ballot ballot)
+        {
+            if (ballot.TransactionCount > 0)
+            {
+
+                return "" + ballot.TransactionCount + " Txns";
+            }
+
+            return "";
+        }
+
+        async Task HandleMerge()
+        {
+            if (mergeStateCounter < 1) // TWEAK-POINT: Trim value.
+            {
+                await sendMergeRequests();
+            }
+
+            mergeStateCounter++;
+
+            // After 5 rounds: Assemble Ballot
+            if (mergeStateCounter >= 5)
+            {
+                CreateBallot();
+
+                isBallotValid = true; // Yayy.
+                voteMap.Reset();
+                CurrentConsensusState = ConsensusStates.Vote;
+                voteMessageCounter.ResetVotes();
+                mergeStateCounter = 0;
+
+                Print("Merge Finished. " + GetTxCount(ballot));
+            }
+        }
+
+        private void CreateBallot()
+        {
+            ballot = transactionChecker.CreateBallot(CurrentTransactions, LedgerCloseSequence);
+            ballot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(ballot.GetSignatureData()));
+        }
+
+        int MAX_EXTRA_VOTING_STEP_WAIT_CYCLES = 10;
+        int extraVotingDelayCycles = 0; // Wait for all the voters to send their requests.
+        bool currentVotingRequestSent = false;
+
+        //int extraConfirmationDelayCycles = 0;
+
+        enum VoteNextState { Wait, Next }
+
+        VoteNextState CheckReceivedExpectedVotePackets()
+        {
+            if (voteMessageCounter.Votes < voteMessageCounter.UniqueVoteResponders)
+            {
+                if (extraVotingDelayCycles < MAX_EXTRA_VOTING_STEP_WAIT_CYCLES)
+                {
+                    if (extraVotingDelayCycles > 0)
+                    {
+                        Print("Waiting a cycle for pending voting requests : " + voteMessageCounter.Votes +
+                            "/" + voteMessageCounter.UniqueVoteResponders + " Received");
+                    }
+
+                    extraVotingDelayCycles++;
+
+                    return VoteNextState.Wait;
+                }
+            }
+
+            return VoteNextState.Next;
+        }
+
+        async Task VotingPostRound(VotingStates state, float Percentage)
+        {
+            extraVotingDelayCycles = 0;
+            currentVotingRequestSent = false;
+
+            Dictionary<Hash, HashSet<Hash>> missingTransactions;
+            voteMap.GetMissingTransactions(ballot, out missingTransactions);
+
+            await sendFetchRequests(missingTransactions);
+
+            //////////////////////////////////////////////////////////////////
+
+            SortedSet<Hash> passedTxs = voteMap.FilterTransactionsByVotes(ballot, Percentage);
+
+            ballot.Reset(LedgerCloseSequence);
+            ballot.PublicKey = nodeConfig.PublicKey;
+            ballot.AddRange(passedTxs);
+            ballot.Timestamp = nodeState.NetworkTime;
+
+            ballot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(ballot.GetSignatureData()));
+
+            isBallotValid = true;
+
+            Print("Voting " + state + " Done" + voteMessageCounter.Votes +
+                "/" + voteMessageCounter.UniqueVoteResponders + " Accepted " + passedTxs.Count +
+                " Txns, Fetching " + missingTransactions.SelectMany(p => p.Value).Count() + " Txns");
+
+            voteMessageCounter.ResetVotes();
+        }
+
+        async Task<VotingStates> HandleVotingInternal(VotingStates state, float percentage)
+        {
+            if (!currentVotingRequestSent)
+            {
+                voteMap.Reset();
+                await sendVoteRequests();
+                currentVotingRequestSent = true;
+            }
+
+            if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
+            {
+                await VotingPostRound(state, percentage);
+
+                return (state + 1);
+            }
+
+            return state;
+        }
+
+        async Task HandleVoting()
+        {
+            switch (CurrentVotingState)
+            {
+                case VotingStates.STNone:
+                    // Pre-Voting Stuff !! 
+                    voteMap.Reset();
+                    CurrentVotingState = VotingStates.ST40;
+                    break;
+
+                case VotingStates.ST40:
+                    CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 40);
+                    break;
+
+                case VotingStates.ST60:
+                    CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 60);
+                    break;
+
+                case VotingStates.ST75:
+                    CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 75);
+                    break;
+
+                case VotingStates.ST80:
+                    CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 80);
+                    break;
+
+                case VotingStates.STDone:
+                    PostVotingOperations();
+                    break;
+            }
+        }
+
+        /*
+                    void HandleVoting()
+                {
+                    switch (CurrentVotingState)
+                    {
+                        case VotingStates.STNone:
+                            // Pre-Voting Stuff !!                    
+                            CurrentVotingState = VotingStates.ST40;
+                            break;
+
+                        case VotingStates.ST40:
+
+                            if (!currentVotingRequestSent)
+                            {
+                                voteMap.Reset();
+                                sendVoteRequests();
+                                currentVotingRequestSent = true;
+                            }
+
+                            if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
+                            {
+                                Print("Voting Step40 Done" + voteMessageCounter.Votes +
+                                "/" + voteMessageCounter.UniqueVoteResponders + "");
+
+                                VotingPostRound(40);
+
+                                CurrentVotingState = VotingStates.ST60;
+                            }
+
+                            break;
+
+                        case VotingStates.ST60:
+
+                            if (!currentVotingRequestSent)
+                            {
+                                voteMap.Reset();
+                                sendVoteRequests();
+                                currentVotingRequestSent = true;
+                            }
+
+                            if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
+                            {
+                                Print("Voting Step60 Done" + voteMessageCounter.Votes +
+                                "/" + voteMessageCounter.UniqueVoteResponders + "");
+
+                                VotingPostRound(60);
+
+                                CurrentVotingState = VotingStates.ST75;
+                            }
+
+                            break;
+
+                        case VotingStates.ST75:
+
+                            if (!currentVotingRequestSent)
+                            {
+                                voteMap.Reset();
+                                sendVoteRequests();
+                                currentVotingRequestSent = true;
+                            }
+
+                            if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
+                            {
+                                Print("Voting Step75 Done" + voteMessageCounter.Votes +
+                                "/" + voteMessageCounter.UniqueVoteResponders + "");
+
+                                VotingPostRound(75);
+                                CurrentVotingState = VotingStates.ST80;
+                            }
+
+                            break;
+
+                        case VotingStates.ST80:
+
+                            if (!currentVotingRequestSent)
+                            {
+                                voteMap.Reset();
+                                sendVoteRequests();
+                                currentVotingRequestSent = true;
+                            }
+
+                            if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
+                            {
+                                Print("Voting Step80 Done" + voteMessageCounter.Votes +
+                                "/" + voteMessageCounter.UniqueVoteResponders + "");
+
+                                VotingPostRound(80);
+                                CurrentVotingState = VotingStates.STDone;
+                            }
+
+                            break;
+
+                        case VotingStates.STDone:
+                            PostVotingOperations();
+                            break;
+                    }
+
+
+                    if (votingStateCounter < 8) // TWEAK-POINT: Trim value.
+                    {
+                        if (votingStateCounter % 2 == 0)
                         {
-                            case ConsensusStates.Collect:
-                                ProcessPendingTransactions();
-                                CurrentConsensusState = ConsensusStates.Merge;
-                                break;
+                            sendVoteRequests();
+                        }
+                        else
+                        {
+                            Dictionary<Hash, HashSet<Hash>> missingTransactions;
+                            voteMap.GetMissingTransactions(ballot, out missingTransactions);
 
-                            case ConsensusStates.Merge:
-                                HandleMerge();
-                                break;
+                            sendFetchRequests(missingTransactions);
+                        }
+                    }
+                    else // Initial Sync Part is over.
+                    {
+                        // Verify the received
+                        if (voteMessageCounter.Votes < voteMessageCounter.PreviousVotes)
+                        {
+                            // Okay, all the votes have not reached till now.
+                            if (extraVotingDelayCycles < 10)
+                            {
+                                extraVotingDelayCycles++;
 
-                            case ConsensusStates.Vote:
-                                HandleVoting();
-                                break;
-
-                            case ConsensusStates.Confirm:
-                                HandleConfirmation();
-                                break;
-
-                            case ConsensusStates.Apply:
-                                HandleVoting();
-                                break;
-
+                                Print("Waiting for pending voting requests : " + voteMessageCounter.Votes +
+                                    "/" + voteMessageCounter.PreviousVotes + " Received");
+                            }
                         }
                     }
 
-                });
-            }
-        }
+                    votingStateCounter++;
 
-        int MergeStateCounter = 0;
-        int VotingStateCounter = 0;
-        int ConfirmationStateCounter = 0;
+                    // We will perform dummy voting cycles even when there are no transactions. those will
+                    // have a different counter, called ConsensusCount, the default is LedgerClose, the ledger close one 
+                    // is the one associated.
 
-        void HandleMerge()
+                    // Request Ballots
+
+                    if (votingStateCounter - extraVotingDelayCycles >= 12)
+                    {
+                        votingStateCounter = 0;
+                        extraVotingDelayCycles = 0;
+
+                        PostVotingOperations();
+
+                        Print("Voting Finished. " + GetTxCount(finalBallot));
+                    }
+                }*/
+
+        private void PostVotingOperations()
         {
-            MergeStateCounter++;
-            SendMergeRequests();
+            finalBallot.Reset(LedgerCloseSequence);
+            finalBallot.PublicKey = nodeConfig.PublicKey;
+            finalBallot.AddRange(voteMap.FilterTransactionsByVotes(ballot, Constants.CONS_FINAL_VOTING_THRESHOLD_PERC));
+            finalBallot.Timestamp = nodeState.NetworkTime;
 
-            // after 5 rounds: assemble ballot
-            if (MergeStateCounter >= 5)
-            {
-                ballot = tchecker.CreateBallot(CurrentTransactions);
-                CurrentConsensusState = ConsensusStates.Vote;
-                MergeStateCounter = 0;
-            }
+            finalBallot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(finalBallot.GetSignatureData()));
+
+            synchronizedVoters = voteMap.GetSynchronisedVoters(finalBallot);
+
+            //finalVoters.Reset(LedgerCloseSequence); // Maybe repeat, but okay.
+
+            isFinalBallotValid = true; // TODO: CRITICAL THINK THINK, TESTS !!                
+
+            CurrentConsensusState = ConsensusStates.Apply; // SKIP CONFIRMATION (Maybe not needed afterall)
+            CurrentVotingState = VotingStates.STNone;
+
+            voteMessageCounter.ResetConfirmations();
         }
 
+        /* void HandleConfirmation()
+         {
+             if (confirmationStateCounter < 1) // Send it once only.
+             {
+                 if (isFinalBallotValid)
+                 {
+                     // Send Confirmation
+                     sendConfirmationRequests();
+                 }
+             }
+             else
+             {
+                 if (voteMessageCounter.Confirmations < voteMessageCounter.PreviousConfirmations)
+                 {
+                     // Okay, all the votes have not reached till now.
+                     if (extraConfirmationDelayCycles < 10)
+                     {
+                         extraConfirmationDelayCycles++;
 
+                         Print("Waiting for pending confirmation requests : " + voteMessageCounter.Confirmations +
+                             "/" + voteMessageCounter.PreviousConfirmations + " Received");
+                     }
+                 }
+             }
 
-        void HandleVoting()
-        {
-            VotingStateCounter++;
+             confirmationStateCounter++;
 
+             if (confirmationStateCounter - extraConfirmationDelayCycles >= 6)
+             {
+                 confirmationStateCounter = 0;
+                 extraConfirmationDelayCycles = 0;
 
-        }
+                 isFinalConfirmedVotersValid = true;
 
-        void HandleConfirmation()
-        {
-            ConfirmationStateCounter++;
+                 CurrentConsensusState = ConsensusStates.Apply; // Verify Confirmation
 
+                 voteMessageCounter.SetPreviousConfirmations();
 
-        }
+                 Print("Confirm Finished. " + GetTxCount(finalBallot));
+             }
+         }*/
+
+        bool NotEnoughVoters = false;
 
         void HandleApply()
         {
+            // Have some delay before apply to allow others to catch up.
+            if (isFinalBallotValid && (applyStateCounter == 1)) // DISABLE CONFIRMATION
+            {
+                NotEnoughVoters = false;
 
+                // Check that the confirmed voters are all trusted
 
-            CurrentConsensusState = ConsensusStates.Apply;
+                int trustedSynchronizedVoters = 0;
+
+                foreach (var voter in synchronizedVoters)
+                {
+                    if (nodeConfig.TrustedNodes.ContainsKey(voter))
+                    {
+                        trustedSynchronizedVoters++;
+                    }
+                }
+
+                int totalTrustedConnections = nodeState.ConnectedValidators.Where(node => node.Value.IsTrusted).Count();
+
+                if ((trustedSynchronizedVoters >= Constants.VOTE_MIN_VOTERS) &&
+                    (totalTrustedConnections >= Constants.VOTE_MIN_VOTERS))
+                {
+                    double percentage = ((double)trustedSynchronizedVoters * 100.0) / (double)totalTrustedConnections;
+
+                    if (percentage >= Constants.CONS_FINAL_VOTING_THRESHOLD_PERC)
+                    {
+                        PrintImpt("Voting Successful. Applying to ledger. " + GetTxCount(finalBallot) +
+                            " | Consesus percentage: " + percentage);
+
+                        ApplyToLedger(finalBallot);
+
+                        //LedgerCloseSequence++;
+                    }
+                    else
+                    {
+                        PrintImpt("Voting Unsuccessful. Consesus percentage: " + percentage);
+                    }
+                }
+                else
+                {
+                    PrintImpt("Voting Unsuccessful. Not Enough Trusted Voters. Trusted Voters: " + trustedSynchronizedVoters +
+                        " Trusted Conns :" + totalTrustedConnections);
+
+                    NotEnoughVoters = true;
+                }
+
+                // Print("Apply Finished. Consensus Finished.");
+            }
+
+            applyStateCounter++;
+
+            if (applyStateCounter > 2)
+            {
+                if (NotEnoughVoters)
+                    CurrentConsensusState = ConsensusStates.Sync;
+                else
+                    CurrentConsensusState = ConsensusStates.Collect;
+
+                applyStateCounter = 0;
+            }
+
         }
 
-        void networkPacketSwitch_VoteMergeEvent(NetworkPacket packet)
+        void ApplyToLedger(Ballot applyBallot)
+        {
+            var transactions = CurrentTransactions.Where(d => applyBallot.Contains(d.Key)).Select(d => d.Value);
+
+            TransactionHandlingData THD = transactionValidator.ValidateTransactions(transactions);
+
+            if (THD.AcceptedTransactions.Any())
+            {
+                transactionValidator.ApplyTransactions(THD);
+
+                PrintImpt("Applied " + THD.AcceptedTransactions.Count + " transaction !!!");
+
+                if (THD.NewAccounts.Count > 0)
+                    PrintImpt("Created " + THD.NewAccounts.Count + " account !!!");
+
+                UpdateLCD();
+            }
+
+            // Remove Txns from current set !
+            foreach (var tx in ballot)
+            {
+                if (CurrentTransactions.ContainsKey(tx))
+                {
+                    TransactionContent tc;
+                    CurrentTransactions.TryRemove(tx, out tc);
+                }
+            }
+        }
+
+        #endregion
+
+        #region Packet Handling
+
+        async Task networkPacketSwitch_ConsensusEvent(NetworkPacket packet)
         {
             switch (packet.Type)
             {
                 case PacketType.TPT_CONS_MERGE_REQUEST:
-                    ProcessMergeRequest(packet);
+                    await processMergeRequest(packet);
                     break;
                 case PacketType.TPT_CONS_MERGE_RESPONSE:
-                    ProcessMergeResponse(packet);
+                    await processMergeResponse(packet);
                     break;
-                case PacketType.TPT_CONS_TX_FETCH_REQUEST:
-                    ProcessFetchRequest(packet);
+                case PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST:
+                    await processFetchRequest(packet);
                     break;
-                case PacketType.TPT_CONS_TX_FETCH_RESPONSE:
-                    ProcessFetchResponse(packet);
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// sends a request to get transaction data for all transaction IDs in the sorted hash
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="transactions"></param>
-        void sendFetchRequest(Hash node, SortedSet<Hash> transactions)
-        {
-            FetchRequestMsg message = new FetchRequestMsg();
-            message.IDs = transactions;
-            Hash token = TNetUtils.GenerateNewToken();
-            NetworkPacket packet = new NetworkPacket();
-            packet.Data = message.Serialize();
-            packet.Token = token;
-            packet.PublicKeySource = nodeConfig.PublicKey;
-            packet.Type = PacketType.TPT_CONS_TX_FETCH_REQUEST;
-            networkPacketSwitch.AddToQueue(node, packet);
-        }
-
-        /// <summary>
-        /// responds to a fetch request, sending all requested transaction data
-        /// </summary>
-        /// <param name="packet"></param>
-        void ProcessFetchRequest(NetworkPacket packet)
-        {
-            FetchRequestMsg message = new FetchRequestMsg();
-            message.Deserialize(packet.Data);
-
-            // collect transaction data
-            FetchResponseMsg response = new FetchResponseMsg();
-            foreach (Hash id in message.IDs)
-            {
-                response.transactions.Add(id, CurrentTransactions[id]);
-            }
-
-            NetworkPacket rpacket = new NetworkPacket();
-            rpacket.Data = response.Serialize();
-            rpacket.Token = packet.Token;
-            rpacket.PublicKeySource = nodeConfig.PublicKey;
-            rpacket.Type = PacketType.TPT_CONS_TX_FETCH_RESPONSE;
-            networkPacketSwitch.AddToQueue(packet.PublicKeySource, rpacket);
-        }
-
-        /// <summary>
-        /// process the response to a fetch request, i.e. add the transactions to CurrentTransactions
-        /// </summary>
-        /// <param name="packet"></param>
-        void ProcessFetchResponse(NetworkPacket packet)
-        {
-            if (networkPacketSwitch.VerifyPendingPacket(packet))
-            {
-                FetchResponseMsg message = new FetchResponseMsg();
-                message.Deserialize(packet.Data);
-
-                //check each transaction for signature validity and basic spendability
-                foreach (KeyValuePair<Hash, TransactionContent> transaction in message.transactions)
-                {
-                    //check signature
-                    if (transaction.Value.VerifySignature() == TransactionProcessingResult.Accepted) 
-                    {
-                        //check spendability
-                        List<Hash> badaccounts = new List<Hash>();
-                        if (tchecker.Spendable(transaction.Value, new Dictionary<Hash, long>(), out badaccounts))
-                        {
-                            CurrentTransactions.AddOrUpdate(transaction.Key, transaction.Value, (ok, ov) => ov);
-                        }
-                        else 
-                        { 
-                            //could blacklist accounts here although not necessary
-                        }
-                    }
-                    else
-                    {
-                        //could blacklist peer for sending transaction with invalid signature
-                    }
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// request a list of all known transactions from each connected validator
-        /// note that message has no content
-        /// </summary>
-        void SendMergeRequests()
-        {
-            foreach (var node in nodeState.ConnectedValidators)
-            {
-                Hash token = TNetUtils.GenerateNewToken();
-                NetworkPacket request = new NetworkPacket();
-                request.PublicKeySource = nodeConfig.PublicKey;
-                request.Token = token;
-                request.Type = PacketType.TPT_CONS_MERGE_REQUEST;
-                networkPacketSwitch.AddToQueue(node.Key, request);
-            }
-        }
-
-        /// <summary>
-        /// respond to a merge request by sending a list of all hashes of known transactions
-        /// </summary>
-        /// <param name="packet"></param>
-        void ProcessMergeRequest(NetworkPacket packet)
-        {
-            Hash sender = packet.PublicKeySource;
-            Hash token = packet.Token;
-
-            //add all transaction IDs from CurrentTransactions
-            MergeResponseMsg message = new MergeResponseMsg();
-            foreach (KeyValuePair<Hash, TransactionContent> transaction in CurrentTransactions)
-            {
-                message.transactions.Add(transaction.Key);
-            }
-
-            NetworkPacket response = new NetworkPacket();
-            response.Token = token;
-            response.PublicKeySource = nodeConfig.PublicKey;
-            response.Data = message.Serialize();
-            response.Type = PacketType.TPT_CONS_MERGE_RESPONSE;
-            networkPacketSwitch.AddToQueue(sender, response);
-        }
-
-        /// <summary>
-        /// respond to merge request by sending a list of all hashes of known (not expired) transactions
-        /// </summary>
-        /// <param name="packet"></param>
-        void ProcessMergeResponse(NetworkPacket packet)
-        {
-            if (networkPacketSwitch.VerifyPendingPacket(packet))
-            {
-                MergeResponseMsg message = new MergeResponseMsg();
-                message.Deserialize(packet.Data);
-                SortedSet<Hash> newTransactions = new SortedSet<Hash>();
-
-                foreach (Hash transaction in message.transactions)
-                {
-                    //check whether transaction for the given ID is already known
-                    if (!CurrentTransactions.ContainsKey(transaction))
-                    {
-                        newTransactions.Add(transaction);
-                    }
-                    //add sender to propagationMap
-                    propagationMap[transaction].Add(packet.PublicKeySource);
-                }
-                sendFetchRequest(packet.PublicKeySource, newTransactions);
-            }
-        }
-
-
-
-        void networkPacketSwitch_VoteEvent(Network.NetworkPacket packet)
-        {
-            switch (packet.Type)
-            {
-                case PacketType.TPT_CONS_STATE:
+                case PacketType.TPT_CONS_MERGE_TX_FETCH_RESPONSE:
+                    processFetchResponse(packet);
                     break;
 
-                case PacketType.TPT_CONS_BALLOT_REQUEST:
+                ///////////////////////////////////////////
+
+                case PacketType.TPT_CONS_SYNC_REQUEST:
+                    await processSyncRequest(packet);
                     break;
 
-                case PacketType.TPT_CONS_BALLOT_RESPONSE:
+                case PacketType.TPT_CONS_SYNC_RESPONSE:
+                    processSyncResponse(packet);
                     break;
 
-                case PacketType.TPT_CONS_BALLOT_AGREE_REQUEST:
+                case PacketType.TPT_CONS_VOTE_REQUEST:
+                    await processVoteRequest(packet);
                     break;
 
-                case PacketType.TPT_CONS_BALLOT_AGREE_RESPONSE:
+                case PacketType.TPT_CONS_VOTE_RESPONSE:
+                    await processVoteResponse(packet);
+                    break;
+
+                case PacketType.TPT_CONS_CONFIRM_REQUEST:
+                    //processConfirmRequest(packet);
+                    break;
+
+                case PacketType.TPT_CONS_CONFIRM_RESPONSE:
+                    //processConfirmResponse(packet);
                     break;
             }
         }
 
-        public void ProcessPendingTransactions()
-        {
-            lock (VotingTransactionLock)
-            {
-
-                try
-                {
-                    if (nodeState.IncomingTransactionMap.IncomingTransactions.Count > 0)
-                    {
-
-                        lock (nodeState.IncomingTransactionMap.transactionLock)
-                        {
-                            foreach (KeyValuePair<Hash, TransactionContent> kvp in nodeState.IncomingTransactionMap.IncomingTransactions)
-                            {
-                                //transactionContentStack.Enqueue(kvp.Value);
-                                if (!CurrentTransactions.ContainsKey(kvp.Key))
-                                {
-                                    CurrentTransactions.TryAdd(kvp.Key, kvp.Value);
-                                }
-                                //Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.TransactionsVerified);
-                            }
-
-                            nodeState.IncomingTransactionMap.IncomingTransactions.Clear();
-                            nodeState.IncomingTransactionMap.IncomingPropagations_ALL.Clear();
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-
-                }
-            }
-        }
-
-
-
+        #endregion
 
     }
 }

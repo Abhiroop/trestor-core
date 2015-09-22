@@ -16,7 +16,7 @@ namespace TNetD
         public static Hash GenerateNewToken()
         {
             byte[] randBytes = new byte[Common.NETWORK_TOKEN_LENGTH];            
-            Common.rngCsp.GetBytes(randBytes);
+            Common.SECURE_RNG.GetBytes(randBytes);
             return new Hash(randBytes);
         }
 
@@ -39,19 +39,26 @@ namespace TNetD
         {
             StringBuilder connData = new StringBuilder();
 
-            foreach (var nd in nodes)
+            try
             {
-                connData.AppendLine("\n\n\n NODE ID " + nd.nodeConfig.NodeID + "   KEY: " + nd.PublicKey);
-                connData.AppendLine(" Ledger Hash : " + nd.nodeState.Ledger.GetRootHash());
-
-                connData.AppendLine(" ---- ConnectedValidators ---- ");
-
-                foreach (var conn in nd.nodeState.ConnectedValidators)
+                foreach (var nd in nodes)
                 {
-                    connData.AppendLine("\t" + conn.Key.ToString() + "  " +
-                        ((conn.Value.Direction == ConnectionDirection.Incoming) ? "<--" : "-->") + "  " +
-                        (conn.Value.IsTrusted ? "Trusted" : ""));
+                    connData.AppendLine("\n\n\n NODE ID " + nd.nodeConfig.NodeID + "   KEY: " + nd.PublicKey);
+                    connData.AppendLine(" Ledger Hash : " + nd.nodeState.Ledger.GetRootHash());
+
+                    connData.AppendLine(" ---- ConnectedValidators ---- ");
+
+                    foreach (var conn in nd.nodeState.ConnectedValidators)
+                    {
+                        connData.AppendLine("\t" + conn.Key.ToString() + "  " +
+                            ((conn.Value.Direction == ConnectionDirection.Incoming) ? "<--" : "-->") + "  " +
+                            (conn.Value.IsTrusted ? "Trusted" : ""));
+                    }
                 }
+            }
+            catch
+            {
+                connData.Append("\n - Updating - \n");
             }
 
             return connData.ToString();
