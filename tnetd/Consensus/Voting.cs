@@ -135,7 +135,7 @@ namespace TNetD.Consensus
 
         VoteMessageCounter voteMessageCounter;
 
-        
+
 
         //System.Timers.Timer TimerVoting = default(System.Timers.Timer);
 
@@ -150,7 +150,7 @@ namespace TNetD.Consensus
             this.voteMap = new VoteMap(nodeConfig, nodeState);
             this.synchronizedVoters = new HashSet<Hash>();
             this.timeStep = new TimeStep(nodeState);
-            
+
             //finalVoters = new FinalVoters();
 
             finalBallot = new Ballot();
@@ -253,7 +253,7 @@ namespace TNetD.Consensus
              if (Enabled)
                  VotingEvent();
          }*/
-         
+
         bool timerLockFree = true;
 
         async Task TimerVoting_FastElapsed(object sender)
@@ -266,7 +266,7 @@ namespace TNetD.Consensus
                 {
                     timerLockFree = false;
                     await VotingEvent();
-                    
+
                     timerLockFree = true;
                 }
             }
@@ -282,7 +282,7 @@ namespace TNetD.Consensus
 
         #region State-Machine
 
-        SemaphoreSlim semaphoreVoting = new SemaphoreSlim(1);       
+        SemaphoreSlim semaphoreVoting = new SemaphoreSlim(1);
 
         private async Task VotingEvent()
         {
@@ -461,7 +461,7 @@ namespace TNetD.Consensus
             ballot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(ballot.GetSignatureData()));
         }
 
-        int MAX_EXTRA_VOTING_STEP_WAIT_CYCLES = 10;
+        int MAX_EXTRA_VOTING_STEP_WAIT_CYCLES = 20;
         int extraVotingDelayCycles = 0; // Wait for all the voters to send their requests.
         bool currentVotingRequestSent = false;
 
@@ -469,29 +469,53 @@ namespace TNetD.Consensus
 
         enum VoteNextState { Wait, Next }
 
-        VoteNextState CheckReceivedExpectedVotePackets()
+        //VoteNextState CheckReceivedExpectedVotePackets()
+        //{
+        //    if (voteMessageCounter.Votes < voteMessageCounter.UniqueVoteResponders)
+        //    {
+        //        if (extraVotingDelayCycles < MAX_EXTRA_VOTING_STEP_WAIT_CYCLES)
+        //        {
+        //            if (extraVotingDelayCycles > 0)
+        //            {
+        //                Print("Waiting a cycle for pending voting requests : " + voteMessageCounter.Votes +
+        //                    "/" + voteMessageCounter.UniqueVoteResponders + " Received");
+
+        //                timeStep.SetNextTimeStep(50);
+        //            }
+
+        //            extraVotingDelayCycles++;
+
+        //            return VoteNextState.Wait;
+        //        }
+        //    }
+
+        //    return VoteNextState.Next;
+        //}
+
+        async Task<VoteNextState> WaitForPendingVotesIfNeeded()
         {
-            if (voteMessageCounter.Votes < voteMessageCounter.UniqueVoteResponders)
+            int waitCount = 0;
+
+            while (waitCount < MAX_EXTRA_VOTING_STEP_WAIT_CYCLES)
             {
-                if (extraVotingDelayCycles < MAX_EXTRA_VOTING_STEP_WAIT_CYCLES)
+                if (voteMessageCounter.Votes < voteMessageCounter.UniqueVoteResponders)
                 {
-                    if (extraVotingDelayCycles > 0)
-                    {
-                        Print("Waiting a cycle for pending voting requests : " + voteMessageCounter.Votes +
+                    waitCount++;
+
+                    Print("Waiting for pending voting requests : " + voteMessageCounter.Votes +
                             "/" + voteMessageCounter.UniqueVoteResponders + " Received");
-
-                        timeStep.SetNextTimeStep(50);
-                    }
-
-                    extraVotingDelayCycles++;
-
-                    return VoteNextState.Wait;
+                    
+                    await Task.Delay(30);
+                }
+                else
+                {
+                    return VoteNextState.Next;
                 }
             }
 
-            return VoteNextState.Next;
+            return VoteNextState.Wait;
         }
-
+        
         async Task VotingPostRound(VotingStates state, float Percentage)
         {
             extraVotingDelayCycles = 0;
@@ -530,8 +554,8 @@ namespace TNetD.Consensus
                 await sendVoteRequests();
                 currentVotingRequestSent = true;
             }
-
-            if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
+                        
+            if (/*CheckReceivedExpectedVotePackets()*/await WaitForPendingVotesIfNeeded() == VoteNextState.Next)
             {
                 await VotingPostRound(state, percentage);
 
