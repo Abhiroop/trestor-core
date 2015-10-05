@@ -465,7 +465,7 @@ namespace TNetD.Consensus
 
                 waitCount++;               
 
-                await Task.Delay(50);
+                await Task.Delay(25);
 
                 Print("Waiting for acceptable state: "+ waitCount +" VS: " + vs + " CVS: " + cvs);                
             }
