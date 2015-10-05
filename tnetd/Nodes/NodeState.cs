@@ -51,8 +51,14 @@ namespace TNetD.Nodes
 
         public NodeLatency NodeLatency;
 
+        /// <summary>
+        ///  Updated every 100ms
+        /// </summary>
         public long SystemTime { get; set; }
 
+        /// <summary>
+        /// Updated every 100ms
+        /// </summary>
         public long NetworkTime { get; set; }
 
         public JS_NodeInfo NodeInfo;
@@ -87,6 +93,15 @@ namespace TNetD.Nodes
         public void updateNetworkTime()
         {
             NetworkTime = SystemTime + timeDifference;
+        }
+
+        /// <summary>
+        /// Re-calculate the precise newtwork time.
+        /// Much more precise than the normal, SystemTime and NetworkTime, but, slightly expensive.
+        /// </summary>
+        public DateTime CurrentNetworkTime
+        {    
+            get { return DateTime.FromFileTimeUtc(DateTime.UtcNow.ToFileTimeUtc() + timeDifference); }
         }
 
         public void updateTimeDifference(long timeDifference)

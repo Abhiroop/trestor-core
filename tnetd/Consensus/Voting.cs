@@ -149,8 +149,8 @@ namespace TNetD.Consensus
             this.syncMap = new ConcurrentDictionary<Hash, SyncState>();
             this.voteMap = new VoteMap(nodeConfig, nodeState);
             this.synchronizedVoters = new HashSet<Hash>();
-            this.timeStep = new TimeStep();
-
+            this.timeStep = new TimeStep(nodeState);
+            
             //finalVoters = new FinalVoters();
 
             finalBallot = new Ballot();
@@ -282,9 +282,7 @@ namespace TNetD.Consensus
 
         #region State-Machine
 
-        SemaphoreSlim semaphoreVoting = new SemaphoreSlim(1);
-
-       
+        SemaphoreSlim semaphoreVoting = new SemaphoreSlim(1);       
 
         private async Task VotingEvent()
         {

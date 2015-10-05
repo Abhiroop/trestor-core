@@ -12,19 +12,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TNetD.Nodes;
 
 namespace TNetD.Consensus
 {
     class TimeStep
     {
+        /// <summary>
+        /// 45 Milliseconds
+        /// </summary>
         public static readonly int DEFAULT_TIMER_FASTSTEP = 45;
+
+        /// <summary>
+        /// 500 Milliseconds
+        /// </summary>
         public static readonly int DEFAULT_TIMER_TIMESTEP = 500;
+
+        /// <summary>
+        /// 5000 Milliseconds
+        /// </summary>
         public static readonly int DEFAULT_TIMER_MAXSTEP = 5000;
 
         /// <summary>
         /// Timesteps in MS
         /// </summary>
-        int[] Resolutions = new int[] { 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000 };
+        int[] resolutions = new int[] { 100, 200, 300, 500, 1000, 1500, 2000, 3000, 5000, 10000};
 
         public int currentTimeElapsed = 0;
 
@@ -32,30 +44,45 @@ namespace TNetD.Consensus
 
         int NextTimeStep { get; set; } = 500;
 
-        public int CurrentResolution { get; private set; } = 3;
+        /// <summary>
+        /// Current resolution in Milliseconds
+        /// </summary>
+        public int CurrentResolution { get { return resolutions[CurrentResolutionIndex]; } }
 
-        public TimeStep()
+        public int CurrentResolutionIndex { get; private set; } = 3;
+
+        DateTime InitialValue = DateTime.UtcNow;
+
+        NodeState nodeState;
+
+        public TimeStep(NodeState nodeState)
         {
+            this.nodeState = nodeState;
 
+            InitialValue = nodeState.CurrentNetworkTime;
         }
 
-        public void IncreaseResolution()
-        {
-            if ((CurrentResolution + 1) < Resolutions.Length)
-                CurrentResolution++;
-        }
-
-        public void DecreaseResolution()
-        {
-            if (CurrentResolution > 0)
-                CurrentResolution--;
-        }
-        
         public void Initalize()
         {
             IsNextStepSet = false;
         }
 
+        #region Resolution
+
+        public void IncreaseResolution()
+        {
+            if ((CurrentResolutionIndex + 1) < resolutions.Length)
+                CurrentResolutionIndex++;
+        }
+
+        public void DecreaseResolution()
+        {
+            if (CurrentResolutionIndex > 0)
+                CurrentResolutionIndex--;
+        }
+
+        #endregion
+        
         public void ResetTimeStepIfNotSet()
         {
             currentTimeElapsed = 0;
@@ -63,20 +90,20 @@ namespace TNetD.Consensus
             if (!IsNextStepSet)
                 SetNextTimeStep(DEFAULT_TIMER_TIMESTEP);
         }
-        
-        public void SetNextTimeStep(int timestepMs)
+
+        public void SetNextTimeStep(int timestepMilliseconds)
         {
-            if (timestepMs >= DEFAULT_TIMER_FASTSTEP &&
-                timestepMs <= DEFAULT_TIMER_MAXSTEP)
+            if (timestepMilliseconds >= DEFAULT_TIMER_FASTSTEP &&
+                timestepMilliseconds <= DEFAULT_TIMER_MAXSTEP)
             {
-                NextTimeStep = timestepMs;
+                NextTimeStep = timestepMilliseconds;
                 IsNextStepSet = true;
             }
         }
 
-        public void Step(int StepTime)
+        public void Step(int stepTimeMilliseconds)
         {
-            currentTimeElapsed += StepTime;            
+            currentTimeElapsed += stepTimeMilliseconds;
         }
 
         /// <summary>
