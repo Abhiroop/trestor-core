@@ -19,6 +19,7 @@ using TNetD.Transactions;
 using TNetD.Network;
 using System.Reactive.Linq;
 using System.Collections.Concurrent;
+using System.Reactive.Concurrency;
 
 namespace TNetD.Consensus
 {
@@ -132,6 +133,12 @@ namespace TNetD.Consensus
 
         VoteMessageCounter voteMessageCounter;
 
+        int nextTimeStep = 500;
+
+        static readonly int DEFAULT_TIMER_FASTSTEP = 45;
+        static readonly int DEFAULT_TIMER_TIMESTEP = 500;
+        static readonly int DEFAULT_TIMER_MAXSTEP = 5000;
+
         //System.Timers.Timer TimerVoting = default(System.Timers.Timer);
 
         public Voting(NodeConfig nodeConfig, NodeState nodeState, NetworkPacketSwitch networkPacketSwitch)
@@ -159,8 +166,24 @@ namespace TNetD.Consensus
 
             voteMessageCounter = new VoteMessageCounter();
 
-            Observable.Interval(TimeSpan.FromMilliseconds(600))
-                .Subscribe(async x => await TimerVoting_Elapsed(x));
+            Observable.Interval(TimeSpan.FromMilliseconds(DEFAULT_TIMER_FASTSTEP))
+                .Subscribe(async x => await TimerVoting_FastElapsed(x));
+
+            // generate 25 random integers sequence
+            /*  var generator = Observable.Generate(
+                  0,         // initial value
+                  i => true, // while predicate
+                  i => i,    // iterator
+                  next => next,  // selector
+                  delay => TimeSpan.FromMilliseconds(nextTimeStep),   // time interval
+                  Scheduler.Default
+              );          
+
+              // print all values one by one
+              generator.Subscribe(async x => await Exec(x));*/
+
+            //System.Threading.Timer t;
+            //t.Change()
 
             /*TimerVoting = new System.Timers.Timer();
             TimerVoting.Elapsed += TimerVoting_Elapsed;
@@ -172,6 +195,13 @@ namespace TNetD.Consensus
 
             Print("Class \"Voting\" created.");
         }
+
+        /* public async Task Exec(object obj)
+         {
+             await Task.Delay(10);
+             nextTimeStep = (int) obj;
+             Print("VALUE: " + obj);
+         }*/
 
         void UpdateLCD()
         {
@@ -225,24 +255,35 @@ namespace TNetD.Consensus
                  VotingEvent();
          }*/
 
-        async Task TimerVoting_Elapsed(object sender)
+        int currentTimeElapsed = 0;
+
+        void setNextTimeStep(int timestepMs)
         {
-            if (Enabled)
-                await VotingEvent();
+            if (timestepMs >= DEFAULT_TIMER_FASTSTEP &&
+                timestepMs <= DEFAULT_TIMER_MAXSTEP)
+            {
+                nextTimeStep = timestepMs;
+                isNextStepSet = true;
+            }
         }
 
+        bool timerLockFree = true;
 
-        /* private async Task TimerCallback_Voting(Object o)
-         {
-             if (Enabled)
-             {
-                 await Task.Run(() =>
-                 {
-                     VotingEvent();
+        async Task TimerVoting_FastElapsed(object sender)
+        {
+            if (Enabled && timerLockFree)
+            {
+                currentTimeElapsed += DEFAULT_TIMER_FASTSTEP;
 
-                 });
-             }
-         }*/
+                if (currentTimeElapsed > nextTimeStep)
+                {
+                    timerLockFree = false;
+                    await VotingEvent();
+                    currentTimeElapsed = 0;
+                    timerLockFree = true;
+                }
+            }
+        }
 
         bool isBallotValid = false;
         bool isFinalBallotValid = false;
@@ -256,10 +297,13 @@ namespace TNetD.Consensus
 
         SemaphoreSlim semaphoreVoting = new SemaphoreSlim(1);
 
+        bool isNextStepSet = false;
+
         private async Task VotingEvent()
         {
             try
             {
+                isNextStepSet = false;
                 await semaphoreVoting.WaitAsync();
 
                 switch (CurrentConsensusState)
@@ -316,6 +360,12 @@ namespace TNetD.Consensus
             finally
             {
                 semaphoreVoting.Release();
+
+                // If forced time is not set, set the step time to default.
+                if (!isNextStepSet)
+                {
+                    setNextTimeStep(DEFAULT_TIMER_TIMESTEP);
+                }
             }
         }
 
@@ -360,7 +410,7 @@ namespace TNetD.Consensus
                         CurrentConsensusState = ConsensusStates.Collect;
                         syncStateCounter = 0;
 
-                       // bool b = nodeState.NodeLatency.GetAverageLatency(nodeConfig.PublicKey)
+                        // bool b = nodeState.NodeLatency.GetAverageLatency(nodeConfig.PublicKey)
 
                         Print("Sync Done. Normal.");
                     }

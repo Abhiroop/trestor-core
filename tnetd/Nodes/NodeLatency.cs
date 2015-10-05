@@ -72,7 +72,7 @@ namespace TNetD.Nodes
                 {
                     watchToken.stopWatch.Stop();
 
-                    double latencyMilliseconds = ((double)watchToken.stopWatch.ElapsedTicks / 10000F);
+                    double latencyMilliseconds = ((double)watchToken.stopWatch.ElapsedTicks / TimeSpan.TicksPerMillisecond);
 
                     watchToken.stopWatch.Reset();
 
@@ -84,8 +84,10 @@ namespace TNetD.Nodes
                     double lat;
                     if(GetAverageLatency(publicKey, out lat))
                     {
-                        DisplayUtils.Display("LAT: Node: " + nodeConfig.PublicKey.ToString().Substring(0, 8) + " <-> " +
-                        publicKey.ToString().Substring(0, 8) + " : " + lat.ToString("0.000"));
+
+
+                        // DisplayUtils.Display("LAT: Node: " + nodeConfig.PublicKey.ToString().Substring(0, 8) + " <-> " +
+                        // publicKey.ToString().Substring(0, 8) + " : " + lat.ToString("0.000"));
                     }
                 }
             }
