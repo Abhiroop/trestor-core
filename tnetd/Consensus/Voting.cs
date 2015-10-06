@@ -83,7 +83,8 @@ namespace TNetD.Consensus
 
             set
             {
-                enabled = true;
+                enabled = value;
+                timeStep.EventEnabled = value;
                 InitLCS(nodeState); //FIX_TEMPORARY_TESTING MEASURE
             }
         }
@@ -134,11 +135,7 @@ namespace TNetD.Consensus
         ConcurrentDictionary<Hash, SyncState> syncMap;
 
         VoteMessageCounter voteMessageCounter;
-
-
-
-        //System.Timers.Timer TimerVoting = default(System.Timers.Timer);
-
+        
         public Voting(NodeConfig nodeConfig, NodeState nodeState, NetworkPacketSwitch networkPacketSwitch)
         {
             this.nodeConfig = nodeConfig;
@@ -150,6 +147,7 @@ namespace TNetD.Consensus
             this.voteMap = new VoteMap(nodeConfig, nodeState);
             this.synchronizedVoters = new HashSet<Hash>();
             this.timeStep = new TimeStep(nodeState);
+            this.timeStep.Step += VotingEvent;
 
             //finalVoters = new FinalVoters();
 
@@ -165,8 +163,6 @@ namespace TNetD.Consensus
 
             voteMessageCounter = new VoteMessageCounter();
 
-            Observable.Interval(TimeSpan.FromMilliseconds(TimeStep.DEFAULT_TIMER_FASTSTEP))
-                .Subscribe(async x => await TimerVoting_FastElapsed(x));
 
             // generate 25 random integers sequence
             /*  var generator = Observable.Generate(
@@ -253,25 +249,7 @@ namespace TNetD.Consensus
              if (Enabled)
                  VotingEvent();
          }*/
-
-        bool timerLockFree = true;
-
-        async Task TimerVoting_FastElapsed(object sender)
-        {
-            if (Enabled && timerLockFree)
-            {
-                timeStep.Step(TimeStep.DEFAULT_TIMER_FASTSTEP);
-
-                if (timeStep.IsComplete())
-                {
-                    timerLockFree = false;
-                    await VotingEvent();
-
-                    timerLockFree = true;
-                }
-            }
-        }
-
+                 
         bool isBallotValid = false;
         bool isFinalBallotValid = false;
         bool isFinalConfirmedVotersValid = false;

@@ -16,8 +16,14 @@ using TNetD.Nodes;
 
 namespace TNetD.Consensus
 {
+    public delegate Task TickHandler();
+    
     class TimeStep
     {
+        public event TickHandler Step;
+
+        public bool EventEnabled { get; set; } = false;
+
         /// <summary>
         /// 45 Milliseconds
         /// </summary>
@@ -44,6 +50,8 @@ namespace TNetD.Consensus
 
         int NextTimeStep { get; set; } = 500;
 
+        DateTime NextTime;
+
         /// <summary>
         /// Current resolution in Milliseconds
         /// </summary>
@@ -54,12 +62,40 @@ namespace TNetD.Consensus
         DateTime InitialValue = DateTime.UtcNow;
 
         NodeState nodeState;
-
+               
         public TimeStep(NodeState nodeState)
         {
             this.nodeState = nodeState;
 
             InitialValue = nodeState.CurrentNetworkTime;
+            
+            DateTime dt = nodeState.CurrentNetworkTime;
+
+            TimeSpan tsp;
+
+            System.Reactive.Linq.Observable.Interval(TimeSpan.FromMilliseconds(DEFAULT_TIMER_FASTSTEP))
+                .Subscribe(async x => await TimerVoting_FastElapsed(x));
+
+            //NextTime = nodeState.CurrentNetworkTime.Add(new TimeSpan())
+        }
+        
+        bool timerLockFree = true;
+
+        async Task TimerVoting_FastElapsed(object sender)
+        {
+            if (EventEnabled && timerLockFree)
+            {
+                StepTime(DEFAULT_TIMER_FASTSTEP);
+
+                if (IsComplete())
+                {
+                    timerLockFree = false;
+
+                    await Step?.Invoke();
+
+                    timerLockFree = true;
+                }
+            }
         }
 
         public void Initalize()
@@ -101,7 +137,7 @@ namespace TNetD.Consensus
             }
         }
 
-        public void Step(int stepTimeMilliseconds)
+        public void StepTime(int stepTimeMilliseconds)
         {
             currentTimeElapsed += stepTimeMilliseconds;
         }
