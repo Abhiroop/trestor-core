@@ -81,7 +81,7 @@ namespace TNetD.Time
         /// and computes the median
         /// </summary>
         /// <returns>Median diff of all responses</returns>
-        public long SyncTime()
+        public async Task<long> SyncTime()
         {
             // process responses
             List<long> diffs = new List<long>();
@@ -100,6 +100,7 @@ namespace TNetD.Time
             //send new requests
             //Print("start syncing with " + nodeState.ConnectedValidators.Count + " peers");
             sentRequests = new ConcurrentDictionary<Hash, RequestStruct>();
+            List<Task> tasks = new List<Task>(); 
             foreach (var peer in nodeState.ConnectedValidators)
             {
                 // save locally
@@ -113,7 +114,12 @@ namespace TNetD.Time
                 request.senderTime = nodeState.SystemTime;
                 byte[] message = request.Serialize();
                 NetworkPacket packet = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_REQUEST, message, rs.token);
-                networkPacketSwitch.AddToQueue(peer.Key, packet);
+                tasks.Add(networkPacketSwitch.SendAsync(peer.Key, packet));
+            }
+
+            foreach (Task t in tasks)
+            {
+                await t;
             }
 
             return diff;

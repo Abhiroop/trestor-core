@@ -178,7 +178,7 @@ namespace TNetD.Nodes
 
         void TimerTimeSync_Elapsed(object sender, ElapsedEventArgs e)
         {
-            nodeState.updateTimeDifference(timeSync.SyncTime());
+            nodeState.updateTimeDifference(timeSync.SyncTime().Result);
         }
 
         void TimerMinute_Elapsed(object sender, ElapsedEventArgs e)
