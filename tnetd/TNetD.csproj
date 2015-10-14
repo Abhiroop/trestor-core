@@ -131,6 +131,7 @@
     <Compile Include="Consensus\FinalVoters.cs" />
     <Compile Include="Consensus\LedgerCloseSequence.cs" />
     <Compile Include="Consensus\TimeStep.cs" />
+    <Compile Include="Nodes\Logging.cs" />
     <Compile Include="Nodes\NodeLatency.cs" />
     <Compile Include="Consensus\SyncMessage.cs" />
     <Compile Include="Consensus\TransactionValidator.cs" />

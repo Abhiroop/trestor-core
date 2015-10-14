@@ -134,9 +134,10 @@ namespace TNetD
 
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 10; i++)
             {
                 AddNode(i);
+                //generateTrustlist("NODE_" + i + "/");
             }
         }
 
@@ -151,9 +152,9 @@ namespace TNetD
             return list;
         }
 
-        private void generateTrustlist()
+        private void generateTrustlist(string path)
         {
-            using (FileStream fs = new FileStream("TrustedNodes.ini", FileMode.Create))
+            using (FileStream fs = new FileStream(path + "TrustedNodes.ini", FileMode.Create))
             {
                 using (StreamWriter w = new StreamWriter(fs, Encoding.UTF8))
                 {

@@ -155,7 +155,7 @@ namespace TNetD.Nodes
             TimerTimeSync = new System.Timers.Timer();
             TimerTimeSync.Elapsed += TimerTimeSync_Elapsed;
             TimerTimeSync.Enabled = true;
-            TimerTimeSync.Interval = 10 * 60 * 1000;
+            TimerTimeSync.Interval = 1 * 30 * 1000;
             TimerTimeSync.Start();
 
             //peerDiscovery.Start(30 * 1000);
@@ -178,7 +178,7 @@ namespace TNetD.Nodes
 
         void TimerTimeSync_Elapsed(object sender, ElapsedEventArgs e)
         {
-            nodeState.updateTimeDifference(timeSync.SyncTime());
+            nodeState.updateTimeDifference(timeSync.SyncTime().Result);
         }
 
         void TimerMinute_Elapsed(object sender, ElapsedEventArgs e)

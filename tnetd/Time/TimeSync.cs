@@ -40,7 +40,7 @@ namespace TNetD.Time
         private ConcurrentDictionary<Hash, RequestStruct> sentRequests;
         private ConcurrentDictionary<Hash, ResponseStruct> collectedResponses;
 
-
+        private Logging logger; 
 
         private void Print(String message)
         {
@@ -54,6 +54,7 @@ namespace TNetD.Time
             this.nodeState = nodeState;
             this.nodeConfig = nodeConfig;
             this.networkPacketSwitch = networkPacketSwitch;
+            this.logger = new Logging("timesync", nodeConfig.NodeID);
             networkPacketSwitch.TimeSyncEvent += networkHandler_TimeSyncEvent;
             collectedResponses = new ConcurrentDictionary<Hash, ResponseStruct>();
         }
@@ -81,7 +82,7 @@ namespace TNetD.Time
         /// and computes the median
         /// </summary>
         /// <returns>Median diff of all responses</returns>
-        public long SyncTime()
+        public async Task<long> SyncTime()
         {
             // process responses
             List<long> diffs = new List<long>();
@@ -96,9 +97,10 @@ namespace TNetD.Time
             DateTime nt = DateTime.FromFileTimeUtc(nodeState.NetworkTime);
 
             Print(diffs.Count + " resp; diff " + display/*.ToString("0.000")*/ + "; \tst: " + st.ToLongTimeString() + "; \tnt: " + nt.ToLongTimeString());
-            
+            logger.Log("SyncTime()", "start syncing with " + nodeState.ConnectedValidators.Count + " peers");
+
+
             //send new requests
-            //Print("start syncing with " + nodeState.ConnectedValidators.Count + " peers");
             sentRequests = new ConcurrentDictionary<Hash, RequestStruct>();
             foreach (var peer in nodeState.ConnectedValidators)
             {
@@ -113,7 +115,7 @@ namespace TNetD.Time
                 request.senderTime = nodeState.SystemTime;
                 byte[] message = request.Serialize();
                 NetworkPacket packet = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_REQUEST, message, rs.token);
-                networkPacketSwitch.AddToQueue(peer.Key, packet);
+                networkPacketSwitch.SendAsync(peer.Key, packet);
             }
 
             return diff;
@@ -133,6 +135,7 @@ namespace TNetD.Time
             // unpacking request
             TimeSyncRqMsg request = new TimeSyncRqMsg();
             request.Deserialize(packet.Data);
+            logger.Log("requestHandler()", "request received; responding ...");
 
             // sending response
             TimeSyncRsMsg response = new TimeSyncRsMsg();
@@ -141,7 +144,7 @@ namespace TNetD.Time
             byte[] data = response.Serialize();
             Hash token = packet.Token;
             NetworkPacket respacket = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_RESPONSE, data, token);
-            networkPacketSwitch.AddToQueue(packet.PublicKeySource, respacket);
+            networkPacketSwitch.SendAsync(packet.PublicKeySource, respacket);
         }
 
 
@@ -155,6 +158,7 @@ namespace TNetD.Time
             TimeSyncRsMsg response = new TimeSyncRsMsg();
             response.Deserialize(packet.Data);
             Hash sender = packet.PublicKeySource;
+            logger.Log("responseHandler()", "response received; processing ...");
 
             // if never sent request to this peer, drop packet
             if (!sentRequests.Keys.Contains(sender))
@@ -209,6 +213,7 @@ namespace TNetD.Time
             }
 
             Print("accepted " + accepted.Count  + " out of " + values.Count + " responses");
+            logger.Log("computeDiff()", "accepted " + accepted.Count + " out of " + values.Count + " responses");
             return (long)accepted.Average();
         }
     }
