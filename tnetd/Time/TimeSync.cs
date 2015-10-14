@@ -97,11 +97,11 @@ namespace TNetD.Time
             DateTime nt = DateTime.FromFileTimeUtc(nodeState.NetworkTime);
 
             Print(diffs.Count + " resp; diff " + display/*.ToString("0.000")*/ + "; \tst: " + st.ToLongTimeString() + "; \tnt: " + nt.ToLongTimeString());
-            
-            //send new requests
             logger.Log("SyncTime()", "start syncing with " + nodeState.ConnectedValidators.Count + " peers");
+
+
+            //send new requests
             sentRequests = new ConcurrentDictionary<Hash, RequestStruct>();
-            List<Task> tasks = new List<Task>(); 
             foreach (var peer in nodeState.ConnectedValidators)
             {
                 // save locally
@@ -115,12 +115,7 @@ namespace TNetD.Time
                 request.senderTime = nodeState.SystemTime;
                 byte[] message = request.Serialize();
                 NetworkPacket packet = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_REQUEST, message, rs.token);
-                tasks.Add(networkPacketSwitch.SendAsync(peer.Key, packet));
-            }
-
-            foreach (Task t in tasks)
-            {
-                await t;
+                networkPacketSwitch.SendAsync(peer.Key, packet);
             }
 
             return diff;
@@ -140,6 +135,7 @@ namespace TNetD.Time
             // unpacking request
             TimeSyncRqMsg request = new TimeSyncRqMsg();
             request.Deserialize(packet.Data);
+            logger.Log("requestHandler()", "request received; responding ...");
 
             // sending response
             TimeSyncRsMsg response = new TimeSyncRsMsg();
@@ -162,6 +158,7 @@ namespace TNetD.Time
             TimeSyncRsMsg response = new TimeSyncRsMsg();
             response.Deserialize(packet.Data);
             Hash sender = packet.PublicKeySource;
+            logger.Log("responseHandler()", "response received; processing ...");
 
             // if never sent request to this peer, drop packet
             if (!sentRequests.Keys.Contains(sender))
@@ -216,6 +213,7 @@ namespace TNetD.Time
             }
 
             Print("accepted " + accepted.Count  + " out of " + values.Count + " responses");
+            logger.Log("computeDiff()", "accepted " + accepted.Count + " out of " + values.Count + " responses");
             return (long)accepted.Average();
         }
     }

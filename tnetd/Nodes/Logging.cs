@@ -21,6 +21,7 @@ namespace TNetD.Nodes
         /// <param name="name">name for the log file</param>
         public Logging(string name, int node_id)
         {
+            Directory.CreateDirectory("NODE_" + node_id + "/logs");
             file = new FileStream("NODE_" + node_id + "/logs/" + name + ".log", FileMode.Create);
             w = new StreamWriter(file, Encoding.UTF8);
             w.WriteLine("Logfile created at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ".");
