@@ -11,6 +11,7 @@ namespace TNetD.Nodes
     {
 
         private FileStream file;
+        private StreamWriter w;
 
         /// <summary>
         /// creates a logging class for logging server activity
@@ -18,9 +19,12 @@ namespace TNetD.Nodes
         /// will log to filename logs/name.log for a given name
         /// </summary>
         /// <param name="name">name for the log file</param>
-        public Logging(string name)
+        public Logging(string name, int node_id)
         {
-            file = new FileStream("logs/" + name + ".log", FileMode.Create);
+            file = new FileStream("NODE_" + node_id + "/logs/" + name + ".log", FileMode.Create);
+            w = new StreamWriter(file, Encoding.UTF8);
+            w.WriteLine("Logfile created at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ".");
+            w.Flush();
         }
 
         /// <summary>
@@ -30,8 +34,8 @@ namespace TNetD.Nodes
         /// <param name="message">logged message</param>
         public void Log(string method, string message)
         {
-            StreamWriter w = new StreamWriter(file, Encoding.UTF8);
             w.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + method + "] " + message);
+            w.Flush();
         }
     }
 }

@@ -138,6 +138,8 @@ namespace TNetD
             {
                 AddNode(i);
             }
+            generateTrustlist();
+
         }
 
         private ConcurrentDictionary<Hash, PeerData> generateFakePeerList(int max)

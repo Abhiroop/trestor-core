@@ -40,7 +40,7 @@ namespace TNetD.Time
         private ConcurrentDictionary<Hash, RequestStruct> sentRequests;
         private ConcurrentDictionary<Hash, ResponseStruct> collectedResponses;
 
-        private Logging logger = new Logging("timesync");
+        private Logging logger; 
 
         private void Print(String message)
         {
@@ -54,6 +54,7 @@ namespace TNetD.Time
             this.nodeState = nodeState;
             this.nodeConfig = nodeConfig;
             this.networkPacketSwitch = networkPacketSwitch;
+            this.logger = new Logging("timesync", nodeConfig.NodeID);
             networkPacketSwitch.TimeSyncEvent += networkHandler_TimeSyncEvent;
             collectedResponses = new ConcurrentDictionary<Hash, ResponseStruct>();
         }
