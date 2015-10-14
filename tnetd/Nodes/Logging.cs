@@ -23,6 +23,11 @@ namespace TNetD.Nodes
             file = new FileStream("logs/" + name + ".log", FileMode.Create);
         }
 
+        /// <summary>
+        /// print a messge to logfile
+        /// </summary>
+        /// <param name="method">tell what method is calling</param>
+        /// <param name="message">logged message</param>
         public void Log(string method, string message)
         {
             StreamWriter w = new StreamWriter(file, Encoding.UTF8);

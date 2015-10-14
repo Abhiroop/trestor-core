@@ -40,7 +40,7 @@ namespace TNetD.Time
         private ConcurrentDictionary<Hash, RequestStruct> sentRequests;
         private ConcurrentDictionary<Hash, ResponseStruct> collectedResponses;
 
-
+        private Logging logger = new Logging("timesync");
 
         private void Print(String message)
         {
@@ -98,7 +98,7 @@ namespace TNetD.Time
             Print(diffs.Count + " resp; diff " + display/*.ToString("0.000")*/ + "; \tst: " + st.ToLongTimeString() + "; \tnt: " + nt.ToLongTimeString());
             
             //send new requests
-            //Print("start syncing with " + nodeState.ConnectedValidators.Count + " peers");
+            logger.Log("SyncTime()", "start syncing with " + nodeState.ConnectedValidators.Count + " peers");
             sentRequests = new ConcurrentDictionary<Hash, RequestStruct>();
             List<Task> tasks = new List<Task>(); 
             foreach (var peer in nodeState.ConnectedValidators)
@@ -147,7 +147,7 @@ namespace TNetD.Time
             byte[] data = response.Serialize();
             Hash token = packet.Token;
             NetworkPacket respacket = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_TIMESYNC_RESPONSE, data, token);
-            networkPacketSwitch.AddToQueue(packet.PublicKeySource, respacket);
+            networkPacketSwitch.SendAsync(packet.PublicKeySource, respacket);
         }
 
 
