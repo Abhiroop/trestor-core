@@ -58,8 +58,10 @@ namespace TNetD.Consensus
         public int CurrentResolution { get { return resolutions[CurrentResolutionIndex]; } }
 
         public int CurrentResolutionIndex { get; private set; } = 3;
+        
+        bool timerLockFree = true;
 
-        DateTime InitialValue = DateTime.UtcNow;
+        DateTime InitialValue;
 
         NodeState nodeState;
                
@@ -79,30 +81,6 @@ namespace TNetD.Consensus
             //NextTime = nodeState.CurrentNetworkTime.Add(new TimeSpan())
         }
         
-        bool timerLockFree = true;
-
-        async Task TimerVoting_FastElapsed(object sender)
-        {
-            if (EventEnabled && timerLockFree)
-            {
-                StepTime(DEFAULT_TIMER_FASTSTEP);
-
-                if (IsComplete())
-                {
-                    timerLockFree = false;
-
-                    await Step?.Invoke();
-
-                    timerLockFree = true;
-                }
-            }
-        }
-
-        public void Initalize()
-        {
-            IsNextStepSet = false;
-        }
-
         #region Resolution
 
         public void IncreaseResolution()
@@ -137,7 +115,7 @@ namespace TNetD.Consensus
             }
         }
 
-        public void StepTime(int stepTimeMilliseconds)
+        void StepTime(int stepTimeMilliseconds)
         {
             currentTimeElapsed += stepTimeMilliseconds;
         }
@@ -146,7 +124,7 @@ namespace TNetD.Consensus
         /// Returns true if the current elapsed time exceeds the set next time step;
         /// </summary>
         /// <returns></returns>
-        public bool IsComplete()
+        bool IsComplete()
         {
             if (currentTimeElapsed > NextTimeStep)
             {
@@ -157,5 +135,30 @@ namespace TNetD.Consensus
             return false;
         }
 
+        async Task TimerVoting_FastElapsed(object sender)
+        {
+            if (EventEnabled && timerLockFree)
+            {
+                StepTime(DEFAULT_TIMER_FASTSTEP);
+
+                if (IsComplete())
+                {
+                    timerLockFree = false;
+
+                    await Step?.Invoke();
+
+
+
+
+
+                    timerLockFree = true;
+                }
+            }
+        }
+
+        public void Initalize()
+        {
+            IsNextStepSet = false;
+        }
     }
 }
