@@ -33,8 +33,8 @@ namespace TNetD.Nodes
         // Cound number of packages per sender in a particular interval (ms)
         private long counterinterval = 10 * 1000;
         private int counterthreshold = 10;
-        private long counterwindow; 
-        private ConcurrentDictionary<Hash, int> packetcounters; 
+        private long counterwindow;
+        private ConcurrentDictionary<Hash, int> packetcounters;
 
         public NetworkPacketSwitch(NodeConfig nodeConfig, NodeState nodeState)
         {
@@ -45,6 +45,8 @@ namespace TNetD.Nodes
             network.PacketReceived += network_PacketReceived;
 
             network.Initialize();
+
+            packetcounters = new ConcurrentDictionary<Hash, int>();
         }
 
         async public Task InitialConnectAsync()
@@ -87,8 +89,9 @@ namespace TNetD.Nodes
         async Task network_PacketReceived(NetworkPacket packet)
         {
             //DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + packet.PublicKeySource + " | Data Length : " + packet.Data.Length);
-            
-    
+
+            checkPacketCounts(packet);
+
             switch (packet.Type)
             {
                 case PacketType.TPT_CONS_MERGE_REQUEST:
@@ -189,6 +192,29 @@ namespace TNetD.Nodes
             }
 
             return good;
+        }
+
+        /// <summary>
+        /// checks whether the number of packets from a certian node exceed a threshold
+        /// </summary>
+        /// <param name="packet"></param>
+        private void checkPacketCounts(NetworkPacket packet)
+        {
+            packetcounters.AddOrUpdate(packet.PublicKeySource, 1, (k, v) => v + 1);
+
+            if (packetcounters[packet.PublicKeySource] > counterthreshold)
+            {
+                nodeState.logger.Log(LogType.Network, "WARNING: More than "
+                    + packetcounters[packet.PublicKeySource] + " packets from "
+                    + packet.PublicKeySource + " received in "
+                    + counterinterval + " ms.");
+            }
+
+            if ( nodeState.SystemTime - counterwindow > counterinterval)
+            {
+                packetcounters = new ConcurrentDictionary<Hash, int>();
+                counterwindow = nodeState.SystemTime;
+            }
         }
 
     }
