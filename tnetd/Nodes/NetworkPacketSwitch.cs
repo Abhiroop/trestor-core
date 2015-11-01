@@ -31,10 +31,12 @@ namespace TNetD.Nodes
         SecureNetwork network = default(SecureNetwork);
 
         // Cound number of packages per sender in a particular interval (ms)
-        private long counterinterval = 10 * 1000;
-        private int counterthreshold = 10;
-        private long counterwindow;
+        private long counterinterval = 5000;
+        private int counterthreshold = 100;
+        private int sizethreshold = 10 * 1024;
+        private DateTime counterwindow;
         private ConcurrentDictionary<Hash, int> packetcounters;
+        private ConcurrentDictionary<Hash, int> sizecounters;
 
         public NetworkPacketSwitch(NodeConfig nodeConfig, NodeState nodeState)
         {
@@ -47,6 +49,7 @@ namespace TNetD.Nodes
             network.Initialize();
 
             packetcounters = new ConcurrentDictionary<Hash, int>();
+            sizecounters = new ConcurrentDictionary<Hash, int>();
         }
 
         async public Task InitialConnectAsync()
@@ -140,7 +143,7 @@ namespace TNetD.Nodes
 
                     break;
 
-                case PacketType.TPT_PEER_DISCOVERY_INIT:
+                case PacketType.TPT_PEER_DISCOVERY_REQUEST:
                 case PacketType.TPT_PEER_DISCOVERY_RESPONSE:
 
                     PeerDiscoveryEvent?.Invoke(packet);
@@ -201,21 +204,56 @@ namespace TNetD.Nodes
         private void checkPacketCounts(NetworkPacket packet)
         {
             packetcounters.AddOrUpdate(packet.PublicKeySource, 1, (k, v) => v + 1);
+            sizecounters.AddOrUpdate(packet.PublicKeySource, packet.Data.Length, (k, v) => v + packet.Data.Length);
 
             if (packetcounters[packet.PublicKeySource] > counterthreshold)
             {
                 nodeState.logger.Log(LogType.Network, "WARNING: More than "
                     + packetcounters[packet.PublicKeySource] + " packets from "
                     + packet.PublicKeySource + " received in "
-                    + counterinterval + " ms.");
+                    + counterinterval + "00 ns.");
+                // TODO: More than just warning
             }
 
-            if ( nodeState.SystemTime - counterwindow > counterinterval)
+            if (sizecounters[packet.PublicKeySource] > sizethreshold)
+            {
+                nodeState.logger.Log(LogType.Network, "WARNING: More than "
+                    + sizecounters[packet.PublicKeySource] + " bytes from "
+                    + packet.PublicKeySource + " received in "
+                    + counterinterval + "00 ns.");
+                // TODO: More than just warning
+            }
+
+            if (nodeState.CurrentNetworkTime - counterwindow > TimeSpan.FromMilliseconds(counterinterval))
             {
                 packetcounters = new ConcurrentDictionary<Hash, int>();
-                counterwindow = nodeState.SystemTime;
+                counterwindow = nodeState.CurrentNetworkTime;
             }
         }
 
+
+        private bool isRequest(NetworkPacket packet)
+        {
+            switch (packet.Type)
+            {
+                case PacketType.TPT_CONS_CONFIRM_REQUEST:
+                case PacketType.TPT_CONS_MERGE_REQUEST:
+                case PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST:
+                case PacketType.TPT_CONS_SYNC_REQUEST:
+                case PacketType.TPT_CONS_VOTE_REQUEST:
+                case PacketType.TPT_LSYNC_LEAF_REQUEST:
+                case PacketType.TPT_LSYNC_LEAF_REQUEST_ALL:
+                case PacketType.TPT_LSYNC_NODE_REQUEST:
+                case PacketType.TPT_LSYNC_ROOT_REQUEST:
+                case PacketType.TPT_TIMESYNC_REQUEST:
+                case PacketType.TPT_TX_SYNC_CLOSEHISTORY_REQUEST:
+                case PacketType.TPT_TX_SYNC_FETCH_REQUEST:
+                case PacketType.TPT_TX_SYNC_ID_REQUEST:
+                case PacketType.TPT_TX_SYNC_QUERY_REQUEST:
+                case PacketType.TPT_PEER_DISCOVERY_REQUEST:
+                    return true;
+            }
+            return false;
+        }
     }
 }

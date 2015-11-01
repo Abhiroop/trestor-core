@@ -172,7 +172,7 @@ namespace TNetD.Network.Networking
         TPT_TIMESYNC_REQUEST = 0x60,
         TPT_TIMESYNC_RESPONSE = 0x61,
 
-        TPT_PEER_DISCOVERY_INIT = 0x70,
+        TPT_PEER_DISCOVERY_REQUEST = 0x70,
         TPT_PEER_DISCOVERY_RESPONSE = 0x71
 
     };
