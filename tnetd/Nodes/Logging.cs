@@ -13,6 +13,8 @@ namespace TNetD.Nodes
         public enum LogType { Voting, TimeSync };
 
         private StreamWriter votinglog, timesynclog;
+        private bool votinglogenabled { get; set; } = true;
+        private bool timesynclogenabled { get; set; } = true;
 
         /// <summary>
         /// creates a logging class for logging server activity
@@ -44,15 +46,33 @@ namespace TNetD.Nodes
             switch (logType)
             {
                 case LogType.TimeSync:
-                    timesynclog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + methodName + "] " + message);
-                    timesynclog.Flush();
+                    if (timesynclogenabled)
+                    {
+                        timesynclog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + methodName + "] " + message);
+                        timesynclog.Flush();
+                    }
                     break;
                 case LogType.Voting:
-                    votinglog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + methodName + "] " + message);
-                    votinglog.Flush();
+                    if (votinglogenabled)
+                    {
+                        votinglog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + methodName + "] " + message);
+                        votinglog.Flush();
+                    }
                     break;
             }
 
+        }
+
+        public void EnableAllLogging()
+        {
+            votinglogenabled = true;
+            timesynclogenabled = true;
+        }
+
+        public void DisableAllLogging()
+        {
+            votinglogenabled = false;
+            timesynclogenabled = false;
         }
     }
 }
