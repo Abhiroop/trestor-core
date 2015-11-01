@@ -45,6 +45,13 @@ namespace TNetD.Nodes
         public Dictionary<Hash, ConnectionProperties> ConnectedValidators { get; set; }
 
         /// <summary>
+        /// Directory where a node's keyfiles etc. are stored
+        /// </summary>
+        public string privateDirectory;
+
+        public Logging logger;
+
+        /// <summary>
         /// Key Token, Value: Time, Public key of recipient
         /// </summary>
         public ConcurrentDictionary<Hash, PendingNetworkRequest> PendingNetworkRequests;
@@ -88,6 +95,9 @@ namespace TNetD.Nodes
 
             SystemTime = DateTime.UtcNow.ToFileTimeUtc();
             NetworkTime = DateTime.UtcNow.ToFileTimeUtc();
+
+            privateDirectory = "NODE_" + nodeConfig.NodeID;
+            logger = new Logging(privateDirectory);
         }
 
         public void updateNetworkTime()

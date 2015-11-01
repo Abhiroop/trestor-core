@@ -40,8 +40,6 @@ namespace TNetD.Time
         private ConcurrentDictionary<Hash, RequestStruct> sentRequests;
         private ConcurrentDictionary<Hash, ResponseStruct> collectedResponses;
 
-        private Logging logger; 
-
         private void Print(String message)
         {
             DisplayUtils.Display(" Node " + nodeConfig.NodeID + " | TimeSync: " + message);
@@ -54,7 +52,6 @@ namespace TNetD.Time
             this.nodeState = nodeState;
             this.nodeConfig = nodeConfig;
             this.networkPacketSwitch = networkPacketSwitch;
-            this.logger = new Logging("timesync", nodeConfig.NodeID);
             networkPacketSwitch.TimeSyncEvent += networkHandler_TimeSyncEvent;
             collectedResponses = new ConcurrentDictionary<Hash, ResponseStruct>();
         }
@@ -97,7 +94,7 @@ namespace TNetD.Time
             DateTime nt = DateTime.FromFileTimeUtc(nodeState.NetworkTime);
 
             Print(diffs.Count + " resp; diff " + display/*.ToString("0.000")*/ + "; \tst: " + st.ToLongTimeString() + "; \tnt: " + nt.ToLongTimeString());
-            logger.Log("SyncTime()", "start syncing with " + nodeState.ConnectedValidators.Count + " peers");
+            nodeState.logger.Log(Logging.LogType.TimeSync, "start syncing with " + nodeState.ConnectedValidators.Count + " peers");
 
 
             //send new requests
@@ -135,7 +132,7 @@ namespace TNetD.Time
             // unpacking request
             TimeSyncRqMsg request = new TimeSyncRqMsg();
             request.Deserialize(packet.Data);
-            logger.Log("requestHandler()", "request received; responding ...");
+            nodeState.logger.Log(Logging.LogType.TimeSync, "request received; responding ...");
 
             // sending response
             TimeSyncRsMsg response = new TimeSyncRsMsg();
@@ -158,7 +155,7 @@ namespace TNetD.Time
             TimeSyncRsMsg response = new TimeSyncRsMsg();
             response.Deserialize(packet.Data);
             Hash sender = packet.PublicKeySource;
-            logger.Log("responseHandler()", "response received; processing ...");
+            nodeState.logger.Log(Logging.LogType.TimeSync, "response received; processing ...");
 
             // if never sent request to this peer, drop packet
             if (!sentRequests.Keys.Contains(sender))
@@ -213,7 +210,7 @@ namespace TNetD.Time
             }
 
             Print("accepted " + accepted.Count  + " out of " + values.Count + " responses");
-            logger.Log("computeDiff()", "accepted " + accepted.Count + " out of " + values.Count + " responses");
+            nodeState.logger.Log(Logging.LogType.TimeSync, "accepted " + accepted.Count + " out of " + values.Count + " responses");
             return (long)accepted.Average();
         }
     }
