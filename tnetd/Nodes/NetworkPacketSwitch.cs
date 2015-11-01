@@ -18,10 +18,10 @@ namespace TNetD.Nodes
     {
         public delegate void NetworkPacketEventHandler(NetworkPacket packet);
         public delegate Task AsyncNetworkPacketEventHandler(NetworkPacket packet);
-               
+
         public event NetworkPacketEventHandler LedgerSyncEvent;
         public event NetworkPacketEventHandler PeerDiscoveryEvent;
-        
+
         public event AsyncNetworkPacketEventHandler ConsensusEvent;
         public event AsyncNetworkPacketEventHandler TimeSyncEvent;
 
@@ -95,7 +95,7 @@ namespace TNetD.Nodes
                 case PacketType.TPT_CONS_CONFIRM_REQUEST:
                 case PacketType.TPT_CONS_CONFIRM_RESPONSE:
 
-                    if(ConsensusEvent!=null)
+                    if (ConsensusEvent != null)
                         await ConsensusEvent.Invoke(packet).ConfigureAwait(false);
 
                     break;
@@ -107,7 +107,7 @@ namespace TNetD.Nodes
                 case PacketType.TPT_LSYNC_LEAF_REQUEST:
                 case PacketType.TPT_LSYNC_LEAF_REQUEST_ALL:
                 case PacketType.TPT_LSYNC_LEAF_RESPONSE:
-                                       
+
                     LedgerSyncEvent?.Invoke(packet);
 
                     break;
@@ -125,20 +125,20 @@ namespace TNetD.Nodes
 
                 case PacketType.TPT_TIMESYNC_REQUEST:
                 case PacketType.TPT_TIMESYNC_RESPONSE:
-                    
+
                     TimeSyncEvent?.Invoke(packet);
 
                     break;
 
                 case PacketType.TPT_PEER_DISCOVERY_INIT:
                 case PacketType.TPT_PEER_DISCOVERY_RESPONSE:
-                    
+
                     PeerDiscoveryEvent?.Invoke(packet);
 
                     break;
             }
         }
-        
+
         public NetworkResult AddToQueue(Hash publicKeyDestination, NetworkPacket packet)
         {
             return network.AddToQueue(new NetworkPacketQueueEntry(publicKeyDestination, packet));
@@ -148,7 +148,7 @@ namespace TNetD.Nodes
         {
             await network.SendAsync(new NetworkPacketQueueEntry(publicKeyDestination, packet)).ConfigureAwait(false);
         }
-        
+
         public void Stop()
         {
             network.Stop();
@@ -174,6 +174,11 @@ namespace TNetD.Nodes
 
                 PendingNetworkRequest tmp;
                 nodeState.PendingNetworkRequests.TryRemove(packet.Token, out tmp);
+            }
+
+            if (!good)
+            {
+                nodeState.logger.Log(LogType.Network, "Dropped packet from " + packet.PublicKeySource + ": Unrequested response.");
             }
 
             return good;

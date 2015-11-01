@@ -5,14 +5,17 @@ using System.Runtime.CompilerServices;
 
 namespace TNetD.Nodes
 {
-    public enum LogType { Voting, TimeSync };
+    public enum LogType { Voting, TimeSync, Network, Security };
 
     class Logging
     {
-        private StreamWriter votinglog, timesynclog;
+        private StreamWriter votinglog, timesynclog, networklog, securitylog;
 
-        private bool VotingLogEnabled { get; set; } = true;
-        private bool TimeSyncLogEnabled { get; set; } = true;
+        public bool VotingLogEnabled { get; set; } = true;
+        public bool TimeSyncLogEnabled { get; set; } = true;
+        public bool NetworkLogEnabled { get; set; } = true;
+        public bool SecurityLogEnabled { get; set; } = true;
+
 
         /// <summary>
         /// Creates a logging class for logging server activity
@@ -24,14 +27,26 @@ namespace TNetD.Nodes
         {
             Directory.CreateDirectory(privateDirectory + "/logs");
             FileStream file;
+
             file = new FileStream(privateDirectory + "/logs/voting.log", FileMode.Append);
             votinglog = new StreamWriter(file, Encoding.UTF8);
             votinglog.WriteLine("Logging started at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ".");
             votinglog.Flush();
+
             file = new FileStream(privateDirectory + "/logs/timesync.log", FileMode.Append);
             timesynclog = new StreamWriter(file, Encoding.UTF8);
             timesynclog.WriteLine("Logging started at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ".");
             timesynclog.Flush();
+
+            file = new FileStream(privateDirectory + "/logs/network.log", FileMode.Append);
+            networklog = new StreamWriter(file, Encoding.UTF8);
+            networklog.WriteLine("Logging started at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ".");
+            networklog.Flush();
+
+            file = new FileStream(privateDirectory + "/logs/security.log", FileMode.Append);
+            securitylog = new StreamWriter(file, Encoding.UTF8);
+            securitylog.WriteLine("Logging started at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ".");
+            securitylog.Flush();
         }
 
         /// <summary>
@@ -57,6 +72,20 @@ namespace TNetD.Nodes
                         votinglog.Flush();
                     }
                     break;
+                case LogType.Network:
+                    if (NetworkLogEnabled)
+                    {
+                        networklog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + methodName + "] " + message);
+                        networklog.Flush();
+                    }
+                    break;
+                case LogType.Security:
+                    if (SecurityLogEnabled)
+                    {
+                        securitylog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + methodName + "] " + message);
+                        securitylog.Flush();
+                    }
+                    break;
             }
 
         }
@@ -65,12 +94,16 @@ namespace TNetD.Nodes
         {
             VotingLogEnabled = true;
             TimeSyncLogEnabled = true;
+            NetworkLogEnabled = true;
+            SecurityLogEnabled = true;
         }
 
         public void Disable()
         {
             VotingLogEnabled = false;
             TimeSyncLogEnabled = false;
+            NetworkLogEnabled = false;
+            SecurityLogEnabled = false;
         }
     }
 }
