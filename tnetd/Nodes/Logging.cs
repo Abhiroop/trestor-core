@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -13,11 +10,12 @@ namespace TNetD.Nodes
         public enum LogType { Voting, TimeSync };
 
         private StreamWriter votinglog, timesynclog;
-        private bool votinglogenabled { get; set; } = true;
-        private bool timesynclogenabled { get; set; } = true;
+
+        private bool VotingLogEnabled { get; set; } = true;
+        private bool TimeSyncLogEnabled { get; set; } = true;
 
         /// <summary>
-        /// creates a logging class for logging server activity
+        /// Creates a logging class for logging server activity
         /// 
         /// will log to filename logs/name.log for a given name
         /// </summary>
@@ -46,14 +44,14 @@ namespace TNetD.Nodes
             switch (logType)
             {
                 case LogType.TimeSync:
-                    if (timesynclogenabled)
+                    if (TimeSyncLogEnabled)
                     {
                         timesynclog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + methodName + "] " + message);
                         timesynclog.Flush();
                     }
                     break;
                 case LogType.Voting:
-                    if (votinglogenabled)
+                    if (VotingLogEnabled)
                     {
                         votinglog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + methodName + "] " + message);
                         votinglog.Flush();
@@ -63,16 +61,16 @@ namespace TNetD.Nodes
 
         }
 
-        public void EnableAllLogging()
+        public void Enable()
         {
-            votinglogenabled = true;
-            timesynclogenabled = true;
+            VotingLogEnabled = true;
+            TimeSyncLogEnabled = true;
         }
 
-        public void DisableAllLogging()
+        public void Disable()
         {
-            votinglogenabled = false;
-            timesynclogenabled = false;
+            VotingLogEnabled = false;
+            TimeSyncLogEnabled = false;
         }
     }
 }
