@@ -30,6 +30,12 @@ namespace TNetD.Nodes
 
         SecureNetwork network = default(SecureNetwork);
 
+        // Cound number of packages per sender in a particular interval (ms)
+        private long counterinterval = 10 * 1000;
+        private int counterthreshold = 10;
+        private long counterwindow; 
+        private ConcurrentDictionary<Hash, int> packetcounters; 
+
         public NetworkPacketSwitch(NodeConfig nodeConfig, NodeState nodeState)
         {
             this.nodeConfig = nodeConfig;
@@ -81,7 +87,8 @@ namespace TNetD.Nodes
         async Task network_PacketReceived(NetworkPacket packet)
         {
             //DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + packet.PublicKeySource + " | Data Length : " + packet.Data.Length);
-
+            
+    
             switch (packet.Type)
             {
                 case PacketType.TPT_CONS_MERGE_REQUEST:
