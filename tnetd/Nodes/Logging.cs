@@ -5,10 +5,10 @@ using System.Runtime.CompilerServices;
 
 namespace TNetD.Nodes
 {
+    public enum LogType { Voting, TimeSync };
+
     class Logging
     {
-        public enum LogType { Voting, TimeSync };
-
         private StreamWriter votinglog, timesynclog;
 
         private bool VotingLogEnabled { get; set; } = true;

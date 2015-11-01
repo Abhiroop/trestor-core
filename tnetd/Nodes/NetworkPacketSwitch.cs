@@ -17,12 +17,13 @@ namespace TNetD.Nodes
     class NetworkPacketSwitch
     {
         public delegate void NetworkPacketEventHandler(NetworkPacket packet);
-        public event NetworkPacketEventHandler TimeSyncEvent;
+        public delegate Task AsyncNetworkPacketEventHandler(NetworkPacket packet);
+               
         public event NetworkPacketEventHandler LedgerSyncEvent;
         public event NetworkPacketEventHandler PeerDiscoveryEvent;
-
-        public delegate Task AsyncNetworkPacketEventHandler(NetworkPacket packet);
+        
         public event AsyncNetworkPacketEventHandler ConsensusEvent;
+        public event AsyncNetworkPacketEventHandler TimeSyncEvent;
 
         NodeConfig nodeConfig;
         NodeState nodeState;
