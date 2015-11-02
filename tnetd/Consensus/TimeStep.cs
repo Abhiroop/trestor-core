@@ -18,7 +18,7 @@ using TNetD.Nodes;
 namespace TNetD.Consensus
 {
     public delegate Task TickHandler();
-    
+
     class TimeStep
     {
         public event TickHandler Step;
@@ -28,7 +28,7 @@ namespace TNetD.Consensus
         /// <summary>
         /// 50 Milliseconds
         /// </summary>
-        public static readonly TimeSpan DEFAULT_TIMER_FASTSTEP = TimeSpan.FromMilliseconds(50);
+        public static readonly TimeSpan DEFAULT_TIMER_FASTSTEP = TimeSpan.FromMilliseconds(25);
 
         /// <summary>
         /// 500 Milliseconds
@@ -43,7 +43,7 @@ namespace TNetD.Consensus
         /// <summary>
         /// Timesteps in MS
         /// </summary>
-        int[] resolutions = new int[] { 100, 200, 300, 500, 1000, 1500, 2000, 3000, 5000, 10000};
+        int[] resolutions = new int[] { 100, 200, 300, 500, 1000, 1500, 2000, 3000, 5000, 10000 };
 
         public double currentTimeElapsed = 0;
 
@@ -57,23 +57,29 @@ namespace TNetD.Consensus
         /// <summary>
         /// Current resolution in Milliseconds
         /// </summary>
-        public int CurrentResolution { get { return resolutions[CurrentResolutionIndex]; } }
+        public int CurrentResolution
+        {
+            get { return resolutions[CurrentResolutionIndex]; }
+        }
 
         public int CurrentResolutionIndex { get; private set; } = 3;
-        
+
         bool timerLockFree = true;
 
         DateTime InitialValue;
 
         NodeState nodeState;
-               
+        DateTime minNextTickTime = DateTime.UtcNow;
+
         public TimeStep(NodeState nodeState)
         {
             this.nodeState = nodeState;
 
             InitialValue = nodeState.CurrentNetworkTime;
-            
+
             DateTime dt = nodeState.CurrentNetworkTime;
+
+            minNextTickTime = nodeState.CurrentNetworkTime;
 
             TimeSpan tsp;
 
@@ -82,7 +88,7 @@ namespace TNetD.Consensus
 
             //NextTime = nodeState.CurrentNetworkTime.Add(new TimeSpan())
         }
-        
+
         #region Resolution
 
         public void IncreaseResolution()
@@ -98,7 +104,7 @@ namespace TNetD.Consensus
         }
 
         #endregion
-        
+
         public void ResetTimeStepIfNotSet()
         {
             currentTimeElapsed = 0;
@@ -116,13 +122,13 @@ namespace TNetD.Consensus
                 IsNextStepSet = true;
             }
         }
-        
+
         void StepTime(TimeSpan stepTime)
         {
             currentTimeElapsed += stepTime.TotalMilliseconds;
         }
 
-        async Task TimerVoting_FastElapsed(object sender)
+        async Task TimerInnerEvent()
         {
             if (EventEnabled && timerLockFree)
             {
@@ -136,10 +142,49 @@ namespace TNetD.Consensus
 
                     LastTick = nodeState.CurrentNetworkTime;
 
+                    //LastTick.
+
                     await Step?.Invoke();
 
                     timerLockFree = true;
                 }
+            }
+        }
+
+        async Task TimerVoting_FastElapsed(object sender)
+        {
+            // Creates a tick at every timer resolution match.
+
+            long resolutionTicks = CurrentResolution * TimeSpan.TicksPerMillisecond;
+
+            long closenessTicks = (long)(DEFAULT_TIMER_FASTSTEP.Ticks * 2);
+
+            DateTime timeNow = nodeState.CurrentNetworkTime;
+
+            long timeTicks = timeNow.Ticks;
+
+            if (((timeTicks % resolutionTicks) < closenessTicks))
+            {
+                if ((minNextTickTime < timeNow))
+                {
+                    // Next event can be atleast halfway from now and the next expected resolution event
+                    minNextTickTime = timeNow.Add(TimeSpan.FromMilliseconds(CurrentResolution / 2));
+
+                    // DisplayUtils.Display("+ " + timeNow.ToLongTimeString());
+                    
+                    if(EventEnabled)
+                        await Step?.Invoke();
+                    
+                    //await TimerInnerEvent();
+                }
+                else
+                {
+                    // DisplayUtils.Display("-");
+                }
+            }
+            else
+            {
+                //  DisplayUtils.Display(".");
             }
         }
 
