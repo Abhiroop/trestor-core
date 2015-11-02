@@ -22,7 +22,7 @@ namespace TNetD.Network.Networking
             [PacketType.TPT_LSYNC_LEAF_REQUEST_ALL] = PacketType.TPT_LSYNC_LEAF_RESPONSE,
 
             [PacketType.TPT_TIMESYNC_REQUEST] = PacketType.TPT_TIMESYNC_RESPONSE,
-            [PacketType.TPT_PEER_DISCOVERY_INIT] = PacketType.TPT_PEER_DISCOVERY_RESPONSE
+            [PacketType.TPT_PEER_DISCOVERY_REQUEST] = PacketType.TPT_PEER_DISCOVERY_RESPONSE
         };
 
         public HashSet<PacketType> Requests = new HashSet<PacketType>();

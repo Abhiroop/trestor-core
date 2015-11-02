@@ -18,10 +18,10 @@ namespace TNetD.Nodes
     {
         public delegate void NetworkPacketEventHandler(NetworkPacket packet);
         public delegate Task AsyncNetworkPacketEventHandler(NetworkPacket packet);
-               
+
         public event NetworkPacketEventHandler LedgerSyncEvent;
         public event NetworkPacketEventHandler PeerDiscoveryEvent;
-        
+
         public event AsyncNetworkPacketEventHandler ConsensusEvent;
         public event AsyncNetworkPacketEventHandler TimeSyncEvent;
 
@@ -29,6 +29,14 @@ namespace TNetD.Nodes
         NodeState nodeState;
 
         SecureNetwork network = default(SecureNetwork);
+
+        // Cound number of packages per sender in a particular interval (ms)
+        private long counterinterval = 5000;
+        private int counterthreshold = 100;
+        private int sizethreshold = 10 * 1024;
+        private DateTime counterwindow;
+        private ConcurrentDictionary<Hash, int> packetcounters;
+        private ConcurrentDictionary<Hash, int> sizecounters;
 
         public NetworkPacketSwitch(NodeConfig nodeConfig, NodeState nodeState)
         {
@@ -39,6 +47,9 @@ namespace TNetD.Nodes
             network.PacketReceived += network_PacketReceived;
 
             network.Initialize();
+
+            packetcounters = new ConcurrentDictionary<Hash, int>();
+            sizecounters = new ConcurrentDictionary<Hash, int>();
         }
 
         async public Task InitialConnectAsync()
@@ -82,6 +93,8 @@ namespace TNetD.Nodes
         {
             //DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + packet.PublicKeySource + " | Data Length : " + packet.Data.Length);
 
+            checkPacketCounts(packet);
+
             switch (packet.Type)
             {
                 case PacketType.TPT_CONS_MERGE_REQUEST:
@@ -95,7 +108,7 @@ namespace TNetD.Nodes
                 case PacketType.TPT_CONS_CONFIRM_REQUEST:
                 case PacketType.TPT_CONS_CONFIRM_RESPONSE:
 
-                    if(ConsensusEvent!=null)
+                    if (ConsensusEvent != null)
                         await ConsensusEvent.Invoke(packet).ConfigureAwait(false);
 
                     break;
@@ -107,7 +120,7 @@ namespace TNetD.Nodes
                 case PacketType.TPT_LSYNC_LEAF_REQUEST:
                 case PacketType.TPT_LSYNC_LEAF_REQUEST_ALL:
                 case PacketType.TPT_LSYNC_LEAF_RESPONSE:
-                                       
+
                     LedgerSyncEvent?.Invoke(packet);
 
                     break;
@@ -125,20 +138,20 @@ namespace TNetD.Nodes
 
                 case PacketType.TPT_TIMESYNC_REQUEST:
                 case PacketType.TPT_TIMESYNC_RESPONSE:
-                    
+
                     TimeSyncEvent?.Invoke(packet);
 
                     break;
 
-                case PacketType.TPT_PEER_DISCOVERY_INIT:
+                case PacketType.TPT_PEER_DISCOVERY_REQUEST:
                 case PacketType.TPT_PEER_DISCOVERY_RESPONSE:
-                    
+
                     PeerDiscoveryEvent?.Invoke(packet);
 
                     break;
             }
         }
-        
+
         public NetworkResult AddToQueue(Hash publicKeyDestination, NetworkPacket packet)
         {
             return network.AddToQueue(new NetworkPacketQueueEntry(publicKeyDestination, packet));
@@ -148,7 +161,7 @@ namespace TNetD.Nodes
         {
             await network.SendAsync(new NetworkPacketQueueEntry(publicKeyDestination, packet)).ConfigureAwait(false);
         }
-        
+
         public void Stop()
         {
             network.Stop();
@@ -176,8 +189,71 @@ namespace TNetD.Nodes
                 nodeState.PendingNetworkRequests.TryRemove(packet.Token, out tmp);
             }
 
+            if (!good)
+            {
+                nodeState.logger.Log(LogType.Network, "Dropped packet from " + packet.PublicKeySource + ": Unrequested response.");
+            }
+
             return good;
         }
 
+        /// <summary>
+        /// checks whether the number of packets from a certian node exceed a threshold
+        /// </summary>
+        /// <param name="packet"></param>
+        private void checkPacketCounts(NetworkPacket packet)
+        {
+            packetcounters.AddOrUpdate(packet.PublicKeySource, 1, (k, v) => v + 1);
+            sizecounters.AddOrUpdate(packet.PublicKeySource, packet.Data.Length, (k, v) => v + packet.Data.Length);
+
+            if (packetcounters[packet.PublicKeySource] > counterthreshold)
+            {
+                nodeState.logger.Log(LogType.Network, "WARNING: More than "
+                    + packetcounters[packet.PublicKeySource] + " packets from "
+                    + packet.PublicKeySource + " received in "
+                    + counterinterval + "00 ns.");
+                // TODO: More than just warning
+            }
+
+            if (sizecounters[packet.PublicKeySource] > sizethreshold)
+            {
+                nodeState.logger.Log(LogType.Network, "WARNING: More than "
+                    + sizecounters[packet.PublicKeySource] + " bytes from "
+                    + packet.PublicKeySource + " received in "
+                    + counterinterval + "00 ns.");
+                // TODO: More than just warning
+            }
+
+            if (nodeState.CurrentNetworkTime - counterwindow > TimeSpan.FromMilliseconds(counterinterval))
+            {
+                packetcounters = new ConcurrentDictionary<Hash, int>();
+                counterwindow = nodeState.CurrentNetworkTime;
+            }
+        }
+
+
+        private bool isRequest(NetworkPacket packet)
+        {
+            switch (packet.Type)
+            {
+                case PacketType.TPT_CONS_CONFIRM_REQUEST:
+                case PacketType.TPT_CONS_MERGE_REQUEST:
+                case PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST:
+                case PacketType.TPT_CONS_SYNC_REQUEST:
+                case PacketType.TPT_CONS_VOTE_REQUEST:
+                case PacketType.TPT_LSYNC_LEAF_REQUEST:
+                case PacketType.TPT_LSYNC_LEAF_REQUEST_ALL:
+                case PacketType.TPT_LSYNC_NODE_REQUEST:
+                case PacketType.TPT_LSYNC_ROOT_REQUEST:
+                case PacketType.TPT_TIMESYNC_REQUEST:
+                case PacketType.TPT_TX_SYNC_CLOSEHISTORY_REQUEST:
+                case PacketType.TPT_TX_SYNC_FETCH_REQUEST:
+                case PacketType.TPT_TX_SYNC_ID_REQUEST:
+                case PacketType.TPT_TX_SYNC_QUERY_REQUEST:
+                case PacketType.TPT_PEER_DISCOVERY_REQUEST:
+                    return true;
+            }
+            return false;
+        }
     }
 }

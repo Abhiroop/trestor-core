@@ -99,7 +99,7 @@ namespace TNetD.Network.PeerDiscovery
             PeerDiscoveryMsg request = new PeerDiscoveryMsg();
             request.knownPeers = KnownPeers;
             byte[] message = request.Serialize();
-            NetworkPacket packet = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_PEER_DISCOVERY_INIT, message, token);
+            NetworkPacket packet = new NetworkPacket(nodeConfig.PublicKey, PacketType.TPT_PEER_DISCOVERY_REQUEST, message, token);
             networkPacketSwitch.AddToQueue(peer, packet);
         }
 
@@ -107,7 +107,7 @@ namespace TNetD.Network.PeerDiscovery
         {
             switch (packet.Type)
             {
-                case PacketType.TPT_PEER_DISCOVERY_INIT:
+                case PacketType.TPT_PEER_DISCOVERY_REQUEST:
                     respondPeerDiscovery(packet);
                     return;
                 case PacketType.TPT_PEER_DISCOVERY_RESPONSE:

@@ -175,14 +175,17 @@ namespace TNetD.Network.Networking
                 {
                     if (!messageTypePairs.Responses.Contains(npqe.Packet.Type))
                     {
-                        DisplayUtils.Display("Non-Pair packet with valid Token.", DisplayType.CodeAssertionFailed);
+                        DisplayUtils.Display("Non-Pair packet with valid Token length.", DisplayType.CodeAssertionFailed);
                     }
                 }
             }
             else
             {
                 if (npqe.Packet.Token.Hex.Length != 0)
+                {
                     DisplayUtils.Display("Bad token Length.", DisplayType.CodeAssertionFailed);
+                    nodeState.logger.Log(LogType.Network, "Invalid packet from " + npqe.Packet.PublicKeySource + ": Bad token Length");
+                }
             }
         }
         
