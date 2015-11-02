@@ -375,13 +375,11 @@ namespace TNetD.Consensus
                         // bool b = nodeState.NodeLatency.GetAverageLatency(nodeConfig.PublicKey)
 
                         Print("Sync Done. Normal.");
-                        nodeState.logger.Log(LogType.Voting, "Sync Done. Normal.");
                     }
                     else
                     {
                         // Too bad we need to wait for sync
                         Print("Sync Wait.");
-                        nodeState.logger.Log(LogType.Voting, "Sync Wait.");
 
                     }
                 }
@@ -396,7 +394,6 @@ namespace TNetD.Consensus
                         syncStateCounter = 0;
 
                         Print("Sync Done. Forced.");
-                        nodeState.logger.Log(LogType.Voting, "Sync Done. Forced.");
                     }
                 }
             }
@@ -436,7 +433,6 @@ namespace TNetD.Consensus
                 mergeStateCounter = 0;
 
                 Print("Merge Finished. " + GetTxCount(ballot));
-                nodeState.logger.Log(LogType.Voting, "Merge Finished. " + GetTxCount(ballot));
             }
         }
 
@@ -489,8 +485,7 @@ namespace TNetD.Consensus
 
                     Print("Waiting for pending voting requests : " + voteMessageCounter.Votes +
                             "/" + voteMessageCounter.UniqueVoteResponders + " Received");
-                    nodeState.logger.Log(LogType.Voting, "Waiting for pending voting requests : " + voteMessageCounter.Votes +
-                            "/" + voteMessageCounter.UniqueVoteResponders + " Received");
+
 
 
                     await Task.Delay(30);
@@ -530,9 +525,7 @@ namespace TNetD.Consensus
             Print("Voting " + state + " Done" + voteMessageCounter.Votes +
                 "/" + voteMessageCounter.UniqueVoteResponders + " Accepted " + passedTxs.Count +
                 " Txns, Fetching " + missingTransactions.SelectMany(p => p.Value).Count() + " Txns");
-            nodeState.logger.Log(LogType.Voting, "Voting " + state + " Done" + voteMessageCounter.Votes +
-                "/" + voteMessageCounter.UniqueVoteResponders + " Accepted " + passedTxs.Count +
-                " Txns, Fetching " + missingTransactions.SelectMany(p => p.Value).Count() + " Txns");
+
 
             voteMessageCounter.ResetVotes();
         }
@@ -830,8 +823,6 @@ namespace TNetD.Consensus
                     {
                         PrintImpt("Voting Successful. Applying to ledger. " + GetTxCount(finalBallot) +
                             " | Consesus percentage: " + percentage);
-                        nodeState.logger.Log(LogType.Voting, "Voting Successful. Applying to ledger. " + GetTxCount(finalBallot) +
-                            " | Consesus percentage: " + percentage);
 
                         ApplyToLedger(finalBallot);
 
@@ -840,15 +831,13 @@ namespace TNetD.Consensus
                     else
                     {
                         PrintImpt("Voting Unsuccessful. Consesus percentage: " + percentage);
-                        nodeState.logger.Log(LogType.Voting, "Voting Unsuccessful. Consesus percentage: " + percentage);
                     }
                 }
                 else
                 {
                     PrintImpt("Voting Unsuccessful. Not Enough Trusted Voters. Trusted Voters: " + trustedSynchronizedVoters +
                         " Trusted Conns :" + totalTrustedConnections);
-                    nodeState.logger.Log(LogType.Voting, "Voting Unsuccessful. Not Enough Trusted Voters. Trusted Voters: " + trustedSynchronizedVoters +
-                        " Trusted Conns :" + totalTrustedConnections);
+
 
                     NotEnoughVoters = true;
                 }
@@ -881,12 +870,10 @@ namespace TNetD.Consensus
                 transactionValidator.ApplyTransactions(THD);
 
                 PrintImpt("Applied " + THD.AcceptedTransactions.Count + " transaction !!!");
-                nodeState.logger.Log(LogType.Voting, "Applied " + THD.AcceptedTransactions.Count + " transaction !!!");
 
                 if (THD.NewAccounts.Count > 0)
                 {
                     PrintImpt("Created " + THD.NewAccounts.Count + " account !!!");
-                    nodeState.logger.Log(LogType.Voting, "Created " + THD.NewAccounts.Count + " account !!!");
                 }
 
                 UpdateLCD();

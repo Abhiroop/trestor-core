@@ -206,7 +206,7 @@ namespace TNetD.Nodes
             packetcounters.AddOrUpdate(packet.PublicKeySource, 1, (k, v) => v + 1);
             sizecounters.AddOrUpdate(packet.PublicKeySource, packet.Data.Length, (k, v) => v + packet.Data.Length);
 
-            if (packetcounters[packet.PublicKeySource] > counterthreshold)
+            if (packetcounters.ContainsKey(packet.PublicKeySource) && packetcounters[packet.PublicKeySource] > counterthreshold)
             {
                 nodeState.logger.Log(LogType.Network, "WARNING: More than "
                     + packetcounters[packet.PublicKeySource] + " packets from "
