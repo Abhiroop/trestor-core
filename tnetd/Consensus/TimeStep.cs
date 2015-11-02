@@ -10,6 +10,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TNetD.Nodes;
@@ -25,31 +26,32 @@ namespace TNetD.Consensus
         public bool EventEnabled { get; set; } = false;
 
         /// <summary>
-        /// 45 Milliseconds
+        /// 50 Milliseconds
         /// </summary>
-        public static readonly int DEFAULT_TIMER_FASTSTEP = 45;
+        public static readonly TimeSpan DEFAULT_TIMER_FASTSTEP = TimeSpan.FromMilliseconds(50);
 
         /// <summary>
         /// 500 Milliseconds
         /// </summary>
-        public static readonly int DEFAULT_TIMER_TIMESTEP = 500;
+        public static readonly TimeSpan DEFAULT_TIMER_TIMESTEP = TimeSpan.FromMilliseconds(500);
 
         /// <summary>
         /// 5000 Milliseconds
         /// </summary>
-        public static readonly int DEFAULT_TIMER_MAXSTEP = 5000;
+        public static readonly TimeSpan DEFAULT_TIMER_MAXSTEP = TimeSpan.FromMilliseconds(5000);
 
         /// <summary>
         /// Timesteps in MS
         /// </summary>
         int[] resolutions = new int[] { 100, 200, 300, 500, 1000, 1500, 2000, 3000, 5000, 10000};
 
-        public int currentTimeElapsed = 0;
+        public double currentTimeElapsed = 0;
 
         public bool IsNextStepSet { get; set; } = false;
 
-        int NextTimeStep { get; set; } = 500;
+        TimeSpan NextTimeStep { get; set; } = TimeSpan.FromMilliseconds(500);
 
+        DateTime LastTick;
         DateTime NextTime;
 
         /// <summary>
@@ -75,7 +77,7 @@ namespace TNetD.Consensus
 
             TimeSpan tsp;
 
-            System.Reactive.Linq.Observable.Interval(TimeSpan.FromMilliseconds(DEFAULT_TIMER_FASTSTEP))
+            Observable.Interval(DEFAULT_TIMER_FASTSTEP)
                 .Subscribe(async x => await TimerVoting_FastElapsed(x));
 
             //NextTime = nodeState.CurrentNetworkTime.Add(new TimeSpan())
@@ -105,34 +107,19 @@ namespace TNetD.Consensus
                 SetNextTimeStep(DEFAULT_TIMER_TIMESTEP);
         }
 
-        public void SetNextTimeStep(int timestepMilliseconds)
+        public void SetNextTimeStep(TimeSpan timeStep)
         {
-            if (timestepMilliseconds >= DEFAULT_TIMER_FASTSTEP &&
-                timestepMilliseconds <= DEFAULT_TIMER_MAXSTEP)
+            if (timeStep >= DEFAULT_TIMER_FASTSTEP &&
+                timeStep <= DEFAULT_TIMER_MAXSTEP)
             {
-                NextTimeStep = timestepMilliseconds;
+                NextTimeStep = timeStep;
                 IsNextStepSet = true;
             }
         }
-
-        void StepTime(int stepTimeMilliseconds)
+        
+        void StepTime(TimeSpan stepTime)
         {
-            currentTimeElapsed += stepTimeMilliseconds;
-        }
-
-        /// <summary>
-        /// Returns true if the current elapsed time exceeds the set next time step;
-        /// </summary>
-        /// <returns></returns>
-        bool IsComplete()
-        {
-            if (currentTimeElapsed > NextTimeStep)
-            {
-                currentTimeElapsed = 0;
-                return true;
-            }
-
-            return false;
+            currentTimeElapsed += stepTime.TotalMilliseconds;
         }
 
         async Task TimerVoting_FastElapsed(object sender)
@@ -141,15 +128,15 @@ namespace TNetD.Consensus
             {
                 StepTime(DEFAULT_TIMER_FASTSTEP);
 
-                if (IsComplete())
+                if (TimeSpan.FromMilliseconds(currentTimeElapsed) > NextTimeStep)
                 {
+                    currentTimeElapsed = 0;
+
                     timerLockFree = false;
 
+                    LastTick = nodeState.CurrentNetworkTime;
+
                     await Step?.Invoke();
-
-
-
-
 
                     timerLockFree = true;
                 }
