@@ -232,28 +232,6 @@ namespace TNetD.Nodes
         }
 
 
-        private bool isRequest(NetworkPacket packet)
-        {
-            switch (packet.Type)
-            {
-                case PacketType.TPT_CONS_CONFIRM_REQUEST:
-                case PacketType.TPT_CONS_MERGE_REQUEST:
-                case PacketType.TPT_CONS_MERGE_TX_FETCH_REQUEST:
-                case PacketType.TPT_CONS_SYNC_REQUEST:
-                case PacketType.TPT_CONS_VOTE_REQUEST:
-                case PacketType.TPT_LSYNC_LEAF_REQUEST:
-                case PacketType.TPT_LSYNC_LEAF_REQUEST_ALL:
-                case PacketType.TPT_LSYNC_NODE_REQUEST:
-                case PacketType.TPT_LSYNC_ROOT_REQUEST:
-                case PacketType.TPT_TIMESYNC_REQUEST:
-                case PacketType.TPT_TX_SYNC_CLOSEHISTORY_REQUEST:
-                case PacketType.TPT_TX_SYNC_FETCH_REQUEST:
-                case PacketType.TPT_TX_SYNC_ID_REQUEST:
-                case PacketType.TPT_TX_SYNC_QUERY_REQUEST:
-                case PacketType.TPT_PEER_DISCOVERY_REQUEST:
-                    return true;
-            }
-            return false;
-        }
+        
     }
 }
