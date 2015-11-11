@@ -24,8 +24,8 @@ namespace TNetD.Network.Networking
         Timer updateTimer;
 
         //thresholds of packets/bytes per second
-        int msgthreshold = 1000;
-        int datathreshold = 4096;
+        int msgthreshold = 100;
+        int datathreshold = 1024;
         int queuelength = 10;
 
         public NodeRating(NodeState nodeState)
@@ -80,8 +80,10 @@ namespace TNetD.Network.Networking
 
         private void processQueue(object sender, ElapsedEventArgs e)
         {
-            foreach (Hash node in nodeState.ConnectedValidators.Keys)
+            Hash[] nodes = nodeState.ConnectedValidators.Keys.ToArray<Hash>();
+            foreach (Hash node in nodes)
             {
+                //create queues for newly connected nodes
                 if (!nodeMsgHistory.ContainsKey(node))
                 {
                     ConcurrentQueue<int> msgQ = new ConcurrentQueue<int>();
@@ -93,9 +95,11 @@ namespace TNetD.Network.Networking
                     nodeDataHistory.AddOrUpdate(node, dataQ, (k, v) => dataQ);
                 }
 
+                //enqueue current data
                 if (currentMsgs.ContainsKey(node))
                 {
                     nodeMsgHistory[node].Enqueue(currentMsgs[node]);
+                    currentMsgs[node] = 0;
                 }
                 else
                 {
@@ -105,6 +109,7 @@ namespace TNetD.Network.Networking
                 if (currentData.ContainsKey(node))
                 {
                     nodeDataHistory[node].Enqueue(currentData[node]);
+                    currentData[node] = 0;
                 }
                 else
                 {
@@ -112,6 +117,7 @@ namespace TNetD.Network.Networking
                 }
             }
 
+            // delete disconnected nodes' history
             foreach (Hash node in nodeMsgHistory.Keys)
             {
                 if (!nodeState.ConnectedValidators.Keys.Contains<Hash>(node))
@@ -120,7 +126,6 @@ namespace TNetD.Network.Networking
                     nodeMsgHistory.TryRemove(node, out q);
                 }
             }
-
             foreach (Hash node in nodeDataHistory.Keys)
             {
                 if (!nodeState.ConnectedValidators.Keys.Contains<Hash>(node))
@@ -130,7 +135,9 @@ namespace TNetD.Network.Networking
                 }
             }
 
-            foreach (Hash node in nodeState.ConnectedValidators.Keys)
+
+
+            foreach (Hash node in nodes)
             {
                 // crop queue to length of 10
                 while (nodeMsgHistory.ContainsKey(node) && nodeMsgHistory[node].Count > queuelength)
@@ -146,13 +153,27 @@ namespace TNetD.Network.Networking
 
                 //compute  results and compare with thresholds
                 int sum;
-                sum = nodeMsgHistory[node].Sum();
+                if (nodeMsgHistory.ContainsKey(node))
+                {
+                    sum = nodeMsgHistory[node].Sum();
+                }
+                else
+                {
+                    sum = 0;
+                }
                 if (sum > msgthreshold)
                 {
                     nodeState.logger.Log(LogType.Network, "WARNING: More than " + msgthreshold
                         + " packets from " + node + " received in " + queuelength + " s.");
                 }
-                sum = nodeDataHistory[node].Sum();
+                if (nodeMsgHistory.ContainsKey(node))
+                {
+                    sum = nodeDataHistory[node].Sum();
+                }
+                else
+                {
+                    sum = 0;
+                }
                 if (sum > datathreshold)
                 {
                     nodeState.logger.Log(LogType.Network, "WARNING: More than " + datathreshold
