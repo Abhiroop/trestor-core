@@ -31,12 +31,7 @@ namespace TNetD.Nodes
         SecureNetwork network = default(SecureNetwork);
 
         // Cound number of packages per sender in a particular interval (ms)
-        private long counterinterval = 5000;
-        private int counterthreshold = 100;
-        private int sizethreshold = 10 * 1024;
-        private DateTime counterwindow;
-        private ConcurrentDictionary<Hash, int> packetcounters;
-        private ConcurrentDictionary<Hash, int> sizecounters;
+        private NodeRating noderating;
 
         public NetworkPacketSwitch(NodeConfig nodeConfig, NodeState nodeState)
         {
@@ -48,8 +43,7 @@ namespace TNetD.Nodes
 
             network.Initialize();
 
-            packetcounters = new ConcurrentDictionary<Hash, int>();
-            sizecounters = new ConcurrentDictionary<Hash, int>();
+            noderating = new NodeRating(nodeState);
         }
 
         async public Task InitialConnectAsync()
@@ -93,7 +87,7 @@ namespace TNetD.Nodes
         {
             //DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + packet.PublicKeySource + " | Data Length : " + packet.Data.Length);
 
-            checkPacketCounts(packet);
+            noderating.TrackPacket(packet);
 
             switch (packet.Type)
             {
@@ -197,41 +191,12 @@ namespace TNetD.Nodes
             return good;
         }
 
-        /// <summary>
-        /// checks whether the number of packets from a certian node exceed a threshold
-        /// </summary>
-        /// <param name="packet"></param>
-        private void checkPacketCounts(NetworkPacket packet)
-        {
-            packetcounters.AddOrUpdate(packet.PublicKeySource, 1, (k, v) => v + 1);
-            sizecounters.AddOrUpdate(packet.PublicKeySource, packet.Data.Length, (k, v) => v + packet.Data.Length);
-
-            if (packetcounters[packet.PublicKeySource] > counterthreshold)
-            {
-                nodeState.logger.Log(LogType.Network, "WARNING: More than "
-                    + packetcounters[packet.PublicKeySource] + " packets from "
-                    + packet.PublicKeySource + " received in "
-                    + counterinterval + "00 ns.");
-                // TODO: More than just warning
-            }
-
-            if (sizecounters[packet.PublicKeySource] > sizethreshold)
-            {
-                nodeState.logger.Log(LogType.Network, "WARNING: More than "
-                    + sizecounters[packet.PublicKeySource] + " bytes from "
-                    + packet.PublicKeySource + " received in "
-                    + counterinterval + "00 ns.");
-                // TODO: More than just warning
-            }
-
-            if (nodeState.CurrentNetworkTime - counterwindow > TimeSpan.FromMilliseconds(counterinterval))
-            {
-                packetcounters.Clear();
-                counterwindow = nodeState.CurrentNetworkTime;
-            }
-        }
 
 
-        
+
+
+
+
+
     }
 }

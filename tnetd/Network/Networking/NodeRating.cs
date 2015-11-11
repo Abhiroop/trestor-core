@@ -23,6 +23,11 @@ namespace TNetD.Network.Networking
 
         Timer updateTimer;
 
+        //thresholds of packets/bytes per second
+        int msgthreshold = 1000;
+        int datathreshold = 4096;
+        int queuelength = 10;
+
         public NodeRating(NodeState nodeState)
         {
             this.nodeState = nodeState;
@@ -31,15 +36,6 @@ namespace TNetD.Network.Networking
             currentMsgs = new ConcurrentDictionary<Hash, int>();
             nodeMsgHistory = new ConcurrentDictionary<Hash, ConcurrentQueue<int>>();
             nodeDataHistory = new ConcurrentDictionary<Hash, ConcurrentQueue<int>>();
-
-            foreach (Hash node in nodeState.ConnectedValidators.Keys)
-            {
-                ConcurrentQueue<int> msgQ = new ConcurrentQueue<int>();
-                nodeMsgHistory.AddOrUpdate(node, msgQ, (k, v) => msgQ);
-
-                ConcurrentQueue<int> dataQ = new ConcurrentQueue<int>();
-                nodeDataHistory.AddOrUpdate(node, dataQ, (k, v) => dataQ);
-            }
 
             updateTimer = new Timer();
             updateTimer.Interval = 1000;
@@ -54,8 +50,8 @@ namespace TNetD.Network.Networking
         /// <param name="packet"></param>
         public void TrackPacket(NetworkPacket packet)
         {
-            currentData[packet.PublicKeySource] += packet.Data.Length;
-            currentMsgs[packet.PublicKeySource] += 1;
+            currentData.AddOrUpdate(packet.PublicKeySource, packet.Data.Length, (k, v) => v + packet.Data.Length);
+            currentMsgs.AddOrUpdate(packet.PublicKeySource, 1, (k, v) => v + 1);
         }
 
         /// <summary>
@@ -80,13 +76,23 @@ namespace TNetD.Network.Networking
             return queue.Sum();
         }
 
-        /// <summary>
-        /// process current counters and enqueue results
-        /// </summary>
+
+
         private void processQueue(object sender, ElapsedEventArgs e)
         {
             foreach (Hash node in nodeState.ConnectedValidators.Keys)
             {
+                if (!nodeMsgHistory.ContainsKey(node))
+                {
+                    ConcurrentQueue<int> msgQ = new ConcurrentQueue<int>();
+                    nodeMsgHistory.AddOrUpdate(node, msgQ, (k, v) => msgQ);
+                }
+                if (!nodeDataHistory.ContainsKey(node))
+                {
+                    ConcurrentQueue<int> dataQ = new ConcurrentQueue<int>();
+                    nodeDataHistory.AddOrUpdate(node, dataQ, (k, v) => dataQ);
+                }
+
                 if (currentMsgs.ContainsKey(node))
                 {
                     nodeMsgHistory[node].Enqueue(currentMsgs[node]);
@@ -105,9 +111,53 @@ namespace TNetD.Network.Networking
                     nodeDataHistory[node].Enqueue(0);
                 }
             }
+
+            foreach (Hash node in nodeMsgHistory.Keys)
+            {
+                if (!nodeState.ConnectedValidators.Keys.Contains<Hash>(node))
+                {
+                    ConcurrentQueue<int> q;
+                    nodeMsgHistory.TryRemove(node, out q);
+                }
+            }
+
+            foreach (Hash node in nodeDataHistory.Keys)
+            {
+                if (!nodeState.ConnectedValidators.Keys.Contains<Hash>(node))
+                {
+                    ConcurrentQueue<int> q;
+                    nodeDataHistory.TryRemove(node, out q);
+                }
+            }
+
             foreach (Hash node in nodeState.ConnectedValidators.Keys)
             {
-                // TODO: crop queues to length
+                // crop queue to length of 10
+                while (nodeMsgHistory.ContainsKey(node) && nodeMsgHistory[node].Count > queuelength)
+                {
+                    int i;
+                    nodeMsgHistory[node].TryDequeue(out i);
+                }
+                while (nodeDataHistory.ContainsKey(node) && nodeDataHistory[node].Count > queuelength)
+                {
+                    int i;
+                    nodeDataHistory[node].TryDequeue(out i);
+                }
+
+                //compute  results and compare with thresholds
+                int sum;
+                sum = nodeMsgHistory[node].Sum();
+                if (sum > msgthreshold)
+                {
+                    nodeState.logger.Log(LogType.Network, "WARNING: More than " + msgthreshold
+                        + " packets from " + node + " received in " + queuelength + " s.");
+                }
+                sum = nodeDataHistory[node].Sum();
+                if (sum > datathreshold)
+                {
+                    nodeState.logger.Log(LogType.Network, "WARNING: More than " + datathreshold
+                        + " bytes from " + node + " received in " + queuelength + " s.");
+                }
             }
         }
 
