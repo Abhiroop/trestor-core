@@ -23,10 +23,11 @@ namespace TNetD.Network.Networking
 
         Timer updateTimer;
 
-        //thresholds of packets/bytes per second
+        //thresholds of packets/bytes per measuring interval
         int msgthreshold = 100;
         int datathreshold = 1024;
         int queuelength = 10;
+        int timer_interval = 1000;
 
         public NodeRating(NodeState nodeState)
         {
@@ -38,7 +39,7 @@ namespace TNetD.Network.Networking
             nodeDataHistory = new ConcurrentDictionary<Hash, ConcurrentQueue<int>>();
 
             updateTimer = new Timer();
-            updateTimer.Interval = 1000;
+            updateTimer.Interval = timer_interval;
             updateTimer.Elapsed += processQueue;
             updateTimer.Enabled = true;
             updateTimer.Start();
