@@ -136,7 +136,7 @@ namespace TNetD.Consensus
         ConcurrentDictionary<Hash, SyncState> syncMap;
 
         VoteMessageCounter voteMessageCounter;
-        
+
         public Voting(NodeConfig nodeConfig, NodeState nodeState, NetworkPacketSwitch networkPacketSwitch)
         {
             this.nodeConfig = nodeConfig;
@@ -233,7 +233,7 @@ namespace TNetD.Consensus
             }
         }
 
-        
+
         private void Print(string message)
         {
             if (DebuggingMessages)
@@ -251,7 +251,7 @@ namespace TNetD.Consensus
              if (Enabled)
                  VotingEvent();
          }*/
-                 
+
         bool isBallotValid = false;
         bool isFinalBallotValid = false;
         bool isFinalConfirmedVotersValid = false;
@@ -442,7 +442,7 @@ namespace TNetD.Consensus
             ballot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(ballot.GetSignatureData()));
         }
 
-        int MAX_EXTRA_VOTING_STEP_WAIT_CYCLES = 20;
+        int MAX_EXTRA_VOTING_STEP_WAIT_CYCLES = 3;
         int extraVotingDelayCycles = 0; // Wait for all the voters to send their requests.
         bool currentVotingRequestSent = false;
 
@@ -483,10 +483,8 @@ namespace TNetD.Consensus
                 {
                     waitCount++;
 
-                    Print("Waiting for pending voting requests : " + voteMessageCounter.Votes +
-                            "/" + voteMessageCounter.UniqueVoteResponders + " Received");
-
-
+                    //Print("Waiting for pending voting requests : " + voteMessageCounter.Votes +
+                    //       "/" + voteMessageCounter.UniqueVoteResponders + " Received");
 
                     await Task.Delay(30);
                 }
@@ -498,7 +496,7 @@ namespace TNetD.Consensus
 
             return VoteNextState.Wait;
         }
-        
+
         async Task VotingPostRound(VotingStates state, float Percentage)
         {
             extraVotingDelayCycles = 0;
@@ -538,7 +536,7 @@ namespace TNetD.Consensus
                 await sendVoteRequests();
                 currentVotingRequestSent = true;
             }
-                        
+
             if (/*CheckReceivedExpectedVotePackets()*/await WaitForPendingVotesIfNeeded() == VoteNextState.Next)
             {
                 await VotingPostRound(state, percentage);
