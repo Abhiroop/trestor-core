@@ -187,7 +187,7 @@ namespace TNetD
                 AccountInfo ai = new AccountInfo(h, Common.NORMAL_RNG.Next(79382, 823649238),
                     "name_" + Common.NORMAL_RNG.Next(0, 823649238), AccountState.Normal, NetworkType.TestNet, AccountType.TestNormal, 0);
 
-                nodes[0].nodeState.Ledger.AddUserToLedger(ai);
+                nodes[1].nodeState.Ledger.AddUserToLedger(ai);
             }
 
         }

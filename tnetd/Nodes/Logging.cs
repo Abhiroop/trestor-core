@@ -2,6 +2,7 @@
 using System.Text;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Timers;
 
 namespace TNetD.Nodes
 {
@@ -16,6 +17,9 @@ namespace TNetD.Nodes
         public bool NetworkLogEnabled { get; set; } = true;
         public bool SecurityLogEnabled { get; set; } = true;
         public bool LedgerSyncLogEnabled { get; set; } = true;
+
+        Timer flushTimer;
+        int timer_interval = 10000;
 
 
         /// <summary>
@@ -32,27 +36,28 @@ namespace TNetD.Nodes
             file = new FileStream(privateDirectory + "/logs/voting.log", FileMode.Append);
             votinglog = new StreamWriter(file, Encoding.UTF8);
             votinglog.WriteLine("Logging started at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ".");
-            votinglog.Flush();
 
             file = new FileStream(privateDirectory + "/logs/timesync.log", FileMode.Append);
             timesynclog = new StreamWriter(file, Encoding.UTF8);
             timesynclog.WriteLine("Logging started at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ".");
-            timesynclog.Flush();
 
             file = new FileStream(privateDirectory + "/logs/network.log", FileMode.Append);
             networklog = new StreamWriter(file, Encoding.UTF8);
             networklog.WriteLine("Logging started at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ".");
-            networklog.Flush();
 
             file = new FileStream(privateDirectory + "/logs/security.log", FileMode.Append);
             securitylog = new StreamWriter(file, Encoding.UTF8);
             securitylog.WriteLine("Logging started at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ".");
-            securitylog.Flush();
 
             file = new FileStream(privateDirectory + "/logs/ledgersync.log", FileMode.Append);
             ledgersynclog = new StreamWriter(file, Encoding.UTF8);
             ledgersynclog.WriteLine("Logging started at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ".");
-            ledgersynclog.Flush();
+
+            flushTimer = new Timer();
+            flushTimer.Interval = timer_interval;
+            flushTimer.Elapsed += flushBuffers;
+            flushTimer.Enabled = true;
+            flushTimer.Start();
         }
 
         /// <summary>
@@ -68,35 +73,30 @@ namespace TNetD.Nodes
                     if (TimeSyncLogEnabled)
                     {
                         timesynclog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + methodName + "] " + message);
-                        timesynclog.Flush();
                     }
                     break;
                 case LogType.Voting:
                     if (VotingLogEnabled)
                     {
                         votinglog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + methodName + "] " + message);
-                        votinglog.Flush();
                     }
                     break;
                 case LogType.Network:
                     if (NetworkLogEnabled)
                     {
                         networklog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + methodName + "] " + message);
-                        networklog.Flush();
                     }
                     break;
                 case LogType.Security:
                     if (SecurityLogEnabled)
                     {
                         securitylog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + methodName + "] " + message);
-                        securitylog.Flush();
                     }
                     break;
                 case LogType.LedgerSync:
                     if (LedgerSyncLogEnabled)
                     {
                         ledgersynclog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + methodName + "] " + message);
-                        ledgersynclog.Flush();
                     }
                     break;
             }
@@ -119,6 +119,15 @@ namespace TNetD.Nodes
             NetworkLogEnabled = false;
             SecurityLogEnabled = false;
             LedgerSyncLogEnabled = false;
+        }
+
+        private void flushBuffers(object sender, ElapsedEventArgs e)
+        {
+            votinglog.Flush();
+            timesynclog.Flush();
+            networklog.Flush();
+            securitylog.Flush();
+            ledgersynclog.Flush();
         }
     }
 }

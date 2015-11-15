@@ -24,7 +24,7 @@ namespace TNetD.Network.Networking
         Timer updateTimer;
 
         //thresholds of packets/bytes per measuring interval
-        int msgthreshold = 100;
+        int msgthreshold = 1000;
         int datathreshold = 1024;
         int queuelength = 10;
         int timer_interval = 1000;
@@ -159,8 +159,8 @@ namespace TNetD.Network.Networking
                 }
                 if (sum > msgthreshold)
                 {
-                    nodeState.logger.Log(LogType.Network, "WARNING: More than " + msgthreshold
-                        + " packets from " + node + " received in " + queuelength + " s.");
+                    nodeState.logger.Log(LogType.Network, "WARNING: " + sum + " packets from " + node 
+                        + " received in " + queuelength + " s.");
                 }
                 if (nodeMsgHistory.ContainsKey(node))
                 {
@@ -172,8 +172,8 @@ namespace TNetD.Network.Networking
                 }
                 if (sum > datathreshold)
                 {
-                    nodeState.logger.Log(LogType.Network, "WARNING: More than " + datathreshold
-                        + " bytes from " + node + " received in " + queuelength + " s.");
+                    nodeState.logger.Log(LogType.Network, "WARNING: " + sum + " bytes from " + node
+                        + " received in " + queuelength + " s.");
                 }
             }
         }
