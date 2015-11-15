@@ -588,7 +588,7 @@ namespace TNetD.Consensus
                     break;
 
                 case VotingStates.ST80:
-                    CurrentVotingState = await HandleVotingInternal_Final(CurrentVotingState, 80);
+                    CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 80);
                     break;
 
                 case VotingStates.STDone:
