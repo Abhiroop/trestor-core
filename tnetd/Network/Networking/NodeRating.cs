@@ -77,12 +77,9 @@ namespace TNetD.Network.Networking
             return queue.Sum();
         }
 
-
-
         private void processQueue(object sender, ElapsedEventArgs e)
         {
-            Hash[] nodes = nodeState.ConnectedValidators.Keys.ToArray<Hash>();
-            foreach (Hash node in nodes)
+            foreach (Hash node in nodeState.ConnectedValidators.Keys)
             {
                 //create queues for newly connected nodes
                 if (!nodeMsgHistory.ContainsKey(node))
@@ -136,9 +133,7 @@ namespace TNetD.Network.Networking
                 }
             }
 
-
-
-            foreach (Hash node in nodes)
+            foreach (Hash node in nodeState.ConnectedValidators.Keys)
             {
                 // crop queue to length of 10
                 while (nodeMsgHistory.ContainsKey(node) && nodeMsgHistory[node].Count > queuelength)
@@ -182,7 +177,6 @@ namespace TNetD.Network.Networking
                 }
             }
         }
-
 
         private bool isRequest(NetworkPacket packet)
         {

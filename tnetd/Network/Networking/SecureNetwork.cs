@@ -223,7 +223,7 @@ namespace TNetD.Network.Networking
                     {
                         if (!nodeState.ConnectedValidators.ContainsKey(kvp.Value.nodeSocketData.PublicKey))
                         {
-                            nodeState.ConnectedValidators.Add(kvp.Value.nodeSocketData.PublicKey, new ConnectionProperties(ConnectionDirection.Outgoing,
+                            nodeState.ConnectedValidators.TryAdd(kvp.Value.nodeSocketData.PublicKey, new ConnectionProperties(ConnectionDirection.Outgoing,
                                 nodeConfig.TrustedNodes.ContainsKey(kvp.Value.nodeSocketData.PublicKey)));
                         }
                     }
@@ -235,7 +235,7 @@ namespace TNetD.Network.Networking
                     {
                         if (!nodeState.ConnectedValidators.ContainsKey(kvp.Value.PublicKey))
                         {
-                            nodeState.ConnectedValidators.Add(kvp.Value.PublicKey, new ConnectionProperties(ConnectionDirection.Incoming,
+                            nodeState.ConnectedValidators.TryAdd(kvp.Value.PublicKey, new ConnectionProperties(ConnectionDirection.Incoming,
                                 nodeConfig.TrustedNodes.ContainsKey(kvp.Value.PublicKey)));
                         }
                     }
@@ -256,7 +256,8 @@ namespace TNetD.Network.Networking
 
                 foreach (Hash pk in toRemove)
                 {
-                    nodeState.ConnectedValidators.Remove(pk);
+                    ConnectionProperties cp;
+                    nodeState.ConnectedValidators.TryRemove(pk, out cp);
                 }
             }
             catch (System.Exception ex)

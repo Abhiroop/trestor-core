@@ -13,7 +13,7 @@ using TNetD.Nodes;
 namespace TNetD.Consensus
 {
     class VoteMap
-    {       
+    {
         NodeConfig nodeConfig;
         NodeState nodeState;
 
@@ -29,22 +29,14 @@ namespace TNetD.Consensus
         }
 
         /// <summary>
-        /// Adds the votes associated to a list. 
+        /// Adds or updates the votes associated to a list. 
         /// Make sure the ballot is valid by verifying signature before calling.
         /// </summary>
         /// <param name="ballot"></param>
         public void AddBallot(Ballot ballot)
         {
-            if (map.ContainsKey(ballot.PublicKey))
-            {
-                // Update
-                map[ballot.PublicKey] = ballot;
-            }
-            else
-            {
-                // Insert 
-                map.AddOrUpdate(ballot.PublicKey, ballot, (k, vx) => ballot);
-            }
+            // Add or Update 
+            map.AddOrUpdate(ballot.PublicKey, ballot, (k, v) => ballot);
         }
 
         /// <summary>

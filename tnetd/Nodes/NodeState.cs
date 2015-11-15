@@ -42,7 +42,7 @@ namespace TNetD.Nodes
 
         public ConcurrentBag<Hash> GlobalBlacklistedUsers { get; set; }
         
-        public Dictionary<Hash, ConnectionProperties> ConnectedValidators { get; set; }
+        public ConcurrentDictionary<Hash, ConnectionProperties> ConnectedValidators { get; set; }
 
         /// <summary>
         /// Directory where a node's keyfiles etc. are stored
@@ -87,7 +87,7 @@ namespace TNetD.Nodes
             GlobalBlacklistedValidators = new ConcurrentBag<Hash>();
             GlobalBlacklistedUsers = new ConcurrentBag<Hash>();
 
-            ConnectedValidators = new Dictionary<Hash, ConnectionProperties>();
+            ConnectedValidators = new ConcurrentDictionary<Hash, ConnectionProperties>();
 
             PendingNetworkRequests = new ConcurrentDictionary<Hash, PendingNetworkRequest>();
 

@@ -33,7 +33,7 @@ namespace TNetD.Consensus
         /// <summary>
         /// 500 Milliseconds
         /// </summary>
-        public static readonly TimeSpan DEFAULT_TIMER_TIMESTEP = TimeSpan.FromMilliseconds(500);
+        public static readonly TimeSpan DEFAULT_TIMER_TIMESTEP = TimeSpan.FromMilliseconds(1000);
 
         /// <summary>
         /// 5000 Milliseconds
@@ -49,7 +49,7 @@ namespace TNetD.Consensus
 
         public bool IsNextStepSet { get; set; } = false;
 
-        TimeSpan NextTimeStep { get; set; } = TimeSpan.FromMilliseconds(500);
+        TimeSpan NextTimeStep { get; set; } = TimeSpan.FromMilliseconds(1000);
 
         DateTime LastTick;
         DateTime NextTime;

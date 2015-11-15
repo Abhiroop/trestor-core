@@ -523,8 +523,7 @@ namespace TNetD.Consensus
             Print("Voting " + state + " Done" + voteMessageCounter.Votes +
                 "/" + voteMessageCounter.UniqueVoteResponders + " Accepted " + passedTxs.Count +
                 " Txns, Fetching " + missingTransactions.SelectMany(p => p.Value).Count() + " Txns");
-
-
+            
             voteMessageCounter.ResetVotes();
         }
 
@@ -532,12 +531,31 @@ namespace TNetD.Consensus
         {
             if (!currentVotingRequestSent)
             {
-                voteMap.Reset();
+                //voteMap.Reset();
                 await sendVoteRequests();
                 currentVotingRequestSent = true;
             }
 
-            if (/*CheckReceivedExpectedVotePackets()*/await WaitForPendingVotesIfNeeded() == VoteNextState.Next)
+           // if (/*CheckReceivedExpectedVotePackets()*/await WaitForPendingVotesIfNeeded() == VoteNextState.Next)
+            {
+                await VotingPostRound(state, percentage);
+
+                return (state + 1);
+            }
+
+           // return state;
+        }
+
+        async Task<VotingStates> HandleVotingInternal_Final(VotingStates state, float percentage)
+        {
+            if (!currentVotingRequestSent)
+            {
+                //voteMap.Reset();
+                await sendVoteRequests();
+                currentVotingRequestSent = true;
+            }
+
+            if (await WaitForPendingVotesIfNeeded() == VoteNextState.Next)
             {
                 await VotingPostRound(state, percentage);
 
@@ -570,7 +588,7 @@ namespace TNetD.Consensus
                     break;
 
                 case VotingStates.ST80:
-                    CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 80);
+                    CurrentVotingState = await HandleVotingInternal_Final(CurrentVotingState, 80);
                     break;
 
                 case VotingStates.STDone:

@@ -449,6 +449,11 @@ namespace TNetD.Consensus
             if (VerboseDebugging) Print("Vote Request Replied to " + packet.PublicKeySource);
         }
 
+        /// <summary>
+        /// CRITICAL: THINK ABOUT THE EFFECT OF REMOVING THIS.
+        /// </summary>
+        /// <param name="_vs"></param>
+        /// <returns></returns>
         async Task<bool> CheckAcceptableVotingState(VotingStates _vs)
         {
             int waitCount = 0;
@@ -465,7 +470,7 @@ namespace TNetD.Consensus
 
                 waitCount++;               
 
-                await Task.Delay(10);
+                await Task.Delay(30);
 
                 Print("Waiting for acceptable state: "+ waitCount +" VS: " + vs + " CVS: " + cvs);                
             }
@@ -473,6 +478,8 @@ namespace TNetD.Consensus
             //if (Math.Abs(vs - cvs) == 1) return true; // THINK: A difference of 1
 
             return false;
+
+            //return true;
         }
 
         async Task processVoteResponse(NetworkPacket packet)
