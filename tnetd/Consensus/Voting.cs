@@ -442,7 +442,7 @@ namespace TNetD.Consensus
             ballot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(ballot.GetSignatureData()));
         }
 
-        int MAX_EXTRA_VOTING_STEP_WAIT_CYCLES = 3;
+        int MAX_EXTRA_VOTING_STEP_WAIT_CYCLES = 5;
         int extraVotingDelayCycles = 0; // Wait for all the voters to send their requests.
         bool currentVotingRequestSent = false;
 
@@ -483,8 +483,8 @@ namespace TNetD.Consensus
                 {
                     waitCount++;
 
-                    //Print("Waiting for pending voting requests : " + voteMessageCounter.Votes +
-                    //       "/" + voteMessageCounter.UniqueVoteResponders + " Received");
+                    Print("Waiting for pending voting requests : " + voteMessageCounter.Votes +
+                           "/" + voteMessageCounter.UniqueVoteResponders + " Received");
 
                     await Task.Delay(30);
                 }
@@ -494,7 +494,7 @@ namespace TNetD.Consensus
                 }
             }
 
-            return VoteNextState.Wait;
+            return VoteNextState.Next;
         }
 
         async Task VotingPostRound(VotingStates state, float Percentage)

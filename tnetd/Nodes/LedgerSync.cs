@@ -26,7 +26,7 @@ namespace TNetD.Nodes
 
     class LedgerSync
     {
-        bool Enable = false;
+        public bool Enabled { get; set; } = false;
 
         // So with update of 2 seconds, its value is 16 seconds when set.
         private readonly uint ROOT_BACKOFF = 8; 
@@ -59,13 +59,13 @@ namespace TNetD.Nodes
             this.networkPacketSwitch.LedgerSyncEvent += networkHandler_LedgerSyncEvent;
 
             TimerLedgerSync = new System.Timers.Timer();
-            if (Enable) TimerLedgerSync.Elapsed += TimerLedgerSync_Elapsed;
+            if (Enabled) TimerLedgerSync.Elapsed += TimerLedgerSync_Elapsed;
             TimerLedgerSync.Enabled = true;
             TimerLedgerSync.Interval = nodeConfig.UpdateFrequencyLedgerSyncMS;
             TimerLedgerSync.Start();
 
             TimerLedgerSync_Root = new System.Timers.Timer();
-            if (Enable) TimerLedgerSync_Root.Elapsed += TimerLedgerSync_Root_Elapsed;
+            if (Enabled) TimerLedgerSync_Root.Elapsed += TimerLedgerSync_Root_Elapsed;
             TimerLedgerSync_Root.Enabled = true;
             TimerLedgerSync_Root.Interval = nodeConfig.UpdateFrequencyLedgerSyncMS_Root;
             TimerLedgerSync_Root.Start();

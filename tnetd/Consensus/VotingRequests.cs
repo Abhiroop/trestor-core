@@ -456,7 +456,7 @@ namespace TNetD.Consensus
             //if (vs == 0 && cvs == 1) return true;
             //if (vs == 1 && cvs == 0) return true;
 
-            while(waitCount < 15)
+            while(waitCount < 10)
             {
                 int vs = (int)_vs;
                 int cvs = (int)CurrentVotingState;
@@ -465,7 +465,7 @@ namespace TNetD.Consensus
 
                 waitCount++;               
 
-                await Task.Delay(50);
+                await Task.Delay(10);
 
                 Print("Waiting for acceptable state: "+ waitCount +" VS: " + vs + " CVS: " + cvs);                
             }

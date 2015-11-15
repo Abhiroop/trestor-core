@@ -175,6 +175,19 @@ namespace TNetD.Nodes
                 voting.Enabled = value;
             }
         }
+        
+        public bool LedgerSyncEnabled
+        {
+            get
+            {
+                return ledgerSync.Enabled;
+            }
+
+            set
+            {
+                ledgerSync.Enabled = value;
+            }
+        }
 
         void TimerTimeSync_Elapsed(object sender, ElapsedEventArgs e)
         {
