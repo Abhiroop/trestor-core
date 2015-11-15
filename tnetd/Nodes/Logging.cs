@@ -5,16 +5,17 @@ using System.Runtime.CompilerServices;
 
 namespace TNetD.Nodes
 {
-    public enum LogType { Voting, TimeSync, Network, Security };
+    public enum LogType { Voting, TimeSync, Network, Security, LedgerSync };
 
     class Logging
     {
-        private StreamWriter votinglog, timesynclog, networklog, securitylog;
+        private StreamWriter votinglog, timesynclog, networklog, securitylog, ledgersynclog;
 
         public bool VotingLogEnabled { get; set; } = true;
         public bool TimeSyncLogEnabled { get; set; } = true;
         public bool NetworkLogEnabled { get; set; } = true;
         public bool SecurityLogEnabled { get; set; } = true;
+        public bool LedgerSyncLogEnabled { get; set; } = true;
 
 
         /// <summary>
@@ -47,6 +48,11 @@ namespace TNetD.Nodes
             securitylog = new StreamWriter(file, Encoding.UTF8);
             securitylog.WriteLine("Logging started at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ".");
             securitylog.Flush();
+
+            file = new FileStream(privateDirectory + "/logs/ledgersync.log", FileMode.Append);
+            ledgersynclog = new StreamWriter(file, Encoding.UTF8);
+            ledgersynclog.WriteLine("Logging started at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + ".");
+            ledgersynclog.Flush();
         }
 
         /// <summary>
@@ -86,6 +92,13 @@ namespace TNetD.Nodes
                         securitylog.Flush();
                     }
                     break;
+                case LogType.LedgerSync:
+                    if (LedgerSyncLogEnabled)
+                    {
+                        ledgersynclog.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + " [" + methodName + "] " + message);
+                        ledgersynclog.Flush();
+                    }
+                    break;
             }
 
         }
@@ -96,6 +109,7 @@ namespace TNetD.Nodes
             TimeSyncLogEnabled = true;
             NetworkLogEnabled = true;
             SecurityLogEnabled = true;
+            LedgerSyncLogEnabled = true;
         }
 
         public void Disable()
@@ -104,6 +118,7 @@ namespace TNetD.Nodes
             TimeSyncLogEnabled = false;
             NetworkLogEnabled = false;
             SecurityLogEnabled = false;
+            LedgerSyncLogEnabled = false;
         }
     }
 }
