@@ -26,10 +26,20 @@ namespace TNetD.Nodes
 
     class LedgerSync
     {
-        public bool Enabled { get; set; } = false;
+        public bool Enabled
+        {
+            get
+            {
+                return IsEnabled;
+            }
+            set
+            {
+                EnableDisable(value);
+            }
+        }
 
         // So with update of 2 seconds, its value is 16 seconds when set.
-        private readonly uint ROOT_BACKOFF = 8; 
+        private readonly uint ROOT_BACKOFF = 8;
 
         private uint rootBackoff = 0;
 
@@ -47,6 +57,32 @@ namespace TNetD.Nodes
         Queue<NodeDataEntity> PendingNodesToBeFetched = new Queue<NodeDataEntity>();
         Queue<Hash> NodeFetchQueue = new Queue<Hash>();
 
+        bool IsEnabled = false;
+
+        void EnableDisable(bool Enable)
+        {
+            if (Enable)
+            {
+                TimerLedgerSync.Enabled = true;
+                TimerLedgerSync.Start();
+
+                TimerLedgerSync_Root.Enabled = true;
+                TimerLedgerSync_Root.Start();
+
+                IsEnabled = true;
+            }
+            else
+            {
+                TimerLedgerSync.Enabled = false;
+                TimerLedgerSync.Stop();
+
+                TimerLedgerSync_Root.Enabled = false;
+                TimerLedgerSync_Root.Stop();
+
+                IsEnabled = false;
+            }
+        }
+
         public LedgerSync(NodeState nodeState, NodeConfig nodeConfig, NetworkPacketSwitch networkPacketSwitch)
         {
             this.nodeState = nodeState;
@@ -59,16 +95,12 @@ namespace TNetD.Nodes
             this.networkPacketSwitch.LedgerSyncEvent += networkHandler_LedgerSyncEvent;
 
             TimerLedgerSync = new System.Timers.Timer();
-            if (Enabled) TimerLedgerSync.Elapsed += TimerLedgerSync_Elapsed;
-            TimerLedgerSync.Enabled = true;
+            TimerLedgerSync.Elapsed += TimerLedgerSync_Elapsed;
             TimerLedgerSync.Interval = nodeConfig.UpdateFrequencyLedgerSyncMS;
-            TimerLedgerSync.Start();
-
+            
             TimerLedgerSync_Root = new System.Timers.Timer();
-            if (Enabled) TimerLedgerSync_Root.Elapsed += TimerLedgerSync_Root_Elapsed;
-            TimerLedgerSync_Root.Enabled = true;
+            TimerLedgerSync_Root.Elapsed += TimerLedgerSync_Root_Elapsed;
             TimerLedgerSync_Root.Interval = nodeConfig.UpdateFrequencyLedgerSyncMS_Root;
-            TimerLedgerSync_Root.Start();
         }
 
         void TimerLedgerSync_Root_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -81,7 +113,7 @@ namespace TNetD.Nodes
 
                         if (PendingNodesToBeFetched.Count == 0)
                         {
-                            if(rootBackoff > 0) 
+                            if (rootBackoff > 0)
                                 rootBackoff--;
 
                             if (rootBackoff <= 0)
@@ -95,7 +127,7 @@ namespace TNetD.Nodes
                             handle_ST_DATA_FETCH();
                         }
 
-                        break;                
+                        break;
                 }
             }
         }
@@ -205,7 +237,7 @@ namespace TNetD.Nodes
                         totalOrderedLeaves += aldr.TotalRequestedLeaves;
                     }
 
-                   // DebugPrint("Fetch Normal All Nodes Below", DisplayType.ImportantInfo);
+                    // DebugPrint("Fetch Normal All Nodes Below", DisplayType.ImportantInfo);
                 }
                 else
                 {
@@ -221,7 +253,7 @@ namespace TNetD.Nodes
                             {
                                 Hash remoteChildHash = nde.Children[i];
                                 ListTreeNode currentChild = currentNode.Children[i];
-                                
+
                                 if (NodeFetchQueue.Count > Common.LSYNC_MAX_PENDING_QUEUE_LENGTH) break;
 
                                 if (remoteChildHash != null)
@@ -302,7 +334,7 @@ namespace TNetD.Nodes
             NodeInfoRequest nir = new NodeInfoRequest();
             nir.Deserialize(packet.Data);
 
-           // DebugPrint("NodeRequest from " + packet.PublicKeySource + " Nodes : " + nir.TotalRequestedNodes, DisplayType.Warning);
+            // DebugPrint("NodeRequest from " + packet.PublicKeySource + " Nodes : " + nir.TotalRequestedNodes, DisplayType.Warning);
 
             if ((Common.LSYNC_MAX_REQUESTED_NODES >= nir.TotalRequestedNodes) &&
                 (nir.TotalRequestedNodes == nir.RequestedNodesAdresses.Count))
@@ -333,7 +365,7 @@ namespace TNetD.Nodes
                 NodeInfoResponse nir = new NodeInfoResponse();
                 nir.Deserialize(packet.Data);
 
-               // DebugPrint("NodeResponse from " + packet.PublicKeySource + " : " + packet.Data.Length + " Bytes, Nodes : " + nir.TotalRequestedNodes, DisplayType.Warning);
+                // DebugPrint("NodeResponse from " + packet.PublicKeySource + " : " + packet.Data.Length + " Bytes, Nodes : " + nir.TotalRequestedNodes, DisplayType.Warning);
 
                 foreach (NodeDataEntity nde in nir.RequestedNodes)
                 {
@@ -351,7 +383,7 @@ namespace TNetD.Nodes
             AllLeafDataRequest aldr = new AllLeafDataRequest();
             aldr.Deserialize(packet.Data);
 
-           // DebugPrint("LEAF REQUEST All : " + aldr.TotalRequestedLeaves + " NODES : " + packet.Data.Length + " Bytes", DisplayType.ImportantInfo);
+            // DebugPrint("LEAF REQUEST All : " + aldr.TotalRequestedLeaves + " NODES : " + packet.Data.Length + " Bytes", DisplayType.ImportantInfo);
 
             if (aldr.TotalRequestedLeaves <= Common.LSYNC_MAX_LEAVES_TO_FETCH)
             {
