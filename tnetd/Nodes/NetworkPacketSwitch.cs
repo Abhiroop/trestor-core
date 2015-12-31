@@ -94,7 +94,7 @@ namespace TNetD.Nodes
             //DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + packet.PublicKeySource + " | Data Length : " + packet.Data.Length);
 
             noderating.TrackPacket(packet);
-            await packetLogger.LogReceive(packet);
+            packetLogger.LogReceive(packet);
 
             switch (packet.Type)
             {
@@ -160,7 +160,7 @@ namespace TNetD.Nodes
 
         public async Task SendAsync(Hash publicKeyDestination, NetworkPacket packet)
         {
-            await packetLogger.LogSend(publicKeyDestination, packet);
+            packetLogger.LogSend(publicKeyDestination, packet);
 
             await network.SendAsync(new NetworkPacketQueueEntry(publicKeyDestination, packet)).ConfigureAwait(false);
         }
