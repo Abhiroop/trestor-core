@@ -25,9 +25,8 @@ namespace TNetD.Nodes
 
         public event AsyncNetworkPacketEventHandler ConsensusEvent;
         public event AsyncNetworkPacketEventHandler TimeSyncEvent;
-
-
-        PacketLogger packetLogger = default(PacketLogger);
+        
+        public PacketLogger packetLogger = default(PacketLogger);
 
         NodeConfig nodeConfig;
         NodeState nodeState;
@@ -51,7 +50,7 @@ namespace TNetD.Nodes
 
             packetLogger = new PacketLogger(nodeConfig, nodeState);
         }
-
+        
         async public Task InitialConnectAsync()
         {
             await Task.Run(async () =>

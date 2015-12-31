@@ -86,6 +86,7 @@ namespace TNetD
             Node nd = new Node(idx);
             // nd.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
             nd.NodeStatusEvent += nd_NodeStatusEvent;
+            nd.networkPacketSwitch.packetLogger.Initialize();
             nd.BeginBackgroundLoad();
 
             nodes.Add(nd);
