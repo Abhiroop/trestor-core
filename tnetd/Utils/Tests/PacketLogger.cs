@@ -32,13 +32,12 @@ namespace TNetD.Tests
             this.nodeConfig = nodeConfig;
             this.nodeState = nodeState;
 
-            logger = new FileStream(nodeConfig.WorkDirectory + "\\" + "voteLog_"+ nodeConfig.NodeID + ".log", FileMode.Create);
+            logger = new FileStream(nodeConfig.WorkDirectory + "\\" + "voteLog_" + nodeConfig.NodeID + ".log", FileMode.Create);
             tr = new StreamWriter(logger);
 
             sw = new Stopwatch();
+            tr.WriteLine("Logging Start At : " + DateTime.UtcNow.ToFileTimeUtc());
             sw.Start();
-
-            tr.WriteLine("Logging Start At : " + nodeState.CurrentNetworkTime.ToFileTimeUtc());
         }
 
         ~PacketLogger()
