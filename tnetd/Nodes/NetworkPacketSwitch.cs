@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TNetD.Network;
 using TNetD.Network.Networking;
+using TNetD.Tests;
 using TNetD.Time;
 
 namespace TNetD.Nodes
@@ -24,6 +25,9 @@ namespace TNetD.Nodes
 
         public event AsyncNetworkPacketEventHandler ConsensusEvent;
         public event AsyncNetworkPacketEventHandler TimeSyncEvent;
+
+
+        PacketLogger packetLogger = default(PacketLogger);
 
         NodeConfig nodeConfig;
         NodeState nodeState;
@@ -44,6 +48,8 @@ namespace TNetD.Nodes
             network.Initialize();
 
             noderating = new NodeRating(nodeState);
+
+            packetLogger = new PacketLogger(nodeConfig, nodeState);
         }
 
         async public Task InitialConnectAsync()
@@ -88,6 +94,7 @@ namespace TNetD.Nodes
             //DisplayUtils.Display(" Packet: " + packet.Type + " | From: " + packet.PublicKeySource + " | Data Length : " + packet.Data.Length);
 
             noderating.TrackPacket(packet);
+            await packetLogger.LogReceive(packet);
 
             switch (packet.Type)
             {
@@ -153,6 +160,8 @@ namespace TNetD.Nodes
 
         public async Task SendAsync(Hash publicKeyDestination, NetworkPacket packet)
         {
+            await packetLogger.LogSend(publicKeyDestination, packet);
+
             await network.SendAsync(new NetworkPacketQueueEntry(publicKeyDestination, packet)).ConfigureAwait(false);
         }
 

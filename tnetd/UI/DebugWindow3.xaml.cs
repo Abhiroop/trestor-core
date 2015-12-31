@@ -173,7 +173,7 @@ namespace TNetD
 
         private void menuItem_Simulation_RamdomlyAddAccounts_Click(object sender, RoutedEventArgs e)
         {
-            int count = 5000;
+            int count = 500;
 
             long received_takas = 0;
 

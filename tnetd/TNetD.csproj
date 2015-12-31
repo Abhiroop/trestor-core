@@ -239,6 +239,7 @@
     <Compile Include="Tree\HashTree.cs" />
     <Compile Include="Tree\TreeNode.cs" />
     <Compile Include="Network\Networking\StructsAndEnums.cs" />
+    <Compile Include="Utils\Tests\PacketLogger.cs" />
     <Compile Include="Utils\TNetUtils.cs" />
     <Page Include="Themes\Metro\Dark\MetroDark.MSControls.Core.Implicit.xaml">
       <Generator>MSBuild:Compile</Generator>

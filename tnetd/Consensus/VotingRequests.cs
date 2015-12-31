@@ -247,7 +247,8 @@ namespace TNetD.Consensus
                     }
                 }
 
-                await sendFetchRequests(packet.PublicKeySource, newTransactions);
+                if(newTransactions.Count > 0)
+                    await sendFetchRequests(packet.PublicKeySource, newTransactions);
             }
 
             if (VerboseDebugging) Print("Merge Response from " + packet.PublicKeySource + " Processed");

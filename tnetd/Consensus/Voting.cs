@@ -97,7 +97,7 @@ namespace TNetD.Consensus
         public ConsensusStates CurrentConsensusState { get; private set; }
 
         public VotingStates CurrentVotingState = VotingStates.STNone;
-
+        
         NodeConfig nodeConfig;
         NodeState nodeState;
         NetworkPacketSwitch networkPacketSwitch;
