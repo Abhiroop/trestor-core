@@ -350,20 +350,14 @@ namespace TNetD.Consensus
                 syncers[(int)state.Value.ConsensusState]++;
             }
 
-            int maxIndex = 0, maxCount = 0;
+            var maxIndex = syncers.ToList().IndexOf(syncers.Max());
 
-            for (int i = 0; i < ConsensusStatesMemberCount; i++)
-            {
-                if (syncers[i] > maxCount)
-                {
-                    maxCount = syncers[i];
-                    maxIndex = i;
-                }
-            }
-
-            return new Tuple<ConsensusStates, bool>((ConsensusStates)maxIndex, maxCount >= Constants.VOTE_MIN_SYNC_NODES);
+            return new Tuple<ConsensusStates, bool>((ConsensusStates)maxIndex,
+                                                        syncers[maxIndex] >= Constants.VOTE_MIN_SYNC_NODES);
         }
 
+        /*
+        Re verify the logic before using
         Tuple<VotingStates, bool> MedianTrustedVotingState()
         {
             int[] syncers = new int[VotingStatesMemberCount];
@@ -373,19 +367,11 @@ namespace TNetD.Consensus
                 syncers[(int)state.Value.VotingState]++;
             }
 
-            int maxIndex = 0, maxCount = 0;
+            var maxIndex = syncers.ToList().IndexOf(syncers.Max());
 
-            for (int i = 0; i < VotingStatesMemberCount; i++)
-            {
-                if (syncers[i] > maxCount)
-                {
-                    maxCount = syncers[i];
-                    maxIndex = i;
-                }
-            }
-
-            return new Tuple<VotingStates, bool>((VotingStates)maxIndex, maxCount >= Constants.VOTE_MIN_SYNC_NODES);
-        }
+            return new Tuple<VotingStates, bool>((VotingStates)maxIndex, 
+                                                        syncers[maxIndex] >= Constants.VOTE_MIN_SYNC_NODES); 
+        }*/
 
         async Task sendVoteRequests()
         {
