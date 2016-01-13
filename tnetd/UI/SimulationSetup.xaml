@@ -11,15 +11,15 @@
             <ColumnDefinition Width="0*"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="num_pcs" HorizontalAlignment="Left" Height="30" Margin="204,10,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="165" Grid.Column="1" />
-        <TextBox x:Name="num_nodes" HorizontalAlignment="Left" Height="30" Margin="204,45,0,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top" Width="165" Grid.Column="1" />
+        <TextBox x:Name="num_pcs" HorizontalAlignment="Left" Height="30" Margin="204,10,0,0" TextWrapping="Wrap" Text="2" VerticalAlignment="Top" Width="165" Grid.Column="1" TextChanged="num_pcs_TextChanged" />
+        <TextBox x:Name="num_nodes" HorizontalAlignment="Left" Height="30" Margin="204,45,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="165" Grid.Column="1" />
         <TextBlock x:Name="lbl_num_pcs" HorizontalAlignment="Left" Margin="5,17,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="30" Width="175" Text="Number of computers" Grid.Column="1"/>
         <TextBlock x:Name="lbl_num_nodes" HorizontalAlignment="Left" Margin="5,51,0,0" TextWrapping="Wrap" Text="Number of nodes per computer" VerticalAlignment="Top" Height="25" Width="175" Grid.Column="1"/>
         <CheckBox x:Name="full_conn" Content="Full connectivity" HorizontalAlignment="Left" Margin="374,77,0,0" VerticalAlignment="Top" Grid.Column="1" Width="151" RenderTransformOrigin="-1.022,3.168" Height="30" Checked="full_conn_Checked" Unchecked="full_conn_Unchecked"/>
         <TextBlock x:Name="lbl_num_peers" HorizontalAlignment="Left" Margin="5,85,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="175" Height="24" Grid.Column="1"><Run Text="Number of pee"/><Run Text="r"/><Run Text="s per node"/><LineBreak/><Run/></TextBlock>
         <TextBox x:Name="num_peers" Grid.Column="1" HorizontalAlignment="Left" Height="30" Margin="204,79,0,0" TextWrapping="Wrap" Text="5" VerticalAlignment="Top" Width="165" />
         <TextBlock x:Name="lbl_ip_addr" HorizontalAlignment="Left" Margin="5,120,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="199" Height="25" Grid.Column="1"><Run Text="IP address"/><Run Text="es"/><Run Text=" (comma separated)"/><LineBreak/><Run/></TextBlock>
-        <TextBox x:Name="ip_addr" Grid.Column="1" HorizontalAlignment="Left" Height="60" Margin="204,114,0,0" TextWrapping="Wrap" Text="127.0.0.1" VerticalAlignment="Top" Width="320" />
+        <TextBox x:Name="ip_addr" Grid.Column="1" HorizontalAlignment="Left" Height="60" Margin="204,114,0,0" TextWrapping="Wrap" Text="168.192.0.1,168.192.0.2" VerticalAlignment="Top" Width="320" />
         <Button x:Name="button_generate" Content="Generate nodes" HorizontalAlignment="Left" Margin="395,255,0,0" VerticalAlignment="Top" Width="129" Grid.Column="1" Click="button_generate_Click" Height="30"/>
         <TextBlock x:Name="information" Grid.ColumnSpan="2" HorizontalAlignment="Left" Height="30" Margin="10,255,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="364"/>
 
