@@ -91,6 +91,7 @@
                 <MenuItem Name="menuItem_Main2" Header="MAIN 2" Click="menuItem_Main2_Click"/>
                 <MenuItem Name="menuItem_Main3" Header="DEBUG LEDGER-SYNC" Click="menuItem_Main3_Click"/>
                 <MenuItem Name="menuItem_Main4" Header="DEBUG VOTING" Click="menuItem_Main4_Click" />
+                <MenuItem Name="menuItem_setup" Header="NODE SETUP" HorizontalAlignment="Left" Width="202" Click="menuItem_setup_Click"/>
             </MenuItem>
             <MenuItem Header="SERVER">
                 <MenuItem Header="Start" Click="menuItem_Server_Start_Click"/>
