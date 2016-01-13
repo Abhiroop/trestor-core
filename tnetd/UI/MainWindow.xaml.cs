@@ -432,5 +432,12 @@ namespace TNetD
             Show();
         }
 
+        private void menuItem_setup_Click(object sender, RoutedEventArgs e)
+        {
+            Hide();
+            SimulationSetup swin = new SimulationSetup();
+            swin.ShowDialog();
+            Show();
+        }
     }
 }

@@ -226,6 +226,9 @@
     <Compile Include="UI\NodeMap.xaml.cs">
       <DependentUpon>NodeMap.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\SimulationSetup.xaml.cs">
+      <DependentUpon>SimulationSetup.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Ledgers\Ledger.cs" />
     <Compile Include="Nodes\Node.cs" />
@@ -298,6 +301,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="UI\NodeMap.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\SimulationSetup.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
