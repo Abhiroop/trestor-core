@@ -43,7 +43,7 @@ namespace TNetD.Consensus
             ProtocolDataType[] PDTs = new ProtocolDataType[3];
             PDTs[0] = ProtocolPackager.Pack(LedgerCloseSequence, 0);
             PDTs[1] = ProtocolPackager.Pack((byte)ConsensusState, 1);
-            PDTs[2] = ProtocolPackager.Pack((byte)ConsensusState, 2);
+            PDTs[2] = ProtocolPackager.Pack((byte)VotingState, 2);
             return ProtocolPackager.PackRaw(PDTs);
         }
 
