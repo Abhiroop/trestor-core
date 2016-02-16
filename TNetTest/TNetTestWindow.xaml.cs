@@ -333,10 +333,18 @@ namespace TNetTest
 
         }
 
+        private void menuItem_File_Test_TimeTests_Click(object sender, RoutedEventArgs e)
+        {
+            TimeTests tt = new TimeTests();
+            tt.Print += Tt_Print;
+            tt.Execute();
+                
+        }
 
-
-
-
-
+        private void Tt_Print(string value)
+        {
+            
+            textBlock_StatusLog.Text += "\n" + value;
+        }
     }
 }
