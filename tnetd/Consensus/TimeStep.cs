@@ -43,7 +43,7 @@ namespace TNetD.Consensus
         /// <summary>
         /// Timesteps in MS
         /// </summary>
-        int[] resolutions = new int[] { 100, 200, 300, 500, 1000, 1500, 2000, 3000, 5000, 10000 };
+        int[] resolutions = new int[] { 50, 100, 200, 300, 500, 800, 1000, 1500, 2000, 3000, 5000, 10000 };
 
         public double currentTimeElapsed = 0;
 
@@ -62,7 +62,7 @@ namespace TNetD.Consensus
             get { return resolutions[CurrentResolutionIndex]; }
         }
 
-        public int CurrentResolutionIndex { get; private set; } = 3;
+        public int CurrentResolutionIndex { get; private set; } = 0;
 
         bool timerLockFree = true;
 

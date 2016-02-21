@@ -1,7 +1,7 @@
 ﻿
 //
-//  @Author: Arpan Jati | Stephan Verbuecheln
-//  @Date: June 2015 
+//  @Author: Arpan Jati | Stephan Verbuecheln | Abhiroop Sarkar
+//  @Date: June 2015 | Jan 2016
 // The voting and consensus is handled by two files. 
 // Voting and VotingRequests (both pertain to the same partial class Voting)
 // The basic state machine code is in Voting.cs and the rest of the handling is in VotingRequests.cs
@@ -20,6 +20,7 @@ using TNetD.Network;
 using System.Reactive.Linq;
 using System.Collections.Concurrent;
 using System.Reactive.Concurrency;
+using TNetD.Helpers;
 
 namespace TNetD.Consensus
 {
@@ -68,11 +69,17 @@ namespace TNetD.Consensus
         int confirmationStateCounter = 0;
         int applyStateCounter = 0;
 
+        int syncAttempt = 0;
+        int mergeAttempt = 0;
+        int voteAttempt = 0;
+
         public bool VerboseDebugging = false;
 
         public bool DebuggingMessages { get; set; }
 
         private bool enabled = false;
+
+        public Tests.PacketLogger packetLogger = default(Tests.PacketLogger);
 
         public bool Enabled
         {
@@ -86,6 +93,7 @@ namespace TNetD.Consensus
                 enabled = value;
                 timeStep.EventEnabled = value;
                 InitLCS(nodeState); //FIX_TEMPORARY_TESTING MEASURE
+                Init();
             }
         }
 
@@ -97,10 +105,14 @@ namespace TNetD.Consensus
         public ConsensusStates CurrentConsensusState { get; private set; }
 
         public VotingStates CurrentVotingState = VotingStates.STNone;
+
+        ConcurrentDictionary<Hash, ConsensusStates> stateMap;
         
         NodeConfig nodeConfig;
         NodeState nodeState;
         NetworkPacketSwitch networkPacketSwitch;
+
+        
 
         /// <summary>
         /// ID and content of current transactions
@@ -135,9 +147,11 @@ namespace TNetD.Consensus
 
         ConcurrentDictionary<Hash, SyncState> syncMap;
 
+        ConcurrentQueue<string> logger;
+
         VoteMessageCounter voteMessageCounter;
 
-        public Voting(NodeConfig nodeConfig, NodeState nodeState, NetworkPacketSwitch networkPacketSwitch)
+        public Voting(NodeConfig nodeConfig, NodeState nodeState, NetworkPacketSwitch networkPacketSwitch,ConcurrentQueue<string> logger)
         {
             this.nodeConfig = nodeConfig;
             this.nodeState = nodeState;
@@ -149,6 +163,8 @@ namespace TNetD.Consensus
             this.synchronizedVoters = new HashSet<Hash>();
             this.timeStep = new TimeStep(nodeState);
             this.timeStep.Step += VotingEvent;
+            this.packetLogger = new Tests.PacketLogger(nodeConfig, nodeState);
+            this.logger = logger;
 
             //finalVoters = new FinalVoters();
 
@@ -163,6 +179,63 @@ namespace TNetD.Consensus
             CurrentConsensusState = ConsensusStates.Sync;
 
             voteMessageCounter = new VoteMessageCounter();
+
+
+
+            // generate 25 random integers sequence
+            /*  var generator = Observable.Generate(
+                  0,         // initial value
+                  i => true, // while predicate
+                  i => i,    // iterator
+                  next => next,  // selector
+                  delay => TimeSpan.FromMilliseconds(nextTimeStep),   // time interval
+                  Scheduler.Default
+              );          
+
+              // print all values one by one
+              generator.Subscribe(async x => await Exec(x));*/
+
+            //System.Threading.Timer t;
+            //t.Change()
+
+            /*TimerVoting = new System.Timers.Timer();
+            TimerVoting.Elapsed += TimerVoting_Elapsed;
+            TimerVoting.Enabled = true;
+            TimerVoting.Interval = 500;
+            TimerVoting.Start();*/
+
+            DebuggingMessages = true;
+
+            Print("Class \"Voting\" created.");
+        }
+        public Voting(NodeConfig nodeConfig, NodeState nodeState, NetworkPacketSwitch networkPacketSwitch)
+        {
+            this.nodeConfig = nodeConfig;
+            this.nodeState = nodeState;
+            this.networkPacketSwitch = networkPacketSwitch;
+            this.CurrentTransactions = new ConcurrentDictionary<Hash, TransactionContent>();
+            this.propagationMap = new ConcurrentDictionary<Hash, HashSet<Hash>>();
+            this.syncMap = new ConcurrentDictionary<Hash, SyncState>();
+            this.voteMap = new VoteMap(nodeConfig, nodeState);
+            this.synchronizedVoters = new HashSet<Hash>();
+            this.timeStep = new TimeStep(nodeState);
+            this.timeStep.Step += VotingEvent;
+            this.packetLogger = new Tests.PacketLogger(nodeConfig, nodeState);
+
+            //finalVoters = new FinalVoters();
+
+            finalBallot = new Ballot();
+            ballot = new Ballot();
+
+            networkPacketSwitch.ConsensusEvent += networkPacketSwitch_ConsensusEvent;
+
+            transactionChecker = new TransactionChecker(nodeState);
+            transactionValidator = new TransactionValidator(nodeConfig, nodeState);
+
+            CurrentConsensusState = ConsensusStates.Sync;
+
+            voteMessageCounter = new VoteMessageCounter();
+
 
 
             // generate 25 random integers sequence
@@ -198,6 +271,14 @@ namespace TNetD.Consensus
              nextTimeStep = (int) obj;
              Print("VALUE: " + obj);
          }*/
+
+        private void Init()
+        {
+            List<ConsensusStates> states = Enumerable.Repeat(ConsensusStates.Sync, nodeState.ConnectedValidators.Count).ToList();
+            var dictionary = nodeState.ConnectedValidators.Keys.Zip(states,(k,v)=>new { Key = k,Value = v})
+                                                           .ToDictionary(x => x.Key, x => x.Value);
+            this.stateMap = new ConcurrentDictionary<Hash, ConsensusStates>(dictionary);
+        }
 
         void UpdateLCD()
         {
@@ -258,7 +339,7 @@ namespace TNetD.Consensus
         bool isAcceptMapValid = false;
 
         int syncStateCounter = 0;
-        bool syncSend = false;
+        
 
         #region State-Machine
 
@@ -274,32 +355,15 @@ namespace TNetD.Consensus
                 switch (CurrentConsensusState)
                 {
                     case ConsensusStates.Sync:
-
                         await HandleSync();
-
                         break;
 
                     case ConsensusStates.Collect:
-
-                        // LCS = LCL + 1  |  CRITICAL FIX !   
-                        // ledgerCloseSequence = nodeState.Ledger.LedgerCloseData.SequenceNumber + 1;
-
-                        UpdateLCD();
-
-                        isBallotValid = false;
-                        isFinalBallotValid = false;
-                        isAcceptMapValid = false;
-                        isFinalConfirmedVotersValid = false;
-                        voteMap.Reset();
-                        voteMessageCounter.ResetVotes();
-                        voteMessageCounter.ResetUniqueVoters();
-                        finalBallot = new Ballot(LedgerCloseSequence);
-                        ballot = new Ballot(LedgerCloseSequence);
-                        //finalVoters.Reset(LedgerCloseSequence);                   
-
-                        processPendingTransactions();
-                        CurrentConsensusState = ConsensusStates.Merge;
+                        HandleCollect();
                         break;
+                    // LCS = LCL + 1  |  CRITICAL FIX !   
+                    // ledgerCloseSequence = nodeState.Ledger.LedgerCloseData.SequenceNumber + 1;
+
 
                     case ConsensusStates.Merge:
                         await HandleMerge();
@@ -331,74 +395,75 @@ namespace TNetD.Consensus
             }
         }
 
+        private void HandleCollect()
+        {
+            UpdateLCD();
+
+            isBallotValid = false;
+            isFinalBallotValid = false;
+            isAcceptMapValid = false;
+            isFinalConfirmedVotersValid = false;
+            voteMap.Reset();
+            voteMessageCounter.ResetVotes();
+            voteMessageCounter.ResetUniqueVoters();
+            finalBallot = new Ballot(LedgerCloseSequence);
+            ballot = new Ballot(LedgerCloseSequence);
+            //finalVoters.Reset(LedgerCloseSequence);                   
+
+            processPendingTransactions();
+            Thread.Sleep(500);
+            CurrentConsensusState = ConsensusStates.Merge;
+        }
+
         private async Task HandleSync()
         {
-            if (!syncSend)
+            await updateStateMap();
+            //filter out trusted nodes here and then run the below check
+            if (stateMap.Values.Distinct().Count()==1 && stateMap.Values.First()==CurrentConsensusState)
             {
-                syncMap.Clear();
-                await sendSyncRequests();
-                syncSend = true;
+                syncAttempt = 0;
+                //blocking check if everyone has the same map
+                //handleFailure();
+                Print("Sync Done. Normal.");
+
+                //packetLogger.LogMap(stateMap);
+                //packetLogger.LogFinish(nodeConfig.NodeID +"-Sync Done. Normal.");
+                Thread.Sleep(500);
+                logger.Enqueue(nodeConfig.NodeID + "-Sync Done. Normal.");
+                CurrentConsensusState = ConsensusStates.Collect;
             }
             else
             {
-                syncSend = false;
-
-                var syncResults = MedianTrustedState();
-
-                if (syncResults.Item2)
+                syncAttempt++;
+                if(syncAttempt>10) //preventing deadlock; this happens in case of message loss
                 {
-                    /*var syncResults2 = MedianTrustedVotingState();
-
-                    if (syncResults2.Item2)
-                    {
-                        // Voting and State;
-
-                        CurrentConsensusState = ConsensusStates.Collect;
-                        syncStateCounter = 0;
-
-                        Print("Sync ###### COPY MEDIAN STATE ######### Normal.");
-
-                        if (CurrentConsensusState == ConsensusStates.Sync)
-                            CurrentConsensusState = ConsensusStates.Merge;
-
-                        CurrentVotingState = syncResults2.Item1;
-                    }
-                    */
-
-                    // Great We know something
-                    if (syncResults.Item1 == ConsensusStates.Sync || syncResults.Item1 == ConsensusStates.Merge)
-                    {
-                        // Awesome ! we can continue :)
-                        CurrentConsensusState = ConsensusStates.Collect;
-                        syncStateCounter = 0;
-
-                        // bool b = nodeState.NodeLatency.GetAverageLatency(nodeConfig.PublicKey)
-
-                        Print("Sync Done. Normal.");
-                    }
-                    else
-                    {
-                        // Too bad we need to wait for sync
-                        Print("Sync Wait.");
-
-                    }
-                }
-                else
-                {
-                    // We dont have anyone replying
-                    // Wait a few cycles and then start anyway.
-
-                    if (syncStateCounter > 200)
-                    {
-                        CurrentConsensusState = ConsensusStates.Collect;
-                        syncStateCounter = 0;
-
-                        Print("Sync Done. Forced.");
-                    }
+                    //ignoring if I am behind case
+                    //Assume I am forward
+                    //filter out those nodes which are not allowing entry and send a request to them
+                    syncAttempt = 0;
                 }
             }
+        }
 
-            syncStateCounter++;
+
+        /// <summary>
+        /// Check if all my friends have the same state map if not send them my current state and 
+        /// keep checking again until failure is handled. If after 3/5 attempts it doesn't work
+        /// assume the machine has failed. And handle that round accordingly.
+        /// </summary>
+        private void handleFailure()
+        {
+            //optimistic failure handling sending 2 messages
+            switch(CurrentConsensusState)
+            {
+                case ConsensusStates.Sync:
+                    Task.Run(() => sendSyncRequest(stateMap.Keys.ToList()));
+                    break;
+                case ConsensusStates.Merge:
+                    Task.Run(() => sendSyncRequest(stateMap.Keys.ToList()));
+                    break;
+
+            }
         }
 
         string GetTxCount(Ballot ballot)
@@ -412,27 +477,61 @@ namespace TNetD.Consensus
             return "";
         }
 
-        async Task HandleMerge()
+        private async Task HandleMerge()
         {
-            if (mergeStateCounter < 1) // TWEAK-POINT: Trim value.
+            await updateStateMap();
+            if (stateMap.Values.Distinct().Count() == 1 && stateMap.Values.First() == CurrentConsensusState)
             {
-                await sendMergeRequests();
-            }
-
-            mergeStateCounter++;
-
-            // After 5 rounds: Assemble Ballot
-            if (mergeStateCounter >= 5)
-            {
+                //handleFailure();
+                mergeAttempt = 0;
                 CreateBallot();
-
                 isBallotValid = true; // Yayy.
                 voteMap.Reset();
-                CurrentConsensusState = ConsensusStates.Vote;
                 voteMessageCounter.ResetVotes();
-                mergeStateCounter = 0;
-
                 Print("Merge Finished. " + GetTxCount(ballot));
+
+                //packetLogger.LogMap(stateMap);
+                //packetLogger.LogFinish(nodeConfig.NodeID + "-Merge Finished");
+                Thread.Sleep(500);
+                logger.Enqueue(nodeConfig.NodeID + "-Merge Finished");
+                CurrentConsensusState = ConsensusStates.Vote;
+            }
+            else
+            {
+                mergeAttempt++;
+                if (mergeAttempt > 10) //preventing deadlock; this happens in case of message loss
+                {
+                    //ignoring if I am behind case
+                    //Assume I am forward
+                    //filter out those nodes which are not allowing entry and send a request to them
+                    mergeAttempt = 0;
+                }
+            }
+        }
+        /// <summary>
+        /// This method blocks until every/necessary no of node arrives at the necessary state
+        /// </summary>
+        /// <param name="currentConsensusState"></param>
+        private async Task updateStateMap()
+        {
+            var filteredFriendHashes = stateMap.Where(x => x.Value != CurrentConsensusState)
+                                          .ToDictionary(x => x.Key, x => x.Value)
+                                          .Keys
+                                          .ToList();
+            //another layer of filtering will happen based on the trusted nodes
+            if (CurrentConsensusState == ConsensusStates.Sync)
+            {
+                await sendSyncRequest(filteredFriendHashes); 
+            }
+
+            if (CurrentConsensusState==ConsensusStates.Merge)
+            {
+                await sendMergeRequests(filteredFriendHashes);
+            }
+            
+            if(CurrentConsensusState==ConsensusStates.Vote)
+            {
+                await sendVoteRequests(filteredFriendHashes);
             }
         }
 
@@ -567,33 +666,51 @@ namespace TNetD.Consensus
 
         async Task HandleVoting()
         {
-            switch (CurrentVotingState)
+            await updateStateMap();
+            if (stateMap.Values.Distinct().Count() == 1 && stateMap.Values.First() == CurrentConsensusState)
             {
-                case VotingStates.STNone:
-                    // Pre-Voting Stuff !! 
-                    voteMap.Reset();
-                    CurrentVotingState = VotingStates.ST40;
-                    break;
+                switch (CurrentVotingState)
+                {
+                    case VotingStates.STNone:
+                        // Pre-Voting Stuff !!
+                        Thread.Sleep(500); 
+                        voteAttempt = 0;
+                        voteMap.Reset();
+                        CurrentVotingState = VotingStates.ST40;
+                        break;
 
-                case VotingStates.ST40:
-                    CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 40);
-                    break;
+                    case VotingStates.ST40:
+                        CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 40);
+                        break;
 
-                case VotingStates.ST60:
-                    CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 60);
-                    break;
+                    case VotingStates.ST60:
+                        CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 60);
+                        break;
 
-                case VotingStates.ST75:
-                    CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 75);
-                    break;
+                    case VotingStates.ST75:
+                        CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 75);
+                        break;
 
-                case VotingStates.ST80:
-                    CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 80);
-                    break;
+                    case VotingStates.ST80:
+                        CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 80);
+                        break;
 
-                case VotingStates.STDone:
-                    PostVotingOperations();
-                    break;
+                    case VotingStates.STDone:
+                        Thread.Sleep(500);
+                        PostVotingOperations();
+                        break;
+                }
+            }
+            else
+            {
+                voteAttempt++;
+                if (voteAttempt > 10) //preventing deadlock; this happens in case of message loss
+                {
+                    //ignoring if I am behind case
+                    //Assume I am forward
+                    //filter out those nodes which are not allowing entry and send a request to them
+                    voteAttempt = 0;
+                }
             }
         }
 
@@ -759,6 +876,7 @@ namespace TNetD.Consensus
 
             isFinalBallotValid = true; // TODO: CRITICAL THINK THINK, TESTS !!                
 
+            logger.Enqueue(nodeConfig.NodeID + "-Voting Done. Normal.");
             CurrentConsensusState = ConsensusStates.Apply; // SKIP CONFIRMATION (Maybe not needed afterall)
             CurrentVotingState = VotingStates.STNone;
 
@@ -862,16 +980,18 @@ namespace TNetD.Consensus
             }
 
             applyStateCounter++;
+            Thread.Sleep(1500);
+            CurrentConsensusState = ConsensusStates.Sync;
 
-            if (applyStateCounter > 2)
-            {
-                if (NotEnoughVoters)
-                    CurrentConsensusState = ConsensusStates.Sync;
-                else
-                    CurrentConsensusState = ConsensusStates.Collect;
+            //if (applyStateCounter > 2)
+            //{
+            //    if (NotEnoughVoters)
+            //        CurrentConsensusState = ConsensusStates.Sync;
+            //    else
+            //        CurrentConsensusState = ConsensusStates.Collect;
 
-                applyStateCounter = 0;
-            }
+            //    applyStateCounter = 0;
+            //}
 
         }
 

@@ -1,6 +1,6 @@
 ﻿
-//  @Author: Stephan Verbuecheln | Arpan Jati
-//  @Date: June 2015 | Sept 2015
+//  @Author: Stephan Verbuecheln | Arpan Jati | Abhiroop Sarkar
+//  @Date: June 2015 | Sept 2015 | Jan 2016
 
 using System.Collections;
 using System.Collections.Generic;
@@ -17,10 +17,21 @@ namespace TNetD.Consensus
         
         public LedgerCloseSequence LedgerCloseSequence;
 
+        public ConsensusStates ConsensusState;
+
+        public VotingStates VotingState;
+
+        public SyncState SyncState
+        {
+            get { return new SyncState(ConsensusState, VotingState); }
+        }
+
         public MergeResponseMsg()
         {
             transactions = new SortedSet<Hash>();
             LedgerCloseSequence = new LedgerCloseSequence();
+            ConsensusState = ConsensusStates.Merge;
+            VotingState = VotingStates.STNone;
         }
 
         public void AddTransaction(Hash transactionID)
@@ -40,6 +51,7 @@ namespace TNetD.Consensus
             }
 
             PDTs.Add(ProtocolPackager.Pack(LedgerCloseSequence, 1));
+            PDTs.Add(ProtocolPackager.Pack((byte)ConsensusState, 2));
 
             return ProtocolPackager.PackRaw(PDTs);
         }
@@ -68,6 +80,14 @@ namespace TNetD.Consensus
                         if (ProtocolPackager.UnpackByteVector(PDT, 1, ref _data))
                         {
                             LedgerCloseSequence.Deserialize(_data);
+                        }
+
+                        break;
+                    case 2:
+                        byte _byte = 0;
+                        if (ProtocolPackager.UnpackByte(PDT, 2, ref _byte))
+                        {
+                            ConsensusState = (ConsensusStates)_byte;
                         }
 
                         break;
