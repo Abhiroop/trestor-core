@@ -229,6 +229,9 @@
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Ledgers\Ledger.cs" />
     <Compile Include="Nodes\Node.cs" />
+    <Compile Include="Utils\Helpers\ConcurrentDictionaryExtensions.cs" />
+    <Compile Include="Utils\Helpers\ConcurrentLinkedQueue.cs" />
+    <Compile Include="Utils\Helpers\HighResolutionDateTime.cs" />
     <Compile Include="Utils\Helpers\IObjectGenerator.cs" />
     <Compile Include="Utils\Helpers\MessageViewModel.cs" />
     <Compile Include="Utils\Helpers\VirtualLists.cs" />

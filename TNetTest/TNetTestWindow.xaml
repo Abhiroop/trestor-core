@@ -19,6 +19,7 @@
         <Menu HorizontalAlignment="Stretch"  VerticalAlignment="Stretch"  >
             <MenuItem Header="FILE">
                 <MenuItem Name="menuItem_File_Exit" Header="EXIT" />
+                <MenuItem Name="menuItem_File_Test_TimeTests" Header="Time Tests" Click="menuItem_File_Test_TimeTests_Click"/>
                 <MenuItem Name="menuItem_Benchmark" Header="BENCHMARK" Click="menuItem_Benchmark_Click"></MenuItem>
                 <MenuItem Name="menuItem_File_TestVarint" Header="Test Varint" Click="menuItem_File_TestVarint_Click" />
                 <MenuItem Name="menuItem_File_TestTree" Header="Test Tree" Click="menuItem_File_TestTree_Click" />
@@ -51,8 +52,8 @@
                         <RowDefinition Height="10"/>
                     </Grid.RowDefinitions>
                     <Label>Simulation Status:</Label>
-                    <ScrollViewer Grid.Row="1">
-                        <TextBox x:Name="textBlock_StatusLog" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
+                    <ScrollViewer Grid.Row="1" HorizontalAlignment="Stretch" HorizontalScrollBarVisibility="Visible">
+                        <TextBox x:Name="textBlock_StatusLog" Background="#FF1E1E1E"  HorizontalAlignment="Stretch" Foreground="#FF8ACD3A" FontFamily="Consolas" />
                     </ScrollViewer>
                 </Grid>
             </TabItem>
