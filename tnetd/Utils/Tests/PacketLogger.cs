@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TNetD.Helpers;
 using TNetD.Network;
 using TNetD.Network.Networking;
 using TNetD.Nodes;
@@ -26,7 +27,7 @@ namespace TNetD.Tests
 
         TextWriter tr = default(TextWriter);
 
-        Stopwatch sw;
+        public Stopwatch sw;
 
         public PacketLogger(NodeConfig nodeConfig, NodeState nodeState)
         {
@@ -37,20 +38,14 @@ namespace TNetD.Tests
             tr = new StreamWriter(logger);           
         }
 
-        public void Initialize()
+        /*public void Initialize()
         {
-            sw = new Stopwatch();
-            tr.WriteLine("Logging Start At : " + DateTime.UtcNow.ToFileTimeUtc());
-            sw.Start();
-        }
+            //sw = new Stopwatch();
+            //tr.WriteLine("Logging Start At : " + DateTime.UtcNow.ToFileTimeUtc());
+            //sw.Start();
+        }*/
 
-        ~PacketLogger()
-        {
-            logger.Flush();
-            logger.Close();
-        }
-
-        public void LogSend(Hash publicKeyDestination, NetworkPacket packet)
+        public void LogSend(Hash publicKeyDestination, NetworkPacket packet, int k)
         {
 
             if (LoggingEnabled)
@@ -75,7 +70,7 @@ namespace TNetD.Tests
 
                             StringBuilder sb = new StringBuilder();
 
-                            sb.Append("S," + packet.Type + ",");
+                            sb.Append("S"+k+"," + packet.Type + ",");
                             sb.Append(packet.Token + ",");
                             sb.Append(sw.ElapsedTicks + ",");
                             sb.Append(packet.PublicKeySource + ",");
@@ -124,6 +119,31 @@ namespace TNetD.Tests
                     }
                 }
             }
+        }
+        public void LogMap(System.Collections.Concurrent.ConcurrentDictionary<Hash, Consensus.ConsensusStates> map)
+        {
+
+            lock (writeLock)
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (var entry in map)
+                {
+                    sb.Append(HighResolutionDateTime.UtcNow + " - ");
+                    sb.Append(entry.Key + "-" + entry.Value + "\r\n");
+                }
+
+                tr.WriteLine(sb.ToString());
+            }
+
+        }
+
+        public void LogFinish(string v)
+        {
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append(HighResolutionDateTime.UtcNow + " - ");
+            sb.Append(v);
+            tr.WriteLine(sb.ToString());
         }
     }
         

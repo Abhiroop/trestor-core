@@ -7,6 +7,7 @@ using Grapevine;
 using Grapevine.Server;
 using Microsoft.Win32;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -45,6 +46,10 @@ namespace TNetD
         object TimerLock = new object();
         MessageViewModel viewModel = new MessageViewModel();
         List<Node> nodes = new List<Node>();
+        ConcurrentQueue<string> logger = new ConcurrentQueue<string>();
+        FileStream fs = default(FileStream);
+
+        TextWriter tr = default(TextWriter);
 
         public DebugWindow4()
         {
@@ -62,6 +67,8 @@ namespace TNetD
             System.Timers.Timer tmr_UI = new System.Timers.Timer(1000);
             tmr_UI.Elapsed += tmr_UI_Elapsed;
             tmr_UI.Start();
+            fs = new FileStream(@"C:\Users\ashis_000\Desktop\testLog.log", FileMode.Create);
+            tr = new StreamWriter(fs);
         }
 
         private void tmr_UI_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -81,12 +88,17 @@ namespace TNetD
             }
         }
 
+        Stopwatch sw = new Stopwatch();
+
         void AddNode(int idx)
         {
-            Node nd = new Node(idx);
+            Node nd = new Node(idx,logger);
+
+            //nd.networkPacketSwitch.packetLogger.sw = sw;
             // nd.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
             nd.NodeStatusEvent += nd_NodeStatusEvent;
-            nd.networkPacketSwitch.packetLogger.Initialize();
+            //nd.networkPacketSwitch.packetLogger.Initialize();
+            //nd.networkPacketSwitch.packetLogger.LoggingEnabled = true;
             nd.BeginBackgroundLoad();
 
             nodes.Add(nd);
@@ -139,6 +151,8 @@ namespace TNetD
 
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
         {
+            sw.Start();
+
             for (int i = 0; i < 6; i++)
             {
                 AddNode(i);
@@ -244,6 +258,28 @@ namespace TNetD
                 node.VotingEnabled = true;
                 //Thread.Sleep(1100);
             }
+            startLogging();
+        }
+
+        private void startLogging()
+        {
+            new Thread(() =>
+            {
+                Thread.CurrentThread.IsBackground = true;
+                while (true)
+                {
+                    if (!logger.IsEmpty)
+                    {
+                        while (!logger.IsEmpty)
+                        {
+                            string log;
+                            logger.TryDequeue(out log);
+                            tr.WriteLine(log);
+                        }
+                    }
+                    Thread.Sleep(5000);
+                }
+            }).Start();
         }
 
         private void menuItem_DisableVoting_Click(object sender, RoutedEventArgs e)

@@ -99,6 +99,7 @@
     <Compile Include="Benchmarks.xaml.cs">
       <DependentUpon>Benchmarks.xaml</DependentUpon>
     </Compile>
+    <Compile Include="TimeTests.cs" />
     <Compile Include="TNetTestWindow.xaml.cs">
       <DependentUpon>TNetTestWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
