@@ -1,7 +1,7 @@
 ﻿
 //
-//  @Author: Arpan Jati
-//  @Date: September 2015 
+//  @Author: Arpan Jati | Abhiroop Sarkar
+//  @Date: September 2015 | January 2016
 //
 
 using System;
@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using TNetD.Network;
 using TNetD.Network.Networking;
 using TNetD.Transactions;
+using TNetD.Helpers;
 
 namespace TNetD.Consensus
 {
@@ -184,6 +185,23 @@ namespace TNetD.Consensus
             if (VerboseDebugging) Print("Merge Requests Sent to " + nodeState.ConnectedValidators.Count + " Validators");
         }
 
+        async Task sendMergeRequests(List<Hash> friendNodes)
+        {
+            var tasks = friendNodes.Select(async (hash) =>
+            {
+                Hash token = TNetUtils.GenerateNewToken();
+
+                await networkPacketSwitch.SendAsync(hash, new NetworkPacket()
+                {
+                    PublicKeySource = nodeConfig.PublicKey,
+                    Token = token,
+                    Type = PacketType.TPT_CONS_MERGE_REQUEST
+                });
+            });
+            await Task.WhenAll(tasks);
+            if (VerboseDebugging) Print("Merge Requests Sent to " + friendNodes.Count + " Validators");
+        }
+
         /// <summary>
         /// respond to a merge request by sending a list of all hashes of known transactions
         /// </summary>
@@ -223,6 +241,7 @@ namespace TNetD.Consensus
                 message.Deserialize(packet.Data);
                 HashSet<Hash> newTransactions = new HashSet<Hash>();
 
+
                 voteMessageCounter.UpdateVoters(packet.PublicKeySource);
 
                 foreach (Hash transaction in message)
@@ -247,8 +266,13 @@ namespace TNetD.Consensus
                     }
                 }
 
-                if(newTransactions.Count > 0)
+                //this is a long call
+                if (newTransactions.Count > 0)
                     await sendFetchRequests(packet.PublicKeySource, newTransactions);
+
+
+                stateMap.AddOrUpdate(packet.PublicKeySource, message.ConsensusState, (oldkey, oldvalue) => message.ConsensusState);
+
             }
 
             if (VerboseDebugging) Print("Merge Response from " + packet.PublicKeySource + " Processed");
@@ -283,6 +307,33 @@ namespace TNetD.Consensus
 
             if (VerboseDebugging) Print("Sync requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
         }
+        async Task sendSyncRequest(List<Hash> friendNodes)
+        {
+            
+            var tasks = friendNodes.Select(async hash =>
+            {
+                // Create BallotRequestMessage
+                SyncMessage sm = new SyncMessage();
+                sm.LedgerCloseSequence = LedgerCloseSequence;
+                sm.ConsensusState = CurrentConsensusState;
+
+                Hash token = TNetUtils.GenerateNewToken();
+
+                nodeState.NodeLatency.StartMeasurement(hash, token);
+
+                // Create NetworkPacket and send
+
+                await networkPacketSwitch.SendAsync(hash, new NetworkPacket()
+                {
+                    PublicKeySource = nodeConfig.PublicKey,
+                    Token = token,
+                    Data = sm.Serialize(),
+                    Type = PacketType.TPT_CONS_SYNC_REQUEST
+                });
+            });
+            await Task.WhenAll(tasks);
+            if (VerboseDebugging) Print("Sync requests sent to " + friendNodes.Count + " Nodes");
+        }
 
         async Task processSyncRequest(NetworkPacket packet)
         {
@@ -311,24 +362,11 @@ namespace TNetD.Consensus
             {
                 nodeState.NodeLatency.StopMeasurement(packet.PublicKeySource, packet.Token);
 
-                if (CurrentConsensusState == ConsensusStates.Sync)
-                {
-                    // Is trusted !
-                    if (nodeConfig.TrustedNodes.ContainsKey(packet.PublicKeySource))
-                    {
-                        SyncMessage message = new SyncMessage();
-                        message.Deserialize(packet.Data);
+                SyncMessage message = new SyncMessage();
+                message.Deserialize(packet.Data);
+                
+                stateMap.AddOrUpdate(packet.PublicKeySource, message.ConsensusState, (oldkey, oldvalue) => message.ConsensusState);
 
-                        if (!syncMap.ContainsKey(packet.PublicKeySource))
-                        {
-                            syncMap.AddOrUpdate(packet.PublicKeySource, message.SyncState, (k, v) => message.SyncState);
-                        }
-                        else
-                        {
-                            syncMap[packet.PublicKeySource] = message.SyncState;
-                        }
-                    }
-                }
             }
 
             if (VerboseDebugging) Print("Sync Response from " + packet.PublicKeySource + " Processed");
@@ -356,6 +394,22 @@ namespace TNetD.Consensus
                                                         syncers[maxIndex] >= Constants.VOTE_MIN_SYNC_NODES);
         }
 
+        private Dictionary<ConsensusStates,int> currentState()
+        {
+            Dictionary<ConsensusStates, int> existingState = new Dictionary<ConsensusStates, int>();
+            foreach(var state in syncMap)
+            {
+                if (existingState.ContainsKey(state.Value.ConsensusState))
+                {
+                    existingState[state.Value.ConsensusState] += 1;
+                }
+                else
+                {
+                    existingState.Add(state.Value.ConsensusState, 1);
+                }
+            }
+            return existingState;
+        }
         /*
         Re verify the logic before using
         Tuple<VotingStates, bool> MedianTrustedVotingState()
@@ -395,6 +449,30 @@ namespace TNetD.Consensus
 
             if (VerboseDebugging) Print("Vote requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
         }
+
+        async Task sendVoteRequests(List<Hash> friendNodes)
+        {
+            var tasks = friendNodes.Select(async (hash)=>
+            {
+                VoteRequestMessage brp = new VoteRequestMessage();
+                brp.LedgerCloseSequence = LedgerCloseSequence;
+                brp.VotingState = CurrentVotingState;
+
+                // Create NetworkPacket and send
+
+                await networkPacketSwitch.SendAsync(hash, new NetworkPacket()
+                {
+                    PublicKeySource = nodeConfig.PublicKey,
+                    Token = TNetUtils.GenerateNewToken(),
+                    Data = brp.Serialize(),
+                    Type = PacketType.TPT_CONS_VOTE_REQUEST
+                });
+            });
+            
+            await Task.WhenAll(tasks);
+            if (VerboseDebugging) Print("Vote requests sent to " + friendNodes.Count + " Nodes");
+        }
+
 
         async Task processVoteRequest(NetworkPacket packet)
         {
@@ -491,7 +569,6 @@ namespace TNetD.Consensus
                                 if (voteResponse.Ballot.VerifySignature(packet.PublicKeySource))
                                 {
                                     voteMap.AddBallot(voteResponse.Ballot);
-
                                     //Print("Received Vote From " + GetTrustedName(packet.PublicKeySource) + " : CVS " + CurrentVotingState);
                                 }
                                 else
@@ -512,6 +589,7 @@ namespace TNetD.Consensus
                     {
                     }
                 }
+                stateMap.CheckValueAndAdd(packet.PublicKeySource, ConsensusStates.Vote);
             }
 
             if (VerboseDebugging) Print("Vote Response from " + packet.PublicKeySource + " Processed");
@@ -632,7 +710,7 @@ namespace TNetD.Consensus
 
              if (VerboseDebugging) Print("Vote Confirm Response from '" + packet.PublicKeySource + "' Processed");
          }*/
-
+       
 
     }
 }

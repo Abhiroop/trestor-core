@@ -23,7 +23,7 @@ namespace TNetD.Consensus
     class SyncMessage
     {
         public LedgerCloseSequence LedgerCloseSequence;
-        public ConsensusStates ConsensusState;
+        public ConsensusStates ConsensusState { get; set; }
         public VotingStates VotingState;
 
         public SyncState SyncState
