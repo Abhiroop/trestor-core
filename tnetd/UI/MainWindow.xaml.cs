@@ -93,8 +93,11 @@ namespace TNetD
             nd.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
             nd.NodeStatusEvent += nd_NodeStatusEvent;
             nd.BeginBackgroundLoad();
-
+            
             nodes.Add(nd);
+
+            nd.VotingEnabled = true;
+            nd.LedgerSyncEnabled = true;
         }
 
         void nd_NodeStatusEvent(string Status, int NodeID)
