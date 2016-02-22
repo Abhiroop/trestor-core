@@ -429,7 +429,7 @@ namespace TNetD.Consensus
                 //packetLogger.LogMap(stateMap);
                 //packetLogger.LogFinish(nodeConfig.NodeID +"-Sync Done. Normal.");
                 Thread.Sleep(500);
-                logger.Enqueue(nodeConfig.NodeID + "-Sync Done. Normal.");
+                //logger.Enqueue(nodeConfig.NodeID + "-Sync Done. Normal.");
                 CurrentConsensusState = ConsensusStates.Collect;
             }
             else
@@ -493,7 +493,7 @@ namespace TNetD.Consensus
                 //packetLogger.LogMap(stateMap);
                 //packetLogger.LogFinish(nodeConfig.NodeID + "-Merge Finished");
                 Thread.Sleep(500);
-                logger.Enqueue(nodeConfig.NodeID + "-Merge Finished");
+                //logger.Enqueue(nodeConfig.NodeID + "-Merge Finished");
                 CurrentConsensusState = ConsensusStates.Vote;
             }
             else
@@ -876,7 +876,7 @@ namespace TNetD.Consensus
 
             isFinalBallotValid = true; // TODO: CRITICAL THINK THINK, TESTS !!                
 
-            logger.Enqueue(nodeConfig.NodeID + "-Voting Done. Normal.");
+            //logger.Enqueue(nodeConfig.NodeID + "-Voting Done. Normal.");
             CurrentConsensusState = ConsensusStates.Apply; // SKIP CONFIRMATION (Maybe not needed afterall)
             CurrentVotingState = VotingStates.STNone;
 
