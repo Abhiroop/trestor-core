@@ -95,6 +95,9 @@
                 <MenuItem Name="menuItem_Simulation_Stop" Header="Stop"/>
                 <MenuItem Name="menuItem_Simulation_Restart" Header="Restart" />
                 <Separator/>
+                <MenuItem Name="menuItem_EnableVoting" Header="Enable Voting" Click="menuItem_EnableVoting_Click" />
+                <MenuItem Name="menuItem_DisableVoting" Header="Disable Voting" Click="menuItem_DisableVoting_Click"/>
+                <Separator/>
                 <MenuItem Name="menuItem_Simulation_Resync" Header="Resync"/>
             </MenuItem>
           

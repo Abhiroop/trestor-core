@@ -134,10 +134,26 @@ namespace TNetD
 
         private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 1; i++)
             {
                 AddNode(i);
                 //generateTrustlist("NODE_" + i + "/");
+            }
+        }
+
+        private void menuItem_EnableVoting_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var node in nodes)
+            {
+                node.VotingEnabled = true;
+                //Thread.Sleep(1100);
+            }
+        }
+        private void menuItem_DisableVoting_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var node in nodes)
+            {
+                node.VotingEnabled = false;
             }
         }
 
