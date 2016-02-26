@@ -62,7 +62,7 @@ namespace TNetD.Consensus
             get { return resolutions[CurrentResolutionIndex]; }
         }
 
-        public int CurrentResolutionIndex { get; private set; } = 0;
+        public int CurrentResolutionIndex { get; private set; } = 4;
 
         bool timerLockFree = true;
 

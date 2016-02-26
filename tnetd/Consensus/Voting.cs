@@ -275,7 +275,7 @@ namespace TNetD.Consensus
         private void Init()
         {
             List<ConsensusStates> states = Enumerable.Repeat(ConsensusStates.Sync, nodeState.ConnectedValidators.Count).ToList();
-            var dictionary = nodeState.ConnectedValidators.Keys.Zip(states,(k,v)=>new { Key = k,Value = v})
+            var dictionary = nodeState.ConnectedValidators.Keys.Zip(states, (k, v) => new { Key = k, Value = v })
                                                            .ToDictionary(x => x.Key, x => x.Value);
             this.stateMap = new ConcurrentDictionary<Hash, ConsensusStates>(dictionary);
         }
@@ -437,11 +437,14 @@ namespace TNetD.Consensus
                 syncAttempt++;
                 if(syncAttempt>10) //preventing deadlock; this happens in case of message loss
                 {
+                    Print("Couldn't Sync");
                     //ignoring if I am behind case
                     //Assume I am forward
                     //filter out those nodes which are not allowing entry and send a request to them
                     syncAttempt = 0;
                 }
+                if (stateMap.Count != nodeState.ConnectedValidators.Count)
+                    Init();
             }
         }
 
