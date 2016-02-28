@@ -607,7 +607,8 @@ namespace TNetD.Consensus
             Dictionary<Hash, HashSet<Hash>> missingTransactions;
             voteMap.GetMissingTransactions(ballot, out missingTransactions);
 
-            await sendFetchRequests(missingTransactions);
+            if(missingTransactions.Count>0)
+                await sendFetchRequests(missingTransactions);
 
             //////////////////////////////////////////////////////////////////
 
@@ -675,8 +676,7 @@ namespace TNetD.Consensus
                 switch (CurrentVotingState)
                 {
                     case VotingStates.STNone:
-                        // Pre-Voting Stuff !!
-                        Thread.Sleep(500); 
+                        // Pre-Voting Stuff !! 
                         voteAttempt = 0;
                         voteMap.Reset();
                         CurrentVotingState = VotingStates.ST40;
@@ -880,6 +880,7 @@ namespace TNetD.Consensus
             isFinalBallotValid = true; // TODO: CRITICAL THINK THINK, TESTS !!                
 
             //logger.Enqueue(nodeConfig.NodeID + "-Voting Done. Normal.");
+            Print(nodeConfig.NodeID + "-Voting Done. Normal.");
             CurrentConsensusState = ConsensusStates.Apply; // SKIP CONFIRMATION (Maybe not needed afterall)
             CurrentVotingState = VotingStates.STNone;
 
