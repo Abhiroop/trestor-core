@@ -54,7 +54,7 @@ namespace TNetD.Consensus
 
             if (votersCount < Constants.VOTE_MIN_VOTERS)
             {
-                DisplayUtils.Display(nodeConfig.ID() + " Insufficient number of Voters :" + votersCount, DisplayType.ImportantInfo);
+                DisplayUtils.Display(nodeConfig.ID() + "Missing Tx Insufficient number of Voters :" + votersCount, DisplayType.ImportantInfo);
             }
             else
             {
