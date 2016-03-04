@@ -16,12 +16,15 @@ namespace TNetD.Consensus
 
         public VotingStates VotingState;
 
-        public VoteResponseMessage(Ballot ballot, bool goodBallot, bool isSynced, VotingStates votingState)
+        public ConsensusStates ConsensusState;
+
+        public VoteResponseMessage(Ballot ballot, bool goodBallot, bool isSynced, VotingStates votingState, ConsensusStates consensusState)
         {
             this.Ballot = ballot;
             this.IsSynced = isSynced;
             this.GoodBallot = goodBallot;
             this.VotingState = votingState;
+            this.ConsensusState = consensusState;
         }
 
         public VoteResponseMessage()
@@ -39,6 +42,7 @@ namespace TNetD.Consensus
             PDTs.Add(ProtocolPackager.Pack(GoodBallot, 1));
             PDTs.Add(ProtocolPackager.Pack(IsSynced, 2));
             PDTs.Add(ProtocolPackager.Pack((byte)VotingState, 3));
+            PDTs.Add(ProtocolPackager.Pack((byte)ConsensusState, 4));
 
             return ProtocolPackager.PackRaw(PDTs);
         }
@@ -73,6 +77,13 @@ namespace TNetD.Consensus
                         if(ProtocolPackager.UnpackByte(PDT, 3, ref b))
                         {
                             VotingState = (VotingStates) b;
+                        }
+                        break;
+                    case 4:
+                        byte by = 0;
+                        if(ProtocolPackager.UnpackByte(PDT, 4, ref by))
+                        {
+                            ConsensusState = (ConsensusStates) by;
                         }
                         break;
                 }

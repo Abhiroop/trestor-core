@@ -72,6 +72,8 @@ namespace TNetD.Consensus
         int syncAttempt = 0;
         int mergeAttempt = 0;
         int voteAttempt = 0;
+        int voteInternalAttempt = 0;
+        int voteFinalFailCounter = 0;
 
         public bool VerboseDebugging = false;
 
@@ -107,6 +109,8 @@ namespace TNetD.Consensus
         public VotingStates CurrentVotingState = VotingStates.STNone;
 
         ConcurrentDictionary<Hash, ConsensusStates> stateMap;
+
+        ConcurrentDictionary<Hash, VotingStates> votingStateMap;
         
         NodeConfig nodeConfig;
         NodeState nodeState;
@@ -278,6 +282,12 @@ namespace TNetD.Consensus
             var dictionary = nodeState.ConnectedValidators.Keys.Zip(states, (k, v) => new { Key = k, Value = v })
                                                            .ToDictionary(x => x.Key, x => x.Value);
             this.stateMap = new ConcurrentDictionary<Hash, ConsensusStates>(dictionary);
+
+
+            List<VotingStates> votingStates = Enumerable.Repeat(VotingStates.STNone, nodeState.ConnectedValidators.Count).ToList();
+            var dict = nodeState.ConnectedValidators.Keys.Zip(votingStates, (k, v) => new { Key = k, Value = v })
+                                                           .ToDictionary(x => x.Key, x => x.Value);
+            this.votingStateMap = new ConcurrentDictionary<Hash, VotingStates>(dict);
         }
 
         void UpdateLCD()
@@ -421,16 +431,7 @@ namespace TNetD.Consensus
             //filter out trusted nodes here and then run the below check
             if (stateMap.Values.Distinct().Count()==1 && stateMap.Values.First()==CurrentConsensusState)
             {
-                syncAttempt = 0;
-                //blocking check if everyone has the same map
-                //handleFailure();
-                Print("Sync Done. Normal.");
-
-                //packetLogger.LogMap(stateMap);
-                //packetLogger.LogFinish(nodeConfig.NodeID +"-Sync Done. Normal.");
-                Thread.Sleep(500);
-                //logger.Enqueue(nodeConfig.NodeID + "-Sync Done. Normal.");
-                CurrentConsensusState = ConsensusStates.Collect;
+                syncStateWork();
             }
             else
             {
@@ -438,14 +439,24 @@ namespace TNetD.Consensus
                 if(syncAttempt>10) //preventing deadlock; this happens in case of message loss
                 {
                     Print("Couldn't Sync");
-                    //ignoring if I am behind case
-                    //Assume I am forward
-                    //filter out those nodes which are not allowing entry and send a request to them
-                    syncAttempt = 0;
+                    await sendSyncRequest();
+                    if (stateMap.Values.Where(x => ((x == ConsensusStates.Collect) || (x == ConsensusStates.Merge))).Count() >= Constants.VOTE_MIN_SYNC_NODES)
+                    {
+                        syncStateWork();
+                        syncAttempt = 0;
+                    }
                 }
                 if (stateMap.Count != nodeState.ConnectedValidators.Count)
                     Init();
             }
+        }
+
+        private void syncStateWork()
+        {
+            syncAttempt = 0;
+            Print("Sync Done. Normal.");
+            Thread.Sleep(500);
+            CurrentConsensusState = ConsensusStates.Collect;
         }
 
 
@@ -485,32 +496,38 @@ namespace TNetD.Consensus
             await updateStateMap();
             if (stateMap.Values.Distinct().Count() == 1 && stateMap.Values.First() == CurrentConsensusState)
             {
-                //handleFailure();
-                mergeAttempt = 0;
-                CreateBallot();
-                isBallotValid = true; // Yayy.
-                voteMap.Reset();
-                voteMessageCounter.ResetVotes();
-                Print("Merge Finished. " + GetTxCount(ballot));
-
-                //packetLogger.LogMap(stateMap);
-                //packetLogger.LogFinish(nodeConfig.NodeID + "-Merge Finished");
-                Thread.Sleep(500);
-                //logger.Enqueue(nodeConfig.NodeID + "-Merge Finished");
-                CurrentConsensusState = ConsensusStates.Vote;
+                mergeStateWork();
             }
             else
             {
                 mergeAttempt++;
-                if (mergeAttempt > 10) //preventing deadlock; this happens in case of message loss
+                if (mergeAttempt > 10) 
                 {
-                    //ignoring if I am behind case
-                    //Assume I am forward
-                    //filter out those nodes which are not allowing entry and send a request to them
-                    mergeAttempt = 0;
+                    await sendMergeRequests();
+                    if (stateMap.Values.Where(x => (x == ConsensusStates.Vote)).Count() >= Constants.VOTE_MIN_SYNC_NODES)
+                    {
+                        mergeAttempt = 0;
+                        mergeStateWork();
+                    }
                 }
             }
         }
+
+        private void mergeStateWork()
+        {
+            //handleFailure();
+            mergeAttempt = 0;
+            CreateBallot();
+            isBallotValid = true; // Yayy.
+            voteMap.Reset();
+            voteMessageCounter.ResetVotes();
+            Print("Merge Finished. " + GetTxCount(ballot));
+
+            Thread.Sleep(500);
+            //logger.Enqueue(nodeConfig.NodeID + "-Merge Finished");
+            CurrentConsensusState = ConsensusStates.Vote;
+        }
+
         /// <summary>
         /// This method blocks until every/necessary no of node arrives at the necessary state
         /// </summary>
@@ -546,34 +563,11 @@ namespace TNetD.Consensus
 
         int MAX_EXTRA_VOTING_STEP_WAIT_CYCLES = 5;
         int extraVotingDelayCycles = 0; // Wait for all the voters to send their requests.
-        bool currentVotingRequestSent = false;
+      
 
         //int extraConfirmationDelayCycles = 0;
 
         enum VoteNextState { Wait, Next }
-
-        //VoteNextState CheckReceivedExpectedVotePackets()
-        //{
-        //    if (voteMessageCounter.Votes < voteMessageCounter.UniqueVoteResponders)
-        //    {
-        //        if (extraVotingDelayCycles < MAX_EXTRA_VOTING_STEP_WAIT_CYCLES)
-        //        {
-        //            if (extraVotingDelayCycles > 0)
-        //            {
-        //                Print("Waiting a cycle for pending voting requests : " + voteMessageCounter.Votes +
-        //                    "/" + voteMessageCounter.UniqueVoteResponders + " Received");
-
-        //                timeStep.SetNextTimeStep(50);
-        //            }
-
-        //            extraVotingDelayCycles++;
-
-        //            return VoteNextState.Wait;
-        //        }
-        //    }
-
-        //    return VoteNextState.Next;
-        //}
 
         async Task<VoteNextState> WaitForPendingVotesIfNeeded()
         {
@@ -601,9 +595,8 @@ namespace TNetD.Consensus
 
         async Task VotingPostRound(VotingStates state, float Percentage)
         {
+            voteInternalAttempt = 0;
             extraVotingDelayCycles = 0;
-            currentVotingRequestSent = false;
-
             Dictionary<Hash, HashSet<Hash>> missingTransactions;
             voteMap.GetMissingTransactions(ballot, out missingTransactions);
 
@@ -628,51 +621,58 @@ namespace TNetD.Consensus
                 " Txns, Fetching " + missingTransactions.SelectMany(p => p.Value).Count() + " Txns");
             
             voteMessageCounter.ResetVotes();
+
+            CurrentVotingState = state + 1;
         }
 
-        async Task<VotingStates> HandleVotingInternal(VotingStates state, float percentage)
+        async Task HandleVotingInternal(VotingStates state, float percentage)
         {
-            if (!currentVotingRequestSent)
-            {
-                //voteMap.Reset();
-                await sendVoteRequests();
-                currentVotingRequestSent = true;
-            }
-
-           // if (/*CheckReceivedExpectedVotePackets()*/await WaitForPendingVotesIfNeeded() == VoteNextState.Next)
-            {
+            await updateVoteMap();
+            if (votingStateMap.Values.Distinct().Count() == 1 && votingStateMap.Values.First() == CurrentVotingState)
                 await VotingPostRound(state, percentage);
-
-                return (state + 1);
+            else
+            {
+                voteInternalAttempt++;
+                //this activity is for nodes that are behind
+                //once we fail to enter the "if" a FEW times then do this
+                if (voteInternalAttempt > 9)
+                {
+                    await sendVoteRequests(); //this will update stateMap
+                    //now calculate the median and move on if you really want to
+                    if (calculateMedianStateOfMap(votingStateMap))
+                    {
+                        CurrentVotingState += 1; //NEW ISSUE: In case of ST80-> STDONE problematic
+                    }
+                    voteInternalAttempt = 0;
+                }
             }
-
-           // return state;
         }
 
-        async Task<VotingStates> HandleVotingInternal_Final(VotingStates state, float percentage)
+        private bool calculateMedianStateOfMap(ConcurrentDictionary<Hash,VotingStates> map) 
         {
-            if (!currentVotingRequestSent)
-            {
-                //voteMap.Reset();
-                await sendVoteRequests();
-                currentVotingRequestSent = true;
-            }
+            var filtered = map.Values.Where(x => x==(CurrentVotingState+1));
+            if (filtered.Count() >= Constants.VOTE_MIN_SYNC_NODES)
+                return true;
+            return false;
+        }
 
-            if (await WaitForPendingVotesIfNeeded() == VoteNextState.Next)
-            {
-                await VotingPostRound(state, percentage);
-
-                return (state + 1);
-            }
-
-            return state;
+        private async Task updateVoteMap()
+        {
+            var filteredFriendHashes = votingStateMap.Where(x => x.Value != CurrentVotingState)
+                                          .ToDictionary(x => x.Key, x => x.Value)
+                                          .Keys
+                                          .ToList();
+            //another layer of filtering will happen based on the trusted nodes
+            await sendVoteRequests(filteredFriendHashes);
+            
         }
 
         async Task HandleVoting()
         {
+            /*
             await updateStateMap();
             if (stateMap.Values.Distinct().Count() == 1 && stateMap.Values.First() == CurrentConsensusState)
-            {
+            {*/
                 switch (CurrentVotingState)
                 {
                     case VotingStates.STNone:
@@ -683,27 +683,27 @@ namespace TNetD.Consensus
                         break;
 
                     case VotingStates.ST40:
-                        CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 40);
+                        await HandleVotingInternal(CurrentVotingState, 40);
                         break;
 
                     case VotingStates.ST60:
-                        CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 60);
+                        await HandleVotingInternal(CurrentVotingState, 60);
                         break;
 
                     case VotingStates.ST75:
-                        CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 75);
+                        await HandleVotingInternal(CurrentVotingState, 75);
                         break;
 
                     case VotingStates.ST80:
-                        CurrentVotingState = await HandleVotingInternal(CurrentVotingState, 80);
+                        await HandleVotingInternal(CurrentVotingState, 80);
                         break;
 
                     case VotingStates.STDone:
-                        Thread.Sleep(500);
-                        PostVotingOperations();
+                        await barrierCheck();
                         break;
                 }
-            }
+            //}
+            /*
             else
             {
                 voteAttempt++;
@@ -714,158 +714,36 @@ namespace TNetD.Consensus
                     //filter out those nodes which are not allowing entry and send a request to them
                     voteAttempt = 0;
                 }
+            }*/
+        }
+
+        private async Task barrierCheck()
+        {
+            await updateVoteMap();
+            if (votingStateMap.Values.Distinct().Count() == 1 && votingStateMap.Values.First() == CurrentVotingState)
+            {
+                postVotingOperations();
+            }
+            else
+            {
+                //after I fail to enter multiple number of times I can check state map to verify if friends are in APPLY or SYNC
+                voteFinalFailCounter++;
+                if (voteFinalFailCounter > 10)
+                {
+                    await sendVoteRequests();
+                    if(stateMap.Values.Where(x=> ((x== ConsensusStates.Apply) || (x == ConsensusStates.Sync))).Count() >= Constants.VOTE_MIN_SYNC_NODES)
+                    {
+                        voteFinalFailCounter = 0;
+                        postVotingOperations();
+                    }
+                }
+
             }
         }
 
-        /*
-                    void HandleVoting()
-                {
-                    switch (CurrentVotingState)
-                    {
-                        case VotingStates.STNone:
-                            // Pre-Voting Stuff !!                    
-                            CurrentVotingState = VotingStates.ST40;
-                            break;
-
-                        case VotingStates.ST40:
-
-                            if (!currentVotingRequestSent)
-                            {
-                                voteMap.Reset();
-                                sendVoteRequests();
-                                currentVotingRequestSent = true;
-                            }
-
-                            if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
-                            {
-                                Print("Voting Step40 Done" + voteMessageCounter.Votes +
-                                "/" + voteMessageCounter.UniqueVoteResponders + "");
-
-                                VotingPostRound(40);
-
-                                CurrentVotingState = VotingStates.ST60;
-                            }
-
-                            break;
-
-                        case VotingStates.ST60:
-
-                            if (!currentVotingRequestSent)
-                            {
-                                voteMap.Reset();
-                                sendVoteRequests();
-                                currentVotingRequestSent = true;
-                            }
-
-                            if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
-                            {
-                                Print("Voting Step60 Done" + voteMessageCounter.Votes +
-                                "/" + voteMessageCounter.UniqueVoteResponders + "");
-
-                                VotingPostRound(60);
-
-                                CurrentVotingState = VotingStates.ST75;
-                            }
-
-                            break;
-
-                        case VotingStates.ST75:
-
-                            if (!currentVotingRequestSent)
-                            {
-                                voteMap.Reset();
-                                sendVoteRequests();
-                                currentVotingRequestSent = true;
-                            }
-
-                            if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
-                            {
-                                Print("Voting Step75 Done" + voteMessageCounter.Votes +
-                                "/" + voteMessageCounter.UniqueVoteResponders + "");
-
-                                VotingPostRound(75);
-                                CurrentVotingState = VotingStates.ST80;
-                            }
-
-                            break;
-
-                        case VotingStates.ST80:
-
-                            if (!currentVotingRequestSent)
-                            {
-                                voteMap.Reset();
-                                sendVoteRequests();
-                                currentVotingRequestSent = true;
-                            }
-
-                            if (CheckReceivedExpectedVotePackets() == VoteNextState.Next)
-                            {
-                                Print("Voting Step80 Done" + voteMessageCounter.Votes +
-                                "/" + voteMessageCounter.UniqueVoteResponders + "");
-
-                                VotingPostRound(80);
-                                CurrentVotingState = VotingStates.STDone;
-                            }
-
-                            break;
-
-                        case VotingStates.STDone:
-                            PostVotingOperations();
-                            break;
-                    }
-
-
-                    if (votingStateCounter < 8) // TWEAK-POINT: Trim value.
-                    {
-                        if (votingStateCounter % 2 == 0)
-                        {
-                            sendVoteRequests();
-                        }
-                        else
-                        {
-                            Dictionary<Hash, HashSet<Hash>> missingTransactions;
-                            voteMap.GetMissingTransactions(ballot, out missingTransactions);
-
-                            sendFetchRequests(missingTransactions);
-                        }
-                    }
-                    else // Initial Sync Part is over.
-                    {
-                        // Verify the received
-                        if (voteMessageCounter.Votes < voteMessageCounter.PreviousVotes)
-                        {
-                            // Okay, all the votes have not reached till now.
-                            if (extraVotingDelayCycles < 10)
-                            {
-                                extraVotingDelayCycles++;
-
-                                Print("Waiting for pending voting requests : " + voteMessageCounter.Votes +
-                                    "/" + voteMessageCounter.PreviousVotes + " Received");
-                            }
-                        }
-                    }
-
-                    votingStateCounter++;
-
-                    // We will perform dummy voting cycles even when there are no transactions. those will
-                    // have a different counter, called ConsensusCount, the default is LedgerClose, the ledger close one 
-                    // is the one associated.
-
-                    // Request Ballots
-
-                    if (votingStateCounter - extraVotingDelayCycles >= 12)
-                    {
-                        votingStateCounter = 0;
-                        extraVotingDelayCycles = 0;
-
-                        PostVotingOperations();
-
-                        Print("Voting Finished. " + GetTxCount(finalBallot));
-                    }
-                }*/
-
-        private void PostVotingOperations()
+        private void postVotingOperations()
         {
+            voteFinalFailCounter = 0;
             finalBallot.Reset(LedgerCloseSequence);
             finalBallot.PublicKey = nodeConfig.PublicKey;
             finalBallot.AddRange(voteMap.FilterTransactionsByVotes(ballot, Constants.CONS_FINAL_VOTING_THRESHOLD_PERC));
@@ -885,49 +763,8 @@ namespace TNetD.Consensus
             CurrentVotingState = VotingStates.STNone;
 
             voteMessageCounter.ResetConfirmations();
+
         }
-
-        /* void HandleConfirmation()
-         {
-             if (confirmationStateCounter < 1) // Send it once only.
-             {
-                 if (isFinalBallotValid)
-                 {
-                     // Send Confirmation
-                     sendConfirmationRequests();
-                 }
-             }
-             else
-             {
-                 if (voteMessageCounter.Confirmations < voteMessageCounter.PreviousConfirmations)
-                 {
-                     // Okay, all the votes have not reached till now.
-                     if (extraConfirmationDelayCycles < 10)
-                     {
-                         extraConfirmationDelayCycles++;
-
-                         Print("Waiting for pending confirmation requests : " + voteMessageCounter.Confirmations +
-                             "/" + voteMessageCounter.PreviousConfirmations + " Received");
-                     }
-                 }
-             }
-
-             confirmationStateCounter++;
-
-             if (confirmationStateCounter - extraConfirmationDelayCycles >= 6)
-             {
-                 confirmationStateCounter = 0;
-                 extraConfirmationDelayCycles = 0;
-
-                 isFinalConfirmedVotersValid = true;
-
-                 CurrentConsensusState = ConsensusStates.Apply; // Verify Confirmation
-
-                 voteMessageCounter.SetPreviousConfirmations();
-
-                 Print("Confirm Finished. " + GetTxCount(finalBallot));
-             }
-         }*/
 
         bool NotEnoughVoters = false;
 
@@ -1066,7 +903,7 @@ namespace TNetD.Consensus
                     break;
 
                 case PacketType.TPT_CONS_VOTE_RESPONSE:
-                    await processVoteResponse(packet);
+                    processVoteResponse(packet);
                     break;
 
                 case PacketType.TPT_CONS_CONFIRM_REQUEST:

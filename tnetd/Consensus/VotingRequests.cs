@@ -213,6 +213,7 @@ namespace TNetD.Consensus
 
             //add all transaction IDs from CurrentTransactions
             MergeResponseMsg message = new MergeResponseMsg();
+            message.ConsensusState = CurrentConsensusState;
             foreach (KeyValuePair<Hash, TransactionContent> transaction in CurrentTransactions)
             {
                 message.AddTransaction(transaction.Key);
@@ -281,7 +282,7 @@ namespace TNetD.Consensus
         /// <summary>
         /// Send sync requests to trusted nodes.
         /// </summary>
-        async Task sendSyncRequests()
+        async Task sendSyncRequest()
         {
             foreach (var node in nodeConfig.TrustedNodes)
             {
@@ -292,7 +293,7 @@ namespace TNetD.Consensus
 
                 Hash token = TNetUtils.GenerateNewToken();
 
-                nodeState.NodeLatency.StartMeasurement(node.Key, token);
+                //nodeState.NodeLatency.StartMeasurement(node.Key, token); -> Failure Handling method I don't want to retart measurement
 
                 // Create NetworkPacket and send
 
@@ -338,7 +339,7 @@ namespace TNetD.Consensus
         async Task processSyncRequest(NetworkPacket packet)
         {
             SyncMessage syncRequest = new SyncMessage();
-            syncRequest.Deserialize(packet.Data);
+            syncRequest.Deserialize(packet.Data);               //REVIEW: any use of syncRequest?
 
             SyncMessage syncResponse = new SyncMessage();
 
@@ -481,9 +482,10 @@ namespace TNetD.Consensus
 
             VoteResponseMessage voteResponse = new VoteResponseMessage();
             voteResponse.VotingState = CurrentVotingState;
+            voteResponse.ConsensusState = CurrentConsensusState;
 
-            if (voteRequest.LedgerCloseSequence == LedgerCloseSequence &&
-                await CheckAcceptableVotingState(voteRequest.VotingState))
+            if (voteRequest.LedgerCloseSequence == LedgerCloseSequence)
+                //await CheckAcceptableVotingState(voteRequest.VotingState))
             {
                 voteResponse.IsSynced = true;
                 voteMessageCounter.IncrementVotes();
@@ -499,8 +501,12 @@ namespace TNetD.Consensus
                 voteResponse.GoodBallot = false;
                 voteResponse.IsSynced = false;
 
-                Print("LCS (PVReq) Mismatch for " + GetTrustedName(packet.PublicKeySource) +
-                    " : " + voteRequest.LedgerCloseSequence + "!=" + LedgerCloseSequence + ", VS:" + voteRequest.VotingState + "/" + CurrentVotingState);
+                Print("LCS (PVReq)  Mismatch (PVResp) for " + GetTrustedName(packet.PublicKeySource) +
+                                " : " + voteResponse.Ballot.LedgerCloseSequence + "!=" + LedgerCloseSequence + " (" +
+                                (voteResponse.Ballot.LedgerCloseSequence == LedgerCloseSequence) + ")" + ", VS:" + voteResponse.VotingState + "/" + CurrentVotingState);
+
+                //Print("LCS (PVReq) Mismatch for " + GetTrustedName(packet.PublicKeySource) +
+                //    " : " + voteRequest.LedgerCloseSequence + "!=" + LedgerCloseSequence + ", VS:" + voteRequest.VotingState + "/" + CurrentVotingState);
             }
 
             await networkPacketSwitch.SendAsync(packet.PublicKeySource, new NetworkPacket()
@@ -537,7 +543,7 @@ namespace TNetD.Consensus
 
                 await Task.Delay(30);
 
-                Print("Waiting for acceptable state: "+ waitCount +" VS: " + vs + " CVS: " + cvs);                
+                //Print("Waiting for acceptable state: "+ waitCount +" VS: " + vs + " CVS: " + cvs);                
             }
 
             //if (Math.Abs(vs - cvs) == 1) return true; // THINK: A difference of 1
@@ -547,7 +553,7 @@ namespace TNetD.Consensus
             //return true;
         }
 
-        async Task processVoteResponse(NetworkPacket packet)
+        void processVoteResponse(NetworkPacket packet)
         {
             if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
@@ -556,11 +562,16 @@ namespace TNetD.Consensus
                     VoteResponseMessage voteResponse = new VoteResponseMessage();
                     voteResponse.Deserialize(packet.Data);
 
+                    //REVIEW: If this should be inside an inner if? //NO
+                    votingStateMap.AddOrUpdate(packet.PublicKeySource, voteResponse.VotingState,
+                        (oldKey, oldValue) => voteResponse.VotingState);
+                    stateMap.CheckValueAndAdd(packet.PublicKeySource, voteResponse.ConsensusState);
+
                     if (voteResponse.GoodBallot)
                     {
                         // We should be voting for the next ballot.
-                        if (voteResponse.Ballot.LedgerCloseSequence == LedgerCloseSequence &&
-                            await CheckAcceptableVotingState(voteResponse.VotingState))
+                        if (voteResponse.Ballot.LedgerCloseSequence == LedgerCloseSequence)
+                            //await CheckAcceptableVotingState(voteResponse.VotingState))
                         {
                             // Sender and ballot keys must be same
                             if (voteResponse.Ballot.PublicKey == packet.PublicKeySource)
@@ -582,14 +593,14 @@ namespace TNetD.Consensus
                         else
                         {
                             Print("LCS Mismatch (PVResp) for " + GetTrustedName(packet.PublicKeySource) +
-                                " : " + voteResponse.Ballot.LedgerCloseSequence + "!=" + LedgerCloseSequence + ", VS:" + voteResponse.VotingState + "/" + CurrentVotingState);
+                                " : " + voteResponse.Ballot.LedgerCloseSequence + "!=" + LedgerCloseSequence +" ("+ 
+                                (voteResponse.Ballot.LedgerCloseSequence == LedgerCloseSequence) +")"+ ", VS:" + voteResponse.VotingState + "/" + CurrentVotingState);
                         }
                     }
                     else
                     {
                     }
                 }
-                stateMap.CheckValueAndAdd(packet.PublicKeySource, ConsensusStates.Vote);
             }
 
             if (VerboseDebugging) Print("Vote Response from " + packet.PublicKeySource + " Processed");

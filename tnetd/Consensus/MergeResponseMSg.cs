@@ -30,7 +30,6 @@ namespace TNetD.Consensus
         {
             transactions = new SortedSet<Hash>();
             LedgerCloseSequence = new LedgerCloseSequence();
-            ConsensusState = ConsensusStates.Merge;
             VotingState = VotingStates.STNone;
         }
 
