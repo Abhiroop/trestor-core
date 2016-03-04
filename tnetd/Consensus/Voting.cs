@@ -639,16 +639,20 @@ namespace TNetD.Consensus
                 {
                     await sendVoteRequests(); //this will update stateMap
                     //now calculate the median and move on if you really want to
-                    if (calculateMedianStateOfMap(votingStateMap))
+                    if (medianNodesAhead(votingStateMap))
                     {
-                        CurrentVotingState += 1;
+                        await VotingPostRound(state, percentage);
                     }
-                    voteInternalAttempt = 0;
+                    else
+                    {
+                        //only a "few" machines are ahead after a larger failure number go ahead
+                        
+                    }
                 }
             }
         }
 
-        private bool calculateMedianStateOfMap(ConcurrentDictionary<Hash,VotingStates> map) 
+        private bool medianNodesAhead(ConcurrentDictionary<Hash,VotingStates> map) 
         {
             var filtered = map.Values.Where(x => x==(CurrentVotingState+1));
             if (filtered.Count() >= Constants.VOTE_MIN_SYNC_NODES)
