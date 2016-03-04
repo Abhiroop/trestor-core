@@ -635,13 +635,13 @@ namespace TNetD.Consensus
                 voteInternalAttempt++;
                 //this activity is for nodes that are behind
                 //once we fail to enter the "if" a FEW times then do this
-                if (voteInternalAttempt > 9)
+                if (voteInternalAttempt > 10)
                 {
                     await sendVoteRequests(); //this will update stateMap
                     //now calculate the median and move on if you really want to
                     if (calculateMedianStateOfMap(votingStateMap))
                     {
-                        CurrentVotingState += 1; //NEW ISSUE: In case of ST80-> STDONE problematic
+                        CurrentVotingState += 1;
                     }
                     voteInternalAttempt = 0;
                 }
