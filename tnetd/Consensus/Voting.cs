@@ -69,11 +69,7 @@ namespace TNetD.Consensus
         int confirmationStateCounter = 0;
         int applyStateCounter = 0;
 
-        int syncAttempt = 0;
-        int mergeAttempt = 0;
-        int voteAttempt = 0;
-        int voteInternalAttempt = 0;
-        int voteFinalFailCounter = 0;
+        int failureCounter = 0;
 
         public bool VerboseDebugging = false;
 
@@ -435,15 +431,14 @@ namespace TNetD.Consensus
             }
             else
             {
-                syncAttempt++;
-                if(syncAttempt>10) //preventing deadlock; this happens in case of message loss
+                failureCounter++;
+                if(failureCounter>10) //preventing deadlock; this happens in case of message loss
                 {
                     Print("Couldn't Sync");
                     await sendSyncRequest();
                     if (stateMap.Values.Where(x => ((x == ConsensusStates.Collect) || (x == ConsensusStates.Merge))).Count() >= Constants.VOTE_MIN_SYNC_NODES)
                     {
                         syncStateWork();
-                        syncAttempt = 0;
                     }
                 }
                 if (stateMap.Count != nodeState.ConnectedValidators.Count)
@@ -453,7 +448,7 @@ namespace TNetD.Consensus
 
         private void syncStateWork()
         {
-            syncAttempt = 0;
+            failureCounter = 0;
             Print("Sync Done. Normal.");
             Thread.Sleep(500);
             CurrentConsensusState = ConsensusStates.Collect;
@@ -500,15 +495,12 @@ namespace TNetD.Consensus
             }
             else
             {
-                mergeAttempt++;
-                if (mergeAttempt > 10) 
+                failureCounter++;
+                if (failureCounter > 10) 
                 {
                     await sendMergeRequests();
                     if (stateMap.Values.Where(x => (x == ConsensusStates.Vote)).Count() >= Constants.VOTE_MIN_SYNC_NODES)
-                    {
-                        mergeAttempt = 0;
                         mergeStateWork();
-                    }
                 }
             }
         }
@@ -516,7 +508,7 @@ namespace TNetD.Consensus
         private void mergeStateWork()
         {
             //handleFailure();
-            mergeAttempt = 0;
+            failureCounter = 0;
             CreateBallot();
             isBallotValid = true; // Yayy.
             voteMap.Reset();
@@ -547,11 +539,6 @@ namespace TNetD.Consensus
             if (CurrentConsensusState==ConsensusStates.Merge)
             {
                 await sendMergeRequests(filteredFriendHashes);
-            }
-            
-            if(CurrentConsensusState==ConsensusStates.Vote)
-            {
-                await sendVoteRequests(filteredFriendHashes);
             }
         }
 
@@ -595,7 +582,7 @@ namespace TNetD.Consensus
 
         async Task VotingPostRound(VotingStates state, float Percentage)
         {
-            voteInternalAttempt = 0;
+            failureCounter = 0;
             extraVotingDelayCycles = 0;
             Dictionary<Hash, HashSet<Hash>> missingTransactions;
             voteMap.GetMissingTransactions(ballot, out missingTransactions);
@@ -632,10 +619,10 @@ namespace TNetD.Consensus
                 await VotingPostRound(state, percentage);
             else
             {
-                voteInternalAttempt++;
+                failureCounter++;
                 //this activity is for nodes that are behind
                 //once we fail to enter the "if" a FEW times then do this
-                if (voteInternalAttempt > 10)
+                if (failureCounter > 10)
                 {
                     await sendVoteRequests(); //this will update stateMap
                     //now calculate the median and move on if you really want to
@@ -643,12 +630,17 @@ namespace TNetD.Consensus
                     {
                         await VotingPostRound(state, percentage);
                     }
+                    /*
                     else
                     {
                         //only a "few" machines are ahead after a larger failure number go ahead
-                        
-                    }
+                        voteInternalAttempt++; //REVIEW: Change this; Actually + 2 is happenning
+                    }*/
                 }
+                /*if(voteInternalAttempt > 20)
+                {
+                    await VotingPostRound(state, percentage);
+                }*/
             }
         }
 
@@ -673,52 +665,34 @@ namespace TNetD.Consensus
 
         async Task HandleVoting()
         {
-            /*
-            await updateStateMap();
-            if (stateMap.Values.Distinct().Count() == 1 && stateMap.Values.First() == CurrentConsensusState)
-            {*/
-                switch (CurrentVotingState)
-                {
-                    case VotingStates.STNone:
-                        // Pre-Voting Stuff !! 
-                        voteAttempt = 0;
-                        voteMap.Reset();
-                        CurrentVotingState = VotingStates.ST40;
-                        break;
-
-                    case VotingStates.ST40:
-                        await HandleVotingInternal(CurrentVotingState, 40);
-                        break;
-
-                    case VotingStates.ST60:
-                        await HandleVotingInternal(CurrentVotingState, 60);
-                        break;
-
-                    case VotingStates.ST75:
-                        await HandleVotingInternal(CurrentVotingState, 75);
-                        break;
-
-                    case VotingStates.ST80:
-                        await HandleVotingInternal(CurrentVotingState, 80);
-                        break;
-
-                    case VotingStates.STDone:
-                        await barrierCheck();
-                        break;
-                }
-            //}
-            /*
-            else
+            switch (CurrentVotingState)
             {
-                voteAttempt++;
-                if (voteAttempt > 10) //preventing deadlock; this happens in case of message loss
-                {
-                    //ignoring if I am behind case
-                    //Assume I am forward
-                    //filter out those nodes which are not allowing entry and send a request to them
-                    voteAttempt = 0;
-                }
-            }*/
+                case VotingStates.STNone:
+                    // Pre-Voting Stuff !! 
+                    voteMap.Reset();
+                    CurrentVotingState = VotingStates.ST40;
+                    break;
+
+                case VotingStates.ST40:
+                    await HandleVotingInternal(CurrentVotingState, 40);
+                    break;
+
+                case VotingStates.ST60:
+                    await HandleVotingInternal(CurrentVotingState, 60);
+                    break;
+
+                case VotingStates.ST75:
+                    await HandleVotingInternal(CurrentVotingState, 75);
+                    break;
+
+                case VotingStates.ST80:
+                    await HandleVotingInternal(CurrentVotingState, 80);
+                    break;
+
+                case VotingStates.STDone:
+                    await barrierCheck();
+                    break;
+            }
         }
 
         private async Task barrierCheck()
@@ -731,23 +705,19 @@ namespace TNetD.Consensus
             else
             {
                 //after I fail to enter multiple number of times I can check state map to verify if friends are in APPLY or SYNC
-                voteFinalFailCounter++;
-                if (voteFinalFailCounter > 10)
+                failureCounter++;
+                if (failureCounter > 10)
                 {
                     await sendVoteRequests();
                     if(stateMap.Values.Where(x=> ((x== ConsensusStates.Apply) || (x == ConsensusStates.Sync))).Count() >= Constants.VOTE_MIN_SYNC_NODES)
-                    {
-                        voteFinalFailCounter = 0;
                         postVotingOperations();
-                    }
                 }
-
             }
         }
 
         private void postVotingOperations()
         {
-            voteFinalFailCounter = 0;
+            failureCounter = 0;
             finalBallot.Reset(LedgerCloseSequence);
             finalBallot.PublicKey = nodeConfig.PublicKey;
             finalBallot.AddRange(voteMap.FilterTransactionsByVotes(ballot, Constants.CONS_FINAL_VOTING_THRESHOLD_PERC));
