@@ -1,0 +1,195 @@
+﻿<Window x:Class="TNetD.MainWindow2"
+        xmlns:local="clr-namespace:TNetD.UI"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TNET_MAIN WINDOW 2" Height="520" Width="1024" Closing="Window_Closing">
+
+    <Window.Resources>
+        <local:StatusToColor x:Key="ColorConverter"/>
+        <local:ByteArrayToString x:Key="ByteArrayToString"/>
+        <local:HashToString x:Key="HashToString"/>
+        <local:DateTimeToTimeString x:Key="DateTimeToTimeString"/>
+
+        <Style x:Key="DarkRoomListViewStyle" TargetType="{x:Type ListView}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListView">
+                        <Border Name="Border" Background="Black" BorderBrush="LightGray" BorderThickness="1" CornerRadius="2">
+                            <ScrollViewer Style="{DynamicResource {x:Static GridView.GridViewScrollViewerStyleKey}}">
+                                <ItemsPresenter />
+                            </ScrollViewer>
+
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="true">
+                                <Setter TargetName="Border" Property="Background" Value="Black" />
+                                <Setter TargetName="Border" Property="BorderBrush" Value="Gray" />
+                                <Setter Property="Foreground" Value="Gray" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ListView_DependencyCollapsedStyle" TargetType="{x:Type ListView}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}, Mode=FindAncestor}}" 
+        			Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <DataTemplate x:Key="DataTemplate_TransactionDataEntity">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="360"/>
+                    <ColumnDefinition  Width="120"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding PublicKey, Converter={StaticResource ByteArrayToString}}" FontFamily="Consolas"  
+                           Margin="5,0"  HorizontalAlignment="Left"/>
+
+                <TextBlock Text="{Binding Value}" Grid.Column="1" FontFamily="Consolas"
+        			       Margin="5,0" Foreground="#FFC0A2FF" HorizontalAlignment="Right"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DataTemplate_TransactionSignature">
+            <Grid>
+
+                <TextBlock Text="{Binding Hex, Converter={StaticResource ByteArrayToString}}" FontFamily="Consolas"  
+                           Margin="5,0"  HorizontalAlignment="Left"/>
+
+            </Grid>
+        </DataTemplate>
+
+        <SolidColorBrush x:Key="Brush_FerrariRed" Color="#FFEC2323"/>
+        <SolidColorBrush x:Key="Brush_BrightGreen" Color="#FF5DEC33"/>
+        <SolidColorBrush x:Key="Brush_DeepYellow" Color="#FFC1B430"/>
+        <LinearGradientBrush x:Key="Brush_Gradient_DeepBlue" EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="#FF36444D" Offset="0"/>
+            <GradientStop Color="#FF113163" Offset="1"/>
+        </LinearGradientBrush>
+
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="307*"/>
+            <RowDefinition Height="22"/>
+        </Grid.RowDefinitions>
+
+        <Menu HorizontalAlignment="Stretch"  VerticalAlignment="Stretch"  >
+            <MenuItem Header="FILE">
+                <MenuItem Name="menuItem_File_Exit" Header="Close" Click="menuItem_File_Exit_Click"/>
+            </MenuItem>
+           
+            <MenuItem Header="SIMULATION">
+                <MenuItem Name="menuItem_Simulation_Start" Header="Start" Click="menuItem_Simulation_Start_Click"/>
+                <MenuItem Name="menuItem_Simulation_Stop" Header="Stop"/>
+                <MenuItem Name="menuItem_Simulation_Restart" Header="Restart" />
+                <Separator/>
+                <MenuItem Name="menuItem_Simulation_Resync" Header="Resync"/>
+            </MenuItem>
+          
+            <MenuItem Header="HELP">
+                <MenuItem Header="Topics"/>
+                <MenuItem Header="About"/>
+            </MenuItem>
+        </Menu>
+
+        <TabControl Grid.Row="1">
+            <TabItem Header="Log">
+                <Grid Name="grid_Main">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="620*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="380*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="100*"/>
+                        <RowDefinition Height="10"/>
+                    </Grid.RowDefinitions>
+                    <Label>Log:</Label>
+                    <Label Grid.Column="2">Status:</Label>
+
+                    <ListBox Grid.Row="1" ItemsSource="{Binding LogMessages}"  Background="#FF1E1E1E" Foreground="#FF8ACD3A" >
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Time, Converter= {StaticResource DateTimeToTimeString}}" 
+                                               Foreground="Plum" Grid.Column="0" />
+
+                                    <StackPanel Orientation="Vertical" Grid.Column="1" Width="850" HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding Text}" FontFamily="Consolas" TextWrapping="Wrap"
+                                               Foreground="{Binding TextColor}" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <ScrollViewer Grid.Row="1" Grid.Column="2">
+                        <TextBlock x:Name="textBlock_Status" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
+                    </ScrollViewer>
+
+                    <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
+                    
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Log2">
+                <Grid Name="grid_Main2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="489*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="392*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="100*"/>
+                        <RowDefinition Height="10"/>
+                    </Grid.RowDefinitions>
+                    <Label>Log:</Label>
+                    <Label Grid.Column="2">Status:</Label>
+                    <ScrollViewer Grid.Row="1">
+                        <TextBlock x:Name="textBlock_Log2" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
+                    </ScrollViewer>
+                    <ScrollViewer Grid.Row="1" Grid.Column="2">
+                        <TextBlock x:Name="textBlock_Status2" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
+                    </ScrollViewer>
+
+                    <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
+
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+
+        <StatusBar Grid.Row="2">
+            <TextBlock Name="textBlock_StatusLabel" Text="Ready"/>
+        </StatusBar>
+    </Grid>
+</Window>
+
+
+<!--TextBlock.Style>
+    <Style TargetType="TextBlock">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Path=IsSource, Converter={StaticResource MyConverter}}" Value="False">
+                <Setter Property="Foreground" Value="Green" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+</TextBlock.Style-->

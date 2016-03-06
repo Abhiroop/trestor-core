@@ -1,0 +1,46 @@
+﻿<Page
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:TNetWallet" xmlns:UserControls="clr-namespace:TNetWallet.UserControls" x:Class="TNetWallet.SendMoney" 
+      mc:Ignorable="d"
+	Title="SendMoney" Height="600" Width="400" Loaded="Page_Loaded">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="20*"/>
+            <ColumnDefinition Width="10*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="49*"/>
+            <RowDefinition Height="251*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="18" Height="28" Grid.Column="1" Margin="43,21,48,0" FontWeight="Bold" Width="109" Text="Send Trests" />
+        <Button Name="button_Refresh" Grid.ColumnSpan="3" Content="Refresh" Margin="72,355,72,0" Grid.Row="1" Style="{DynamicResource TrestorButtonStyle}" Foreground="#FFFDFDFD" Background="#00000000" Height="38" VerticalAlignment="Top" Click="button_Refresh_Click"/>
+        <Line Margin="0,0,0,49"/>
+        <TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Enter transaction details " VerticalAlignment="Top" FontSize="14" Height="28" Margin="23,49,22,0" Width="155" Grid.Column="1" />
+
+        <local:TitledTextBox x:Name="textBox_UserName" ToolTipService.Placement="Bottom" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="72,10,0,0" Grid.Row="1" VerticalAlignment="Top" Width="256" TitleText="SEND TRESTS TO">
+            <local:TitledTextBox.ToolTip>
+                <Border  Margin="-6" Padding="5" Background="#FF747474">
+                    <TextBlock Foreground="White" Text="A unique id, will be used to transfer trests. It is preferable to have an anonymous ID."/>
+                </Border>
+            </local:TitledTextBox.ToolTip>
+        </local:TitledTextBox>
+        <Ellipse x:Name="passQualityEllipse" Grid.Column="2" HorizontalAlignment="Left" Height="22" Margin="59,125,0,0" Grid.Row="1" VerticalAlignment="Top" Width="22"/>
+        <local:TitledTextBox x:Name="textBox_Money" TextBoxBase.TextChanged="textBox_Money_TextChanged"  ToolTipService.Placement="Bottom" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="72,95,0,0" Grid.Row="1" VerticalAlignment="Top" Width="256" TitleText="AMOUNT IN TRESTS" Text="">
+            <local:TitledTextBox.ToolTip>
+                <Border  Margin="-6" Padding="5" Background="#FF747474">
+                    <TextBlock Foreground="White" Text="A unique id, will be used to transfer trests. It is preferable to have an anonymous ID."/>
+                </Border>
+            </local:TitledTextBox.ToolTip>
+        </local:TitledTextBox>
+        <Button x:Name="button_Send" Grid.ColumnSpan="3" Content="Next" Margin="72,181,72,0" Grid.Row="1" Style="{DynamicResource TrestorButtonStyle}" Foreground="#FFFDFDFD" Background="#00000000" Height="38" VerticalAlignment="Top" Click="button_Send_Click" />
+        <TextBlock x:Name="textBlock_Status"  Margin="0,321,0,147" FontSize="20" Grid.Row="1" Grid.Column="1"/>
+        <TextBlock x:Name="textBlock_TotalMoney"  Margin="72,426,72,55" Grid.ColumnSpan="3" FontSize="16" Grid.Row="1"/>
+        <UserControls:MoneyBar x:Name="moneyBar" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="72,260,0,0" Grid.Row="1" VerticalAlignment="Top" Width="256"/>
+    </Grid>
+</Page>

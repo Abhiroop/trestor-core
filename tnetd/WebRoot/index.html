@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<link href="http://fonts.googleapis.com/css?family=Varela" rel="stylesheet" />
+<link href="default.css" rel="stylesheet" type="text/css" media="all" />
+<link href="fonts.css" rel="stylesheet" type="text/css" media="all" />
+
+<!--[if IE 6]><link href="default_ie6.css" rel="stylesheet" type="text/css" /><![endif]-->
+
+</head>
+<body>
+<div id="wrapper">
+	<div id="header-wrapper">
+	<div id="header" class="container">
+		<div id="logo">
+			<h1><a href="https://trestor.org/"><img src="https://trestor.org/images/trestor-logo-home.png"></a></h1>
+		</div>
+		<div id="menu">
+			<ul>
+				<li class="current_page_item"><a href="https://manav.trestor.org/info" accesskey="1" title="">Status</a></li>
+				<li><a href="https://trestor.org/about-us" accesskey="2" title="">About Us</a></li>
+				<li><a href="https://trestor.org/locate-retail-partner" accesskey="3" title="">Retail Partners</a></li>
+				<li><a href="https://trestor.org/faq" accesskey="4" title="">FAQ'S</a></li>
+				<li><a href="https://trestor.org/app" accesskey="5" title="">Download The App</a></li>
+			</ul>
+		</div>
+	</div>
+	</div>
+	<div id="banner">
+		<div class="container">
+			<div class="title">
+				<h2>Live Node Information</h2>
+		</div>
+	</div>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+
+	<script type="text/javascript">
+
+	$.ajaxSetup({ cache: false }); //disallows cachinge, so information should be new
+
+	function loadNodeStatus()
+	{ //start function
+		var url = "https://manav.trestor.org/info";
+        $.getJSON(url,
+            function(data){
+                setTimeout("loadNodeStatus()",10000);
+				document.getElementById("PUBLICKEY").innerHTML = data.Data.PublicKey;
+				document.getElementById("NAME").innerHTML = data.Data.Name;
+				document.getElementById("ADDRESS").innerHTML = data.Data.Address;
+				document.getElementById("VERSION").innerHTML = data.Data.Version;
+				document.getElementById("ORGANISATION").innerHTML = data.Data.Organisation;
+				document.getElementById("PLATFORM").innerHTML = data.Data.Platform;
+				document.getElementById("EMAIL").innerHTML = data.Data.Email;
+				document.getElementById("TRANSACTIONSPROCESSED").innerHTML = data.Data.NodeDetails.TransactionsProcessed;
+				document.getElementById("TRANSACTIONSACCEPTED").innerHTML = data.Data.NodeDetails.TransactionsAccepted;
+				document.getElementById("TRANSACTIONSVALIDATED").innerHTML = data.Data.NodeDetails.TransactionsValidated;
+				document.getElementById("REQUESTSPROCESSED").innerHTML = data.Data.NodeDetails.RequestsProcessed;
+				document.getElementById("TOTALACCOUNTS").innerHTML = data.Data.NodeDetails.TotalAccounts;
+				document.getElementById("PROOF").innerHTML = data.Data.NodeDetails.ProofOfWorkQueueLength;
+				document.getElementById("LOADLEVEL").innerHTML = data.Data.NodeDetails.LoadLevel;
+				document.getElementById("TIMEUTC").innerHTML = data.Data.NodeDetails.TimeUTC;
+				document.getElementById("HASH").innerHTML = data.Data.LastLedgerInfo.Hash;
+				document.getElementById("SEQUENCENUMBER").innerHTML = data.Data.LastLedgerInfo.SequenceNumber;
+				document.getElementById("CLOSETIME").innerHTML = data.Data.LastLedgerInfo.CloseTime;
+				document.getElementById("TRANSACTIONS").innerHTML = data.Data.LastLedgerInfo.Transactions;
+				document.getElementById("TOTALTRANSACTIONS").innerHTML = data.Data.LastLedgerInfo.TotalTransactions;
+            }); 
+	} //end function        
+	
+	$(document).ready(function(){ 
+		loadNodeStatus();
+	}); 
+
+	</script>
+	<div id="extra" class="container">
+		<div class="title">
+			<div class="boxA">
+				<div class="box">
+					<h1 align="center">Node Information</h1><br><br>
+					<p style="display:inline-block;" align="left"><b><i>Organisation &nbsp; : &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="ORGANISATION">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Version &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="VERSION">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Email &nbsp; :&nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="EMAIL">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Name &nbsp;  :&nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="NAME">Loading..</div>
+					<br>
+					
+					<p style="display:inline-block;" align="left"><b><i>Platform &nbsp; : &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="PLATFORM">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>PublicKey &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="PUBLICKEY">Loading..</div>
+		<br>
+					<p style="display:inline-block;" align="left"><b><i>Address &nbsp;  : &nbsp; &nbsp; </p></i></b><div style="display:inline-block;" align="left" id="ADDRESS">Loading..</div>
+				</div>
+			</div>
+			<div class="boxC">
+				<div class="box">
+					<h1 align="center">Transaction Details</h1><br><br>
+					<p style="display:inline-block;" align="left"><b><i>Transactions Proposed &nbsp; : &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="TRANSACTIONSPROCESSED">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Transactions Accepted &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="TRANSACTIONSACCEPTED">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Transactions Validated &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="TRANSACTIONSVALIDATED">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Requests Processed &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="REQUESTSPROCESSED">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Load Level &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="LOADLEVEL">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Total Number of Accounts &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="TOTALACCOUNTS">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Queue Length &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="PROOF">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Time UTC &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="TIMEUTC">Loading..</div>
+				</div>
+			</div>
+			<div class="boxD">
+				<div class="box">
+					<h1 align="center">Last Ledger Details</h1><br><br>
+					<p style="display:inline-block;" align="left"><b><i>Hash &nbsp; : &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="HASH">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Sequence Number &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="SEQUENCENUMBER">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Transactions &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="TRANSACTIONS">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Total Transactions Number &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="TOTALTRANSACTIONS">Loading..</div>
+					<br>
+					<p style="display:inline-block;" align="left"><b><i>Close Time &nbsp; : &nbsp; &nbsp;  </p></i></b><div style="display:inline-block;" align="left" id="CLOSETIME">Loading..</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+<!--
+	Design inspired by TEMPLATED (http://templated.co)
+-->
+</body>
+</html>

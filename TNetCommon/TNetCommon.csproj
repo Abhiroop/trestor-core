@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{66391146-98D7-4258-85F5-D8BE99E632FD}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TNetD</RootNamespace>
+    <AssemblyName>TNetCommon</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Address\AccountIdentifier.cs" />
+    <Compile Include="Address\AddressData.cs" />
+    <Compile Include="Address\AddressFactory.cs" />
+    <Compile Include="Address\GenesisFileParser.cs" />
+    <Compile Include="ArrayHelpers.cs" />
+    <Compile Include="Base58.cs" />
+    <Compile Include="Chaos.NaCl\CryptoBytes.cs" />
+    <Compile Include="Chaos.NaCl\Ed25519.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Array16.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Array8.cs" />
+    <Compile Include="Chaos.NaCl\Internal\ByteIntegerConverter.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\base.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\base2.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\d.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\d2.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_0.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_1.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_add.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_cmov.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_cswap.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_frombytes.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_invert.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_isnegative.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_isnonzero.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_mul.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_mul121666.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_neg.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_pow22523.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_sq.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_sq2.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_sub.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\fe_tobytes.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\FieldElement.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_add.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_double_scalarmult.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_frombytes.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_madd.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_msub.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_p1p1_to_p2.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_p1p1_to_p3.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_p2_0.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_p2_dbl.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_p3_0.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_p3_dbl.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_p3_tobytes.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_p3_to_cached.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_p3_to_p2.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_precomp_0.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_scalarmult_base.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_sub.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\ge_tobytes.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\GroupElement.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\keypair.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\open.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\scalarmult.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\sc_clamp.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\sc_mul_add.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\sc_reduce.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\sign.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Ed25519Ref10\sqrtm1.cs" />
+    <Compile Include="Chaos.NaCl\Internal\InternalAssert.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Poly1305Donna.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Salsa\Salsa20.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Salsa\SalsaCore.cs" />
+    <Compile Include="Chaos.NaCl\Internal\Sha512Internal.cs" />
+    <Compile Include="Chaos.NaCl\MontgomeryCurve25519.cs" />
+    <Compile Include="Chaos.NaCl\Sha512.cs" />
+    <Compile Include="Chaos.NaCl\XSalsa20Poly1305.cs" />
+    <Compile Include="CommonConstants.cs" />
+    <Compile Include="Compression\QuickLZ.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2B.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2BConfig.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2BCore-FullyUnrolled.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2BCore-Inline.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2BCore-Simple.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2BCore.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2BHasher.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2BNodeHasher.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2BTreeConfig.cs" />
+    <Compile Include="Crypto\BLAKE2\Blake2IvBuilder.cs" />
+    <Compile Include="Crypto\BLAKE2\Hasher.cs" />
+    <Compile Include="Crypto\ISymmCipher.cs" />
+    <Compile Include="Crypto\PrivateKeyStore.cs" />
+    <Compile Include="Crypto\RC4.cs" />
+    <Compile Include="Crypto\Salsa20.cs" />
+    <Compile Include="Curve25519.cs" />
+    <Compile Include="Hash.cs" />
+    <Compile Include="HashPair.cs" />
+    <Compile Include="HexUtil.cs" />
+    <Compile Include="Interop\Rig2.cs" />
+    <Compile Include="ISignableBase.cs" />
+    <Compile Include="Json\REST\BytesToHexConverter.cs" />
+    <Compile Include="Json\REST\Client\RESTClient.cs" />
+    <Compile Include="Json\REST\Client\RESTRequest.cs" />
+    <Compile Include="Json\REST\Client\RESTResponse.cs" />
+    <Compile Include="Json\REST\Server\Config.cs" />
+    <Compile Include="Json\REST\Server\RESTServer.cs" />
+    <Compile Include="Json\REST\Util\ContentType.cs" />
+    <Compile Include="Json\REST\Util\EventLogger.cs" />
+    <Compile Include="Json\REST\Util\Exceptions.cs" />
+    <Compile Include="Json\REST\Util\Extensions.cs" />
+    <Compile Include="Json\REST\Util\HttpMethod.cs" />
+    <Compile Include="Json\REST\Util\Responder.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Conversions.cs" />
+    <Compile Include="Protocol\ProtocolPackager.cs" />
+    <Compile Include="Protocol\SerializableBase.cs" />
+    <Compile Include="Protocol\StandardVarint.cs" />
+    <Compile Include="Protocol\Varint2.cs" />
+    <Compile Include="Transactions\AccountInfo.cs" />
+    <Compile Include="Transactions\StructsAndEnums.cs" />
+    <Compile Include="Transactions\TransactionContent.cs" />
+    <Compile Include="Transactions\TransactionEntity.cs" />
+    <Compile Include="Transactions\TransactionFactory.cs" />
+    <Compile Include="Transactions\TransactionState.cs" />
+    <Compile Include="Transactions\TransactionStateManager.cs" />
+    <Compile Include="Types\JS_LedgerInfo.cs" />
+    <Compile Include="Types\JS_Structs.cs" />
+    <Compile Include="Types\LeafDataType.cs" />
+    <Compile Include="Types\CommonStructs.cs" />
+    <Compile Include="Types\LedgerCloseData.cs" />
+    <Compile Include="UI\DisplayUtils.cs" />
+    <Compile Include="UI\DisplayMessageType.cs" />
+    <Compile Include="Utils.cs" />
+    <Compile Include="WorkProof.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Chaos.NaCl\Internal\Salsa\replace regex.txt" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

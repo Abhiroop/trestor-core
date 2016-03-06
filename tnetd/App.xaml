@@ -1,0 +1,21 @@
+﻿<Application x:Class="TNetD.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="UI/MainWindow.xaml">
+    <Application.Resources>
+
+        <ResourceDictionary>
+
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary x:Name="ThemeDarK" Source="/tnetd;component/Themes/Metro/Dark/MetroDark.MSControls.Core.Implicit.xaml" />
+            </ResourceDictionary.MergedDictionaries>            
+            
+            <SolidColorBrush x:Key="DarkBackgroundBrush" Color="#FF1E1E1E"/>
+            <SolidColorBrush x:Key="Brush_GraphBackground" Color="#FF013066"/>
+            <SolidColorBrush x:Key="Brush_GraphBackground_Dark" Color="#FF02254D"/>
+
+        </ResourceDictionary>
+        
+    </Application.Resources>
+
+</Application>

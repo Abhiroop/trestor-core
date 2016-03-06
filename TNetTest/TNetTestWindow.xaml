@@ -1,0 +1,83 @@
+﻿<Window x:Class="TNetTest.TNetTestWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TNet Test Bench - v0.1 - Jan 2015" Height="402" Width="592">
+    <Window.Resources>
+
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="307*"/>
+            <RowDefinition Height="22"/>
+        </Grid.RowDefinitions>
+
+        <Menu HorizontalAlignment="Stretch"  VerticalAlignment="Stretch"  >
+            <MenuItem Header="FILE">
+                <MenuItem Name="menuItem_File_Exit" Header="EXIT" />
+                <MenuItem Name="menuItem_Benchmark" Header="BENCHMARK" Click="menuItem_Benchmark_Click"></MenuItem>
+                <MenuItem Name="menuItem_File_TestVarint" Header="Test Varint" Click="menuItem_File_TestVarint_Click" />
+                <MenuItem Name="menuItem_File_TestTree" Header="Test Tree" Click="menuItem_File_TestTree_Click" />
+            </MenuItem>
+            <MenuItem Header="TRANSACTIONS">
+                <MenuItem Header="Intialize" Name="button_TransactionsInitialize" Click="button_TransactionsInitialize_Click" />
+                <MenuItem Header="Start" Name="button_TransactionsStart" Click="button_TransactionsStart_Click"/>
+                <MenuItem Header="Verify" Name="button_TransactionsVerify" Click="button_TransactionsVerify_Click"/>
+                <MenuItem Header="Restart" />
+                <Separator/>
+            </MenuItem>
+            <MenuItem Header="MEMORY HARDNESS">
+                <MenuItem Header="Start" Name="button_MEM_HARD_Start" Click="button_MEM_HARD_Start_Click" />
+                <MenuItem Header="Verify" Name="button_MEM_HARD_Verify" />
+                <MenuItem Header="Restart" />
+                <Separator/>
+            </MenuItem>
+            <MenuItem Header="HELP">
+                <MenuItem Header="Topics"/>
+                <MenuItem Header="About"/>
+            </MenuItem>
+        </Menu>
+
+        <TabControl Grid.Row="1">
+            <TabItem Header="Status">
+                <Grid Name="grid_Main">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="100*"/>
+                        <RowDefinition Height="10"/>
+                    </Grid.RowDefinitions>
+                    <Label>Simulation Status:</Label>
+                    <ScrollViewer Grid.Row="1">
+                        <TextBox x:Name="textBlock_StatusLog" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Transactions">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="143*"/>
+                        <ColumnDefinition Width="435*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="35*"/>
+                        <RowDefinition Height="36*"/>
+                        <RowDefinition Height="230*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Width="100" Height="22" Margin="33,0,10,14" Grid.Row="1">Transaction Count:</TextBlock>
+                    <TextBox Name="textBox_Transactions_TransactionCount" Width="100" Height="22" Margin="24,34,311,15" Grid.Column="1" Grid.RowSpan="2">1</TextBox>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Log"/>
+        </TabControl>
+
+        <StatusBar Grid.Row="2">
+            <TextBlock Name="textBlock_Status" Text="Ready"/>
+        </StatusBar>
+    </Grid>
+</Window>
+
