@@ -1,0 +1,974 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Sources">
+      <UniqueIdentifier>{bd1708a4-eee5-49f7-8daf-2d7992d0927d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\HashTree">
+      <UniqueIdentifier>{9932b0f5-f6b2-4914-b354-536d2dfbd39c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Utils">
+      <UniqueIdentifier>{ffc53bb3-363e-4d58-b74f-409ef8ba49c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Core">
+      <UniqueIdentifier>{1b8c9c17-6ccc-46f1-baca-d10eb13c9b3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Routing">
+      <UniqueIdentifier>{855a07b1-ea5e-4e12-80c6-d0b838de4ae6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Transactions">
+      <UniqueIdentifier>{3576ead9-c003-4030-8f59-4e21a489029d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Ledger">
+      <UniqueIdentifier>{9496c862-f88c-403a-9405-50cbda799af7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Node">
+      <UniqueIdentifier>{3facd9f6-4336-4089-b756-a1e6f64ab210}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\FakeNetwork">
+      <UniqueIdentifier>{edf9bc04-ccfc-4bd8-b464-e0e412d65800}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Consensus">
+      <UniqueIdentifier>{8a677c09-ae67-4a28-877b-bb9c2d65c532}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\TBB">
+      <UniqueIdentifier>{c1babbf9-ebb8-485a-bdba-ce608263b1c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Simulator">
+      <UniqueIdentifier>{41843b58-516d-4eea-a94f-55625eefbaf1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Protocol">
+      <UniqueIdentifier>{9d417022-9045-4aa2-bb5d-35dca7fdfd81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\SQLLiteCpp">
+      <UniqueIdentifier>{6f09fe2c-6b1d-44bd-84b7-dfc8111dca7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Network">
+      <UniqueIdentifier>{83a8fe07-e7a3-4dba-8fce-d3cdc3075ec3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Time">
+      <UniqueIdentifier>{e2b9f0f5-c712-4c5f-9f7c-146b4199ea96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RPC">
+      <UniqueIdentifier>{f6482991-d42d-42b3-8e0f-013fbf0fd46e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Salsa20">
+      <UniqueIdentifier>{47f1d3a3-a806-4c33-be8f-aeafb0cd160d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\LevelDB">
+      <UniqueIdentifier>{adf407c7-776b-48c6-9d88-c74da59f752c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ed25519">
+      <UniqueIdentifier>{b2f25913-1157-4a18-be93-7daef50a5e6f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\TNET_UI\Sources\BaseNetwork.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\CandidateSet.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\CyptoTest.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ECTest.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\main1.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\main1_.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\PrivateKeyManage.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\SQLiteTest.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\UserDataHandler.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\UserDataMapHandler.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\add_scalar.cpp">
+      <Filter>ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\fe.cpp">
+      <Filter>ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\ge.cpp">
+      <Filter>ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\keypair.cpp">
+      <Filter>ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\key_exchange.cpp">
+      <Filter>ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\sc.cpp">
+      <Filter>ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\seed.cpp">
+      <Filter>ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\sha512.cpp">
+      <Filter>ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\sign.cpp">
+      <Filter>ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\test_ec.cpp">
+      <Filter>ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ed25519\verify.cpp">
+      <Filter>ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Base64.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Hash.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Utils.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\OnionConnectionEstablish.cpp">
+      <Filter>Sources\Routing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\OnionNodeList.cpp">
+      <Filter>Sources\Routing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\OnionPack.cpp">
+      <Filter>Sources\Routing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\CreditDebitData.cpp">
+      <Filter>Sources\Transactions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TransactionContent.cpp">
+      <Filter>Sources\Transactions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Ledger.cpp">
+      <Filter>Sources\Ledger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LedgerFileHandler.cpp">
+      <Filter>Sources\Ledger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\AccountInfo.cpp">
+      <Filter>Sources\Ledger</Filter>
+    </ClCompile>
+    <ClCompile Include="Program.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MainForm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TreeNodeX.cpp">
+      <Filter>Sources\HashTree</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkVisualizer.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Point2.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\FakeNetwork.cpp">
+      <Filter>Sources\FakeNetwork</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Constants.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\FakeSocket.cpp">
+      <Filter>Sources\FakeNetwork</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Timer.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Simulator.cpp">
+      <Filter>Sources\Simulator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Node.cpp">
+      <Filter>Sources\Node</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ProtocolPackager.cpp">
+      <Filter>Sources\Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Conversions.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\SerializableBase.cpp">
+      <Filter>Sources\Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Consensus.cpp">
+      <Filter>Sources\Consensus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\VoteType.cpp">
+      <Filter>Sources\Consensus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.cpp">
+      <Filter>Sources\SQLLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Base64_2.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\AddressFactory.cpp">
+      <Filter>Sources\Node</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Varint2.cpp">
+      <Filter>Sources\Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TreeLevelDataType.cpp">
+      <Filter>Sources\HashTree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LedgerRootInfo.cpp">
+      <Filter>Sources\Ledger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ConsensusMap.cpp">
+      <Filter>Sources\Consensus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\IncomingTransactionMap.cpp">
+      <Filter>Sources\Consensus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TransactionEntity.cpp">
+      <Filter>Sources\Transactions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TreeSyncData.cpp">
+      <Filter>Sources\HashTree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\MoneyInOutFlow.cpp">
+      <Filter>Sources\Ledger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\State.cpp">
+      <Filter>Sources\Node</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TimeSync.cpp">
+      <Filter>Sources\Time</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TreeSyncRootData.cpp">
+      <Filter>Sources\HashTree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\RpcTest.cpp">
+      <Filter>RPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\RPCKeyExchange.cpp">
+      <Filter>RPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\TreeSyncRequest.cpp">
+      <Filter>Sources\HashTree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\KeyExchangeState.cpp">
+      <Filter>RPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\Salsa20\salsa20.cpp">
+      <Filter>Sources\Salsa20</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\SQLiteCpp\sqlite3.c">
+      <Filter>Sources\SQLLiteCpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\RPCPacketHandler.cpp">
+      <Filter>RPC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\builder.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\dbformat.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\db_impl.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\db_iter.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\dumpfile.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\filename.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\log_reader.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\log_writer.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\memtable.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\repair.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\table_cache.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\version_edit.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\version_set.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\db\write_batch.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\helpers\memenv\memenv.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\block.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\block_builder.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\filter_block.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\format.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\iterator.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\merger.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\table.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\table_builder.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\table\two_level_iterator.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\arena.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\bloom.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\cache.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\coding.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\comparator.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\crc32c.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\env.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\filter_policy.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\hash.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\histogram.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\logging.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\options.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\status.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\testharness.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\testutil.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\port\port_windows.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LevelDB\util\env_windows.cc">
+      <Filter>Sources\LevelDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\LedgerFileHandler_LevelDB.cpp">
+      <Filter>Sources\Ledger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TNET_UI\Sources\ConvertUTF.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\TNET_UI\Sources\BaseNetwork.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\CandidateSet.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\PrivateKeyManage.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Structs.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\UserDataHandler.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\UserDataMapHandler.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\ed25519.h">
+      <Filter>ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\fe.h">
+      <Filter>ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\fixedint_.h">
+      <Filter>ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\ge.h">
+      <Filter>ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\precomp_data.h">
+      <Filter>ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\sc.h">
+      <Filter>ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ed25519\sha512.h">
+      <Filter>ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\HashTree.h">
+      <Filter>Sources\HashTree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Base64.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Hash.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Utils.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\OnionConnectionEstablish.h">
+      <Filter>Sources\Routing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\OnionNodeList.h">
+      <Filter>Sources\Routing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\OnionPack.h">
+      <Filter>Sources\Routing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\CreditDebitData.h">
+      <Filter>Sources\Transactions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TransactionContent.h">
+      <Filter>Sources\Transactions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Ledger.h">
+      <Filter>Sources\Ledger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LedgerFileHandler.h">
+      <Filter>Sources\Ledger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\AccountInfo.h">
+      <Filter>Sources\Ledger</Filter>
+    </ClInclude>
+    <ClInclude Include="MainForm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TreeNodeX.h">
+      <Filter>Sources\HashTree</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkVisualizer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Point2.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\FakeNetwork.h">
+      <Filter>Sources\FakeNetwork</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Constants.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\FakeSocket.h">
+      <Filter>Sources\FakeNetwork</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Timer.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Signal.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\aggregator.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\aligned_space.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\atomic.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\blocked_range.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\blocked_range2d.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\blocked_range3d.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\cache_aligned_allocator.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\combinable.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\concurrent_hash_map.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\concurrent_lru_cache.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\concurrent_priority_queue.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\concurrent_queue.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\concurrent_unordered_map.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\concurrent_unordered_set.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\concurrent_vector.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\critical_section.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\enumerable_thread_specific.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\flow_graph.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\memory_pool.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\mutex.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\null_mutex.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\null_rw_mutex.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\parallel_do.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\parallel_for.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\parallel_for_each.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\parallel_invoke.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\parallel_reduce.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\parallel_scan.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\parallel_sort.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\parallel_while.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\partitioner.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\pipeline.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\queuing_mutex.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\queuing_rw_mutex.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\reader_writer_lock.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\recursive_mutex.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\runtime_loader.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\scalable_allocator.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\spin_mutex.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\spin_rw_mutex.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\task.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\task_arena.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\task_group.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\task_scheduler_init.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\task_scheduler_observer.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbb.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbb_allocator.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbb_config.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbb_exception.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbb_machine.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbb_profiling.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbb_stddef.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbb_thread.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tbbmalloc_proxy.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TBB\tbb\tick_count.h">
+      <Filter>Sources\TBB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Simulator.h">
+      <Filter>Sources\Simulator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Node.h">
+      <Filter>Sources\Node</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Consensus.h">
+      <Filter>Sources\Consensus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ProtocolPackager.h">
+      <Filter>Sources\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Conversions.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Types.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\SerializableBase.h">
+      <Filter>Sources\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\VoteType.h">
+      <Filter>Sources\Consensus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\SQLiteCpp\CppSQLite3.h">
+      <Filter>Sources\SQLLiteCpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\SQLiteCpp\sqlite3.h">
+      <Filter>Sources\SQLLiteCpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Base64_2.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\AddressFactory.h">
+      <Filter>Sources\Node</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Varint2.h">
+      <Filter>Sources\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TreeLevelDataType.h">
+      <Filter>Sources\HashTree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LeafDataType.h">
+      <Filter>Sources\HashTree</Filter>
+    </ClInclude>
+    <ClInclude Include="TreeLevelData.h">
+      <Filter>Sources\HashTree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LedgerRootInfo.h">
+      <Filter>Sources\Ledger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\RootDataType.h">
+      <Filter>Sources\HashTree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ConsensusMap.h">
+      <Filter>Sources\Consensus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\IncomingTransactionMap.h">
+      <Filter>Sources\Consensus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TransactionEntity.h">
+      <Filter>Sources\Transactions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\NetworkManager.h">
+      <Filter>Sources\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\NetworkCommand.h">
+      <Filter>Sources\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TreeSyncData.h">
+      <Filter>Sources\HashTree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\MoneyInOutFlow.h">
+      <Filter>Sources\Ledger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\State.h">
+      <Filter>Sources\Node</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TimeSync.h">
+      <Filter>Sources\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TreeSyncRootData.h">
+      <Filter>Sources\HashTree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\RPCKeyExchange.h">
+      <Filter>RPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\TreeSyncRequest.h">
+      <Filter>Sources\HashTree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\KeyExchangeState.h">
+      <Filter>RPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Salsa20\ecrypt-config.h">
+      <Filter>Sources\Salsa20</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Salsa20\ecrypt-machine.h">
+      <Filter>Sources\Salsa20</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Salsa20\ecrypt-portable.h">
+      <Filter>Sources\Salsa20</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Salsa20\ecrypt-sync.h">
+      <Filter>Sources\Salsa20</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\Salsa20\salsa20.h">
+      <Filter>Sources\Salsa20</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\RPCPacketHandler.h">
+      <Filter>RPC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\builder.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\dbformat.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\db_impl.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\db_iter.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\filename.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\log_format.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\log_reader.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\log_writer.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\memtable.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\skiplist.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\snapshot.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\table_cache.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\version_edit.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\version_set.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\db\write_batch_internal.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\helpers\memenv\memenv.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\cache.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\comparator.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\db.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\dumpfile.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\env.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\filter_policy.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\iterator.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\options.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\slice.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\status.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\table.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\table_builder.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\include\leveldb\write_batch.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\port\atomic_pointer.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\port\port.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\port\thread_annotations.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\port\win\stdint.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\block.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\block_builder.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\filter_block.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\format.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\iterator_wrapper.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\merger.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\table\two_level_iterator.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\arena.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\coding.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\crc32c.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\hash.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\histogram.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\logging.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\mutexlock.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\posix_logger.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\random.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\testharness.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\util\testutil.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LevelDB\port\port_windows.h">
+      <Filter>Sources\LevelDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\LedgerFileHandler_LevelDB.h">
+      <Filter>Sources\Ledger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\ConvertUTF.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TNET_UI\Sources\SimpleIni.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="MainForm.resx">
+      <Filter>Resource Files</Filter>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NetworkVisualizer.resx">
+      <Filter>Resource Files</Filter>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\TNET_UI\Sources\TBB\tbb\index.html">
+      <Filter>Sources\TBB</Filter>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Rig2">
+      <UniqueIdentifier>{b8fb8014-c120-48d1-bb0a-446a6ec89669}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ed25519">
+      <UniqueIdentifier>{94ba6f63-0b40-4051-8781-c9fa7d7ba5a0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TNetNative.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="blake_impl.h">
+      <Filter>Source Files\Rig2</Filter>
+    </ClInclude>
+    <ClInclude Include="Constants.h">
+      <Filter>Source Files\Rig2</Filter>
+    </ClInclude>
+    <ClInclude Include="rig.h">
+      <Filter>Source Files\Rig2</Filter>
+    </ClInclude>
+    <ClInclude Include="BLAKE\blake2-impl.h">
+      <Filter>Source Files\Rig2</Filter>
+    </ClInclude>
+    <ClInclude Include="BLAKE\blake2.h">
+      <Filter>Source Files\Rig2</Filter>
+    </ClInclude>
+    <ClInclude Include="ed25519\ed25519.h">
+      <Filter>Source Files\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="ed25519\fe.h">
+      <Filter>Source Files\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="ed25519\fixedint_.h">
+      <Filter>Source Files\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="ed25519\ge.h">
+      <Filter>Source Files\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="ed25519\precomp_data.h">
+      <Filter>Source Files\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="ed25519\sc.h">
+      <Filter>Source Files\ed25519</Filter>
+    </ClInclude>
+    <ClInclude Include="ed25519\sha512.h">
+      <Filter>Source Files\ed25519</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="TNetNative.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AssemblyInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="blake_impl.cpp">
+      <Filter>Source Files\Rig2</Filter>
+    </ClCompile>
+    <ClCompile Include="rig.cpp">
+      <Filter>Source Files\Rig2</Filter>
+    </ClCompile>
+    <ClCompile Include="BLAKE\blake2b-ref.cpp">
+      <Filter>Source Files\Rig2</Filter>
+    </ClCompile>
+    <ClCompile Include="ed25519\add_scalar.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="ed25519\fe.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="ed25519\ge.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="ed25519\key_exchange.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="ed25519\keypair.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="ed25519\sc.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="ed25519\seed.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="ed25519\sha512.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="ed25519\sign.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="ed25519\test_ec.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+    <ClCompile Include="ed25519\verify.cpp">
+      <Filter>Source Files\ed25519</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="app.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

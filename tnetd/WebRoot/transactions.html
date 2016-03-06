@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<link href="http://fonts.googleapis.com/css?family=Varela" rel="stylesheet" />
+<link href="defaultTransactions.css" rel="stylesheet" type="text/css" media="all" />
+<link href="fonts.css" rel="stylesheet" type="text/css" media="all" />
+
+<!--[if IE 6]><link href="default_ie6.css" rel="stylesheet" type="text/css" /><![endif]-->
+
+</head>
+<body>
+<div id="wrapper">
+	<div id="header-wrapper">
+	<div id="header" class="container">
+		<div id="logo">
+			<h1><a href="https://trestor.org/"><img src="https://trestor.org/images/trestor-logo-home.png"></a></h1>
+		</div>
+		<div id="menu">
+			<ul>
+				<li class="current_page_item"><a href="http://54.69.239.153:2015/" accesskey="1" title="">Status</a></li>
+				<li><a href="https://trestor.org/about-us" accesskey="2" title="">About Us</a></li>
+				<li><a href="https://trestor.org/locate-retail-partner" accesskey="3" title="">Retail Partners</a></li>
+				<li><a href="https://trestor.org/faq" accesskey="4" title="">FAQ'S</a></li>
+				<li><a href="https://trestor.org/app" accesskey="5" title="">Download The App</a></li>
+			</ul>
+		</div>
+	</div>
+	</div>
+	<div id="banner">
+		<div class="container">
+			<div class="title">
+				<h2>Transaction Info</h2>
+		</div>
+	</div>
+	
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+ <form action="/" id="searchForm">
+            <input type="text" name="s" placeholder="Enter Transaction Id.." />
+            <input type="submit" value="Get Details" />
+        </form>
+        <!-- the result of the search will be rendered inside this div -->
+        <div id="result"></div>
+        <script>
+            /* attach a submit handler to the form */
+            $("#searchForm").submit(function(event) {
+				$('.boxA').show();
+                /* stop form from submitting normally */
+                event.preventDefault();
+
+                /* get some values from elements on the page: */
+                var $form = $(this),
+                    term = $form.find('input[name="s"]').val(),
+                    url = "http://54.69.239.153:2015/transactions?id="+$form.find('input[name="s"]').val() ;
+                /* Send the data using post */
+                $.getJSON(url,function(data){
+						document.getElementById("VERSIONDATA").innerHTML = data.Data.Transactions[0].VersionData;
+						document.getElementById("TRANSACTIONID").innerHTML = data.Data.Transactions[0].TransactionID;
+						document.getElementById("TIMESTAMP").innerHTML = data.Data.Transactions[0].Timestamp;
+						document.getElementById("VALUE").innerHTML = data.Data.Transactions[0].Value;
+						document.getElementById("TRANSACTIONFEE").innerHTML = data.Data.Transactions[0].TransactionFee;
+						var srcKey = data.Data.Transactions[0].Sources[0].PublicKey , srcVal = data.Data.Transactions[0].Sources[0].Value;
+						for(var i = 1; i < data.Data.Transactions[0].Sources.length; i++) {
+							var obj = data.Data.Transactions[0].Sources[i];
+							srcKey = " , " + srcKey + obj.PublicKey ;
+							srcVal = " , "  + srcVal + obj.Value;
+						}
+						document.getElementById("SOURCEPUBLICKEY").innerHTML = srcKey;
+						document.getElementById("SOURCEVALUE").innerHTML = srcVal;
+						var destKey = data.Data.Transactions[0].Destinations[0].PublicKey , destVal = data.Data.Transactions[0].Destinations[0].Value;
+						for(var i = 1; i < data.Data.Transactions[0].Destinations.length; i++) {
+							var obj = data.Data.Transactions[0].Destinations[i];
+							destKey = " , " + destKey + obj.PublicKey;
+							destVal = " , " + destVal + obj.Value;
+						}
+						document.getElementById("DESTINATIONPUBLICKEY").innerHTML = destKey;
+						document.getElementById("DESTINATIONVALUE").innerHTML = destVal;
+						document.getElementById("SIGNATURES").innerHTML = data.Data.Transactions[0].Signatures[0];
+					});
+				});
+        </script>
+	<div id="extra" class="container">
+		<div class="title">
+			<div class="boxA">
+				<div class="box">
+					<div class = "label">Version Data &nbsp; : &nbsp;  </div> <div class = "info" id="VERSIONDATA">Loading..</div>
+					<br>
+					<div class = "label">Transaction Id &nbsp; : &nbsp; &nbsp;  </div> <div class = "info" id="TRANSACTIONID">Loading..</div>
+					<br>
+					<div class = "label">TimeStamp &nbsp; : &nbsp; &nbsp;  </div> <div class = "info" id="TIMESTAMP">Loading..</div>
+					<br>
+					<div class = "label">Value &nbsp; : &nbsp; &nbsp;  </div> <div class = "info" id="VALUE">Loading..</div>
+					<br>
+					<div class = "label">Transaction ID &nbsp; : &nbsp; &nbsp;  </div> <div class = "info" id="TRANSACTIONFEE">Loading..</div>
+					<br>
+					<div class = "label">Source PublicKey &nbsp; : &nbsp; &nbsp;  </div> <div class = "info" id="SOURCEPUBLICKEY">Loading..</div>
+					<br>
+					<div class = "label">Source Value &nbsp; : &nbsp; &nbsp;  </div> <div class = "info" id="SOURCEVALUE">Loading..</div>
+					<br>
+					<div class = "label">Destination PublicKey &nbsp; : &nbsp; &nbsp;  </div> <div class = "info" id="DESTINATIONPUBLICKEY">Loading..</div>
+					<br>
+					<div class = "label">Destination Value &nbsp; : &nbsp; &nbsp;  </div> <div  class = "info" id="DESTINATIONVALUE">Loading..</div>
+					<br>
+					<div class = "label">Signatures &nbsp; : &nbsp; &nbsp;  </div> <div  class = "info" id="SIGNATURES">Loading..</div>
+				</div>
+			</div>
+		</div>
+	</div>
+<!--
+	Design inspired by TEMPLATED (http://templated.co)
+-->
+</body>
+</html>
