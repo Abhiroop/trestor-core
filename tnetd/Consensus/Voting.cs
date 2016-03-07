@@ -417,7 +417,7 @@ namespace TNetD.Consensus
             //finalVoters.Reset(LedgerCloseSequence);                   
 
             processPendingTransactions();
-            Thread.Sleep(500);
+            //Thread.Sleep(500);
             CurrentConsensusState = ConsensusStates.Merge;
         }
 
@@ -440,17 +440,26 @@ namespace TNetD.Consensus
                     {
                         syncStateWork();
                     }
+                    else
+                    {
+                        handleFasterNode();
+                    }
                 }
                 if (stateMap.Count != nodeState.ConnectedValidators.Count)
                     Init();
             }
         }
 
+        private void handleFasterNode()
+        {
+            throw new NotImplementedException();
+        }
+
         private void syncStateWork()
         {
             failureCounter = 0;
             Print("Sync Done. Normal.");
-            Thread.Sleep(500);
+            //Thread.Sleep(500);
             CurrentConsensusState = ConsensusStates.Collect;
         }
 
@@ -501,6 +510,10 @@ namespace TNetD.Consensus
                     await sendMergeRequests();
                     if (stateMap.Values.Where(x => (x == ConsensusStates.Vote)).Count() >= Constants.VOTE_MIN_SYNC_NODES)
                         mergeStateWork();
+                    else
+                    {
+                        handleFasterNode();
+                    }
                 }
             }
         }
@@ -515,7 +528,7 @@ namespace TNetD.Consensus
             voteMessageCounter.ResetVotes();
             Print("Merge Finished. " + GetTxCount(ballot));
 
-            Thread.Sleep(500);
+            //Thread.Sleep(500);
             //logger.Enqueue(nodeConfig.NodeID + "-Merge Finished");
             CurrentConsensusState = ConsensusStates.Vote;
         }
@@ -630,17 +643,11 @@ namespace TNetD.Consensus
                     {
                         await VotingPostRound(state, percentage);
                     }
-                    /*
                     else
                     {
-                        //only a "few" machines are ahead after a larger failure number go ahead
-                        voteInternalAttempt++; //REVIEW: Change this; Actually + 2 is happenning
-                    }*/
+                        handleFasterNode();
+                    }
                 }
-                /*if(voteInternalAttempt > 20)
-                {
-                    await VotingPostRound(state, percentage);
-                }*/
             }
         }
 
@@ -711,6 +718,10 @@ namespace TNetD.Consensus
                     await sendVoteRequests();
                     if(stateMap.Values.Where(x=> ((x== ConsensusStates.Apply) || (x == ConsensusStates.Sync))).Count() >= Constants.VOTE_MIN_SYNC_NODES)
                         postVotingOperations();
+                    else
+                    {
+                        Print("I am faster muthafucka");
+                    }
                 }
             }
         }
@@ -795,7 +806,7 @@ namespace TNetD.Consensus
             }
 
             applyStateCounter++;
-            Thread.Sleep(1500);
+            //Thread.Sleep(1500);
             CurrentConsensusState = ConsensusStates.Sync;
 
             //if (applyStateCounter > 2)

@@ -240,14 +240,14 @@ namespace TNetTest
             byte[] PubSrc;
             byte[] PrivSrcExpanded;
             Ed25519.KeyPairFromSeed(out PubSrc, out PrivSrcExpanded, HexUtil.GetBytes("<PUT PRIVATE KEY HERE>"));
-
+  
             AccountIdentifier identifierSrc = AddressFactory.PublicKeyToAccount(PubSrc, "<PUT SENDER NAME HERE>", NetworkType.MainNet, AccountType.MainGenesis);
-            
+
             byte[] PK_dest = HexUtil.GetBytes("<PK Destination>");
 
             AccountIdentifier identifierDest = AddressFactory.PublicKeyToAccount(PK_dest, "<Destination Name>", NetworkType.MainNet, AccountType.MainNormal);
 
-            SingleTransactionFactory stf = new SingleTransactionFactory(identifierSrc, identifierDest, 0, 1000000000);
+            SingleTransactionFactory stf = new SingleTransactionFactory(identifierSrc, identifierDest, 0, 999990000000);
 
             byte[] dd = stf.GetTransactionData();
 
