@@ -71,15 +71,15 @@ namespace TNetD.Nodes
         public JS_NodeInfo NodeInfo;
         
         private long timeDifference = 0;
-    
+        
         public NodeState(NodeConfig nodeConfig)
         {
             PersistentAccountStore = new SQLiteAccountStore(nodeConfig);
             PersistentTransactionStore = new SQLiteTransactionStore(nodeConfig);
             PersistentBannedNameStore = new SQLiteBannedNames(nodeConfig);
             PersistentCloseHistory = new SQLiteCloseHistory(nodeConfig);
-
-            Ledger = new Ledger(PersistentAccountStore, PersistentCloseHistory);
+            
+            Ledger = new Ledger(PersistentAccountStore, PersistentCloseHistory, nodeConfig);
 
             TransactionStateManager = new TransactionStateManager();
             IncomingTransactionMap = new IncomingTransactionMap(this, nodeConfig, TransactionStateManager);

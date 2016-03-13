@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TNetD.Nodes;
 using TNetD.PersistentStore;
 using TNetD.Transactions;
 using TNetD.Tree;
@@ -25,6 +26,7 @@ namespace TNetD.Ledgers
         public delegate void LedgerEventHandler(LedgerEventType ledgerEvent, string Message);
 
         public event LedgerEventHandler LedgerEvent;
+        public NodeConfig nodeConfig;
 
         IPersistentAccountStore persistentStore;
         IPersistentCloseHistory persistentCloseHistory;
@@ -52,10 +54,11 @@ namespace TNetD.Ledgers
             get { return _load_stats; }
         }
         
-        public Ledger(IPersistentAccountStore persistentStore, IPersistentCloseHistory persistentCloseHistory)
+        public Ledger(IPersistentAccountStore persistentStore, IPersistentCloseHistory persistentCloseHistory, NodeConfig nodeConfig)
         {
             this.LedgerTree = new ListHashTree();
             this.persistentStore = persistentStore;
+            this.nodeConfig = nodeConfig;
             this.persistentCloseHistory = persistentCloseHistory;
             this.TransactionFees = 0;
             this.TotalAmount = 0;
@@ -134,6 +137,9 @@ namespace TNetD.Ledgers
         /// <returns></returns>
         public TreeResponseType AddUserToLedger(AccountInfo userInfo)
         {
+            DisplayUtils.Display("NODE_" + nodeConfig.NodeID + 
+                " Found Account: " + Newtonsoft.Json.JsonConvert.SerializeObject(userInfo) + "\n OUR ROOT " + this.LedgerTree.GetRootHash());
+
             TreeResponseType response = LedgerTree.AddUpdate(userInfo);
 
             if (response == TreeResponseType.Added || response == TreeResponseType.Updated)
