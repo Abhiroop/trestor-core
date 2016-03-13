@@ -20,6 +20,11 @@ namespace TNetD.Consensus
         public long Sequence { get { return sequence; } }
         public Hash Hash { get { return hash; } }
 
+        public void IncrementSequence()
+        {
+            sequence++;
+        }
+
         public LedgerCloseSequence(long sequence, Hash hash)
         {
             this.sequence = sequence;

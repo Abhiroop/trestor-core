@@ -276,7 +276,7 @@ namespace TNetD.Consensus
 
         void UpdateLCD()
         {
-            LedgerCloseData lcd;
+            /*LedgerCloseData lcd;
             if (nodeState.PersistentCloseHistory.GetLastRowData(out lcd))
             {
                 LedgerCloseSequence = new LedgerCloseSequence(lcd);
@@ -284,7 +284,7 @@ namespace TNetD.Consensus
             else
             {
                 LedgerCloseSequence = new LedgerCloseSequence(0, nodeState.Ledger.GetRootHash());
-            }
+            }*/
         }
 
         private void InitLCS(NodeState nodeState)
@@ -837,6 +837,10 @@ namespace TNetD.Consensus
                     CurrentTransactions.TryRemove(tx, out tc);
                 }
             }
+
+            // CRITICAL: TEST_CODE: Update the seq.
+            LedgerCloseSequence.IncrementSequence();
+
         }
 
         #endregion
