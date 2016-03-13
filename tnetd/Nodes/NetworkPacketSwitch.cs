@@ -28,7 +28,7 @@ namespace TNetD.Nodes
         
         //public PacketLogger packetLogger = default(PacketLogger);
 
-        NodeConfig nodeConfig;
+        public NodeConfig nodeConfig;
         NodeState nodeState;
 
         SecureNetwork network = default(SecureNetwork);
@@ -198,13 +198,5 @@ namespace TNetD.Nodes
 
             return good;
         }
-
-
-
-
-
-
-
-
     }
 }

@@ -128,9 +128,15 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Consensus\Ballot.cs" />
+    <Compile Include="Consensus\FailureHandler\DefaultFailureHandler.cs" />
+    <Compile Include="Consensus\FailureHandler\FailureHandlerFactory.cs" />
     <Compile Include="Consensus\FinalVoters.cs" />
+    <Compile Include="Consensus\FailureHandler\FailureHandler.cs" />
     <Compile Include="Consensus\LedgerCloseSequence.cs" />
+    <Compile Include="Consensus\FailureHandler\MergeFailureHandler.cs" />
+    <Compile Include="Consensus\FailureHandler\SyncFailureHandler.cs" />
     <Compile Include="Consensus\TimeStep.cs" />
+    <Compile Include="Consensus\FailureHandler\VotingFailureHandler.cs" />
     <Compile Include="Network\Networking\NodeRating.cs" />
     <Compile Include="Nodes\Logging.cs" />
     <Compile Include="Nodes\NodeLatency.cs" />
@@ -241,6 +247,7 @@
     <Compile Include="Utils\INIFile.cs" />
     <Compile Include="Network\Networking\PacketCodec.cs" />
     <Compile Include="Network\Networking\IncomingConnectionHander.cs" />
+    <Compile Include="Utils\Helpers\Printer.cs" />
     <Compile Include="Utils\Structs.cs" />
     <Compile Include="Tree\HashTree.cs" />
     <Compile Include="Tree\TreeNode.cs" />
