@@ -47,10 +47,7 @@ namespace TNetD
         MessageViewModel viewModel = new MessageViewModel();
         List<Node> nodes = new List<Node>();
         ConcurrentQueue<string> logger = new ConcurrentQueue<string>();
-        FileStream fs = default(FileStream);
-
-        TextWriter tr = default(TextWriter);
-
+      
         public DebugWindow4()
         {
             DataContext = viewModel;
@@ -67,8 +64,6 @@ namespace TNetD
             System.Timers.Timer tmr_UI = new System.Timers.Timer(1000);
             tmr_UI.Elapsed += tmr_UI_Elapsed;
             tmr_UI.Start();
-            fs = new FileStream(@"C:\Users\ashis_000\Desktop\testLog.log", FileMode.Create);
-            tr = new StreamWriter(fs);
         }
 
         private void tmr_UI_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -274,7 +269,6 @@ namespace TNetD
                         {
                             string log;
                             logger.TryDequeue(out log);
-                            tr.WriteLine(log);
                         }
                     }
                     Thread.Sleep(5000);
