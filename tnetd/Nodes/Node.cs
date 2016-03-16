@@ -69,12 +69,12 @@ namespace TNetD.Nodes
 
         public Voting voting = default(Voting);
 
-        RpcHandlers rpcHandlers = default(RpcHandlers);        
+        RpcHandlers rpcHandlers = default(RpcHandlers);
         TransactionHandler transactionHandler = default(TransactionHandler);
         TimeSync timeSync = default(TimeSync);
         LedgerSync ledgerSync = default(LedgerSync);
-        
-        
+
+
         #endregion
 
         #region ConstructorsAndTimers
@@ -120,7 +120,7 @@ namespace TNetD.Nodes
             peerDiscovery.AddKnownPeer(new PeerData(new NodeSocketData(nodeConfig.PublicKey, nodeConfig.ListenPortProtocol, "127.0.0.1", nodeConfig.Name), nodeState, nodeConfig));
 
             voting = new Voting(nodeConfig, nodeState, networkPacketSwitch);
-            
+
             networkPacketSwitch.HeartbeatEvent += NetworkPacketSwitch_HeartbeatEvent;
 
             if (Common.NODE_OPERATION_TYPE == NodeOperationType.Distributed)
@@ -166,7 +166,7 @@ namespace TNetD.Nodes
 
             DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
         }
-        
+
         public bool VotingEnabled
         {
             get
@@ -179,7 +179,7 @@ namespace TNetD.Nodes
                 voting.Enabled = value;
             }
         }
-        
+
         public bool LedgerSyncEnabled
         {
             get
@@ -196,6 +196,7 @@ namespace TNetD.Nodes
         void TimerTimeSync_Elapsed(object sender, ElapsedEventArgs e)
         {
             nodeState.updateTimeDifference(timeSync.SyncTime().Result);
+            sendHeartbeatRequests(); // FOR TESTING
         }
 
         void TimerMinute_Elapsed(object sender, ElapsedEventArgs e)
@@ -259,7 +260,7 @@ namespace TNetD.Nodes
 
             nodeState.SystemTime = DateTime.UtcNow.ToFileTimeUtc();
             nodeState.updateNetworkTime();
-            
+
             if (NodeStatusEvent != null)
             {
                 var json = JsonConvert.SerializeObject(nodeState.NodeInfo.GetResponse(), Common.JSON_SERIALIZER_SETTINGS);
@@ -327,7 +328,7 @@ namespace TNetD.Nodes
         }
 
         #endregion
-                
+
         public async Task<long> CalculateTotalMoneyInPersistentStoreAsync()
         {
             long Tres = 0;
@@ -407,35 +408,56 @@ namespace TNetD.Nodes
                 }
             }
         }*/
-        
+
+        async Task sendHeartbeatRequests()
+        {
+            foreach (var node in nodeState.ConnectedValidators)
+            {
+                //Hash token = TNetUtils.GenerateNewToken();
+
+                await networkPacketSwitch.SendAsync(node.Key, new NetworkPacket()
+                {
+                    PublicKeySource = nodeConfig.PublicKey,
+                    //Token = token,
+                    Type = PacketType.TPT_HEARTBEAT_REQUEST
+                });
+            }
+
+            // if (VerboseDebugging) Print("Sync requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
+        }
+
         async Task NetworkPacketSwitch_HeartbeatEvent(NetworkPacket packet)
         {
             switch (packet.Type)
             {
                 case PacketType.TPT_HEARTBEAT_REQUEST:
-
-                    Hash sender = packet.PublicKeySource;
-                    Hash token = packet.Token;
-
-                    HeartbeatMessage heartbeatMessage = new HeartbeatMessage();
-
-                    heartbeatMessage.ConsensusState = voting.Params.ConsensusState;
-                    heartbeatMessage.VotingState = voting.Params.VotingState;
-                    heartbeatMessage.LCS = voting.Params.LCS;
-
-                    await networkPacketSwitch.SendAsync(sender, new NetworkPacket()
                     {
-                        Token = token,
-                        PublicKeySource = nodeConfig.PublicKey,
-                        Data = heartbeatMessage.Serialize(),
-                        Type = PacketType.TPT_CONS_MERGE_RESPONSE
-                    });
+                        Hash sender = packet.PublicKeySource;
+                        Hash token = packet.Token;
 
+                        HeartbeatMessage heartbeatMessage = new HeartbeatMessage();
+
+                        heartbeatMessage.ConsensusState = voting.Params.ConsensusState;
+                        heartbeatMessage.VotingState = voting.Params.VotingState;
+                        heartbeatMessage.LCS = voting.Params.LCS;
+
+                        await networkPacketSwitch.SendAsync(sender, new NetworkPacket()
+                        {
+                            Token = token,
+                            PublicKeySource = nodeConfig.PublicKey,
+                            Data = heartbeatMessage.Serialize(),
+                            Type = PacketType.TPT_HEARTBEAT_RESPONSE
+                        });
+                    }
                     break;
 
-
                 case PacketType.TPT_HEARTBEAT_RESPONSE:
+                    {
+                        HeartbeatMessage heartbeatMessage = new HeartbeatMessage();
+                        heartbeatMessage.Deserialize(packet.Data);
 
+                        DisplayUtils.Display("Received Heartbeat: " + heartbeatMessage.VotingState, DisplayType.ImportantInfo);
+                    }
                     break;
             }
 
