@@ -51,6 +51,8 @@ namespace TNetD.Nodes
 
         public Logging logger;
 
+        public ConcurrentQueue<string> cq_logger;
+
         /// <summary>
         /// Key Token, Value: Time, Public key of recipient
         /// </summary>

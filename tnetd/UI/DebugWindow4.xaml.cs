@@ -87,7 +87,8 @@ namespace TNetD
 
         void AddNode(int idx)
         {
-            Node nd = new Node(idx,logger);
+            Node nd = new Node(idx);
+            nd.nodeState.cq_logger = logger;
 
             //nd.networkPacketSwitch.packetLogger.sw = sw;
             // nd.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;

@@ -64,7 +64,7 @@ namespace TNetD.Consensus
             FetchRequestMsg message = new FetchRequestMsg();
             message.IDs = transactions;
             Hash token = TNetUtils.GenerateNewToken();
-            
+
             await networkPacketSwitch.SendAsync(publicKey, new NetworkPacket()
             {
                 Data = message.Serialize(),
@@ -101,7 +101,7 @@ namespace TNetD.Consensus
             FetchResponseMsg response = new FetchResponseMsg();
             foreach (Hash id in message.IDs)
             {
-                if(CurrentTransactions.ContainsKey(id))
+                if (CurrentTransactions.ContainsKey(id))
                     response.transactions.Add(id, CurrentTransactions[id]);
             }
 
@@ -308,9 +308,10 @@ namespace TNetD.Consensus
 
             if (VerboseDebugging) Print("Sync requests sent to " + nodeState.ConnectedValidators.Count + " Nodes");
         }
+
         async Task sendSyncRequest(List<Hash> friendNodes)
         {
-            
+
             var tasks = friendNodes.Select(async hash =>
             {
                 // Create BallotRequestMessage
@@ -365,7 +366,7 @@ namespace TNetD.Consensus
 
                 SyncMessage message = new SyncMessage();
                 message.Deserialize(packet.Data);
-                
+
                 stateMap.AddOrUpdate(packet.PublicKeySource, message.ConsensusState, (oldkey, oldvalue) => message.ConsensusState);
 
             }
@@ -373,8 +374,9 @@ namespace TNetD.Consensus
             if (VerboseDebugging) Print("Sync Response from " + packet.PublicKeySource + " Processed");
         }
 
-        static int ConsensusStatesMemberCount = Enum.GetNames(typeof(ConsensusStates)).Length;
-        static int VotingStatesMemberCount = Enum.GetNames(typeof(VotingStates)).Length;
+        /*
+        //static int ConsensusStatesMemberCount = Enum.GetNames(typeof(ConsensusStates)).Length;
+        //static int VotingStatesMemberCount = Enum.GetNames(typeof(VotingStates)).Length;
 
         /// <summary>
         /// Tuple: True means than at least VOTE_MIN_SYNC_NODES nodes have replied with the same state.
@@ -411,8 +413,8 @@ namespace TNetD.Consensus
             }
             return existingState;
         }
-        /*
-        Re verify the logic before using
+        
+        //Re verify the logic before using
         Tuple<VotingStates, bool> MedianTrustedVotingState()
         {
             int[] syncers = new int[VotingStatesMemberCount];
@@ -453,7 +455,7 @@ namespace TNetD.Consensus
 
         async Task sendVoteRequests(List<Hash> friendNodes)
         {
-            var tasks = friendNodes.Select(async (hash)=>
+            var tasks = friendNodes.Select(async (hash) =>
             {
                 VoteRequestMessage brp = new VoteRequestMessage();
                 brp.LedgerCloseSequence = LedgerCloseSequence;
@@ -469,7 +471,7 @@ namespace TNetD.Consensus
                     Type = PacketType.TPT_CONS_VOTE_REQUEST
                 });
             });
-            
+
             await Task.WhenAll(tasks);
             if (VerboseDebugging) Print("Vote requests sent to " + friendNodes.Count + " Nodes");
         }
@@ -485,7 +487,7 @@ namespace TNetD.Consensus
             voteResponse.ConsensusState = CurrentConsensusState;
 
             if (voteRequest.LedgerCloseSequence == LedgerCloseSequence)
-                //await CheckAcceptableVotingState(voteRequest.VotingState))
+            //await CheckAcceptableVotingState(voteRequest.VotingState))
             {
                 voteResponse.IsSynced = true;
                 voteMessageCounter.IncrementVotes();
@@ -528,18 +530,18 @@ namespace TNetD.Consensus
         async Task<bool> CheckAcceptableVotingState(VotingStates _vs)
         {
             int waitCount = 0;
-            
+
             //if (vs == 0 && cvs == 1) return true;
             //if (vs == 1 && cvs == 0) return true;
 
-            while(waitCount < 10)
+            while (waitCount < 10)
             {
                 int vs = (int)_vs;
                 int cvs = (int)CurrentVotingState;
 
                 if (vs == cvs) return true;
 
-                waitCount++;               
+                waitCount++;
 
                 await Task.Delay(30);
 
@@ -571,7 +573,7 @@ namespace TNetD.Consensus
                     {
                         // We should be voting for the next ballot.
                         if (voteResponse.Ballot.LedgerCloseSequence == LedgerCloseSequence)
-                            //await CheckAcceptableVotingState(voteResponse.VotingState))
+                        //await CheckAcceptableVotingState(voteResponse.VotingState))
                         {
                             // Sender and ballot keys must be same
                             if (voteResponse.Ballot.PublicKey == packet.PublicKeySource)
@@ -593,8 +595,8 @@ namespace TNetD.Consensus
                         else
                         {
                             Print("LCS Mismatch (PVResp) for " + GetTrustedName(packet.PublicKeySource) +
-                                " : " + voteResponse.Ballot.LedgerCloseSequence + "!=" + LedgerCloseSequence +" ("+ 
-                                (voteResponse.Ballot.LedgerCloseSequence == LedgerCloseSequence) +")"+ ", VS:" + voteResponse.VotingState + "/" + CurrentVotingState);
+                                " : " + voteResponse.Ballot.LedgerCloseSequence + "!=" + LedgerCloseSequence + " (" +
+                                (voteResponse.Ballot.LedgerCloseSequence == LedgerCloseSequence) + ")" + ", VS:" + voteResponse.VotingState + "/" + CurrentVotingState);
                         }
                     }
                     else
@@ -721,7 +723,7 @@ namespace TNetD.Consensus
 
              if (VerboseDebugging) Print("Vote Confirm Response from '" + packet.PublicKeySource + "' Processed");
          }*/
-       
+
 
     }
 }

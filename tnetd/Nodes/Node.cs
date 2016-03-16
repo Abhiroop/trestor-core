@@ -102,68 +102,7 @@ namespace TNetD.Nodes
         /// Initializes a node. Node ID is 0 for most cases.
         /// Only other use is hosting multiple validators from an IP (bad-idea) and simulation.
         /// </summary>
-        /// <param name="ID"></param>
-        public Node(int ID, ConcurrentQueue<string> logger)
-        {
-            nodeConfig = new NodeConfig(ID);
-
-            nodeState = new NodeState(nodeConfig);
-
-            nodeState.NodeInfo = nodeConfig.Get_JS_Info();
-
-            rpcHandlers = new RpcHandlers(nodeConfig, nodeState);
-            networkPacketSwitch = new NetworkPacketSwitch(nodeConfig, nodeState);
-            transactionHandler = new TransactionHandler(nodeConfig, nodeState);
-            timeSync = new TimeSync(nodeState, nodeConfig, networkPacketSwitch);
-            ledgerSync = new LedgerSync(nodeState, nodeConfig, networkPacketSwitch);
-            peerDiscovery = new PeerDiscovery(nodeState, nodeConfig, networkPacketSwitch);
-            peerDiscovery.AddKnownPeer(new PeerData(new NodeSocketData(nodeConfig.PublicKey, nodeConfig.ListenPortProtocol, "127.0.0.1", nodeConfig.Name), nodeState, nodeConfig));
-
-            voting = new Voting(nodeConfig, nodeState, networkPacketSwitch,logger);
-
-            if(Common.NODE_OPERATION_TYPE == NodeOperationType.Distributed)
-            {
-                // voting.Enabled = true;
-            }
-            
-            //AI = new AccountInfo(PublicKey, Money);
-
-            TimerConsensus = new System.Timers.Timer();
-            TimerConsensus.Elapsed += TimerConsensus_Elapsed;
-            TimerConsensus.Enabled = true;
-            TimerConsensus.Interval = nodeConfig.UpdateFrequencyConsensusMS;
-            TimerConsensus.Start();
-
-            // ////////////////////
-
-            TimerSecond = new System.Timers.Timer();
-            TimerSecond.Elapsed += TimerSecond_Elapsed;
-            TimerSecond.Enabled = true;
-            TimerSecond.Interval = 100;
-            TimerSecond.Start();
-
-            TimerFast = new System.Timers.Timer();
-            TimerFast.Elapsed += TimerFast_Elapsed;
-            TimerFast.Enabled = true;
-            TimerFast.Interval = 100;
-            TimerFast.Start();
-
-            TimerMinute = new System.Timers.Timer();
-            TimerMinute.Elapsed += TimerMinute_Elapsed;
-            TimerMinute.Enabled = true;
-            TimerMinute.Interval = 30000;
-            TimerMinute.Start();
-
-            TimerTimeSync = new System.Timers.Timer();
-            TimerTimeSync.Elapsed += TimerTimeSync_Elapsed;
-            TimerTimeSync.Enabled = true;
-            TimerTimeSync.Interval = 1 * 30 * 1000;
-            TimerTimeSync.Start();
-
-            //peerDiscovery.Start(30 * 1000);
-
-            DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
-        }
+        /// <param name="ID"></param>      
         public Node(int ID)
         {
             nodeConfig = new NodeConfig(ID);

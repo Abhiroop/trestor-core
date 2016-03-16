@@ -66,8 +66,7 @@ namespace TNetD.Consensus
 
         bool timerLockFree = true;
 
-        DateTime InitialValue;
-
+        DateTime initialValue;
         NodeState nodeState;
         DateTime minNextTickTime = DateTime.UtcNow;
 
@@ -75,7 +74,7 @@ namespace TNetD.Consensus
         {
             this.nodeState = nodeState;
 
-            InitialValue = nodeState.CurrentNetworkTime;
+            initialValue = nodeState.CurrentNetworkTime;
 
             DateTime dt = nodeState.CurrentNetworkTime;
 
