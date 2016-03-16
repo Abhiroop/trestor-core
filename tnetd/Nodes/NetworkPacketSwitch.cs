@@ -25,7 +25,9 @@ namespace TNetD.Nodes
 
         public event AsyncNetworkPacketEventHandler ConsensusEvent;
         public event AsyncNetworkPacketEventHandler TimeSyncEvent;
-        
+
+        public event AsyncNetworkPacketEventHandler HeartbeatEvent;
+
         //public PacketLogger packetLogger = default(PacketLogger);
 
         public NodeConfig nodeConfig;
@@ -149,6 +151,13 @@ namespace TNetD.Nodes
                     PeerDiscoveryEvent?.Invoke(packet);
 
                     break;
+
+                case PacketType.TPT_HEARTBEAT_REQUEST:
+                case PacketType.TPT_HEARTBEAT_RESPONSE:
+
+                    await HeartbeatEvent?.Invoke(packet);
+
+                    break;
             }
         }
 
@@ -193,7 +202,7 @@ namespace TNetD.Nodes
 
             if (!good)
             {
-                nodeState.logger.Log(LogType.Network, "Dropped packet from " + packet.PublicKeySource + ": Unrequested response.");
+                nodeState.logger.Log(LogType.Network, "Dropped "+ packet.Type + " packet from " + packet.PublicKeySource + ": Unrequested response.");
             }
 
             return good;

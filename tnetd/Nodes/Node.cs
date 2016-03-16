@@ -120,6 +120,8 @@ namespace TNetD.Nodes
             peerDiscovery.AddKnownPeer(new PeerData(new NodeSocketData(nodeConfig.PublicKey, nodeConfig.ListenPortProtocol, "127.0.0.1", nodeConfig.Name), nodeState, nodeConfig));
 
             voting = new Voting(nodeConfig, nodeState, networkPacketSwitch);
+            
+            networkPacketSwitch.HeartbeatEvent += NetworkPacketSwitch_HeartbeatEvent;
 
             if (Common.NODE_OPERATION_TYPE == NodeOperationType.Distributed)
             {
@@ -164,7 +166,7 @@ namespace TNetD.Nodes
 
             DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
         }
-
+        
         public bool VotingEnabled
         {
             get
@@ -405,7 +407,39 @@ namespace TNetD.Nodes
                 }
             }
         }*/
+        
+        async Task NetworkPacketSwitch_HeartbeatEvent(NetworkPacket packet)
+        {
+            switch (packet.Type)
+            {
+                case PacketType.TPT_HEARTBEAT_REQUEST:
 
+                    Hash sender = packet.PublicKeySource;
+                    Hash token = packet.Token;
+
+                    HeartbeatMessage heartbeatMessage = new HeartbeatMessage();
+
+                    heartbeatMessage.ConsensusState = voting.Params.State;
+                    heartbeatMessage.VotingState = voting.Params.VotingState;
+                    heartbeatMessage.LCS = voting.Params.LCS;
+
+                    await networkPacketSwitch.SendAsync(sender, new NetworkPacket()
+                    {
+                        Token = token,
+                        PublicKeySource = nodeConfig.PublicKey,
+                        Data = heartbeatMessage.Serialize(),
+                        Type = PacketType.TPT_CONS_MERGE_RESPONSE
+                    });
+
+                    break;
+
+
+                case PacketType.TPT_HEARTBEAT_RESPONSE:
+
+                    break;
+            }
+
+        }
 
     }
 }

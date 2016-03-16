@@ -139,6 +139,7 @@
     <Compile Include="Consensus\TimeStep.cs" />
     <Compile Include="Consensus\FailureHandler\VotingFailureHandler.cs" />
     <Compile Include="Network\Networking\NodeRating.cs" />
+    <Compile Include="Nodes\HeartbeatMessage.cs" />
     <Compile Include="Nodes\Logging.cs" />
     <Compile Include="Nodes\NodeLatency.cs" />
     <Compile Include="Consensus\SyncMessage.cs" />

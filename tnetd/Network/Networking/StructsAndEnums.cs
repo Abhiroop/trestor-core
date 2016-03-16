@@ -108,7 +108,7 @@ namespace TNetD.Network.Networking
     {
         TPT_NOTHING = 0x00,
         TPT_HELLO = 0x01, TPT_DISCONNECT = 0x02, TPT_KEEPALIVE = 0x03,
-        
+
         TPT_CONS_SYNC_REQUEST = 0x30,
         TPT_CONS_SYNC_RESPONSE = 0x31,
         TPT_CONS_MERGE_REQUEST = 0x32,
@@ -118,7 +118,7 @@ namespace TNetD.Network.Networking
         TPT_CONS_VOTE_REQUEST = 0x36,
         TPT_CONS_VOTE_RESPONSE = 0x37,
         TPT_CONS_CONFIRM_REQUEST = 0x38,
-        TPT_CONS_CONFIRM_RESPONSE = 0x39,   
+        TPT_CONS_CONFIRM_RESPONSE = 0x39,
 
         TPT_LSYNC_ROOT_REQUEST = 0x40,
         TPT_LSYNC_ROOT_RESPONSE = 0x41,
@@ -127,7 +127,7 @@ namespace TNetD.Network.Networking
         TPT_LSYNC_LEAF_REQUEST = 0x44,
         TPT_LSYNC_LEAF_REQUEST_ALL = 0x45,
         TPT_LSYNC_LEAF_RESPONSE = 0x46,
-        
+
         /// <summary>
         /// Request transaction data for a range of Ledger Sequence Numbers
         /// FORMAT: TransactionSyncRequest
@@ -173,8 +173,10 @@ namespace TNetD.Network.Networking
         TPT_TIMESYNC_RESPONSE = 0x61,
 
         TPT_PEER_DISCOVERY_REQUEST = 0x70,
-        TPT_PEER_DISCOVERY_RESPONSE = 0x71
+        TPT_PEER_DISCOVERY_RESPONSE = 0x71,
 
+        TPT_HEARTBEAT_REQUEST = 0x80,
+        TPT_HEARTBEAT_RESPONSE = 0x81
     };
 
 }
