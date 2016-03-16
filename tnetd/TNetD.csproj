@@ -128,6 +128,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Consensus\Ballot.cs" />
+    <Compile Include="Consensus\ConsensusParams.cs" />
     <Compile Include="Consensus\FailureHandler\DefaultFailureHandler.cs" />
     <Compile Include="Consensus\FailureHandler\FailureHandlerFactory.cs" />
     <Compile Include="Consensus\FinalVoters.cs" />

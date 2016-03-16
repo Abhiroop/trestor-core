@@ -325,13 +325,7 @@ namespace TNetD.Nodes
         }
 
         #endregion
-
-
-        public ConsensusStates ConsensusState
-        {
-            get { return voting.CurrentConsensusState; }
-        }
-        
+                
         public async Task<long> CalculateTotalMoneyInPersistentStoreAsync()
         {
             long Tres = 0;

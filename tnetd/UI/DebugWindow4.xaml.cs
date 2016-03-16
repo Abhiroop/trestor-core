@@ -46,7 +46,7 @@ namespace TNetD
         object TimerLock = new object();
         MessageViewModel viewModel = new MessageViewModel();
         List<Node> nodes = new List<Node>();
-        ConcurrentQueue<string> logger = new ConcurrentQueue<string>();
+        //ConcurrentQueue<string> logger = new ConcurrentQueue<string>();
       
         public DebugWindow4()
         {
@@ -88,7 +88,6 @@ namespace TNetD
         void AddNode(int idx)
         {
             Node nd = new Node(idx);
-            nd.nodeState.cq_logger = logger;
 
             //nd.networkPacketSwitch.packetLogger.sw = sw;
             // nd.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
@@ -114,12 +113,7 @@ namespace TNetD
                 catch { }
             }
         }
-
-
-        void LoadNodes()
-        {
-
-        }
+                
 
         void DisplayUtils_DisplayText(DisplayMessageType displayMessage)
         {
@@ -254,10 +248,10 @@ namespace TNetD
                 node.VotingEnabled = true;
                 //Thread.Sleep(1100);
             }
-            startLogging();
+            //startLogging();
         }
 
-        private void startLogging()
+       /* private void startLogging()
         {
             new Thread(() =>
             {
@@ -275,7 +269,7 @@ namespace TNetD
                     Thread.Sleep(5000);
                 }
             }).Start();
-        }
+        }*/
 
         private void menuItem_DisableVoting_Click(object sender, RoutedEventArgs e)
         {

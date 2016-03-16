@@ -122,7 +122,7 @@ namespace TNetD.Consensus
         /// <param name="packet"></param>
         void processFetchResponse(NetworkPacket packet)
         {
-            if (CurrentConsensusState == ConsensusStates.Merge || CurrentConsensusState == ConsensusStates.Vote)
+            if (Params.State == ConsensusStates.Merge || Params.State == ConsensusStates.Vote)
             {
                 if (networkPacketSwitch.VerifyPendingPacket(packet))
                 {
@@ -154,7 +154,7 @@ namespace TNetD.Consensus
                 }
             }
 
-            if (CurrentConsensusState == ConsensusStates.Vote)
+            if (Params.State == ConsensusStates.Vote)
             {
                 // Update Ballot Accordingly.
 
@@ -213,7 +213,7 @@ namespace TNetD.Consensus
 
             //add all transaction IDs from CurrentTransactions
             MergeResponseMsg message = new MergeResponseMsg();
-            message.ConsensusState = CurrentConsensusState;
+            message.ConsensusState = Params.State;
             foreach (KeyValuePair<Hash, TransactionContent> transaction in CurrentTransactions)
             {
                 message.AddTransaction(transaction.Key);
@@ -288,8 +288,8 @@ namespace TNetD.Consensus
             {
                 // Create BallotRequestMessage
                 SyncMessage sm = new SyncMessage();
-                sm.LedgerCloseSequence = LedgerCloseSequence;
-                sm.ConsensusState = CurrentConsensusState;
+                sm.LedgerCloseSequence = Params.LCS;
+                sm.ConsensusState = Params.State;
 
                 Hash token = TNetUtils.GenerateNewToken();
 
@@ -316,8 +316,8 @@ namespace TNetD.Consensus
             {
                 // Create BallotRequestMessage
                 SyncMessage sm = new SyncMessage();
-                sm.LedgerCloseSequence = LedgerCloseSequence;
-                sm.ConsensusState = CurrentConsensusState;
+                sm.LedgerCloseSequence = Params.LCS;
+                sm.ConsensusState = Params.State;
 
                 Hash token = TNetUtils.GenerateNewToken();
 
@@ -344,8 +344,8 @@ namespace TNetD.Consensus
 
             SyncMessage syncResponse = new SyncMessage();
 
-            syncResponse.ConsensusState = CurrentConsensusState;
-            syncResponse.LedgerCloseSequence = LedgerCloseSequence;
+            syncResponse.ConsensusState = Params.State;
+            syncResponse.LedgerCloseSequence = Params.LCS;
 
             await networkPacketSwitch.SendAsync(packet.PublicKeySource, new NetworkPacket()
             {
@@ -436,8 +436,8 @@ namespace TNetD.Consensus
             {
                 // Create BallotRequestMessage
                 VoteRequestMessage brp = new VoteRequestMessage();
-                brp.LedgerCloseSequence = LedgerCloseSequence;
-                brp.VotingState = CurrentVotingState;
+                brp.LedgerCloseSequence = Params.LCS;
+                brp.VotingState = Params.VotingState;
 
                 // Create NetworkPacket and send
 
@@ -458,8 +458,8 @@ namespace TNetD.Consensus
             var tasks = friendNodes.Select(async (hash) =>
             {
                 VoteRequestMessage brp = new VoteRequestMessage();
-                brp.LedgerCloseSequence = LedgerCloseSequence;
-                brp.VotingState = CurrentVotingState;
+                brp.LedgerCloseSequence = Params.LCS;
+                brp.VotingState = Params.VotingState;
 
                 // Create NetworkPacket and send
 
@@ -483,10 +483,10 @@ namespace TNetD.Consensus
             voteRequest.Deserialize(packet.Data);
 
             VoteResponseMessage voteResponse = new VoteResponseMessage();
-            voteResponse.VotingState = CurrentVotingState;
-            voteResponse.ConsensusState = CurrentConsensusState;
+            voteResponse.VotingState = Params.VotingState;
+            voteResponse.ConsensusState = Params.State;
 
-            if (voteRequest.LedgerCloseSequence == LedgerCloseSequence)
+            if (voteRequest.LedgerCloseSequence == Params.LCS)
             //await CheckAcceptableVotingState(voteRequest.VotingState))
             {
                 voteResponse.IsSynced = true;
@@ -504,11 +504,13 @@ namespace TNetD.Consensus
                 voteResponse.IsSynced = false;
 
                 Print("LCS (PVReq)  Mismatch (PVResp) for " + GetTrustedName(packet.PublicKeySource) +
-                                " : " + voteResponse.Ballot.LedgerCloseSequence + "!=" + LedgerCloseSequence + " (" +
-                                (voteResponse.Ballot.LedgerCloseSequence == LedgerCloseSequence) + ")" + ", VS:" + voteResponse.VotingState + "/" + CurrentVotingState);
+                                " : " + voteResponse.Ballot.LedgerCloseSequence + "!=" + Params.LCS + " (" +
+                                (voteResponse.Ballot.LedgerCloseSequence == Params.LCS) + ")" + ", VS:" +
+                                voteResponse.VotingState + "/" + Params.VotingState);
 
                 //Print("LCS (PVReq) Mismatch for " + GetTrustedName(packet.PublicKeySource) +
-                //    " : " + voteRequest.LedgerCloseSequence + "!=" + LedgerCloseSequence + ", VS:" + voteRequest.VotingState + "/" + CurrentVotingState);
+                //    " : " + voteRequest.LedgerCloseSequence + "!=" + LedgerCloseSequence + ", VS:" +
+                // voteRequest.VotingState + "/" + CurrentVotingState);
             }
 
             await networkPacketSwitch.SendAsync(packet.PublicKeySource, new NetworkPacket()
@@ -537,7 +539,7 @@ namespace TNetD.Consensus
             while (waitCount < 10)
             {
                 int vs = (int)_vs;
-                int cvs = (int)CurrentVotingState;
+                int cvs = (int)Params.VotingState;
 
                 if (vs == cvs) return true;
 
@@ -559,7 +561,7 @@ namespace TNetD.Consensus
         {
             if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
-                if (CurrentConsensusState == ConsensusStates.Vote)
+                if (Params.State == ConsensusStates.Vote)
                 {
                     VoteResponseMessage voteResponse = new VoteResponseMessage();
                     voteResponse.Deserialize(packet.Data);
@@ -572,7 +574,7 @@ namespace TNetD.Consensus
                     if (voteResponse.GoodBallot)
                     {
                         // We should be voting for the next ballot.
-                        if (voteResponse.Ballot.LedgerCloseSequence == LedgerCloseSequence)
+                        if (voteResponse.Ballot.LedgerCloseSequence == Params.LCS)
                         //await CheckAcceptableVotingState(voteResponse.VotingState))
                         {
                             // Sender and ballot keys must be same
@@ -595,8 +597,8 @@ namespace TNetD.Consensus
                         else
                         {
                             Print("LCS Mismatch (PVResp) for " + GetTrustedName(packet.PublicKeySource) +
-                                " : " + voteResponse.Ballot.LedgerCloseSequence + "!=" + LedgerCloseSequence + " (" +
-                                (voteResponse.Ballot.LedgerCloseSequence == LedgerCloseSequence) + ")" + ", VS:" + voteResponse.VotingState + "/" + CurrentVotingState);
+                                " : " + voteResponse.Ballot.LedgerCloseSequence + "!=" + Params.LCS + " (" +
+                                (voteResponse.Ballot.LedgerCloseSequence == Params.LCS) + ")" + ", VS:" + voteResponse.VotingState + "/" + Params.VotingState);
                         }
                     }
                     else
