@@ -10,7 +10,7 @@ namespace TNetD.Consensus
     {
         public LedgerCloseSequence LCS { get; set; }
 
-        public ConsensusStates State = ConsensusStates.Sync;
+        public ConsensusStates ConsensusState = ConsensusStates.Sync;
 
         public VotingStates VotingState = VotingStates.STNone;
         

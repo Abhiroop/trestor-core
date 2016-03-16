@@ -122,7 +122,7 @@ namespace TNetD.Consensus
         /// <param name="packet"></param>
         void processFetchResponse(NetworkPacket packet)
         {
-            if (Params.State == ConsensusStates.Merge || Params.State == ConsensusStates.Vote)
+            if (Params.ConsensusState == ConsensusStates.Merge || Params.ConsensusState == ConsensusStates.Vote)
             {
                 if (networkPacketSwitch.VerifyPendingPacket(packet))
                 {
@@ -154,7 +154,7 @@ namespace TNetD.Consensus
                 }
             }
 
-            if (Params.State == ConsensusStates.Vote)
+            if (Params.ConsensusState == ConsensusStates.Vote)
             {
                 // Update Ballot Accordingly.
 
@@ -213,7 +213,7 @@ namespace TNetD.Consensus
 
             //add all transaction IDs from CurrentTransactions
             MergeResponseMsg message = new MergeResponseMsg();
-            message.ConsensusState = Params.State;
+            message.ConsensusState = Params.ConsensusState;
             foreach (KeyValuePair<Hash, TransactionContent> transaction in CurrentTransactions)
             {
                 message.AddTransaction(transaction.Key);
@@ -289,7 +289,7 @@ namespace TNetD.Consensus
                 // Create BallotRequestMessage
                 SyncMessage sm = new SyncMessage();
                 sm.LedgerCloseSequence = Params.LCS;
-                sm.ConsensusState = Params.State;
+                sm.ConsensusState = Params.ConsensusState;
 
                 Hash token = TNetUtils.GenerateNewToken();
 
@@ -317,7 +317,7 @@ namespace TNetD.Consensus
                 // Create BallotRequestMessage
                 SyncMessage sm = new SyncMessage();
                 sm.LedgerCloseSequence = Params.LCS;
-                sm.ConsensusState = Params.State;
+                sm.ConsensusState = Params.ConsensusState;
 
                 Hash token = TNetUtils.GenerateNewToken();
 
@@ -344,7 +344,7 @@ namespace TNetD.Consensus
 
             SyncMessage syncResponse = new SyncMessage();
 
-            syncResponse.ConsensusState = Params.State;
+            syncResponse.ConsensusState = Params.ConsensusState;
             syncResponse.LedgerCloseSequence = Params.LCS;
 
             await networkPacketSwitch.SendAsync(packet.PublicKeySource, new NetworkPacket()
@@ -484,7 +484,7 @@ namespace TNetD.Consensus
 
             VoteResponseMessage voteResponse = new VoteResponseMessage();
             voteResponse.VotingState = Params.VotingState;
-            voteResponse.ConsensusState = Params.State;
+            voteResponse.ConsensusState = Params.ConsensusState;
 
             if (voteRequest.LedgerCloseSequence == Params.LCS)
             //await CheckAcceptableVotingState(voteRequest.VotingState))
@@ -561,7 +561,7 @@ namespace TNetD.Consensus
         {
             if (networkPacketSwitch.VerifyPendingPacket(packet))
             {
-                if (Params.State == ConsensusStates.Vote)
+                if (Params.ConsensusState == ConsensusStates.Vote)
                 {
                     VoteResponseMessage voteResponse = new VoteResponseMessage();
                     voteResponse.Deserialize(packet.Data);

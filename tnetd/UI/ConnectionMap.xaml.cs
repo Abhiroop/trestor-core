@@ -364,8 +364,8 @@ namespace TNetD.UI
                     string rh = nd.LocalLedger.LedgerTree.GetRootHash().ToString();
 
                     sb.Append(
-                        "\nST:" + (nd.voting.Params.State == Consensus.ConsensusStates.Vote ? "Vote:" +
-                                  nd.voting.Params.VotingState : "" + nd.voting.Params.State) +
+                        "\nST:" + (nd.voting.Params.ConsensusState == Consensus.ConsensusStates.Vote ? "Vote:" +
+                                  nd.voting.Params.VotingState : "" + nd.voting.Params.ConsensusState) +
                         "\nRoot: " + ((rh.Length >= 8) ? rh.Substring(0, 8) : "Empty") +
                         "\nLCS:" + nd.voting.Params.LCS
                         );
@@ -417,7 +417,7 @@ namespace TNetD.UI
             {
                 case ConnectionMapDisplayMode.Voting:
 
-                    switch (nd.voting.Params.State)
+                    switch (nd.voting.Params.ConsensusState)
                     {
                         case Consensus.ConsensusStates.Sync:
                             scb = new SolidColorBrush(Color.FromRgb(204, 204, 62)); //Yellow

@@ -419,7 +419,7 @@ namespace TNetD.Nodes
 
                     HeartbeatMessage heartbeatMessage = new HeartbeatMessage();
 
-                    heartbeatMessage.ConsensusState = voting.Params.State;
+                    heartbeatMessage.ConsensusState = voting.Params.ConsensusState;
                     heartbeatMessage.VotingState = voting.Params.VotingState;
                     heartbeatMessage.LCS = voting.Params.LCS;
 
