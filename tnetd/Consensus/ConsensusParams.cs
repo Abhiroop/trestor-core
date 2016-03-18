@@ -12,7 +12,7 @@ namespace TNetD.Consensus
 {    
     class ConsensusParams
     {
-        public LedgerCloseSequence LCS { get; set; }
+        public LedgerCloseSequence LCS { get; set; } = new LedgerCloseSequence();
 
         public ConsensusStates ConsensusState = ConsensusStates.Sync;
 

@@ -1,13 +1,9 @@
 ﻿
 // @Author : Arpan Jati
-// @Date: 10th June 2015
+// @Date: 10th June 2015 | March 18, 2016
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TNetD.Protocol;
+using System.Collections.Generic;
 
 namespace TNetD.Tree
 {
@@ -27,7 +23,7 @@ namespace TNetD.Tree
             for (int i = 0; i < 16; i++)
             {
                 ListTreeNode LTN = root.Children[i];
-                if(LTN != null) Children[i] = new NodeDataEntity(LTN);
+                if (LTN != null) Children[i] = new NodeDataEntity(LTN);
             }
         }
 
@@ -63,50 +59,46 @@ namespace TNetD.Tree
             return ProtocolPackager.PackRaw(PDTs);
         }
 
-
         public void Deserialize(byte[] Data)
         {
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
-            int cnt = 0;
-
             Init();
 
-            while (cnt < (int)PDTs.Count)
+            foreach (var PDT in ProtocolPackager.UnPackRaw(Data))
             {
-                ProtocolDataType PDT = PDTs[cnt++];
-
-                if (PDT.NameType == 0)
+                if ((PDT.NameType >= 10) && (PDT.NameType <= 26))
                 {
-                    byte[] _data0 = new byte[0];
-                    ProtocolPackager.UnpackByteVector(PDT, 0, ref _data0);
-                    RootHash = new Hash(_data0);
-                }
-                else if (PDT.NameType == 1)
-                {
-                    ProtocolPackager.UnpackVarint(PDT, 1, ref LeafCount);
-                }
-                else if (PDT.NameType == 2)
-                {
-                    byte[] _data1 = new byte[0];
-                    if (ProtocolPackager.UnpackByteVector(PDT, 2, ref _data1))
-                    {
-                        LedgerCloseData.Deserialize(_data1);
-                    }
-                }
-                else if ((PDT.NameType >= 10) && (PDT.NameType <= 26))
-                {
-                    byte[] _data2 = new byte[0];
-                    if(ProtocolPackager.UnpackByteVector(PDT, PDT.NameType, ref _data2))
+                    byte[] _data2;
+                    if (ProtocolPackager.UnpackByteVector(PDT, PDT.NameType, out _data2))
                     {
                         NodeDataEntity nd = new NodeDataEntity();
                         nd.Deserialize(_data2);
                         Children[PDT.NameType - 10] = nd;
                     }
                 }
+                else
+                {
+                    switch (PDT.NameType)
+                    {
+                        case 0:
+                            byte[] _data0;
+                            ProtocolPackager.UnpackByteVector(PDT, 0, out _data0);
+                            RootHash = new Hash(_data0);
+                            break;
+
+                        case 1:
+                            ProtocolPackager.UnpackVarint(PDT, 1, ref LeafCount);
+                            break;
+
+                        case 2:
+                            byte[] _data1;
+                            if (ProtocolPackager.UnpackByteVector(PDT, 2, out _data1))
+                            {
+                                LedgerCloseData.Deserialize(_data1);
+                            }
+                            break;
+                    }
+                }
             }
         }
     }
-
-
-
 }

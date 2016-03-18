@@ -4,9 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TNetD.Network.Networking;
 using TNetD.Protocol;
 
@@ -55,14 +52,12 @@ namespace TNetD.Network
             return ProtocolPackager.PackRaw(PDTs);
         }
 
-        public void Deserialize(byte[] Data)
+        public void Deserialize(byte[] data)
         {
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
-            int cnt = 0;
+            var PDTs = ProtocolPackager.UnPackRaw(data);
 
-            while (cnt < (int)PDTs.Count)
-            {
-                ProtocolDataType PDT = PDTs[cnt++];
+            foreach (var PDT in PDTs)
+            { 
 
                 switch (PDT.NameType)
                 {
@@ -77,7 +72,7 @@ namespace TNetD.Network
                         break;
 
                     case 2:
-                        ProtocolPackager.UnpackByteVector(PDT, 2, ref this.Data);
+                        ProtocolPackager.UnpackByteVector(PDT, 2, out this.Data);
                         break;
 
                     case 3:

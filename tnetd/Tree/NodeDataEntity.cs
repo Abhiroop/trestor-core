@@ -1,6 +1,6 @@
 ﻿
 // @Author : Arpan Jati
-// @Date: 10th June 2015
+// @Date: 10th June 2015 | March 2016
 
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using TNetD.Protocol;
 
 namespace TNetD.Tree
-{  
+{
     class NodeDataEntity : ISerializableBase
     {
         public Hash NodeHash;
@@ -52,10 +52,10 @@ namespace TNetD.Tree
             PDTs.Add(ProtocolPackager.Pack(NodeHash, 0));
             PDTs.Add(ProtocolPackager.Pack(AddressNibbles, 1));
             PDTs.Add(ProtocolPackager.PackVarint(LeafCount, 2));
-            
+
             for (int i = 0; i < 16; i++)
             {
-                if (Children[i] != null)               
+                if (Children[i] != null)
                 {
                     PDTs.Add(ProtocolPackager.Pack(Children[i], (byte)(i + 10)));
                 }
@@ -63,36 +63,34 @@ namespace TNetD.Tree
 
             return ProtocolPackager.PackRaw(PDTs);
         }
-        
+
         public void Deserialize(byte[] Data)
         {
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
-            int cnt = 0;
-
             Init();
 
-            while (cnt < (int)PDTs.Count)
+            foreach (var PDT in ProtocolPackager.UnPackRaw(Data))
             {
-                ProtocolDataType PDT = PDTs[cnt++];
-
-                if (PDT.NameType == 0)
+                if ((PDT.NameType >= 10) && (PDT.NameType <= 26))
                 {
-                    ProtocolPackager.UnpackHash(PDT, 0, out NodeHash);  
-                }
-                else if (PDT.NameType == 1)
-                {                    
-                    ProtocolPackager.UnpackHash(PDT, 1, out AddressNibbles);                    
-                }
-                else if (PDT.NameType == 2)
-                {
-                    ProtocolPackager.UnpackVarint(PDT, 2, ref LeafCount);
-                }       
-                else if ((PDT.NameType >= 10) && (PDT.NameType <= 26))
-                {
-                    byte[] _data2 = new byte[0];
-                    if (ProtocolPackager.UnpackByteVector_s(PDT, PDT.NameType, 32, ref _data2))
+                    byte[] _child;
+                    if (ProtocolPackager.UnpackByteVector_s(PDT, PDT.NameType, 32, out _child))
                     {
-                        Children[PDT.NameType - 10] = new Hash(_data2);
+                        Children[PDT.NameType - 10] = new Hash(_child);
+                    }
+                }
+                else
+                {
+                    switch (PDT.NameType)
+                    {
+                        case 0:
+                            ProtocolPackager.UnpackHash(PDT, 0, out NodeHash);
+                            break;
+                        case 1:
+                            ProtocolPackager.UnpackHash(PDT, 1, out AddressNibbles);
+                            break;
+                        case 2:
+                            ProtocolPackager.UnpackVarint(PDT, 2, ref LeafCount);
+                            break;
                     }
                 }
             }

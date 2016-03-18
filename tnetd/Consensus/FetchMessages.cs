@@ -65,15 +65,16 @@ namespace TNetD.Consensus
         public void Deserialize(byte[] data)
         {
             transactions.Clear();
-
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(data);
-            foreach (ProtocolDataType pdt in PDTs)
-            {
-                TransactionContent tc = new TransactionContent();
-                byte[] tcdata = new byte[0];
-                ProtocolPackager.UnpackByteVector(pdt, 0, ref tcdata);
-                tc.Deserialize(tcdata);
-                transactions.Add(tc.TransactionID, tc);
+            
+            foreach (var PDT in ProtocolPackager.UnPackRaw(data))
+            {                
+                byte[] tcdata;
+                if (ProtocolPackager.UnpackByteVector(PDT, 0, out tcdata))
+                {
+                    TransactionContent tc = new TransactionContent();
+                    tc.Deserialize(tcdata);
+                    transactions.Add(tc.TransactionID, tc);
+                }
             }
         }
     }

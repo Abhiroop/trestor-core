@@ -2,14 +2,8 @@
 // Author : Stephan Verbuecheln
 // Date: June 2015
 
-using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TNetD.Protocol;
-using TNetD.Network.Networking;
 
 namespace TNetD.Network.PeerDiscovery
 {
@@ -22,7 +16,7 @@ namespace TNetD.Network.PeerDiscovery
         {
             ProtocolDataType[] PDTs = new ProtocolDataType[knownPeers.Count];
             int i = 0;
-            foreach (KeyValuePair<Hash, PeerData> peer in knownPeers)
+            foreach (var peer in knownPeers)
             {
                 PDTs[i] = ProtocolPackager.Pack(peer.Value.Serialize(), 0);
                 i++;
@@ -32,13 +26,14 @@ namespace TNetD.Network.PeerDiscovery
 
         public void Deserialize(byte[] data)
         {
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(data);
             knownPeers = new ConcurrentDictionary<Hash, PeerData>();
 
-            for (int i = 0; i < PDTs.Count; i++)
+            var PDTs = ProtocolPackager.UnPackRaw(data);
+
+            foreach (var PDT in PDTs)
             {
                 byte[] tmpData = new byte[0];
-                ProtocolPackager.UnpackByteVector(PDTs[i], 0, ref tmpData);
+                ProtocolPackager.UnpackByteVector(PDT, 0, out tmpData);
                 if (tmpData.Length > 0)
                 {
                     PeerData conn = new PeerData();

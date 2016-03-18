@@ -2,7 +2,6 @@
 //  @Author: Arpan Jati
 //  @Date: June 2015 | Sept 2015
 
-using System.Collections.Generic;
 using TNetD.Protocol;
 
 namespace TNetD.Consensus
@@ -28,17 +27,15 @@ namespace TNetD.Consensus
        
         public void Deserialize(byte[] data)
         {
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(data);
-
-            foreach (var PDT in PDTs)
+            foreach (var PDT in ProtocolPackager.UnPackRaw(data))
             {
                 switch (PDT.NameType)
                 {
                     case 0:
-                        byte[] _data = null;
-                        if (ProtocolPackager.UnpackByteVector(PDT, 0, ref _data))
+                        byte[] _lcs;
+                        if (ProtocolPackager.UnpackByteVector(PDT, 0, out _lcs))
                         {
-                            LedgerCloseSequence.Deserialize(_data);
+                            LedgerCloseSequence.Deserialize(_lcs);
                         }
 
                         break;

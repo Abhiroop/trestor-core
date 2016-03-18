@@ -114,9 +114,7 @@ namespace TNetD.Consensus
         {
             Reset();
 
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(data);
-            
-            foreach (var PDT in PDTs)
+            foreach (var PDT in ProtocolPackager.UnPackRaw(data))
             {
                 switch (PDT.NameType)
                 {
@@ -129,8 +127,8 @@ namespace TNetD.Consensus
                         break;
 
                     case 1:
-                        byte[] _data = new byte[0];
-                        if (ProtocolPackager.UnpackByteVector(PDT, 1, ref _data)) {
+                        byte[] _data;
+                        if (ProtocolPackager.UnpackByteVector(PDT, 1, out _data)) {
                             LedgerCloseSequence.Deserialize(_data);
                         }
                         break;

@@ -350,24 +350,32 @@ namespace TNetD.Protocol
             }
         }
 
-        public static bool UnpackByteVector(ProtocolDataType packedData, byte nameType, ref byte[] Data)
+        public static bool UnpackByteVector(ProtocolDataType packedData, byte nameType, out byte[] Data)
         {
             if ((nameType == packedData.NameType) && (packedData.DataType == PDataType.PD_BYTE_VECTOR))
             {
                 Data = packedData.Data;
                 return true;
             }
-            else return false;
+            else
+            {
+                Data = new byte[0];
+                return false;
+            }
         }
 
-        public static bool UnpackByteVector_s(ProtocolDataType packedData, byte nameType, int ExpectedSize, ref byte[] Data)
+        public static bool UnpackByteVector_s(ProtocolDataType packedData, byte nameType, int ExpectedSize, out byte[] Data)
         {
             if (packedData.Data.Length == ExpectedSize && (nameType == packedData.NameType) && (packedData.DataType == PDataType.PD_BYTE_VECTOR))
             {
                 Data = packedData.Data;
                 return true;
             }
-            else return false;
+            else
+            {
+                Data = new byte[0];
+                return false;
+            }
         }
 
         public static bool UnpackByte(ProtocolDataType packedData, byte nameType, ref byte Data)

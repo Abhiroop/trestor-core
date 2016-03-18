@@ -195,6 +195,8 @@
     <Compile Include="Transactions\TransactionState.cs" />
     <Compile Include="Transactions\TransactionStateManager.cs" />
     <Compile Include="Types\JS_LedgerInfo.cs" />
+    <Compile Include="Types\JS_NodeDetails.cs" />
+    <Compile Include="Types\JS_NodeInfo.cs" />
     <Compile Include="Types\JS_Structs.cs" />
     <Compile Include="Types\LeafDataType.cs" />
     <Compile Include="Types\CommonStructs.cs" />

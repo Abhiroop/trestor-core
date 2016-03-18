@@ -12,10 +12,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TNetD.Address;
+using TNetD.Json.JS_Structs;
 using TNetD.Nodes;
 using TNetD.PersistentStore;
 using TNetD.Transactions;
-using TNetD.Types;
 
 namespace TNetD.Consensus
 {

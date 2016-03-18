@@ -57,23 +57,18 @@ namespace TNetD.Tree
 
         public void Deserialize(byte[] Data)
         {
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
-            int cnt = 0;
-
             Init();
 
-            while (cnt < (int)PDTs.Count)
+            foreach (var PDT in ProtocolPackager.UnPackRaw(Data))
             {
-                ProtocolDataType PDT = PDTs[cnt++];
-
                 if (PDT.NameType == 0)
                 {
                     ProtocolPackager.UnpackVarint(PDT, 0, ref LeafCount);
                 }
                 else if (PDT.NameType == 1)
                 {
-                    byte[] _bv = new byte[0];
-                    if (ProtocolPackager.UnpackByteVector(PDT, 1, ref _bv))
+                    byte[] _bv;
+                    if (ProtocolPackager.UnpackByteVector(PDT, 1, out _bv))
                     {
                         AccountInfo nie = new AccountInfo();
                         nie.Deserialize(_bv);

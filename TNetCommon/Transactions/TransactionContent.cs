@@ -470,13 +470,13 @@ namespace TNetD.Transactions
                 {
                     case 0:
                         {
-                            ProtocolPackager.UnpackByteVector(PDT, 0, ref versionData);
+                            ProtocolPackager.UnpackByteVector(PDT, 0, out versionData);
                         }
                         break;
 
                     case 1:
                         {
-                            ProtocolPackager.UnpackByteVector(PDT, 1, ref executionData);
+                            ProtocolPackager.UnpackByteVector(PDT, 1, out executionData);
                         }
                         break;
 
@@ -488,8 +488,8 @@ namespace TNetD.Transactions
 
                     case 3:
                         {
-                            byte[] tempSource = new byte[0];
-                            ProtocolPackager.UnpackByteVector(PDT, 3, ref tempSource);
+                            byte[] tempSource;
+                            ProtocolPackager.UnpackByteVector(PDT, 3, out tempSource);
                             if (tempSource.Length > 0)
                             {
                                 TransactionEntity tsk = new TransactionEntity();
@@ -501,8 +501,8 @@ namespace TNetD.Transactions
 
                     case 4:
                         {
-                            byte[] tempDestination = new byte[0];
-                            ProtocolPackager.UnpackByteVector(PDT, 4, ref tempDestination);
+                            byte[] tempDestination;
+                            ProtocolPackager.UnpackByteVector(PDT, 4, out tempDestination);
                             if (tempDestination.Length > 0)
                             {
                                 TransactionEntity tsk = new TransactionEntity();

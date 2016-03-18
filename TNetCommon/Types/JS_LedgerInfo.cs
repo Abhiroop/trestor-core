@@ -2,16 +2,12 @@
 // @Author : Arpan Jati
 // @Date: 13th Feb 2015
 
-using Newtonsoft.Json;
 using System;
+using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TNetD.Json.JS_Structs;
 using TNetD.Protocol;
 
-namespace TNetD.Types
+namespace TNetD.Json.JS_Structs
 {
     public class JS_LedgerInfo : JS_Response, ISerializableBase
     {
@@ -46,34 +42,27 @@ namespace TNetD.Types
 
         public byte[] Serialize()
         {
-            ProtocolDataType[] PDTs = new ProtocolDataType[5];
-
-            int cnt = 0;
-
-            PDTs[cnt++] = ProtocolPackager.Pack(Hash, 0);
-            PDTs[cnt++] = ProtocolPackager.Pack(SequenceNumber, 1);
-            PDTs[cnt++] = ProtocolPackager.Pack(CloseTimeLong, 2);
-            PDTs[cnt++] = ProtocolPackager.Pack(Transactions, 3);
-            PDTs[cnt++] = ProtocolPackager.Pack(TotalTransactions, 4);
-
-            if (cnt != PDTs.Length) throw new Exception("Invalid pack entries");
-
+            var PDTs = new List<ProtocolDataType>();
+            
+            PDTs.Add(ProtocolPackager.Pack(Hash, 0));
+            PDTs.Add(ProtocolPackager.Pack(SequenceNumber, 1));
+            PDTs.Add(ProtocolPackager.Pack(CloseTimeLong, 2));
+            PDTs.Add(ProtocolPackager.Pack(Transactions, 3));
+            PDTs.Add(ProtocolPackager.Pack(TotalTransactions, 4));
+            
             return ProtocolPackager.PackRaw(PDTs);
         }
 
         public void Deserialize(byte[] Data)
         {
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
-            int cnt = 0;
-
-            while (cnt < (int)PDTs.Count)
+            var PDTs = ProtocolPackager.UnPackRaw(Data);
+            
+            foreach(var PDT in PDTs)
             {
-                ProtocolDataType PDT = PDTs[cnt++];
-
                 switch (PDT.NameType)
                 {
                     case 0:
-                        ProtocolPackager.UnpackByteVector(PDT, 0, ref Hash);
+                        ProtocolPackager.UnpackByteVector(PDT, 0, out Hash);
                         break;
 
                     case 1:
@@ -82,6 +71,7 @@ namespace TNetD.Types
 
                     case 2:
                         ProtocolPackager.UnpackInt64(PDT, 2, ref CloseTimeLong);
+                        CloseTime = DateTime.FromFileTimeUtc(CloseTimeLong);
                         break;
 
                     case 3:

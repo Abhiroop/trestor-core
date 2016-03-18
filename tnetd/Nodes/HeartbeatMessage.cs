@@ -24,7 +24,7 @@ namespace TNetD.Nodes
         public byte[] Serialize()
         {
             List<ProtocolDataType> PDTs = new List<ProtocolDataType>();
-            PDTs.Add(ProtocolPackager.Pack(LCS, 0));
+            PDTs.Add(ProtocolPackager.Pack(LCS.Serialize(), 0));
             PDTs.Add(ProtocolPackager.Pack((byte)VotingState, 1));
             PDTs.Add(ProtocolPackager.Pack((byte)ConsensusState, 2));
             return ProtocolPackager.PackRaw(PDTs);
@@ -32,16 +32,14 @@ namespace TNetD.Nodes
 
         public void Deserialize(byte[] data)
         {
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(data);
-
-            foreach (var PDT in PDTs)
+            foreach (var PDT in ProtocolPackager.UnPackRaw(data))
             {
                 switch (PDT.NameType)
                 {
                     case 0:
 
-                        byte[] _data = null;
-                        if (ProtocolPackager.UnpackByteVector(PDT, 0, ref _data))
+                        byte[] _data;
+                        if (ProtocolPackager.UnpackByteVector(PDT, 0, out _data))
                         {
                             LCS.Deserialize(_data);
                         }

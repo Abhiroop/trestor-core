@@ -413,12 +413,12 @@ namespace TNetD.Nodes
         {
             foreach (var node in nodeState.ConnectedValidators)
             {
-                //Hash token = TNetUtils.GenerateNewToken();
+                Hash token = TNetUtils.GenerateNewToken();
 
                 await networkPacketSwitch.SendAsync(node.Key, new NetworkPacket()
                 {
                     PublicKeySource = nodeConfig.PublicKey,
-                    //Token = token,
+                    Token = token,
                     Type = PacketType.TPT_HEARTBEAT_REQUEST
                 });
             }

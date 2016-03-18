@@ -58,13 +58,10 @@ namespace TNetD.SyncFramework.Packets
 
         public void Deserialize(byte[] Data)
         {
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
-            int cnt = 0;
+            var PDTs = ProtocolPackager.UnPackRaw(Data);
 
-            while (cnt < (int)PDTs.Count)
+            foreach (var PDT in PDTs)
             {
-                ProtocolDataType PDT = PDTs[cnt++];
-
                 switch (PDT.NameType)
                 {
 
@@ -77,7 +74,7 @@ namespace TNetD.SyncFramework.Packets
                     case 1:
                         {
                             byte[] tempSource = new byte[0];
-                            ProtocolPackager.UnpackByteVector(PDT, 1, ref tempSource);
+                            ProtocolPackager.UnpackByteVector(PDT, 1, out tempSource);
                             if (tempSource.Length > 0)
                             {
                                 TransactionContent tsk = new TransactionContent();

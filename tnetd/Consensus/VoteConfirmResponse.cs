@@ -2,13 +2,8 @@
 //  @Author: Arpan Jati
 //  @Date: 5 Sept 2015 
 
-using Chaos.NaCl;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TNetD.Protocol;
+using System.Collections.Generic;
 
 namespace TNetD.Consensus
 {
@@ -39,23 +34,20 @@ namespace TNetD.Consensus
             return ProtocolPackager.PackRaw(PDTs);
         }
 
-        public void Deserialize(byte[] Data)
+        public void Deserialize(byte[] data)
         {
             Init();
 
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
-
-            foreach (ProtocolDataType PDT in PDTs)
+            foreach (var PDT in ProtocolPackager.UnPackRaw(data))
             {
                 switch (PDT.NameType)
                 {
-
                     case 0:
-                        byte[] data = new byte[0];
-                        ProtocolPackager.UnpackByteVector(PDT, 0, ref data);
-                        if (data.Length > 0)
+                        byte[] _finalBallot;
+                        ProtocolPackager.UnpackByteVector(PDT, 0, out _finalBallot);
+                        if (_finalBallot.Length > 0)
                         {
-                            FinalBallot.Deserialize(data);
+                            FinalBallot.Deserialize(_finalBallot);
                         }
 
                         break;
@@ -69,8 +61,6 @@ namespace TNetD.Consensus
                         break;
                 }
             }
-        }
-
-       
+        }       
     }
 }

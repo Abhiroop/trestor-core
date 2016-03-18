@@ -134,7 +134,7 @@ namespace TNetD.Transactions
                 switch (PDT.NameType)
                 {
                     case 0:
-                        ProtocolPackager.UnpackByteVector_s(PDT, 0, Common.KEYLEN_PUBLIC, ref publicKey);
+                        ProtocolPackager.UnpackByteVector_s(PDT, 0, Common.KEYLEN_PUBLIC, out publicKey);
                         break;
 
                     case 1:

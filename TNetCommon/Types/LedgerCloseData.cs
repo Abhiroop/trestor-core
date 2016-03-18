@@ -39,9 +39,9 @@ namespace TNetD
             return ProtocolPackager.PackRaw(PDTs);
         }
         
-        public void Deserialize(byte[] Data)
+        public void Deserialize(byte[] data)
         {
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
+            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(data);
             int cnt = 0;
 
             while (cnt < (int)PDTs.Count)
@@ -58,7 +58,7 @@ namespace TNetD
 
                     case 1:
                         {
-                            ProtocolPackager.UnpackByteVector(PDT, 1, ref LedgerHash);
+                            ProtocolPackager.UnpackByteVector(PDT, 1, out LedgerHash);
                         }
                         break;
 

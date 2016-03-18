@@ -61,21 +61,21 @@ namespace TNetD.Address
                 switch (PDT.NameType)
                 {
                     case 0:
-                        byte[] PK = new byte[Common.KEYLEN_PUBLIC];
-                        ProtocolPackager.UnpackByteVector_s(PDT, 0, Common.KEYLEN_PUBLIC, ref PK);
+                        byte[] PK;
+                        ProtocolPackager.UnpackByteVector_s(PDT, 0, Common.KEYLEN_PUBLIC, out PK);
                         PublicKey = PK;
                         break;
 
                     case 1:
-                        string _Name = "";
-                        ProtocolPackager.UnpackString(PDT, 1, ref _Name);
-                        Name = _Name;
+                        string _name = "";
+                        ProtocolPackager.UnpackString(PDT, 1, ref _name);
+                        Name = _name;
                         break;
 
                     case 2:
-                        string AddressString = "";
-                        ProtocolPackager.UnpackString(PDT, 2, ref AddressString);
-                        AddressData = new AddressData(AddressString);
+                        string _addressString = "";
+                        ProtocolPackager.UnpackString(PDT, 2, ref _addressString);
+                        AddressData = new AddressData(_addressString);
                         break;
                 }
             }

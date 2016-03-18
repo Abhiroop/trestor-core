@@ -75,77 +75,7 @@ namespace TNetD.Json.JS_Structs
             return new JS_Resp(RPCStatus.Success, this);
         }
     }
-
-    public class JS_NodeInfo : JS_Response
-    {
-        public byte[] PublicKey;
-        public string Name;
-        public string Address;
-        public string Organisation;
-        public string Platform;
-        public string Email;
-        public string Version;
-        public string Network;
-        public JS_NodeDetails NodeDetails;
-        public JS_LedgerInfo LastLedgerInfo;
-
-        public JS_NodeInfo()
-        {
-            Network = Common.NETWORK_TYPE.ToString();
-            this.NodeDetails = new JS_NodeDetails();
-            this.LastLedgerInfo = new JS_LedgerInfo();
-        }
-
-        public JS_NodeInfo(JS_NodeDetails NodeDetails, JS_LedgerInfo LastLedgerInfo)
-        {
-            this.NodeDetails = NodeDetails;
-            this.LastLedgerInfo = LastLedgerInfo;
-        }
-
-        public JS_Resp GetResponse()
-        {
-            return new JS_Resp(RPCStatus.Success, this);
-        }
-    }
-
-    public class JS_NodeDetails : JS_Response
-    {
-        [JsonIgnore]
-        public int ConnectedPeers = 1;
-        public long TransactionsProcessed = 0;
-        public long TransactionsAccepted = 0;
-        public long TransactionsVerified = 0;
-        public long TransactionsValidated = 0;
-        public long RequestsProcessed = 0;
-
-        public long NetworkPacketsOut = 0;
-        public long NetworkPacketsIn = 0;
-
-        public long AccountCreationRequests = 0;
-        public long TotalAccounts = 0;
-
-        public long ProofOfWorkQueueLength = 0;
-
-        public int LoadLevel = 1;
-        public DateTime SystemTime = DateTime.UtcNow;
-        public DateTime NetworkTime = DateTime.UtcNow;
-
-        public JS_NodeDetails()
-        {
-        }
-
-        public JS_NodeDetails(DateTime SystemTime, DateTime NetworkTime)
-        {
-            this.SystemTime = SystemTime;
-            this.NetworkTime = NetworkTime;
-        }
-
-        public JS_Resp GetResponse()
-        {
-            return new JS_Resp(RPCStatus.Success, this);
-        }
-    }
-
+      
     public class JS_TransactionReply : JS_Response
     {
         public byte[] VersionData;

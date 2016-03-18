@@ -164,7 +164,7 @@ namespace TNetD.Network.Networking
 
             if (npqe.Packet.Token.Hex.Length == Common.NETWORK_TOKEN_LENGTH)
             {
-                if (messageTypePairs.Pairs.ContainsKey(npqe.Packet.Type))
+                if (messageTypePairs.Requests.Contains(npqe.Packet.Type))
                 {
                     PendingNetworkRequest pnr = new PendingNetworkRequest(nodeState.SystemTime, npqe.PublicKeyDestination,
                         messageTypePairs.Pairs[npqe.Packet.Type]);

@@ -49,15 +49,13 @@ namespace TNetD.Consensus
 
         public void Deserialize(byte[] data)
         {
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(data);
-            
-            foreach(var PDT in PDTs)
-            { 
+            foreach (var PDT in ProtocolPackager.UnPackRaw(data))
+            {
                 switch (PDT.NameType)
                 {
                     case 0:
-                        byte[] _data = null;
-                        if (ProtocolPackager.UnpackByteVector(PDT, 0, ref _data))
+                        byte[] _data;
+                        if (ProtocolPackager.UnpackByteVector(PDT, 0, out _data))
                         {
                             Ballot.Deserialize(_data);
                         }

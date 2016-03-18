@@ -31,13 +31,11 @@ namespace TNetD.Consensus
             return ProtocolPackager.PackRaw(PDTs);
         }
 
-        public void Deserialize(byte[] Data)
+        public void Deserialize(byte[] data)
         {
             Init();
-
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);            
-
-            foreach(ProtocolDataType PDT in PDTs)
+            
+            foreach(var PDT in ProtocolPackager.UnPackRaw(data))
             {
                 switch (PDT.NameType)
                 {
@@ -46,8 +44,8 @@ namespace TNetD.Consensus
                         break;
 
                     case 1:
-                        byte[] _data = new byte[0];
-                        if (ProtocolPackager.UnpackByteVector(PDT, 1, ref _data))
+                        byte[] _data;
+                        if (ProtocolPackager.UnpackByteVector(PDT, 1, out _data))
                         {
                             LedgerCloseSequence.Deserialize(_data);
                         }
