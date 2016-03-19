@@ -76,7 +76,7 @@ namespace TNetD
                 {
                     Dispatcher.Invoke(new Action(() =>
                     {
-
+                        textBlock_Status2.Text = "LCD: " + transactionViewModel.LedgerCloseData.Count;
 
 
                     }));
@@ -106,7 +106,7 @@ namespace TNetD
             {
                 try
                 {
-                    this.Dispatcher.Invoke(new Action(() =>
+                    Dispatcher.Invoke(new Action(() =>
                     {
                         displayMessage.Text = displayMessage.Text.Trim();
                         viewModel.ProcessSkips();
@@ -139,7 +139,12 @@ namespace TNetD
             node.NodeStatusEvent += nd_NodeStatusEvent;
 
             await node.nodeState.PersistentCloseHistory.FetchAllLCLAsync((LedgerCloseData lcd) =>
-                                 { transactionViewModel.LedgerCloseData.Add(lcd); });
+                    {
+                        Dispatcher.Invoke(new Action(() =>
+                        {
+                            transactionViewModel.LedgerCloseData.Add(new DisplayLedgerCloseType(lcd));
+                        }));
+                    });
 
         }
 

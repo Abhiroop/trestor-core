@@ -51,10 +51,10 @@ namespace TNetD.Helpers
     
     class TransactionViewModel
     {
-        ObservableCollection<LedgerCloseData> lcsData = new ObservableCollection<LedgerCloseData>();
+        ObservableCollection<DisplayLedgerCloseType> lcsData = new ObservableCollection<DisplayLedgerCloseType>();
         ObservableCollection<TransactionContent> txData = new ObservableCollection<TransactionContent>();
 
-        public ObservableCollection<LedgerCloseData> LedgerCloseData
+        public ObservableCollection<DisplayLedgerCloseType> LedgerCloseData
         {
             get
             {

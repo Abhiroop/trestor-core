@@ -103,21 +103,21 @@ namespace TNetD.PersistentStore
                     {
                         if (reader.HasRows)
                         {
-                            if (reader.Read())
+                            while (reader.Read())
                             {
-                                var ledgerCloseData = new LedgerCloseData();
-                                ledgerCloseData.SequenceNumber = (long)reader[0];
-                                ledgerCloseData.LedgerHash = (byte[])reader[1];
-                                ledgerCloseData.Transactions = (long)reader[2];
-                                ledgerCloseData.TotalTransactions = (long)reader[3];
-                                ledgerCloseData.CloseTime = (long)reader[4];
+                                var lcd = new LedgerCloseData();
+                                lcd.SequenceNumber = (long)reader[0];
+                                lcd.LedgerHash = (byte[])reader[1];
+                                lcd.Transactions = (long)reader[2];
+                                lcd.TotalTransactions = (long)reader[3];
+                                lcd.CloseTime = (long)reader[4];
 
-                                closeHistoryFetch(ledgerCloseData);
+                                closeHistoryFetch(lcd);
                             }
                         }
                     }
                 }
-            });            
+            });
         }
 
         ////////////////////////
@@ -315,7 +315,7 @@ namespace TNetD.PersistentStore
 
             return new Tuple<DBResponse, long>(response, removed);
         }
-        
+
         public bool GetLastRowData(out LedgerCloseData lastCloseData)
         {
             bool _found = false;

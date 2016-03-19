@@ -9,7 +9,8 @@
         <local:ByteArrayToString x:Key="ByteArrayToString"/>
         <local:HashToString x:Key="HashToString"/>
         <local:DateTimeToTimeString x:Key="DateTimeToTimeString"/>
-
+        <local:DateTimeToDateString x:Key="DateTimeToDateString"/>
+        
         <Style x:Key="DarkRoomListViewStyle" TargetType="{x:Type ListView}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -160,18 +161,26 @@
                     </Grid.RowDefinitions>
                     <Label>Log:</Label>
                     <Label Grid.Column="2">Status:</Label>
-                    <ListBox Name="listBox_LCS" Grid.Row="1"   Background="#FF1E1E1E" Foreground="#FF8ACD3A" >
+                    <ListBox Name="listBox_LCS" Grid.Row="1"  ItemsSource="{Binding LedgerCloseData}" Background="#FF1E1E1E" Foreground="#FF8ACD3A" >
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="85"/>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="60"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding Time, Converter= {StaticResource DateTimeToTimeString}}" 
+                                    <TextBlock Text="{Binding Time}" 
                                                Foreground="Plum" Grid.Column="0" />
 
-                                    <StackPanel Orientation="Vertical" Grid.Column="1" Width="850" HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding Transactions}" 
+                                               Foreground="Plum" Grid.Column="1" />
+
+                                    <TextBlock Text="{Binding TotalTransactions}" 
+                                               Foreground="Plum" Grid.Column="2" />
+
+                                    <StackPanel Orientation="Vertical" Grid.Column="3" Width="850" HorizontalAlignment="Left">
                                         <TextBlock Text="{Binding Text}" FontFamily="Consolas" TextWrapping="Wrap"
                                                Foreground="{Binding TextColor}" />
                                     </StackPanel>
