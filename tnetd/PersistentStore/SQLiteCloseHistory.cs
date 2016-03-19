@@ -93,6 +93,33 @@ namespace TNetD.PersistentStore
             return response;
         }
 
+        public async Task FetchAllLCLAsync(CloseHistoryFetchEventHandler closeHistoryFetch)
+        {
+            await Task.Run(() =>
+            {
+                using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM LedgerInfo;", sqliteConnection))
+                {
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            if (reader.Read())
+                            {
+                                var ledgerCloseData = new LedgerCloseData();
+                                ledgerCloseData.SequenceNumber = (long)reader[0];
+                                ledgerCloseData.LedgerHash = (byte[])reader[1];
+                                ledgerCloseData.Transactions = (long)reader[2];
+                                ledgerCloseData.TotalTransactions = (long)reader[3];
+                                ledgerCloseData.CloseTime = (long)reader[4];
+
+                                closeHistoryFetch(ledgerCloseData);
+                            }
+                        }
+                    }
+                }
+            });            
+        }
+
         ////////////////////////
 
         public DBResponse FetchLCL(out LedgerCloseData ledgerCloseData, long sequenceNumber)

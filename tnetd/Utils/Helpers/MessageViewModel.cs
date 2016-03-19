@@ -1,8 +1,9 @@
 ﻿
- // @Author: Arpan Jati
- // @Date: 30 August 2015
+// @Author: Arpan Jati
+// @Date: 30 August 2015
 
 using System.Collections.ObjectModel;
+using TNetD.Transactions;
 
 namespace TNetD.Helpers
 {
@@ -46,6 +47,27 @@ namespace TNetD.Helpers
             }
             catch { }              
         }
+    }
+    
+    class TransactionViewModel
+    {
+        ObservableCollection<LedgerCloseData> lcsData = new ObservableCollection<LedgerCloseData>();
+        ObservableCollection<TransactionContent> txData = new ObservableCollection<TransactionContent>();
 
+        public ObservableCollection<LedgerCloseData> LedgerCloseData
+        {
+            get
+            {
+                return lcsData;
+            }
+        }
+
+        public ObservableCollection<TransactionContent> TransactionData
+        {
+            get
+            {
+                return txData;
+            }
+        }
     }
 }

@@ -43,6 +43,7 @@ namespace TNetD
     {
         object TimerLock = new object();
         MessageViewModel viewModel = new MessageViewModel();
+        TransactionViewModel transactionViewModel = new TransactionViewModel();
 
         List<Node> nodes = new List<Node>();
 
@@ -50,9 +51,13 @@ namespace TNetD
         {
             DataContext = viewModel;
 
+
             Common.Initialize();
 
             InitializeComponent();
+
+
+            listBox_LCS.DataContext = transactionViewModel;
 
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
 
@@ -71,7 +76,7 @@ namespace TNetD
                 {
                     Dispatcher.Invoke(new Action(() =>
                     {
-                        
+
 
 
                     }));
@@ -111,7 +116,7 @@ namespace TNetD
                 catch { }
             }
         }
-        
+
         private void menuItem_File_Exit_Click(object sender, RoutedEventArgs e)
         {
             Close();
@@ -127,11 +132,14 @@ namespace TNetD
 
         Node node = default(Node);
 
-        private void menuItem_Load_Node_Data_Click(object sender, RoutedEventArgs e)
+        private async void menuItem_Load_Node_Data_Click(object sender, RoutedEventArgs e)
         {
             node = new Node(0);
             node.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
             node.NodeStatusEvent += nd_NodeStatusEvent;
+
+            await node.nodeState.PersistentCloseHistory.FetchAllLCLAsync((LedgerCloseData lcd) =>
+                                 { transactionViewModel.LedgerCloseData.Add(lcd); });
 
         }
 

@@ -76,7 +76,6 @@ namespace TNetD.PersistentStore
 
             await Task.Run(() =>
             {
-
                 using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Ledger;", sqliteConnection))
                 {
                     using (SQLiteDataReader reader = cmd.ExecuteReader())
