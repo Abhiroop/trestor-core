@@ -434,6 +434,13 @@ namespace TNetD
             m4.ShowDialog();
             Show();
         }
+        private void menuItem_Main5_Click(object sender, RoutedEventArgs e)
+        {
+            Hide();
+            DebugWindow5 m5 = new DebugWindow5();
+            m5.ShowDialog();
+            Show();
+        }
 
         private void menuItem_setup_Click(object sender, RoutedEventArgs e)
         {
@@ -442,5 +449,7 @@ namespace TNetD
             swin.ShowDialog();
             Show();
         }
+
+       
     }
 }

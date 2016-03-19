@@ -90,13 +90,14 @@
                 <MenuItem Name="menuItem_File_Exit" Header="EXIT" Click="menuItem_File_Exit_Click"/>
                 <MenuItem Name="menuItem_Main2" Header="MAIN 2" Click="menuItem_Main2_Click"/>
                 <MenuItem Name="menuItem_Main3" Header="DEBUG LEDGER-SYNC" Click="menuItem_Main3_Click"/>
-                <MenuItem Name="menuItem_Main4" Header="DEBUG VOTING" Click="menuItem_Main4_Click" />
-                <MenuItem Name="menuItem_setup" Header="NODE SETUP" HorizontalAlignment="Left" Width="202" Click="menuItem_setup_Click"/>
+                <MenuItem Name="menuItem_Main4" Header="DEBUG VOTING" Click="menuItem_Main4_Click"/>
+                <MenuItem Name="menuItem_Main5" Header="TRANSACTION VISUALIZER" Click="menuItem_Main5_Click"/>
+                <MenuItem Name="menuItem_setup" Header="NODE SETUP" Click="menuItem_setup_Click"/>
             </MenuItem>
             <MenuItem Header="SERVER">
                 <MenuItem Header="Start" Click="menuItem_Server_Start_Click"/>
-                <MenuItem Header="Stop" Click="menuItem_Server_Stop_Click" />
-                <MenuItem Header="Restart" />
+                <MenuItem Header="Stop" Click="menuItem_Server_Stop_Click"/>
+                <MenuItem Header="Restart"/>
                 <Separator/>
                 <MenuItem Header="Resync"/>
                 <Separator/>
@@ -106,7 +107,7 @@
             <MenuItem Header="SIMULATION">
                 <MenuItem Name="menuItem_Simulation_Start" Header="Start" Click="menuItem_Simulation_Start_Click"/>
                 <MenuItem Name="menuItem_Simulation_Stop" Header="Stop"/>
-                <MenuItem Name="menuItem_Simulation_Restart" Header="Restart" />
+                <MenuItem Name="menuItem_Simulation_Restart" Header="Restart"/>
                 <Separator/>
                 <MenuItem Name="menuItem_Simulation_Resync" Header="Resync"/>
             </MenuItem>

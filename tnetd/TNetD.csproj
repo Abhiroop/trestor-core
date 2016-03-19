@@ -222,6 +222,9 @@
     <Compile Include="UI\CreateTransaction.xaml.cs">
       <DependentUpon>CreateTransaction.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\DebugWindow5.xaml.cs">
+      <DependentUpon>DebugWindow5.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\DebugWindow4.xaml.cs">
       <DependentUpon>DebugWindow4.xaml</DependentUpon>
     </Compile>
@@ -287,6 +290,10 @@
     <Page Include="UI\CreateTransaction.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\DebugWindow5.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\DebugWindow4.xaml">
       <Generator>MSBuild:Compile</Generator>
