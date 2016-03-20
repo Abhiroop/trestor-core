@@ -4,12 +4,12 @@
 
 using System.Collections.ObjectModel;
 using TNetD.Transactions;
+using TNetD.UI;
 
 namespace TNetD.Helpers
 {
     class MessageViewModel
     {
-
         ObservableCollection<DisplayMessageType> logMessages = new ObservableCollection<DisplayMessageType>();
         ObservableCollection<DisplayMessageType> statusMessages = new ObservableCollection<DisplayMessageType>();
         
@@ -52,7 +52,7 @@ namespace TNetD.Helpers
     class TransactionViewModel
     {
         ObservableCollection<DisplayLedgerCloseType> lcsData = new ObservableCollection<DisplayLedgerCloseType>();
-        ObservableCollection<TransactionContent> txData = new ObservableCollection<TransactionContent>();
+        ObservableCollection<DisplayTransactionContentType> txData = new ObservableCollection<DisplayTransactionContentType>();
 
         public ObservableCollection<DisplayLedgerCloseType> LedgerCloseData
         {
@@ -62,7 +62,7 @@ namespace TNetD.Helpers
             }
         }
 
-        public ObservableCollection<TransactionContent> TransactionData
+        public ObservableCollection<DisplayTransactionContentType> TransactionData
         {
             get
             {

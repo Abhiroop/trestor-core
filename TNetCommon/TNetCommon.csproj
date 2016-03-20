@@ -201,6 +201,8 @@
     <Compile Include="Types\LeafDataType.cs" />
     <Compile Include="Types\CommonStructs.cs" />
     <Compile Include="Types\LedgerCloseData.cs" />
+    <Compile Include="UI\DisplayLedgerCloseType.cs" />
+    <Compile Include="UI\DisplayTransactionContentType.cs" />
     <Compile Include="UI\DisplayUtils.cs" />
     <Compile Include="UI\DisplayMessageType.cs" />
     <Compile Include="Utils.cs" />

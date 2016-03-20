@@ -1,4 +1,4 @@
-﻿//
+﻿
 // @Author: Arpan Jati
 // @Date: 6 Feb 2015
 
@@ -7,13 +7,8 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.SQLite;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using TNetD.Address;
-using TNetD.Ledgers;
 using TNetD.Nodes;
-using TNetD.Transactions;
-using TNetD.Types;
 
 namespace TNetD.PersistentStore
 {

@@ -150,9 +150,11 @@
             <TabItem Header="Transactions">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="489*"/>
+                        <ColumnDefinition Width="500*"/>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="392*"/>
+                        <ColumnDefinition Width="275"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="400*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30"/>
@@ -161,7 +163,8 @@
                     </Grid.RowDefinitions>
                     <Label>Log:</Label>
                     <Label Grid.Column="2">Status:</Label>
-                    <ListBox Name="listBox_LCS" Grid.Row="1"  ItemsSource="{Binding LedgerCloseData}" Background="#FF1E1E1E" Foreground="#FF8ACD3A" >
+                    <ListBox Name="listBox_LCS" Grid.Row="1"  ItemsSource="{Binding LedgerCloseData}" Background="#FF1E1E1E"
+                             Foreground="#FF8ACD3A" SelectionChanged="listBox_LCS_SelectionChanged" >
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -188,11 +191,35 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <ScrollViewer Grid.Row="1" Grid.Column="2">
-                        <TextBlock x:Name="textBlock_Status2" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
-                    </ScrollViewer>
+                    
+                    <GridSplitter  Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
 
-                    <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
+                    <ListBox Name="listBox_TransactionData" Grid.Row="1" Grid.Column="2" ItemsSource="{Binding TransactionData}" 
+                             Background="#FF1E1E1E" Foreground="#FF8ACD3A" SelectionChanged="listBox_TransactionData_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>                   
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Time}" 
+                                               Foreground="Plum" Grid.Column="0" />                           
+
+                                    <StackPanel Orientation="Vertical" Grid.Column="1" Width="100" HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding Text}" FontFamily="Consolas" TextWrapping="Wrap"
+                                               Foreground="{Binding TextColor}" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <GridSplitter Grid.Row="1" Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
+
+                    <ScrollViewer Grid.Row="1" Grid.Column="4">
+                        <TextBlock x:Name="textBlock_TransactionDetails" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" TextWrapping="Wrap" />
+                    </ScrollViewer>
 
                 </Grid>
             </TabItem>

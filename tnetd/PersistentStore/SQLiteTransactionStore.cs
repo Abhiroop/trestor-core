@@ -101,7 +101,7 @@ namespace TNetD.PersistentStore
 
             string LIMIT_CLAUSE = "LIMIT " + Constants.DB_HISTORY_TX_LIMIT;
 
-            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Transactions WHERE (SequenceNumber >= @sequenceNumber AND SequenceNumber < @sequenceMax ) ORDER BY TimeStamp DESC " + LIMIT_CLAUSE + ";", sqliteConnection))
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Transactions WHERE (SequenceNumber >= @sequenceNumber AND SequenceNumber < @sequenceMax ) ORDER BY SequenceNumber " + LIMIT_CLAUSE + ";", sqliteConnection))
             {
                 cmd.Parameters.Add(new SQLiteParameter("@sequenceNumber", sequenceNumber));
                 cmd.Parameters.Add(new SQLiteParameter("@sequenceMax", sequenceMax));

@@ -1,6 +1,6 @@
 ﻿
 // @Author: Arpan Jati
-// @Date: Aug 28, 2015
+// @Date: March 20, 2016
 
 using System;
 using System.ComponentModel;
@@ -10,12 +10,17 @@ using TNetD.Transactions;
 
 namespace TNetD.UI
 {
-    public class DisplayMessageType : INotifyPropertyChanged
+    public class DisplayTransactionContentType : INotifyPropertyChanged
     {
         string text = string.Empty;
         Brush textColor = Brushes.Green;
         DisplayType displayType = DisplayType.Info;
         DateTime time;
+        
+        public TransactionContent TransactionContent = default(TransactionContent);
+
+        public long sequenceNumber = 0;
+        public byte[] ledgerHash = new byte[0];
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -30,33 +35,37 @@ namespace TNetD.UI
             }
         }
 
-        public DisplayMessageType()
+        public DisplayTransactionContentType()
         {
-            this.text = string.Empty;
-            this.textColor = textColor = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF8ACD3A"));// #FF8ACD3A 
-            this.displayType = DisplayType.Info;
+            text = string.Empty;
+            textColor = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF8ACD3A"));// #FF8ACD3A
+            displayType = DisplayType.Info;
         }
 
-        public DisplayMessageType(string text, Brush textColor, DisplayType displayType, DateTime time) : this()
+        public DisplayTransactionContentType(TransactionContent tc) : this()
         {
-            this.text = text;
-            this.textColor = textColor;
-            this.displayType = displayType;
-            this.time = time;
+            TransactionContent = tc;
+
+            text = tc.TransactionID.ToString().Substring(0, 8) + "\r\n" + (tc.Value/1000000.0).ToString("0.00000");
+            //this.transactions = lcd.Transactions;
+            //this.totalTransactions = lcd.TotalTransactions;
+            // this.textColor = textColor;
+            // this.displayType = displayType;
+            time = tc.DateTime;
         }
 
         public string Text
         {
             get
             {
-                return this.text;
+                return text;
             }
 
             set
             {
-                if (value != this.text)
+                if (value != text)
                 {
-                    this.text = value;
+                    text = value;
                     NotifyPropertyChanged();
                 }
             }
@@ -66,14 +75,14 @@ namespace TNetD.UI
         {
             get
             {
-                return this.time;
+                return time;
             }
 
             set
             {
-                if (value != this.time)
+                if (value != time)
                 {
-                    this.time = value;
+                    time = value;
                     NotifyPropertyChanged();
                 }
             }
@@ -83,14 +92,14 @@ namespace TNetD.UI
         {
             get
             {
-                return this.textColor;
+                return textColor;
             }
 
             set
             {
-                if (value != this.textColor)
+                if (value != textColor)
                 {
-                    this.textColor = value;
+                    textColor = value;
                     NotifyPropertyChanged();
                 }
             }
@@ -100,22 +109,19 @@ namespace TNetD.UI
         {
             get
             {
-                return this.displayType;
+                return displayType;
             }
 
             set
             {
-                if (value != this.displayType)
+                if (value != displayType)
                 {
-                    this.displayType = value;
+                    displayType = value;
                     NotifyPropertyChanged();
                 }
             }
         }
+
+
     }
-
-   
-
-
-   
 }

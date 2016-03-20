@@ -1,21 +1,25 @@
 ﻿
 // @Author: Arpan Jati
-// @Date: Aug 28, 2015
+// @Date: March 20, 2016
 
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
-using TNetD.Transactions;
 
 namespace TNetD.UI
 {
-    public class DisplayMessageType : INotifyPropertyChanged
+    public class DisplayLedgerCloseType : INotifyPropertyChanged
     {
         string text = string.Empty;
+        long transactions = 0;
+        long totalTransactions = 0;
         Brush textColor = Brushes.Green;
         DisplayType displayType = DisplayType.Info;
         DateTime time;
+
+        public long sequenceNumber = 0;
+        public byte[] ledgerHash = new byte[0];
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -30,19 +34,31 @@ namespace TNetD.UI
             }
         }
 
-        public DisplayMessageType()
+        public DisplayLedgerCloseType()
         {
             this.text = string.Empty;
-            this.textColor = textColor = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF8ACD3A"));// #FF8ACD3A 
+            this.textColor = textColor = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF8ACD3A"));// #FF8ACD3A
             this.displayType = DisplayType.Info;
         }
 
-        public DisplayMessageType(string text, Brush textColor, DisplayType displayType, DateTime time) : this()
+        public DisplayLedgerCloseType(LedgerCloseData lcd) : this()
         {
-            this.text = text;
-            this.textColor = textColor;
-            this.displayType = displayType;
-            this.time = time;
+            /*public long SequenceNumber;
+                public byte[] LedgerHash;
+                public long Transactions;
+                public long TotalTransactions;
+                public long CloseTime;*/
+
+            sequenceNumber = lcd.SequenceNumber;
+            ledgerHash = lcd.LedgerHash;
+
+            this.text = lcd.SequenceNumber + " | " + new Hash(lcd.LedgerHash);
+            this.transactions = lcd.Transactions;
+            this.totalTransactions = lcd.TotalTransactions;
+
+            // this.textColor = textColor;
+            // this.displayType = displayType;
+            this.time = DateTime.FromFileTimeUtc(lcd.CloseTime);
         }
 
         public string Text
@@ -62,18 +78,34 @@ namespace TNetD.UI
             }
         }
 
+        public string Transactions
+        {
+            get
+            {
+                return transactions + "";
+            }
+        }
+
+        public string TotalTransactions
+        {
+            get
+            {
+                return totalTransactions + "";
+            }
+        }
+
         public DateTime Time
         {
             get
             {
-                return this.time;
+                return time;
             }
 
             set
             {
-                if (value != this.time)
+                if (value != time)
                 {
-                    this.time = value;
+                    time = value;
                     NotifyPropertyChanged();
                 }
             }
@@ -83,14 +115,14 @@ namespace TNetD.UI
         {
             get
             {
-                return this.textColor;
+                return textColor;
             }
 
             set
             {
-                if (value != this.textColor)
+                if (value != textColor)
                 {
-                    this.textColor = value;
+                    textColor = value;
                     NotifyPropertyChanged();
                 }
             }
@@ -100,22 +132,18 @@ namespace TNetD.UI
         {
             get
             {
-                return this.displayType;
+                return displayType;
             }
 
             set
             {
-                if (value != this.displayType)
+                if (value != displayType)
                 {
-                    this.displayType = value;
+                    displayType = value;
                     NotifyPropertyChanged();
                 }
             }
         }
+
     }
-
-   
-
-
-   
 }

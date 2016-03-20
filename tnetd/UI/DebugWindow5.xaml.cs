@@ -6,6 +6,7 @@
 using Grapevine;
 using Grapevine.Server;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -30,6 +31,7 @@ using TNetD.Ledgers;
 using TNetD.Network.Networking;
 using TNetD.Nodes;
 using TNetD.PersistentStore;
+using TNetD.SyncFramework.Packets;
 using TNetD.Transactions;
 using TNetD.Tree;
 using TNetD.UI;
@@ -51,13 +53,12 @@ namespace TNetD
         {
             DataContext = viewModel;
 
-
             Common.Initialize();
 
             InitializeComponent();
 
-
             listBox_LCS.DataContext = transactionViewModel;
+            listBox_TransactionData.DataContext = transactionViewModel;
 
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
 
@@ -76,7 +77,7 @@ namespace TNetD
                 {
                     Dispatcher.Invoke(new Action(() =>
                     {
-                        textBlock_Status2.Text = "LCD: " + transactionViewModel.LedgerCloseData.Count;
+                        // textBlock_TransactionDetails.Text = "LCD: " + transactionViewModel.LedgerCloseData.Count;
 
 
                     }));
@@ -159,5 +160,49 @@ namespace TNetD
             }
             catch { }
         }
+        private void listBox_LCS_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            transactionViewModel.TransactionData.Clear();
+
+
+            var item = (DisplayLedgerCloseType)listBox_LCS.SelectedItem;
+
+            if (item != null)
+            {
+                List<TransactionContentSet> data = new List<TransactionContentSet>();
+
+                if (node.nodeState.PersistentTransactionStore.FetchBySequenceNumber(out data, item.sequenceNumber, 1)
+                    == DBResponse.FetchSuccess)
+                {
+                    if (data.Count == 1)
+                    {
+                        var txCSet = data[0];
+
+                        foreach (var tc in txCSet.TxContent)
+                        {
+                            transactionViewModel.TransactionData.Add(new DisplayTransactionContentType(tc));
+                        }
+                    }
+                }
+
+                listBox_TransactionData.SelectedIndex = 0;
+            }
+        }        
+
+        private void listBox_TransactionData_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            var tc = ((DisplayTransactionContentType)listBox_TransactionData.SelectedItem)?.TransactionContent;
+
+            if (tc != null)
+            {
+                var d = new Json.JS_Structs.JS_TransactionReply(tc);
+
+                textBlock_TransactionDetails.Text = JsonConvert.SerializeObject(tc, Common.JSON_SERIALIZER_SETTINGS);
+            }
+
+        }
+
+       
     }
 }
+
