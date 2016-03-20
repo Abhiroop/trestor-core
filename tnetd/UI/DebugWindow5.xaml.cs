@@ -163,8 +163,7 @@ namespace TNetD
         private void listBox_LCS_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             transactionViewModel.TransactionData.Clear();
-
-
+            
             var item = (DisplayLedgerCloseType)listBox_LCS.SelectedItem;
 
             if (item != null)

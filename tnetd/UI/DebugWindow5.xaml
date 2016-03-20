@@ -169,21 +169,30 @@
                             <DataTemplate>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="150"/>
-                                        <ColumnDefinition Width="60"/>
-                                        <ColumnDefinition Width="60"/>
-                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="90*"/>
+                                        <ColumnDefinition Width="140"/>                                       
+                                        <ColumnDefinition Width="90*"/>
+                                        <ColumnDefinition Width="90*"/>
                                     </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    
+                                    <TextBlock Text="{Binding SequenceNumber}" 
+                                               Foreground="CornflowerBlue" Grid.Column="0" />
+                                    
                                     <TextBlock Text="{Binding Time}" 
-                                               Foreground="Plum" Grid.Column="0" />
-
+                                               Foreground="Plum" Grid.Column="1" />                                    
+                                    
                                     <TextBlock Text="{Binding Transactions}" 
-                                               Foreground="Plum" Grid.Column="1" />
+                                               Foreground="Yellow" Grid.Column="2" />
 
                                     <TextBlock Text="{Binding TotalTransactions}" 
-                                               Foreground="Plum" Grid.Column="2" />
+                                               Foreground="Pink" Grid.Column="3" />
 
-                                    <StackPanel Orientation="Vertical" Grid.Column="3" Width="850" HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="4"  
+                                                HorizontalAlignment="Left">
                                         <TextBlock Text="{Binding Text}" FontFamily="Consolas" TextWrapping="Wrap"
                                                Foreground="{Binding TextColor}" />
                                     </StackPanel>

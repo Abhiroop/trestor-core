@@ -14,6 +14,7 @@ namespace TNetD.UI
         string text = string.Empty;
         long transactions = 0;
         long totalTransactions = 0;
+        
         Brush textColor = Brushes.Green;
         DisplayType displayType = DisplayType.Info;
         DateTime time;
@@ -36,9 +37,9 @@ namespace TNetD.UI
 
         public DisplayLedgerCloseType()
         {
-            this.text = string.Empty;
-            this.textColor = textColor = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF8ACD3A"));// #FF8ACD3A
-            this.displayType = DisplayType.Info;
+            text = string.Empty;
+            textColor = textColor = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF8ACD3A"));// #FF8ACD3A
+            displayType = DisplayType.Info;
         }
 
         public DisplayLedgerCloseType(LedgerCloseData lcd) : this()
@@ -52,7 +53,7 @@ namespace TNetD.UI
             sequenceNumber = lcd.SequenceNumber;
             ledgerHash = lcd.LedgerHash;
 
-            this.text = lcd.SequenceNumber + " | " + new Hash(lcd.LedgerHash);
+            this.text = "" + new Hash(lcd.LedgerHash).ToStringDualLine() ;
             this.transactions = lcd.Transactions;
             this.totalTransactions = lcd.TotalTransactions;
 
@@ -65,16 +66,24 @@ namespace TNetD.UI
         {
             get
             {
-                return this.text;
+                return text;
             }
 
             set
             {
-                if (value != this.text)
+                if (value != text)
                 {
-                    this.text = value;
+                    text = value;
                     NotifyPropertyChanged();
                 }
+            }
+        }
+
+        public string SequenceNumber
+        {
+            get
+            {
+                return "SEQ: " + sequenceNumber + "";
             }
         }
 
@@ -82,7 +91,7 @@ namespace TNetD.UI
         {
             get
             {
-                return transactions + "";
+                return "TX: "+transactions + "";
             }
         }
 
@@ -90,7 +99,7 @@ namespace TNetD.UI
         {
             get
             {
-                return totalTransactions + "";
+                return "TOT: " + totalTransactions + "";
             }
         }
 

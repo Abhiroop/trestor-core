@@ -83,6 +83,26 @@ namespace TNetD
             return sb.ToString();
         }
 
+        public string ToStringDualLine()
+        {
+            if (HashValue.Length == 0) return "EMPTY";
+
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < HashValue.Length; i++)
+            {
+                sb.Append(HashValue[i].ToString("X2") + "");
+
+                if (((i + 1) % (HashValue.Length / 2)) == 0 &&
+                    (i + 1) < HashValue.Length)
+                {
+                    sb.AppendLine();
+                }
+            }
+
+            return sb.ToString();
+        }
+
         /// <summary>
         /// Well, looks ok, should work !! [Punisher]
         /// Certainly, can be improved.
@@ -109,7 +129,7 @@ namespace TNetD
 
             return a.Equals((object)b);
         }
-                
+
         // Simple comparer from http://stackoverflow.com/questions/10658709/linq-orderbybyte-values
         // Too simple to write one :)
         public int Compare(byte[] x, byte[] y)
@@ -182,8 +202,8 @@ namespace TNetD
         public static bool operator !=(Hash a, Hash b)
         {
             return !(a == b);
-        }        
-     
+        }
+
         //old school style
         public int compareHash(Hash h)
         {
@@ -199,7 +219,7 @@ namespace TNetD
             else
             {
                 //start from MSB
-                for(int i = thisHash.Length - 1 ; i >= 0; i--)
+                for (int i = thisHash.Length - 1; i >= 0; i--)
                 {
                     if (thisHash[i] > otherHash[i])
                         return 1;
