@@ -46,9 +46,14 @@ namespace TNetD
         BadData,
 
         /// <summary>
-        /// [5] : Should not ahppen for good code.
+        /// [5] : Should not happen for good code.
         /// </summary>
-        CodeAssertionFailed
+        CodeAssertionFailed,
+
+        /// <summary>
+        /// [6] : Debugging Messages
+        /// </summary>
+        Debug
     };
 
     public static class DisplayUtils

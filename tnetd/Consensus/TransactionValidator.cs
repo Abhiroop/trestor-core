@@ -60,7 +60,7 @@ namespace TNetD.Consensus
                     {
                         TransactionContent transactionFromPersistentDB;
                         long sequenceNumber;
-                        if (nodeState.PersistentTransactionStore.FetchTransaction(out transactionFromPersistentDB, out sequenceNumber,
+                        if (nodeState.Persistent.TransactionStore.FetchTransaction(out transactionFromPersistentDB, out sequenceNumber,
                             transactionContent.TransactionID) == DBResponse.FetchSuccess)
                         {
                             //TODO: LOG THIS and Display properly.
@@ -91,7 +91,7 @@ namespace TNetD.Consensus
                                 }
 
                                 AccountInfo ai;
-                                if (nodeState.PersistentAccountStore.FetchAccount(out ai, new Hash(te.PublicKey)) == DBResponse.FetchSuccess)
+                                if (nodeState.Persistent.AccountStore.FetchAccount(out ai, new Hash(te.PublicKey)) == DBResponse.FetchSuccess)
                                 {
                                     // Account Exists
                                     if (ai.Name != te.Name)
@@ -113,7 +113,7 @@ namespace TNetD.Consensus
                                     if (!badTX_AccountName)
                                     {
                                         // Check if same named account exists. When, public key could not be fetched.
-                                        if (nodeState.PersistentAccountStore.FetchAccount(out ai, te.Name) == DBResponse.FetchSuccess)
+                                        if (nodeState.Persistent.AccountStore.FetchAccount(out ai, te.Name) == DBResponse.FetchSuccess)
                                         {
                                             // Thats too bad, transaction cannot happen, 
                                             // new wallet has invalid Name (name already used).
@@ -364,7 +364,7 @@ namespace TNetD.Consensus
 
             ////// Create the new accounts in the PersistentDatabase  /////
 
-            int newDBAccountCount = nodeState.PersistentAccountStore.AddUpdateBatch(newAccounts);
+            int newDBAccountCount = nodeState.Persistent.AccountStore.AddUpdateBatch(newAccounts);
 
             Interlocked.Add(ref nodeState.NodeInfo.NodeDetails.TotalAccounts, newDBAccountCount);
 
@@ -375,7 +375,7 @@ namespace TNetD.Consensus
 
             Dictionary<Hash, AccountInfo> accountsInDB;
 
-            int fetchedAccountsCount = nodeState.PersistentAccountStore.BatchFetch(out accountsInDB, pendingDifferenceData.Keys);
+            int fetchedAccountsCount = nodeState.Persistent.AccountStore.BatchFetch(out accountsInDB, pendingDifferenceData.Keys);
 
             if (fetchedAccountsCount != pendingDifferenceData.Count)
             {
@@ -446,7 +446,7 @@ namespace TNetD.Consensus
             }
 
             LedgerCloseData ledgerCloseData;
-            bool ok = nodeState.PersistentCloseHistory.GetLastRowData(out ledgerCloseData);
+            bool ok = nodeState.Persistent.CloseHistory.GetLastRowData(out ledgerCloseData);
 
             ledgerCloseData.CloseTime = CloseTime.ToFileTimeUtc();
             ledgerCloseData.SequenceNumber++;
@@ -456,9 +456,9 @@ namespace TNetD.Consensus
 
             // Apply to persistent DB.
 
-            nodeState.PersistentCloseHistory.AddUpdate(ledgerCloseData);
-            nodeState.PersistentAccountStore.AddUpdateBatch(finalPersistentDBUpdateList);
-            nodeState.PersistentTransactionStore.AddUpdateBatch(acceptedTransactions, ledgerCloseData.SequenceNumber);
+            nodeState.Persistent.CloseHistory.AddUpdate(ledgerCloseData);
+            nodeState.Persistent.AccountStore.AddUpdateBatch(finalPersistentDBUpdateList);
+            nodeState.Persistent.TransactionStore.AddUpdateBatch(acceptedTransactions, ledgerCloseData.SequenceNumber);
 
             nodeState.NodeInfo.LastLedgerInfo = new JS_LedgerInfo(ledgerCloseData);
         }

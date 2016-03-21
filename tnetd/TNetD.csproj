@@ -175,6 +175,7 @@
     <Compile Include="Nodes\TransactionHandler.cs" />
     <Compile Include="Nodes\LedgerSync.cs" />
     <Compile Include="PersistentStore\IPersistentCloseHistory.cs" />
+    <Compile Include="PersistentStore\Persistent.cs" />
     <Compile Include="SyncFramework\IndexedVector.cs" />
     <Compile Include="SyncFramework\Packets\LedgerSyncRequest.cs" />
     <Compile Include="SyncFramework\Packets\TransactionContentSet.cs" />
@@ -194,6 +195,7 @@
     <Compile Include="PersistentStore\SQLiteTransactionStore.cs" />
     <Compile Include="Consensus\VoteInfo.cs" />
     <Compile Include="SyncFramework\TransactionStreamHandler.cs" />
+    <Compile Include="Tests\LedgerIntegrity.cs" />
     <Compile Include="Time\TimeSync.cs" />
     <Compile Include="Time\TimeSyncRqMsg.cs" />
     <Compile Include="Time\TimeSyncRsMsg.cs" />

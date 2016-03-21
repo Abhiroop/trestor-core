@@ -28,8 +28,8 @@ namespace TNetD.Ledgers
         public event LedgerEventHandler LedgerEvent;
         public NodeConfig nodeConfig;
 
-        IPersistentAccountStore persistentStore;
-        IPersistentCloseHistory persistentCloseHistory;
+        IPersistentAccountStore accountStore;
+        IPersistentCloseHistory closeHistory;
 
         /// <summary>
         /// A mapping between Adresses and Account. Later to be converted to DB based implementation.
@@ -54,15 +54,17 @@ namespace TNetD.Ledgers
             get { return _load_stats; }
         }
         
-        public Ledger(IPersistentAccountStore persistentStore, IPersistentCloseHistory persistentCloseHistory, NodeConfig nodeConfig)
+        public Ledger(Persistent persistent, NodeConfig nodeConfig)
         {
-            this.LedgerTree = new ListHashTree();
-            this.persistentStore = persistentStore;
             this.nodeConfig = nodeConfig;
-            this.persistentCloseHistory = persistentCloseHistory;
-            this.TransactionFees = 0;
-            this.TotalAmount = 0;
-            this.ledgerCloseData = new LedgerCloseData();
+
+            LedgerTree = new ListHashTree();
+            accountStore = persistent.AccountStore;
+            closeHistory = persistent.CloseHistory;
+                         
+            TransactionFees = 0;
+            TotalAmount = 0;
+            ledgerCloseData = new LedgerCloseData();
         }
 
         public LedgerCloseData LedgerCloseData
@@ -89,7 +91,7 @@ namespace TNetD.Ledgers
                 LedgerEvent(LedgerEventType.Progress, "Ready");
             }
 
-            bool ok = persistentCloseHistory.GetLastRowData(out ledgerCloseData);
+            bool ok = closeHistory.GetLastRowData(out ledgerCloseData);
             
             initialLoading = false;
 
@@ -105,7 +107,7 @@ namespace TNetD.Ledgers
             _load_stats = 0;
             AddressAccountInfoMap.Clear();
             NameAccountInfoMap.Clear();
-            Tuple<DBResponse,long> result = await persistentStore.FetchAllAccountsAsync(AddUserToLedger);
+            Tuple<DBResponse,long> result = await accountStore.FetchAllAccountsAsync(AddUserToLedger);
             return result.Item2;
         }
 

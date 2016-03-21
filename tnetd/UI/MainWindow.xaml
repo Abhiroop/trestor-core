@@ -115,6 +115,10 @@
                 <MenuItem Name="menu_CreateTransaction" Click="menu_CreateTransaction_Click" Header="Create Transaction"/>
                 <MenuItem Name="menu_CreateAccount" Click="menu_CreateAccount_Click"  Header="Create Account"/>
                 <MenuItem Name="menu_BannedNames" Click="menu_BannedNames_Click"  Header="Recreate Banned Name List"/>
+                <Separator/>
+                <MenuItem Header="Tests">
+                    <MenuItem Name="menu_IntegrityTest" FontWeight="DemiBold" Header="IntegrityTest" Click="menu_IntegrityTest_Click"/>                    
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="HELP">
                 <MenuItem Header="Topics"/>

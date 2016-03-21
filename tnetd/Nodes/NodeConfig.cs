@@ -77,9 +77,9 @@ namespace TNetD.Nodes
             {
                 Directory.CreateDirectory(WorkDirectory);
             }
-            
+
             iniFile = new INIFile(WorkDirectory + "\\NodeConfig.ini");
-            
+
             masterNodeRandom = GetNodePrivateRandom(iniFile);
 
             DisplayUtils.Display(" Node " + NodeID + " | Private Key     : " + HexUtil.ToString(masterNodeRandom));
@@ -126,7 +126,7 @@ namespace TNetD.Nodes
 
             Path_CloseHistoryDB = GetInitString("PersistentDatabase", "CloseHistoryDB", WorkDirectory + "\\CloseHistory.sqlite3");
             DisplayUtils.Display(" Node " + NodeID + " | Close History DB Path    : " + Path_CloseHistoryDB);
-            
+
             // /////////////////////
 
             Organisation = GetInitString("Info", "Organisation", "_unspecified_");
@@ -210,10 +210,10 @@ namespace TNetD.Nodes
         {
             return Ed25519.Sign(data, masterPrivateKeyExpanded);
         }
-        
+
         public void SignEntity(ISignableBase entity)
         {
-            entity.UpdateSignature( Ed25519.Sign(entity.GetSignatureData(), masterPrivateKeyExpanded));
+            entity.UpdateSignature(Ed25519.Sign(entity.GetSignatureData(), masterPrivateKeyExpanded));
         }
 
         #region INI Methods
@@ -483,7 +483,7 @@ namespace TNetD.Nodes
                 foreach (int randomPeerID in dist)
                 {
                     NodeSocketData nsd = TrustedNodes.Values.ElementAt(randomPeerID);
-                    if(nsd.PublicKey != PublicKey)
+                    if (nsd.PublicKey != PublicKey)
                         randomPeer.Add(nsd);
                 }
 

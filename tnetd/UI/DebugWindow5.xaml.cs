@@ -139,7 +139,7 @@ namespace TNetD
             node.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
             node.NodeStatusEvent += nd_NodeStatusEvent;
 
-            await node.nodeState.PersistentCloseHistory.FetchAllLCLAsync((LedgerCloseData lcd) =>
+            await node.nodeState.Persistent.CloseHistory.FetchAllLCLAsync((LedgerCloseData lcd) =>
                     {
                         Dispatcher.Invoke(new Action(() =>
                         {
@@ -163,14 +163,14 @@ namespace TNetD
         private void listBox_LCS_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             transactionViewModel.TransactionData.Clear();
-            
+
             var item = (DisplayLedgerCloseType)listBox_LCS.SelectedItem;
 
             if (item != null)
             {
                 List<TransactionContentSet> data = new List<TransactionContentSet>();
 
-                if (node.nodeState.PersistentTransactionStore.FetchBySequenceNumber(out data, item.sequenceNumber, 1)
+                if (node.nodeState.Persistent.TransactionStore.FetchBySequenceNumber(out data, item.sequenceNumber, 1)
                     == DBResponse.FetchSuccess)
                 {
                     if (data.Count == 1)
@@ -186,7 +186,7 @@ namespace TNetD
 
                 listBox_TransactionData.SelectedIndex = 0;
             }
-        }        
+        }
 
         private void listBox_TransactionData_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
@@ -198,10 +198,10 @@ namespace TNetD
 
                 textBlock_TransactionDetails.Text = JsonConvert.SerializeObject(tc, Common.JSON_SERIALIZER_SETTINGS);
             }
-
         }
 
-       
+
+
     }
 }
 

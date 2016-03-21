@@ -30,6 +30,7 @@ using TNetD.Ledgers;
 using TNetD.Network.Networking;
 using TNetD.Nodes;
 using TNetD.PersistentStore;
+using TNetD.Tests;
 using TNetD.Transactions;
 using TNetD.Tree;
 using TNetD.UI;
@@ -48,7 +49,7 @@ namespace TNetD
         List<Node> nodes = new List<Node>();
 
         List<Thread> runningNodes = new List<Thread>();
-        
+
         public MainWindow()
         {
             DataContext = viewModel;
@@ -60,7 +61,7 @@ namespace TNetD
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
 
             lv_TX.ItemsSource = _tranxData;
-                        
+
             Title += " | " + Common.NETWORK_TYPE.ToString();
 
         }
@@ -93,7 +94,7 @@ namespace TNetD
             nd.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
             nd.NodeStatusEvent += nd_NodeStatusEvent;
             nd.BeginBackgroundLoad();
-            
+
             nodes.Add(nd);
 
             nd.VotingEnabled = true;
@@ -135,7 +136,7 @@ namespace TNetD
             //AddNode(1);
         }
 
-        void DisplayUtils_DisplayText ( DisplayMessageType displayMessage )
+        void DisplayUtils_DisplayText(DisplayMessageType displayMessage)
         {
             if (displayMessage.DisplayType >= Constants.DebugLevel)
             {
@@ -201,7 +202,7 @@ namespace TNetD
             DisplayUtils.Display("\nTraversing ... ");
 
             long Tres = 0;
-            
+
             long LeafDataCount = 0;
             long FoundNodes = 0;
 
@@ -244,7 +245,7 @@ namespace TNetD
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            STOP_NODES();          
+            STOP_NODES();
         }
 
         private void STOP_NODES()
@@ -351,9 +352,11 @@ namespace TNetD
                 // Write to nodes
                 foreach (Node n in nodes)
                 {
-                    var resp = n.nodeState.PersistentAccountStore.DeleteEverything();
+                    n.nodeState.Persistent.AccountStore.DeleteEverything();
+                    n.nodeState.Persistent.TransactionStore.DeleteEverything();
+                    n.nodeState.Persistent.CloseHistory.DeleteEverything();
 
-                    n.nodeState.PersistentAccountStore.AddUpdateBatch(aiData);
+                    n.nodeState.Persistent.AccountStore.AddUpdateBatch(aiData);                    
                 }
 
                 MessageBox.Show("ACCOUNTS RESET. It will take some time to synchronise with the network to resume normal operation." +
@@ -450,6 +453,15 @@ namespace TNetD
             Show();
         }
 
-       
+        private async void menu_IntegrityTest_Click(object sender, RoutedEventArgs e)
+        {
+            if (nodes.Count == 0)
+            {
+                LedgerIntegrity le = new LedgerIntegrity(0);
+
+                await le.ValidateLedger();
+            }
+
+        }
     }
 }

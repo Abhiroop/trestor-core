@@ -261,7 +261,7 @@ namespace TNetD.Nodes
 
                             List<TransactionContent> transactionContents;
 
-                            nodeState.PersistentTransactionStore.FetchTransactionHistory(out transactionContents, new Hash(publicKey_Bytes), timeStamp, limit);
+                            nodeState.Persistent.TransactionStore.FetchTransactionHistory(out transactionContents, new Hash(publicKey_Bytes), timeStamp, limit);
 
                             foreach (TransactionContent transactionContent in transactionContents)
                             {
@@ -361,7 +361,7 @@ namespace TNetD.Nodes
             // Check if the transaction is processed.
             TransactionContent transactionContent;
             long sequenceNumber;
-            if (nodeState.PersistentTransactionStore.FetchTransaction(out transactionContent, out sequenceNumber, transactionID) == DBResponse.FetchSuccess)
+            if (nodeState.Persistent.TransactionStore.FetchTransaction(out transactionContent, out sequenceNumber, transactionID) == DBResponse.FetchSuccess)
             {
                 replies.TransactionState.Add(new JS_TransactionState_Reply(TransactionStatusType.Success,
                     TransactionProcessingResult.PR_Success));
@@ -480,7 +480,7 @@ namespace TNetD.Nodes
                             {
                                 TransactionContent transactionContent;
                                 long sequenceNumber;
-                                if (nodeState.PersistentTransactionStore.FetchTransaction(out transactionContent, out sequenceNumber, new Hash(transactionID_Bytes)) == DBResponse.FetchSuccess)
+                                if (nodeState.Persistent.TransactionStore.FetchTransaction(out transactionContent, out sequenceNumber, new Hash(transactionID_Bytes)) == DBResponse.FetchSuccess)
                                 {
                                     replies.Transactions.Add(new JS_TransactionReply(transactionContent));
                                 }
@@ -654,12 +654,12 @@ namespace TNetD.Nodes
 
                                         if (GoodName)
                                         {
-                                            bool ExistsPK = nodeState.PersistentAccountStore.AccountExists(new Hash(request.PublicKey));
-                                            bool ExistsName = nodeState.PersistentAccountStore.AccountExists(request.Name);
+                                            bool ExistsPK = nodeState.Persistent.AccountStore.AccountExists(new Hash(request.PublicKey));
+                                            bool ExistsName = nodeState.Persistent.AccountStore.AccountExists(request.Name);
 
                                             if (!ExistsPK && !ExistsName)
                                             {
-                                                if (nodeState.PersistentAccountStore.AddUpdate(newAccountInfo) == DBResponse.InsertSuccess)
+                                                if (nodeState.Persistent.AccountStore.AddUpdate(newAccountInfo) == DBResponse.InsertSuccess)
                                                 {
                                                     nodeState.Ledger.AddUpdateBatch(new AccountInfo[] { newAccountInfo });
                                                     Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.TotalAccounts);

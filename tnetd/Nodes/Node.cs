@@ -282,7 +282,7 @@ namespace TNetD.Nodes
                 await networkPacketSwitch.InitialConnectAsync();
 
                 LedgerCloseData ledgerCloseData;
-                nodeState.PersistentCloseHistory.GetLastRowData(out ledgerCloseData);
+                nodeState.Persistent.CloseHistory.GetLastRowData(out ledgerCloseData);
                 nodeState.NodeInfo.LastLedgerInfo = new JS_LedgerInfo(ledgerCloseData);
             });
         }
@@ -333,7 +333,7 @@ namespace TNetD.Nodes
         {
             long Tres = 0;
 
-            await nodeState.PersistentAccountStore.FetchAllAccountsAsync((X) =>
+            await nodeState.Persistent.AccountStore.FetchAllAccountsAsync((X) =>
             {
                 Tres += X.Money;
                 return TreeResponseType.NothingDone;

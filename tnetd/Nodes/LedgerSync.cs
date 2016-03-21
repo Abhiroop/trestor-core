@@ -446,7 +446,7 @@ namespace TNetD.Nodes
         {
             DebugPrint("ROOT DATA REQUESTED BY " + packet.PublicKeySource.ToString(), DisplayType.ImportantInfo);
             LedgerCloseData ledgerCloseData;
-            if (nodeState.PersistentCloseHistory.GetLastRowData(out ledgerCloseData))
+            if (nodeState.Persistent.CloseHistory.GetLastRowData(out ledgerCloseData))
             {
                 RootDataResponse rdrm = new RootDataResponse(LedgerTree.RootNode, ledgerCloseData);
 

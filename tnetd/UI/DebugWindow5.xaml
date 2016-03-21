@@ -172,9 +172,10 @@
                                         <ColumnDefinition Width="90*"/>
                                         <ColumnDefinition Width="140"/>                                       
                                         <ColumnDefinition Width="90*"/>
-                                        <ColumnDefinition Width="90*"/>
+                                        <ColumnDefinition Width="90*"/>                                        
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
+                                        <RowDefinition />
                                         <RowDefinition />
                                         <RowDefinition />
                                     </Grid.RowDefinitions>
@@ -196,6 +197,8 @@
                                         <TextBlock Text="{Binding Text}" FontFamily="Consolas" TextWrapping="Wrap"
                                                Foreground="{Binding TextColor}" />
                                     </StackPanel>
+
+                                    <Separator x:Name="Separator" Grid.Row="2" Grid.ColumnSpan="4" HorizontalAlignment="Stretch"/>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>

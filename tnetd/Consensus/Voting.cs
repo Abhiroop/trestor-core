@@ -226,7 +226,7 @@ namespace TNetD.Consensus
             else
             {
                 LedgerCloseData lcd;
-                if (nodeState.PersistentCloseHistory.GetLastRowData(out lcd))
+                if (nodeState.Persistent.CloseHistory.GetLastRowData(out lcd))
                 {
                     Params.LCS = new LedgerCloseSequence(lcd);
                 }

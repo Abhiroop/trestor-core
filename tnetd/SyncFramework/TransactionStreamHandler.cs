@@ -107,7 +107,7 @@ namespace TNetD.SyncFramework
             {
                 TransactionSyncResponse transactionSyncResponse = new TransactionSyncResponse();
 
-                if (nodeState.PersistentTransactionStore.FetchBySequenceNumber(out transactionSyncResponse.TransactionContents,
+                if (nodeState.Persistent.TransactionStore.FetchBySequenceNumber(out transactionSyncResponse.TransactionContents,
                     TSR.StartSequenceNumber, TSR.Length) == DBResponse.FetchSuccess)
                 {
                     NetworkPacket np = new NetworkPacket(new Hash(nodeState.NodeInfo.PublicKey), PacketType.TPT_TX_SYNC_FETCH_RESPONSE,
@@ -127,7 +127,7 @@ namespace TNetD.SyncFramework
             // Verify the correctness and push to database.
             // CRITICAL. THIS VESION TRUSTS THE SERVER (May not be true in practice)
 
-            nodeState.PersistentTransactionStore.AddUpdateBatch(transactionSyncResponse.TransactionContents);
+            nodeState.Persistent.TransactionStore.AddUpdateBatch(transactionSyncResponse.TransactionContents);
 
             /*foreach (TransactionContentSet transactionContentSet in transactionSyncResponse.TransactionContents)
             {

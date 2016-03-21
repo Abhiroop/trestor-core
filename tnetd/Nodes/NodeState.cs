@@ -7,9 +7,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TNetD.Json.JS_Structs;
 using TNetD.Ledgers;
 using TNetD.Network.Networking;
@@ -28,11 +25,9 @@ namespace TNetD.Nodes
 
         public Ledger Ledger = default(Ledger);
 
-        public IPersistentAccountStore PersistentAccountStore;
-        public IPersistentTransactionStore PersistentTransactionStore;
+        public Persistent Persistent = new Persistent();
 
-        public SQLiteBannedNames PersistentBannedNameStore;
-        public SQLiteCloseHistory PersistentCloseHistory;
+        public SQLiteBannedNames PersistentBannedNameStore;        
 
         public IncomingTransactionMap IncomingTransactionMap;
 
@@ -74,12 +69,11 @@ namespace TNetD.Nodes
         
         public NodeState(NodeConfig nodeConfig)
         {
-            PersistentAccountStore = new SQLiteAccountStore(nodeConfig);
-            PersistentTransactionStore = new SQLiteTransactionStore(nodeConfig);
             PersistentBannedNameStore = new SQLiteBannedNames(nodeConfig);
-            PersistentCloseHistory = new SQLiteCloseHistory(nodeConfig);
-            
-            Ledger = new Ledger(PersistentAccountStore, PersistentCloseHistory, nodeConfig);
+
+            Persistent.InitializeSQLite(nodeConfig);
+
+            Ledger = new Ledger(Persistent, nodeConfig);
 
             TransactionStateManager = new TransactionStateManager();
             IncomingTransactionMap = new IncomingTransactionMap(this, nodeConfig, TransactionStateManager);
