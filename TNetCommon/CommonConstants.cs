@@ -64,7 +64,7 @@ namespace TNetD
 
         public static readonly int UI_TextBox_Max_Length = 20000;
 
-        public static readonly NetworkType NETWORK_TYPE = Address.NetworkType.TestNet;
+        public static readonly NetworkType NETWORK_TYPE = Address.NetworkType.MainNet;
         public static readonly NodeOperationType NODE_OPERATION_TYPE = NodeOperationType.Distributed;
 
         public static readonly string RPC_HOST = "localhost";// "localhost";

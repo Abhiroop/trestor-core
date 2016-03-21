@@ -34,5 +34,12 @@ namespace TNetD.PersistentStore
             TransactionStore = new SQLiteTransactionStore(nodeConfig);
             CloseHistory = new SQLiteCloseHistory(nodeConfig);
         }
+
+        public void DeleteEverything()
+        {
+            TransactionStore.DeleteEverything();
+            CloseHistory.DeleteEverything();
+            AccountStore.DeleteEverything();
+        }
     }
 }

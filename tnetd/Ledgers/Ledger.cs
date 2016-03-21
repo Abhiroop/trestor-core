@@ -28,8 +28,8 @@ namespace TNetD.Ledgers
         public event LedgerEventHandler LedgerEvent;
         public NodeConfig nodeConfig;
 
-        IPersistentAccountStore accountStore;
-        IPersistentCloseHistory closeHistory;
+        Persistent persistent;
+        
 
         /// <summary>
         /// A mapping between Adresses and Account. Later to be converted to DB based implementation.
@@ -59,9 +59,8 @@ namespace TNetD.Ledgers
             this.nodeConfig = nodeConfig;
 
             LedgerTree = new ListHashTree();
-            accountStore = persistent.AccountStore;
-            closeHistory = persistent.CloseHistory;
-                         
+            this.persistent = persistent;
+
             TransactionFees = 0;
             TotalAmount = 0;
             ledgerCloseData = new LedgerCloseData();
@@ -91,7 +90,7 @@ namespace TNetD.Ledgers
                 LedgerEvent(LedgerEventType.Progress, "Ready");
             }
 
-            bool ok = closeHistory.GetLastRowData(out ledgerCloseData);
+            bool ok = persistent.CloseHistory.GetLastRowData(out ledgerCloseData);
             
             initialLoading = false;
 
@@ -104,10 +103,11 @@ namespace TNetD.Ledgers
         /// </summary>
         async public Task<long> ReloadFromPersistentStore()
         {
+            LedgerTree = new ListHashTree();
             _load_stats = 0;
             AddressAccountInfoMap.Clear();
             NameAccountInfoMap.Clear();
-            Tuple<DBResponse,long> result = await accountStore.FetchAllAccountsAsync(AddUserToLedger);
+            Tuple<DBResponse,long> result = await persistent.AccountStore.FetchAllAccountsAsync(AddUserToLedger);
             return result.Item2;
         }
 

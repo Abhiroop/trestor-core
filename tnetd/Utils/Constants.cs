@@ -5,7 +5,10 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using TNetD.Address;
 using TNetD.Json.REST;
+using TNetD.Ledgers;
+using TNetD.Transactions;
 
 namespace TNetD
 {
@@ -158,6 +161,33 @@ namespace TNetD
         /// Number of pending work proofs, before new entries are rejected.
         /// </summary>
         public static readonly int WorkProofQueueLength = 50000;
+
+
+        public static List<AccountInfo> GetGenesisData()
+        {
+            List<AccountInfo> aiData = new List<AccountInfo>();
+
+            string[] Accs = Common.NETWORK_TYPE == NetworkType.MainNet ? GenesisRawData.MainNet : GenesisRawData.TestNet;
+
+            foreach (string acc in Accs)
+            {
+                AccountIdentifier AI = new AccountIdentifier();
+                AI.Deserialize(Convert.FromBase64String(acc));
+
+                AccountInfo ai = new AccountInfo(new Hash(AI.PublicKey), Constants.FIN_TRE_PER_GENESIS_ACCOUNT);
+
+                ai.NetworkType = AI.AddressData.NetworkType;
+                ai.AccountType = AI.AddressData.AccountType;
+
+                ai.AccountState = AccountState.Normal;
+                ai.LastTransactionTime = 0;
+                ai.Name = AI.Name;
+
+                aiData.Add(ai);
+            }
+
+            return aiData;
+        }
 
 
 

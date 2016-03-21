@@ -16,48 +16,64 @@ namespace TNetD.Tests
     // The accounts and balances are therefore correct.
     class LedgerIntegrity
     {
-        Node node = default(Node);
+        Node inputNode = default(Node);
+        Node destNode = default(Node);
 
-        public LedgerIntegrity(int NodeID)
+        public LedgerIntegrity(int inputNodeID, int destinationNodeID)
         {
-            node = new Node(NodeID);
-
+            inputNode = new Node(inputNodeID);
+            destNode = new Node(destinationNodeID);
         }
 
         public async Task ValidateLedger()
         {
             // We don't need to initialize the node.
 
-            DisplayUtils.Display("Starting Validation for " + node.nodeConfig.ID(), DisplayType.Debug);
+            // Delete the data in the destination node.
+            destNode.nodeState.Persistent.DeleteEverything();
+            destNode.nodeState.Persistent.AccountStore.AddUpdateBatch(Constants.GetGenesisData());
+            await destNode.nodeState.Ledger.ReloadFromPersistentStore();
+
+            DisplayUtils.Display("Starting Validation for " + inputNode.nodeConfig.ID(), DisplayType.Debug);
 
             var LCDs = new List<LedgerCloseData>();
 
-            await node.nodeState.Persistent.CloseHistory.FetchAllLCLAsync((LedgerCloseData lcd) =>
+            await inputNode.nodeState.Persistent.CloseHistory.FetchAllLCLAsync((LedgerCloseData lcd) =>
             {
                 LCDs.Add(lcd);
 
                 List<TransactionContentSet> tcsS = new List<TransactionContentSet>();
 
-                if (node.nodeState.Persistent.TransactionStore.FetchBySequenceNumber(out tcsS,
+                if (inputNode.nodeState.Persistent.TransactionStore.FetchBySequenceNumber(out tcsS,
                     lcd.SequenceNumber, 1) == PersistentStore.DBResponse.FetchSuccess)
                 {
                     if (tcsS.Count == 1)
                     {
-                        TransactionValidator tv = new TransactionValidator(node.nodeConfig, node.nodeState);
-
-
-
                         var tcs = tcsS[0].TxContent;
                         
+                        TransactionValidator tv_dest = new TransactionValidator(destNode.nodeConfig, destNode.nodeState);
+
+                        var tx_opers = tv_dest.ValidateTransactions(tcs);
+
+                        tv_dest.ApplyTransactions(tx_opers);
+                        
+                        Hash dest_h = destNode.nodeState.Ledger.GetRootHash();
+                        Hash curr_h = new Hash(lcd.LedgerHash);
+                        
+                        if (dest_h == curr_h)
+                        {
+                            DisplayUtils.Display("MATCH:" + curr_h, DisplayType.Debug);
+                        }
+                        else
+                        {
+                            DisplayUtils.Display("MISMATCH:" + curr_h + "-" + dest_h, DisplayType.CodeAssertionFailed);
+                        }
                     }
                     else
                     {
                         DisplayUtils.Display("ERR !", DisplayType.Debug);
                     }
                 }
-
-
-
 
             });
 

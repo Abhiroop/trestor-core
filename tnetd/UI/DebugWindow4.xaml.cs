@@ -284,41 +284,20 @@ namespace TNetD
             if (MessageBoxResult.Yes == MessageBox.Show("Do you really want to reset the current state. All state information will be lost.",
                "Ledger State Reset !!!", MessageBoxButton.YesNo))
             {
-                List<AccountInfo> aiData = new List<AccountInfo>();
-
-                string[] Accs = Common.NETWORK_TYPE == NetworkType.MainNet ? GenesisRawData.MainNet : GenesisRawData.TestNet;
-
-                foreach (string acc in Accs)
-                {
-                    AccountIdentifier AI = new AccountIdentifier();
-                    AI.Deserialize(Convert.FromBase64String(acc));
-
-                    AccountInfo ai = new AccountInfo(new Hash(AI.PublicKey), Constants.FIN_TRE_PER_GENESIS_ACCOUNT);
-
-                    ai.NetworkType = AI.AddressData.NetworkType;
-                    ai.AccountType = AI.AddressData.AccountType;
-
-                    ai.AccountState = AccountState.Normal;
-                    ai.LastTransactionTime = 0;
-                    ai.Name = AI.Name;
-
-                    aiData.Add(ai);
-                }
-
                 // Write to nodes
                 foreach (Node n in nodes)
                 {
-                    n.nodeState.Persistent.TransactionStore.DeleteEverything();
-                    n.nodeState.Persistent.CloseHistory.DeleteEverything();
-                    n.nodeState.Persistent.AccountStore.DeleteEverything();
+                    n.nodeState.Persistent.DeleteEverything();
 
-                    n.nodeState.Persistent.AccountStore.AddUpdateBatch(aiData);
+                    n.nodeState.Persistent.AccountStore.AddUpdateBatch(Constants.GetGenesisData());
                 }
 
                 MessageBox.Show("ACCOUNTS RESET. It will take some time to synchronise with the network to resume normal operation." +
                     "\nApplication restart needed for proper operation.");
             }
         }
+
+        
 
         /// ///////
 
