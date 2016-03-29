@@ -1,9 +1,10 @@
 ﻿
 //
 // @Author: Arpan Jati
-// @Date: 16 March 2016
+// @Date: 16-29 March 2016
 //
 
+using System.Data.SQLite;
 using TNetD.Nodes;
 
 namespace TNetD.PersistentStore
@@ -30,9 +31,14 @@ namespace TNetD.PersistentStore
 
         public void InitializeSQLite(NodeConfig nodeConfig)
         {
-            AccountStore = new SQLiteAccountStore(nodeConfig);
-            TransactionStore = new SQLiteTransactionStore(nodeConfig);
-            CloseHistory = new SQLiteCloseHistory(nodeConfig);
+            InitializeSQLite(nodeConfig, false);
+        }
+
+        public void InitializeSQLite(NodeConfig nodeConfig, bool isMemoryDB)
+        {
+            AccountStore = new SQLiteAccountStore(nodeConfig, isMemoryDB);
+            TransactionStore = new SQLiteTransactionStore(nodeConfig, isMemoryDB);
+            CloseHistory = new SQLiteCloseHistory(nodeConfig, isMemoryDB);
         }
 
         public void DeleteEverything()
@@ -40,6 +46,21 @@ namespace TNetD.PersistentStore
             TransactionStore.DeleteEverything();
             CloseHistory.DeleteEverything();
             AccountStore.DeleteEverything();
+        }
+
+        public void ExportToNodeSQLite(Node node)
+        {
+            var source_AccountStore = (SQLiteConnection)AccountStore.GetConnection();
+            var source_TransactionStore = (SQLiteConnection)TransactionStore.GetConnection();
+            var source_CloseHistory = (SQLiteConnection)CloseHistory.GetConnection();
+
+            var dest_AccountStore = node.nodeState.Persistent.AccountStore.GetConnection();
+            var dest_TransactionStore = node.nodeState.Persistent.TransactionStore.GetConnection();
+            var dest_CloseHistory = node.nodeState.Persistent.CloseHistory.GetConnection();
+            
+            source_AccountStore.BackupDatabase((SQLiteConnection)dest_AccountStore, "main", "main", -1, null, -1);
+            source_TransactionStore.BackupDatabase((SQLiteConnection)dest_TransactionStore, "main", "main", -1, null, -1);
+            source_CloseHistory.BackupDatabase((SQLiteConnection)dest_CloseHistory, "main", "main", -1, null, -1);
         }
     }
 }

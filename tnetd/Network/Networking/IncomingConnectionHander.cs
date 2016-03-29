@@ -26,6 +26,10 @@ namespace TNetD.Network.Networking
 
         bool IsICHRunning = false;
 
+        private readonly object syncObject = new object();
+        private CancellationTokenSource cts;
+        private Thread listenThread;
+
         NodeConfig nodeConfig;
 
         TcpListener listener;
@@ -193,7 +197,7 @@ namespace TNetD.Network.Networking
                 }
             }
         }
-        
+
         private void TimerCallback_Housekeeping(object o)
         {
             // Remove Threads
@@ -312,7 +316,7 @@ namespace TNetD.Network.Networking
                                     }
 
                                 }
-                                catch (System.Exception ex)
+                                catch (Exception ex)
                                 {
                                     DisplayUtils.Display("ClientHandler : Read()", ex);
                                 }
@@ -327,7 +331,7 @@ namespace TNetD.Network.Networking
                 }
                 reader.Close();
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 DisplayUtils.Display("ClientHandler()", ex);
             }
@@ -561,53 +565,63 @@ namespace TNetD.Network.Networking
             catch { }
         }
 
-        public void StartListeningInternal()
+        public void StartListening()
         {
-            try
+            lock (syncObject)
             {
-                listener.Start();
-
-                while (Constants.ApplicationRunning && IsICHRunning)
+                IsICHRunning = true;
+                if (listenThread == null || !listenThread.IsAlive)
                 {
-                    IncomingClient _inClient = new IncomingClient();
-                    _inClient.client = listener.AcceptTcpClient();
+                    cts = new CancellationTokenSource();
+                    listenThread = new Thread(() => Listen(cts.Token))
+                    {
+                        IsBackground = true
+                    };
+                    listenThread.Start();
+                }
+            }
+        }
+
+        private void Listen(CancellationToken token)
+        {
+            listener.Start();
+            while (!token.IsCancellationRequested && Constants.ApplicationRunning)
+            {
+                try
+                {
+                    IncomingClient inClient = new IncomingClient();
+                    inClient.client = listener.AcceptTcpClient();
 
                     Constants.SERVER_GLOBAL_TOTAL_ACC_CONNS++;
 
-                    Hash hsh = new Hash(Utils.GenerateUniqueGUID_Bytes(8));
-                    _inClient.Identifier = hsh;
+                    Hash identifier = new Hash(Utils.GenerateUniqueGUID_Bytes(8));
+                    inClient.Identifier = identifier;
 
-                    ThreadList.Add(hsh, _inClient);
+                    ThreadList.Add(identifier, inClient);
 
-                    Task.Run(() => { ClientHandler(_inClient); });
-
-                    /*Thread clientThread = new Thread(new ParameterizedThreadStart(ClientHandler));
-                    _inClient.thread = clientThread;
-                    clientThread.Start(_inClient);*/
+                    Task.Run(() => { ClientHandler(inClient); });
                 }
-            }
-            catch (Exception ex)
-            {
-                DisplayUtils.Display("Listening", ex);
+                catch (Exception ex)
+                {
+                    DisplayUtils.Display("ICH Listen()", ex);
+                }
             }
         }
 
+        private void StopListener()
+        {
+            lock (syncObject)
+            {
+                cts.Cancel();
+                listener.Stop();
+            }
+        }
 
         public void StopAndExit()
         {
-            listener.Stop();
+            StopListener();
             IsICHRunning = false;
         }
-
-        public void StartListening()
-        {
-            IsICHRunning = true;
-            // Create a thread to start the listen process, everything else is done using async-await.
-            ThreadStart ts = new ThreadStart(StartListeningInternal);
-            Thread thr = new Thread(ts);
-            thr.Start();
-        }
-
 
     }
 }

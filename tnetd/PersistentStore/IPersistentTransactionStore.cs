@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using TNetD.SyncFramework.Packets;
@@ -18,6 +19,12 @@ namespace TNetD.PersistentStore
     /// </summary>
     interface IPersistentTransactionStore
     {
+        /// <summary>
+        /// Gets the assocated DB connection.
+        /// </summary>
+        /// <returns></returns>
+        DbConnection GetConnection();
+
         int AddUpdateBatch(Dictionary<Hash, TransactionContent> transactionContents, long sequenceNumber);
 
         int AddUpdateBatch(List<TransactionContentSet> transactionContentSets);
@@ -62,6 +69,14 @@ namespace TNetD.PersistentStore
         /// <param name="Count"></param>
         /// <returns></returns>
         DBResponse FetchBySequenceNumber(out List<TransactionContentSet> transactions, long sequenceNumber, long Count);
+
+        /// <summary>
+        /// Fetch transactions for a provided sequence number.
+        /// </summary>
+        /// <param name="transactions"></param>
+        /// <param name="sequenceNumber"></param>
+        /// <returns></returns>
+        DBResponse FetchBySequenceNumber(out List<TransactionContent> transactions, long sequenceNumber);
 
         /// <summary>
         /// Returns true if the transaction exists in the database.

@@ -139,8 +139,8 @@ namespace TNetD.Ledgers
         /// <returns></returns>
         public TreeResponseType AddUserToLedger(AccountInfo userInfo)
         {
-            DisplayUtils.Display("NODE_" + nodeConfig.NodeID + 
-                " Found Account: " + Newtonsoft.Json.JsonConvert.SerializeObject(userInfo) + "\n OUR ROOT " + this.LedgerTree.GetRootHash());
+            //DisplayUtils.Display("NODE_" + nodeConfig.NodeID + 
+            //    " Found Account: " + Newtonsoft.Json.JsonConvert.SerializeObject(userInfo) + "\n OUR ROOT " + this.LedgerTree.GetRootHash());
 
             TreeResponseType response = LedgerTree.AddUpdate(userInfo);
 

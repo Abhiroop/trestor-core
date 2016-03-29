@@ -102,12 +102,20 @@ namespace TNetD.Nodes
         /// Initializes a node. Node ID is 0 for most cases.
         /// Only other use is hosting multiple validators from an IP (bad-idea) and simulation.
         /// </summary>
-        /// <param name="ID"></param>      
-        public Node(int ID)
+        /// <param name="ID">NodeID</param>
+        public Node(int ID) : this(ID, false) { }
+
+        /// <summary>
+        /// Initializes a node. Node ID is 0 for most cases.
+        /// Only other use is hosting multiple validators from an IP (bad-idea) and simulation.
+        /// </summary>
+        /// <param name="ID">NodeID</param>      
+        /// <param name="isMemoryDB">True to use in-memory persistent databases (for testing).</param>
+        public Node(int ID, bool isMemoryDB)
         {
             nodeConfig = new NodeConfig(ID);
 
-            nodeState = new NodeState(nodeConfig);
+            nodeState = new NodeState(nodeConfig, isMemoryDB);
 
             nodeState.NodeInfo = nodeConfig.Get_JS_Info();
 
@@ -166,6 +174,7 @@ namespace TNetD.Nodes
 
             DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
         }
+        
 
         public bool VotingEnabled
         {

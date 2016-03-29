@@ -66,12 +66,14 @@ namespace TNetD.Nodes
         public JS_NodeInfo NodeInfo;
         
         private long timeDifference = 0;
-        
-        public NodeState(NodeConfig nodeConfig)
+
+        public NodeState(NodeConfig nodeConfig) : this(nodeConfig, false) { }
+
+        public NodeState(NodeConfig nodeConfig, bool isMemoryDB)
         {
             PersistentBannedNameStore = new SQLiteBannedNames(nodeConfig);
 
-            Persistent.InitializeSQLite(nodeConfig);
+            Persistent.InitializeSQLite(nodeConfig, isMemoryDB);
 
             Ledger = new Ledger(Persistent, nodeConfig);
 

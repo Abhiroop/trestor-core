@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TNetD.PersistentStore
@@ -9,6 +10,12 @@ namespace TNetD.PersistentStore
 
     interface IPersistentCloseHistory
     {
+        /// <summary>
+        /// Gets the assocated DB connection.
+        /// </summary>
+        /// <returns></returns>
+        DbConnection GetConnection();
+
         bool LCLExists(Hash ledgerHash);
 
         bool LCLExists(long sequenceNumber);
@@ -17,7 +24,7 @@ namespace TNetD.PersistentStore
         
         DBResponse FetchLCL(out LedgerCloseData ledgerCloseData, long sequenceNumber);
 
-        Task FetchAllLCLAsync(CloseHistoryFetchEventHandler closeHistoryFetch);
+        Task FetchAllLCLAsync(CloseHistoryFetchEventHandler closeHistoryFetch, CancellationToken? cancellationToken);
 
         int BatchFetch(out Dictionary<Hash, LedgerCloseData> lastClosedLedgers, IEnumerable<Hash> ledgerHashes);
 

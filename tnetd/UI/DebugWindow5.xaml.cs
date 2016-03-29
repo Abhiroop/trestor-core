@@ -135,7 +135,7 @@ namespace TNetD
 
         private async void menuItem_Load_Node_Data_Click(object sender, RoutedEventArgs e)
         {
-            node = new Node(100);
+            node = new Node(101);
             node.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
             node.NodeStatusEvent += nd_NodeStatusEvent;
 
@@ -145,8 +145,7 @@ namespace TNetD
                         {
                             transactionViewModel.LedgerCloseData.Add(new DisplayLedgerCloseType(lcd));
                         }));
-                    });
-
+                    }, null);
         }
 
         private void LocalLedger_LedgerEvent(Ledger.LedgerEventType ledgerEvent, string Message)

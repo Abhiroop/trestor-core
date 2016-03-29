@@ -276,8 +276,8 @@ namespace TNetD.Consensus
                                 // Added to difference list.
                                 acceptedTransactions.Add(transactionContent.TransactionID, transactionContent);
 
-                                DisplayUtils.Display("Transaction added to intermediate list : " +
-                                    HexUtil.ToString(transactionContent.TransactionID.Hex), DisplayType.Info);
+                                //DisplayUtils.Display("Transaction added to intermediate list : " +
+                                  //  HexUtil.ToString(transactionContent.TransactionID.Hex), DisplayType.Info);
 
                                 nodeState.TransactionStateManager.Set(transactionContent.TransactionID, TransactionProcessingResult.PR_Validated);
                             }
@@ -435,12 +435,11 @@ namespace TNetD.Consensus
                 }
                 else
                 {
-                    DisplayUtils.Display("TEST MODE: NOT USING PERSISTENT LCD CloseTimes.", DisplayType.ImportantInfo);
-
+                    //DisplayUtils.Display("TEST MODE: NOT USING PERSISTENT LCD CloseTimes.", DisplayType.ImportantInfo);
+                    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     CloseTime = ledgerCloseData.CloseTime;
                 }
-
-
+                
                 foreach (KeyValuePair<Hash, TreeDiffData> kvp in pendingDifferenceData)
                 {
                     TreeDiffData diffData = kvp.Value;
@@ -449,8 +448,8 @@ namespace TNetD.Consensus
 
                     AccountInfo ledgerAccount = nodeState.Ledger[diffData.PublicKey];
 
-                    DisplayUtils.Display("\nFor Account : '" + ledgerAccount.Name + "' : " + HexUtil.ToString(ledgerAccount.PublicKey.Hex), DisplayType.Info);
-                    DisplayUtils.Display("Balance: " + ledgerAccount.Money + ", Added:" + diffData.AddValue + ", Removed:" + diffData.RemoveValue, DisplayType.Info);
+                    // DisplayUtils.Display("\nFor Account : '" + ledgerAccount.Name + "' : " + HexUtil.ToString(ledgerAccount.PublicKey.Hex), DisplayType.Info);
+                    // DisplayUtils.Display("Balance: " + ledgerAccount.Money + ", Added:" + diffData.AddValue + ", Removed:" + diffData.RemoveValue, DisplayType.Info);
 
                     ledgerAccount.Money += diffData.AddValue;
                     ledgerAccount.Money -= diffData.RemoveValue;

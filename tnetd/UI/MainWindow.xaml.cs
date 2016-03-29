@@ -246,6 +246,7 @@ namespace TNetD
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             STOP_NODES();
+            Constants.ApplicationRunning = false;
         }
 
         private void STOP_NODES()
@@ -434,9 +435,10 @@ namespace TNetD
         {
             if (nodes.Count == 0)
             {
-                LedgerIntegrity le = new LedgerIntegrity(0, 100);
-
-                await le.ValidateLedger();
+                using (LedgerIntegrity le = new LedgerIntegrity(0, 100, 101))
+                {
+                    await le.ValidateLedger();                   
+                }
             }
 
         }

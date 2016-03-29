@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Data.SQLite;
 using System.Linq;
 using System.Text;
@@ -19,9 +20,16 @@ namespace TNetD.PersistentStore
     {
         SQLiteConnection sqliteConnection = default(SQLiteConnection);
 
-        public SQLiteTransactionStore(NodeConfig config)
+        public DbConnection GetConnection()
         {
-            sqliteConnection = new SQLiteConnection("Data Source=" + config.Path_TransactionDB + ";Version=3;");
+            return sqliteConnection;
+        }
+
+        public SQLiteTransactionStore(NodeConfig config) : this(config, false) { }
+
+        public SQLiteTransactionStore(NodeConfig config, bool isMemoryDB)
+        {
+            sqliteConnection = new SQLiteConnection("Data Source=" + (isMemoryDB ? ":memory:" : config.Path_TransactionDB) + ";Version=3;");
             sqliteConnection.Open();
 
             VerifyTables();
@@ -94,7 +102,6 @@ namespace TNetD.PersistentStore
 
         public DBResponse FetchBySequenceNumber(out List<TransactionContentSet> transactions, long sequenceNumber, long Count)
         {
-
             DBResponse response = DBResponse.NonDBError;
 
             long sequenceMax = sequenceNumber + Count;
@@ -142,6 +149,49 @@ namespace TNetD.PersistentStore
                         }
 
                         transactions.AddRange(transactionContentSet.Values);
+                    }
+                }
+            }
+
+            return response;
+        }
+
+        public DBResponse FetchBySequenceNumber(out List<TransactionContent> transactions, long sequenceNumber)
+        {
+            DBResponse response = DBResponse.NonDBError;
+
+            transactions = new List<TransactionContent>();
+            
+            string LIMIT_CLAUSE = "LIMIT " + Constants.DB_HISTORY_TX_LIMIT;
+
+            using (SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM Transactions WHERE (SequenceNumber = @sequenceNumber) " + LIMIT_CLAUSE + ";", sqliteConnection))
+            {
+                cmd.Parameters.Add(new SQLiteParameter("@sequenceNumber", sequenceNumber));
+                
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            Hash _transactionID = new Hash((byte[])reader[0]);
+
+                            sequenceNumber = (long)reader[1];
+
+                            TransactionContent transactionContent = new TransactionContent();
+                            transactionContent.Deserialize((byte[])reader[2]);
+
+                            if (_transactionID == transactionContent.TransactionID)
+                            {
+                                transactions.Add(transactionContent);
+
+                                response = DBResponse.FetchSuccess;
+                            }
+                            else // BAD TRANSACTION DECODE. Real Bad. Should not happen !!! 
+                            {
+                                return DBResponse.Exception;
+                            }
+                        }                        
                     }
                 }
             }

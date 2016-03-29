@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.SQLite;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TNetD.Nodes;
 
@@ -19,9 +20,16 @@ namespace TNetD.PersistentStore
     {
         SQLiteConnection sqliteConnection = default(SQLiteConnection);
 
-        public SQLiteCloseHistory(NodeConfig config)
+        public DbConnection GetConnection()
         {
-            sqliteConnection = new SQLiteConnection("Data Source=" + config.Path_CloseHistoryDB + ";Version=3;");
+            return sqliteConnection;
+        }
+
+        public SQLiteCloseHistory(NodeConfig config) : this(config, false) { }
+
+        public SQLiteCloseHistory(NodeConfig config, bool isMemoryDB)
+        {
+            sqliteConnection = new SQLiteConnection("Data Source=" + (isMemoryDB ? ":memory:" : config.Path_CloseHistoryDB) + ";Version=3;");
             sqliteConnection.Open();
 
             VerifyTables();
@@ -88,7 +96,7 @@ namespace TNetD.PersistentStore
             return response;
         }
 
-        public async Task FetchAllLCLAsync(CloseHistoryFetchEventHandler closeHistoryFetch)
+        public async Task FetchAllLCLAsync(CloseHistoryFetchEventHandler closeHistoryFetch, CancellationToken? cancellationToken)
         {
             await Task.Run(() =>
             {
@@ -98,16 +106,24 @@ namespace TNetD.PersistentStore
                     {
                         if (reader.HasRows)
                         {
-                            while (reader.Read())
+                            try
                             {
-                                var lcd = new LedgerCloseData();
-                                lcd.SequenceNumber = (long)reader[0];
-                                lcd.LedgerHash = (byte[])reader[1];
-                                lcd.Transactions = (long)reader[2];
-                                lcd.TotalTransactions = (long)reader[3];
-                                lcd.CloseTime = (long)reader[4];
+                                while (reader.Read())
+                                {
+                                    var lcd = new LedgerCloseData();
+                                    lcd.SequenceNumber = (long)reader[0];
+                                    lcd.LedgerHash = (byte[])reader[1];
+                                    lcd.Transactions = (long)reader[2];
+                                    lcd.TotalTransactions = (long)reader[3];
+                                    lcd.CloseTime = (long)reader[4];
 
-                                closeHistoryFetch(lcd);
+                                    closeHistoryFetch(lcd);
+
+                                    cancellationToken?.ThrowIfCancellationRequested();
+                                }
+                            }
+                            catch { 
+                                //Think about handling, and pushing the possible exceptions. 
                             }
                         }
                     }

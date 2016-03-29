@@ -29,9 +29,16 @@ namespace TNetD.PersistentStore
     {
         SQLiteConnection sqliteConnection = default(SQLiteConnection);
 
-        public SQLiteAccountStore(NodeConfig config)
+        public DbConnection GetConnection()
         {
-            sqliteConnection = new SQLiteConnection("Data Source=" + config.Path_AccountDB + ";Version=3;");
+            return sqliteConnection;
+        }
+
+        public SQLiteAccountStore(NodeConfig config) : this(config, false) { }
+
+        public SQLiteAccountStore(NodeConfig config, bool isMemoryDB)
+        {
+            sqliteConnection = new SQLiteConnection("Data Source=" + (isMemoryDB ? ":memory:" : config.Path_AccountDB) + ";Version=3;");
             sqliteConnection.Open();
 
             VerifyTables();

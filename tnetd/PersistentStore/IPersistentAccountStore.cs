@@ -23,6 +23,12 @@ namespace TNetD.PersistentStore
     interface IPersistentAccountStore
     {
         /// <summary>
+        /// Gets the assocated DB connection.
+        /// </summary>
+        /// <returns></returns>
+        DbConnection GetConnection();
+
+        /// <summary>
         /// Adds or updates elements to the PersistentStore
         /// </summary>
         /// <param name="accountInfoData"></param>
