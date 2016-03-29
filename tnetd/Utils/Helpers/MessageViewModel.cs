@@ -33,13 +33,13 @@ namespace TNetD.Helpers
         {
             try {
 
-                if (statusMessages.Count > 1000)
+                if (statusMessages.Count > 2000)
                 {
                     for (int i = 0; i < 200; i++)
                         statusMessages.RemoveAt(0);                    
                 }
 
-                if (logMessages.Count > 1000)
+                if (logMessages.Count > 2000)
                 {
                     for (int i = 0; i < 200; i++)
                         logMessages.RemoveAt(0);

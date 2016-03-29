@@ -53,7 +53,7 @@ namespace TNetD.UI
             sequenceNumber = lcd.SequenceNumber;
             ledgerHash = lcd.LedgerHash;
 
-            this.text = "" + new Hash(lcd.LedgerHash).ToStringDualLine() ;
+            this.text = "" + new Hash(lcd.LedgerHash).ToString() ;
             this.transactions = lcd.Transactions;
             this.totalTransactions = lcd.TotalTransactions;
 
@@ -83,7 +83,7 @@ namespace TNetD.UI
         {
             get
             {
-                return "SEQ: " + sequenceNumber + "";
+                return "SEQ: " + sequenceNumber + " | " + totalTransactions + "";
             }
         }
 

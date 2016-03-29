@@ -224,9 +224,12 @@ namespace TNetD.Ledgers
             return LedgerTree.NodeExists(account);
         }
 
-        public Hash GetRootHash()
+        public Hash RootHash
         {
-            return LedgerTree.GetRootHash();
+            get
+            {
+                return LedgerTree.GetRootHash();
+            }
         }
 
         public bool TryFetch(Hash publicKey, out AccountInfo account)

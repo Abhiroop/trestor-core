@@ -221,7 +221,7 @@ namespace TNetD.Consensus
             if (nodeState.Ledger.LedgerCloseData.LedgerHash == null)
             {
                 // No voting has happened yet !
-                Params.LCS = new LedgerCloseSequence(0, nodeState.Ledger.GetRootHash());
+                Params.LCS = new LedgerCloseSequence(0, nodeState.Ledger.RootHash);
             }
             else
             {
@@ -232,7 +232,7 @@ namespace TNetD.Consensus
                 }
                 else
                 {
-                    Params.LCS = new LedgerCloseSequence(0, nodeState.Ledger.GetRootHash());
+                    Params.LCS = new LedgerCloseSequence(0, nodeState.Ledger.RootHash);
                 }
             }
         }

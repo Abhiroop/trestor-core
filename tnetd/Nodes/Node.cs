@@ -254,7 +254,7 @@ namespace TNetD.Nodes
             nodeState.NodeInfo.NodeDetails.NetworkTime = DateTime.FromFileTimeUtc(nodeState.NetworkTime);
             nodeState.NodeInfo.NodeDetails.SystemTime = DateTime.FromFileTimeUtc(nodeState.SystemTime);
 
-            nodeState.NodeInfo.LastLedgerInfo.Hash = nodeState.Ledger.GetRootHash().Hex;
+            nodeState.NodeInfo.LastLedgerInfo.Hash = nodeState.Ledger.RootHash.Hex;
 
             nodeState.NodeInfo.NodeDetails.ProofOfWorkQueueLength = nodeState.WorkProofMap.Count;
 

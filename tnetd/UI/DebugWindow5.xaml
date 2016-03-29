@@ -169,15 +169,13 @@
                             <DataTemplate>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="90*"/>
+                                        <ColumnDefinition Width="75"/>
                                         <ColumnDefinition Width="140"/>                                       
-                                        <ColumnDefinition Width="90*"/>
-                                        <ColumnDefinition Width="90*"/>                                        
+                                        <ColumnDefinition Width="*"/>                                                                               
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
                                         <RowDefinition />
-                                        <RowDefinition />
-                                        <RowDefinition />
+                                        <RowDefinition />                                   
                                     </Grid.RowDefinitions>
                                     
                                     <TextBlock Text="{Binding SequenceNumber}" 
@@ -187,18 +185,13 @@
                                                Foreground="Plum" Grid.Column="1" />                                    
                                     
                                     <TextBlock Text="{Binding Transactions}" 
-                                               Foreground="Yellow" Grid.Column="2" />
+                                               Foreground="Yellow" Grid.Column="2" />                                    
 
-                                    <TextBlock Text="{Binding TotalTransactions}" 
-                                               Foreground="Pink" Grid.Column="3" />
-
-                                    <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="4"  
+                                    <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3"  
                                                 HorizontalAlignment="Left">
                                         <TextBlock Text="{Binding Text}" FontFamily="Consolas" TextWrapping="Wrap"
                                                Foreground="{Binding TextColor}" />
                                     </StackPanel>
-
-                                    <Separator x:Name="Separator" Grid.Row="2" Grid.ColumnSpan="4" HorizontalAlignment="Stretch"/>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>

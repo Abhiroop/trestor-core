@@ -34,8 +34,9 @@ namespace TNetTest
     public partial class TNetTestWindow : Window
     {
         //RESTClient client = new RESTClient("http://54.69.239.153:2015");
-        RESTClient client = new RESTClient("http://localhost:2015");
+        //RESTClient client = new RESTClient("http://localhost:2015");
         //RESTClient client = new RESTClient("http://54.200.152.214:2015"); // LIVE
+        RESTClient client = new RESTClient("http://localhost:44711");
 
         List<GenesisAccountData> GAD = new List<GenesisAccountData>();
 
@@ -95,7 +96,8 @@ namespace TNetTest
             byte[] PrivSeedSender = Src.RandomPrivate;
             string SenderName = Src.Name;
 
-            AccountIdentifier identifierSrc = AddressFactory.PrivateKeyToAccount(PrivSeedSender, SenderName, NetworkType.TestNet, AccountType.TestGenesis);
+            AccountIdentifier identifierSrc = AddressFactory.PrivateKeyToAccount(PrivSeedSender, SenderName, 
+                NetworkType.TestNet, AccountType.TestGenesis);
 
             byte[] PubSrc;
             byte[] PrivSrcExpanded;
@@ -106,7 +108,8 @@ namespace TNetTest
             byte[] PrivSeedDest = Dest.RandomPrivate;
             string DestName = Dest.Name;
 
-            AccountIdentifier identifierDest = AddressFactory.PrivateKeyToAccount(PrivSeedDest, DestName, NetworkType.TestNet, AccountType.TestGenesis);
+            AccountIdentifier identifierDest = AddressFactory.PrivateKeyToAccount(PrivSeedDest, DestName, 
+                NetworkType.TestNet, AccountType.TestGenesis);
 
             SingleTransactionFactory stf = new SingleTransactionFactory(identifierSrc, identifierDest, fee, value);
 
@@ -136,8 +139,6 @@ namespace TNetTest
                     RESTResponse response = client.Execute(request);
 
                     WriteLog(response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n");
-
-
 
                 }));
 
@@ -194,7 +195,8 @@ namespace TNetTest
             
             WriteLog("\n ACC_WORK:" + json + " \n");
 
-            JS_Resp_WorkProofRequest_Outer jwr_ = JsonConvert.DeserializeObject<JS_Resp_WorkProofRequest_Outer>(json, Common.JsonSerializerSettings);
+            JS_Resp_WorkProofRequest_Outer jwr_ = JsonConvert.DeserializeObject<JS_Resp_WorkProofRequest_Outer>(json, 
+                                                    Common.JsonSerializerSettings);
 
             JS_WorkProofRequest jwr = jwr_.Data;
 
@@ -220,7 +222,6 @@ namespace TNetTest
             
             WriteLog("\n ACC_RESPONSE:" + acc_resp.Content + " \n");*/
 
-
             /*foreach (Hash txid in TX_IDs)
             {
                 WriteLog("Sending TxStatus:" + txid.ToString());
@@ -232,22 +233,24 @@ namespace TNetTest
                 RESTResponse response = client.Execute(request);
 
                 WriteLog(response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n");
-
             }*/
 
+            string priv_key = "<SENDER PRIVATE>";
+            string sender_name = "<SENDER NAME>";
 
-            
             byte[] PubSrc;
             byte[] PrivSrcExpanded;
-            Ed25519.KeyPairFromSeed(out PubSrc, out PrivSrcExpanded, HexUtil.GetBytes("<PUT PRIVATE KEY HERE>"));
+            Ed25519.KeyPairFromSeed(out PubSrc, out PrivSrcExpanded, HexUtil.GetBytes(priv_key));
   
-            AccountIdentifier identifierSrc = AddressFactory.PublicKeyToAccount(PubSrc, "<PUT SENDER NAME HERE>", NetworkType.MainNet, AccountType.MainGenesis);
+            AccountIdentifier identifierSrc = AddressFactory.PublicKeyToAccount(PubSrc, sender_name, 
+                                                NetworkType.MainNet, AccountType.MainGenesis);
 
-            byte[] PK_dest = HexUtil.GetBytes("<PK Destination>");
+            byte[] PK_dest = HexUtil.GetBytes("<DEST PUBLIC>");
 
-            AccountIdentifier identifierDest = AddressFactory.PublicKeyToAccount(PK_dest, "<Destination Name>", NetworkType.MainNet, AccountType.MainNormal);
+            AccountIdentifier identifierDest = AddressFactory.PublicKeyToAccount(PK_dest, "<DEST NAME>", 
+                                                NetworkType.MainNet, AccountType.MainNormal);
 
-            SingleTransactionFactory stf = new SingleTransactionFactory(identifierSrc, identifierDest, 0, 999990000000);
+            SingleTransactionFactory stf = new SingleTransactionFactory(identifierSrc, identifierDest, 0, 100000);
 
             byte[] dd = stf.GetTransactionData();
 
@@ -272,25 +275,11 @@ namespace TNetTest
                 RESTResponse response = client.Execute(request);
 
                 WriteLog(response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n");
-
-
             }
             else
             {
                 WriteLog("INVALID DATA : " + rslt.ToString());
             }
-
-            //Name - shila
-
-            //Address - TNpsWwc1H6SuSXEmQLUn2SyTe328xZh2crL
-
-            //Public - 9c263b6310eac539462818484d8db6c828ec6efb4b1d5951d9e5dc036568fdea
-            /*
-            bool OK = AddressFactory.VerfiyAddress("TNTBzsiitLGe7cN4HDBDjUTVi6Tp3SkVMKb",
-                HexUtil.GetBytes("062160b53d81fd7b49a18842e8522e89d864d351fe2a8841369a8d782198d5da"), "ashish");
-            
-            WriteLog("OKAY:" + OK);*/
-
         }
 
         private void button_MEM_HARD_Start_Click(object sender, RoutedEventArgs e)
@@ -319,17 +308,10 @@ namespace TNetTest
             //Varint2.TestSingle();
         }
 
-
-
         private void menuItem_File_TestTree_Click(object sender, RoutedEventArgs e)
         {
-
             //ListHashTree LHT = new ListHashTree();
-
             //LHT.
-
-
-
 
         }
 
@@ -345,6 +327,63 @@ namespace TNetTest
         {
             
             textBlock_StatusLog.Text += "\n" + value;
+        }
+
+        private void singleTX_Execute_Click(object sender, RoutedEventArgs e)
+        {
+            var _client = new RESTClient(singleTX_Client.Text);
+
+            string priv_key = singleTX_SenderPrivate.Text;
+            string sender_name = singleTX_SenderName.Text;
+
+            string pub_dest = singleTX_DestPublic.Text;
+            string dest_name = singleTX_DestName.Text;
+
+            string amt = singleTX_Amount.Text;
+            long value = long.Parse(amt);
+
+            byte[] PubSrc;
+            byte[] PrivSrcExpanded;
+            Ed25519.KeyPairFromSeed(out PubSrc, out PrivSrcExpanded, HexUtil.GetBytes(priv_key));
+
+            AccountIdentifier identifierSrc = AddressFactory.PublicKeyToAccount(PubSrc, sender_name, 
+                                                NetworkType.MainNet, AccountType.MainGenesis);
+
+            byte[] PK_dest = HexUtil.GetBytes(pub_dest);
+
+            AccountIdentifier identifierDest = AddressFactory.PublicKeyToAccount(PK_dest, dest_name, 
+                                                NetworkType.MainNet, AccountType.MainNormal);
+
+            SingleTransactionFactory stf = new SingleTransactionFactory(identifierSrc, identifierDest, 0, value);
+
+            byte[] dd = stf.GetTransactionData();
+
+            Hash sig = new Hash(Ed25519.Sign(dd, PrivSrcExpanded));
+
+            TransactionContent tc;
+
+            TransactionProcessingResult rslt = stf.Create(sig, out tc);
+
+            if (rslt == TransactionProcessingResult.Accepted)
+            {
+                TaskFactory tf = new TaskFactory();
+
+                string SER_DATA = JsonConvert.SerializeObject(new JS_TransactionReply(tc), Common.JSON_SERIALIZER_SETTINGS);
+
+                WriteLog("\nSending:" + SER_DATA);
+
+                RESTRequest request = new RESTRequest("propagate", Grapevine.HttpMethod.POST, Grapevine.ContentType.JSON);
+
+                request.Payload = SER_DATA;
+
+                RESTResponse response = _client.Execute(request);
+
+                WriteLog(response.Content + "\nTime:" + response.ElapsedTime + " (ms)\n");
+            }
+            else
+            {
+                WriteLog("INVALID DATA : " + rslt.ToString());
+            }
         }
     }
 }

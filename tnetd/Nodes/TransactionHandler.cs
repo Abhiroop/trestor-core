@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using TNetD.Address;
 using TNetD.Json.JS_Structs;
@@ -28,7 +29,7 @@ namespace TNetD.Nodes
             {
                 try
                 {
-                    if ((nodeState.IncomingTransactionMap.IncomingTransactions.Count > 0) && 
+                    if ((nodeState.IncomingTransactionMap.IncomingTransactions.Count > 0) &&
                         (Common.NODE_OPERATION_TYPE == NodeOperationType.Centralized))
                     {
                         Dictionary<Hash, TreeDiffData> pendingDifferenceData = new Dictionary<Hash, TreeDiffData>();
@@ -38,7 +39,7 @@ namespace TNetD.Nodes
                         long totalTransactionFees = 0;
 
                         Queue<TransactionContent> transactionContentStack = new Queue<TransactionContent>();
-                        
+
                         lock (nodeState.IncomingTransactionMap.transactionLock)
                         {
                             foreach (KeyValuePair<Hash, TransactionContent> kvp in nodeState.IncomingTransactionMap.IncomingTransactions)
@@ -51,7 +52,7 @@ namespace TNetD.Nodes
                             nodeState.IncomingTransactionMap.IncomingTransactions.Clear();
                             nodeState.IncomingTransactionMap.IncomingPropagations_ALL.Clear();
                         }
-                        
+
                         while (transactionContentStack.Count > 0)
                         {
                             TransactionContent transactionContent = transactionContentStack.Dequeue();
@@ -333,132 +334,135 @@ namespace TNetD.Nodes
 
                         ////// Create the accounts in the Ledger  /////
 
-                        int newLedgerAccountCount = nodeState.Ledger.AddUpdateBatch(newAccounts);
-
-                        if (newLedgerAccountCount != newAccounts.Count)
+                        if (acceptedTransactions.Any())
                         {
-                            throw new Exception("Ledger batch write failure. #2");
-                        }
+                            int newLedgerAccountCount = nodeState.Ledger.AddUpdateBatch(newAccounts);
 
-                        Dictionary<Hash, AccountInfo> accountsInLedger;
-
-                        int fetchedLedgerAccountsCount = nodeState.Ledger.BatchFetch(out accountsInLedger, pendingDifferenceData.Keys);
-
-                        if (fetchedLedgerAccountsCount != pendingDifferenceData.Count)
-                        {
-                            throw new Exception("Ledger batch read failure. #2");
-                        }
-
-                        ////// Create the new accounts in the PersistentDatabase  /////
-
-                        int newDBAccountCount = nodeState.Persistent.AccountStore.AddUpdateBatch(newAccounts);
-
-                        Interlocked.Add(ref nodeState.NodeInfo.NodeDetails.TotalAccounts, newDBAccountCount);
-
-                        if (newDBAccountCount != newAccounts.Count)
-                        {
-                            throw new Exception("Persistent DB batch write failure. #2");
-                        }
-
-                        Dictionary<Hash, AccountInfo> accountsInDB;
-
-                        int fetchedAccountsCount = nodeState.Persistent.AccountStore.BatchFetch(out accountsInDB, pendingDifferenceData.Keys);
-
-                        if (fetchedAccountsCount != pendingDifferenceData.Count)
-                        {
-                            throw new Exception("Persistent DB batch read failure. #2");
-                        }
-
-                        // We are here without exceptions 
-                        // Great the accounts are ready to be written to.                    
-                        // Cross-Verify that the initial account contents are the same.
-
-                        foreach (KeyValuePair<Hash, AccountInfo> kvp in accountsInLedger)
-                        {
-                            if (accountsInDB.ContainsKey(kvp.Key))
+                            if (newLedgerAccountCount != newAccounts.Count)
                             {
-                                AccountInfo ledgerAccount = kvp.Value;
-                                AccountInfo persistentAccount = accountsInDB[kvp.Key];
+                                throw new Exception("Ledger batch write failure. #2");
+                            }
 
-                                if (ledgerAccount.LastTransactionTime != persistentAccount.LastTransactionTime)
+                            Dictionary<Hash, AccountInfo> accountsInLedger;
+
+                            int fetchedLedgerAccountsCount = nodeState.Ledger.BatchFetch(out accountsInLedger, pendingDifferenceData.Keys);
+
+                            if (fetchedLedgerAccountsCount != pendingDifferenceData.Count)
+                            {
+                                throw new Exception("Ledger batch read failure. #2");
+                            }
+
+                            ////// Create the new accounts in the PersistentDatabase  /////
+
+                            int newDBAccountCount = nodeState.Persistent.AccountStore.AddUpdateBatch(newAccounts);
+
+                            Interlocked.Add(ref nodeState.NodeInfo.NodeDetails.TotalAccounts, newDBAccountCount);
+
+                            if (newDBAccountCount != newAccounts.Count)
+                            {
+                                throw new Exception("Persistent DB batch write failure. #2");
+                            }
+
+                            Dictionary<Hash, AccountInfo> accountsInDB;
+
+                            int fetchedAccountsCount = nodeState.Persistent.AccountStore.BatchFetch(out accountsInDB, pendingDifferenceData.Keys);
+
+                            if (fetchedAccountsCount != pendingDifferenceData.Count)
+                            {
+                                throw new Exception("Persistent DB batch read failure. #2");
+                            }
+
+                            // We are here without exceptions 
+                            // Great the accounts are ready to be written to.                    
+                            // Cross-Verify that the initial account contents are the same.
+
+                            foreach (KeyValuePair<Hash, AccountInfo> kvp in accountsInLedger)
+                            {
+                                if (accountsInDB.ContainsKey(kvp.Key))
                                 {
-                                    throw new Exception("Persistent DB or Ledger unauthorized overwrite Time. #1 : \nLedgerAccount : " +
-                                     JsonConvert.SerializeObject(ledgerAccount, Common.JSON_SERIALIZER_SETTINGS) + "\nPersistentAccount :" +
-                                     JsonConvert.SerializeObject(persistentAccount, Common.JSON_SERIALIZER_SETTINGS) + "\n");
+                                    AccountInfo ledgerAccount = kvp.Value;
+                                    AccountInfo persistentAccount = accountsInDB[kvp.Key];
+
+                                    if (ledgerAccount.LastTransactionTime != persistentAccount.LastTransactionTime)
+                                    {
+                                        throw new Exception("Persistent DB or Ledger unauthorized overwrite Time. #1 : \nLedgerAccount : " +
+                                         JsonConvert.SerializeObject(ledgerAccount, Common.JSON_SERIALIZER_SETTINGS) + "\nPersistentAccount :" +
+                                         JsonConvert.SerializeObject(persistentAccount, Common.JSON_SERIALIZER_SETTINGS) + "\n");
+                                    }
+
+                                    if (ledgerAccount.Money != persistentAccount.Money)
+                                    {
+                                        throw new Exception("Persistent DB or Ledger unauthorized overwrite Value. #1 : \nLedgerAccount : " +
+                                         JsonConvert.SerializeObject(ledgerAccount, Common.JSON_SERIALIZER_SETTINGS) + "\nPersistentAccount :" +
+                                         JsonConvert.SerializeObject(persistentAccount, Common.JSON_SERIALIZER_SETTINGS) + "\n");
+                                    }
                                 }
-
-                                if (ledgerAccount.Money != persistentAccount.Money)
+                                else
                                 {
-                                    throw new Exception("Persistent DB or Ledger unauthorized overwrite Value. #1 : \nLedgerAccount : " +
-                                     JsonConvert.SerializeObject(ledgerAccount, Common.JSON_SERIALIZER_SETTINGS) + "\nPersistentAccount :" +
-                                     JsonConvert.SerializeObject(persistentAccount, Common.JSON_SERIALIZER_SETTINGS) + "\n");
+                                    throw new Exception("Improbable Assertion Failed: Persistent DB or Ledger account missing !!!");
                                 }
                             }
-                            else
+
+                            // Fine, the account information is same in both the Ledger and Persistent-DB
+                            // CRITICAL : NO EXCEPTION HANDLERS INSIDE !!
+
+                            List<AccountInfo> finalPersistentDBUpdateList = new List<AccountInfo>();
+
+                            // This essentially gets values from Ledger Tree and updates the Persistent-DB
+
+                            DateTime CloseTime = DateTime.UtcNow;
+
+                            foreach (KeyValuePair<Hash, TreeDiffData> kvp in pendingDifferenceData)
                             {
-                                throw new Exception("Improbable Assertion Failed: Persistent DB or Ledger account missing !!!");
+                                TreeDiffData diffData = kvp.Value;
+
+                                // Apply to ledger
+
+                                AccountInfo ledgerAccount = nodeState.Ledger[diffData.PublicKey];
+
+                                DisplayUtils.Display("\nFor Account : '" + ledgerAccount.Name + "' : " + HexUtil.ToString(ledgerAccount.PublicKey.Hex), DisplayType.Info);
+                                DisplayUtils.Display("Balance: " + ledgerAccount.Money + ", Added:" + diffData.AddValue + ", Removed:" + diffData.RemoveValue, DisplayType.Info);
+
+                                ledgerAccount.Money += diffData.AddValue;
+                                ledgerAccount.Money -= diffData.RemoveValue;
+                                ledgerAccount.LastTransactionTime = CloseTime.ToFileTimeUtc();
+
+                                nodeState.Ledger[diffData.PublicKey] = ledgerAccount;
+
+                                // This is good enough as we have previously checked for correctness and matching
+                                // values in both locations.
+
+                                finalPersistentDBUpdateList.Add(ledgerAccount);
                             }
+
+                            LedgerCloseData ledgerCloseData;
+                            bool ok = nodeState.Persistent.CloseHistory.GetLastRowData(out ledgerCloseData);
+
+                            ledgerCloseData.CloseTime = CloseTime.ToFileTimeUtc();
+                            ledgerCloseData.SequenceNumber++;
+                            ledgerCloseData.Transactions = acceptedTransactions.Count;
+                            ledgerCloseData.TotalTransactions += ledgerCloseData.Transactions;
+                            ledgerCloseData.LedgerHash = nodeState.Ledger.RootHash.Hex;
+
+                            // Apply to persistent DB.
+
+                            nodeState.Persistent.CloseHistory.AddUpdate(ledgerCloseData);
+                            nodeState.Persistent.AccountStore.AddUpdateBatch(finalPersistentDBUpdateList);
+                            nodeState.Persistent.TransactionStore.AddUpdateBatch(acceptedTransactions, ledgerCloseData.SequenceNumber);
+
+                            nodeState.NodeInfo.LastLedgerInfo = new JS_LedgerInfo(ledgerCloseData);
+
+                            // Apply the transactions to the PersistentDatabase.
+
+                            /*while (PendingIncomingCandidates.Count > 0)
+                            {
+                            }
+
+                            // Send the transcation to the TrustedNodes
+                            while (PendingIncomingTransactions.Count > 0)
+                            {
+                            }*/
                         }
-
-                        // Fine, the account information is same in both the Ledger and Persistent-DB
-                        // CRITICAL : NO EXCEPTION HANDLERS INSIDE !!
-
-                        List<AccountInfo> finalPersistentDBUpdateList = new List<AccountInfo>();
-
-                        // This essentially gets values from Ledger Tree and updates the Persistent-DB
-
-                        DateTime CloseTime = DateTime.UtcNow;
-
-                        foreach (KeyValuePair<Hash, TreeDiffData> kvp in pendingDifferenceData)
-                        {
-                            TreeDiffData diffData = kvp.Value;
-
-                            // Apply to ledger
-
-                            AccountInfo ledgerAccount = nodeState.Ledger[diffData.PublicKey];
-
-                            DisplayUtils.Display("\nFor Account : '" + ledgerAccount.Name + "' : " + HexUtil.ToString(ledgerAccount.PublicKey.Hex), DisplayType.Info);
-                            DisplayUtils.Display("Balance: " + ledgerAccount.Money + ", Added:" + diffData.AddValue + ", Removed:" + diffData.RemoveValue, DisplayType.Info);
-
-                            ledgerAccount.Money += diffData.AddValue;
-                            ledgerAccount.Money -= diffData.RemoveValue;
-                            ledgerAccount.LastTransactionTime = CloseTime.ToFileTimeUtc();
-
-                            nodeState.Ledger[diffData.PublicKey] = ledgerAccount;
-
-                            // This is good enough as we have previously checked for correctness and matching
-                            // values in both locations.
-
-                            finalPersistentDBUpdateList.Add(ledgerAccount);
-                        }
-
-                        LedgerCloseData ledgerCloseData;
-                        bool ok = nodeState.Persistent.CloseHistory.GetLastRowData(out ledgerCloseData);
-
-                        ledgerCloseData.CloseTime = CloseTime.ToFileTimeUtc();
-                        ledgerCloseData.SequenceNumber++;
-                        ledgerCloseData.Transactions = acceptedTransactions.Count;
-                        ledgerCloseData.TotalTransactions += ledgerCloseData.Transactions;
-                        ledgerCloseData.LedgerHash = nodeState.Ledger.GetRootHash().Hex;
-
-                        // Apply to persistent DB.
-
-                        nodeState.Persistent.CloseHistory.AddUpdate(ledgerCloseData);
-                        nodeState.Persistent.AccountStore.AddUpdateBatch(finalPersistentDBUpdateList);
-                        nodeState.Persistent.TransactionStore.AddUpdateBatch(acceptedTransactions, ledgerCloseData.SequenceNumber);
-
-                        nodeState.NodeInfo.LastLedgerInfo = new JS_LedgerInfo(ledgerCloseData);
-
-                        // Apply the transactions to the PersistentDatabase.
-
-                        /*while (PendingIncomingCandidates.Count > 0)
-                        {
-                        }
-
-                        // Send the transcation to the TrustedNodes
-                        while (PendingIncomingTransactions.Count > 0)
-                        {
-                        }*/
                     }
 
                 }

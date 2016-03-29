@@ -55,19 +55,27 @@ namespace TNetD.Tests
 
                         var tx_opers = tv_dest.ValidateTransactions(tcs);
 
-                        tv_dest.ApplyTransactions(tx_opers);
+                        //lcd.CloseTime = tcs[0].Timestamp;
+
+                        tv_dest.ApplyTransactions(tx_opers, lcd);
                         
-                        Hash dest_h = destNode.nodeState.Ledger.GetRootHash();
+                        LedgerCloseData l_lcd;
+
+                        bool ok = destNode.nodeState.Persistent.CloseHistory.GetLastRowData(out l_lcd);
+
+                        Hash dest_h = destNode.nodeState.Ledger.RootHash;
                         Hash curr_h = new Hash(lcd.LedgerHash);
-                        
-                        if (dest_h == curr_h)
-                        {
-                            DisplayUtils.Display("MATCH:" + curr_h, DisplayType.Debug);
-                        }
-                        else
-                        {
-                            DisplayUtils.Display("MISMATCH:" + curr_h + "-" + dest_h, DisplayType.CodeAssertionFailed);
-                        }
+
+                        DisplayUtils.Display("Ledger Closed:" + dest_h, DisplayType.Debug);
+
+                        /* if (dest_h == curr_h)
+                         {
+                             DisplayUtils.Display("MATCH:" + curr_h, DisplayType.Debug);
+                         }
+                         else
+                         {
+                             DisplayUtils.Display("MISMATCH:" + curr_h + "-" + dest_h, DisplayType.CodeAssertionFailed);
+                         }*/
                     }
                     else
                     {

@@ -44,7 +44,7 @@ namespace TNetD
                 foreach (var nd in nodes)
                 {
                     connData.AppendLine("\n\n\n NODE ID " + nd.nodeConfig.NodeID + "   KEY: " + nd.PublicKey);
-                    connData.AppendLine(" Ledger Hash : " + nd.nodeState.Ledger.GetRootHash());
+                    connData.AppendLine(" Ledger Hash : " + nd.nodeState.Ledger.RootHash);
 
                     connData.AppendLine(" ---- ConnectedValidators ---- ");
 

@@ -92,7 +92,7 @@ namespace TNetD
             {
                 try
                 {
-                    this.Dispatcher.Invoke(new Action(() =>
+                    Dispatcher.Invoke(new Action(() =>
                     {
                         textBlock_Status.Text = Status;
                     }));
@@ -135,7 +135,7 @@ namespace TNetD
 
         private async void menuItem_Load_Node_Data_Click(object sender, RoutedEventArgs e)
         {
-            node = new Node(0);
+            node = new Node(100);
             node.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
             node.NodeStatusEvent += nd_NodeStatusEvent;
 
@@ -160,6 +160,7 @@ namespace TNetD
             }
             catch { }
         }
+
         private void listBox_LCS_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             transactionViewModel.TransactionData.Clear();
