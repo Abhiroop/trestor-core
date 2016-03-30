@@ -73,6 +73,31 @@ namespace TNetD.Json.JS_Structs
             return ProtocolPackager.PackRaw(PDTs);
         }
 
+        public void Deserialize(string json)
+        {
+            JS_NodeDetails nd = (JS_NodeDetails)JsonConvert.DeserializeObject(json,
+                            typeof(JS_NodeDetails), Common.JSON_SERIALIZER_SETTINGS);
+
+            ConnectedPeers = nd.ConnectedPeers;
+            LoadLevel = nd.LoadLevel;
+
+            TransactionsProcessed = nd.TransactionsProcessed;
+            TransactionsAccepted = nd.TransactionsAccepted;
+            TransactionsVerified = nd.TransactionsVerified;
+            TransactionsValidated = nd.TransactionsValidated;
+            RequestsProcessed = nd.RequestsProcessed;
+
+            NetworkPacketsOut = nd.NetworkPacketsOut;
+            NetworkPacketsIn = nd.NetworkPacketsIn;
+
+            AccountCreationRequests = nd.AccountCreationRequests;
+            TotalAccounts = nd.TotalAccounts;
+            ProofOfWorkQueueLength = nd.ProofOfWorkQueueLength;
+
+            SystemTime = nd.SystemTime;
+            NetworkTime = nd.NetworkTime;
+        }
+
         public void Deserialize(byte[] data)
         {
             foreach (var PDT in ProtocolPackager.UnPackRaw(data))

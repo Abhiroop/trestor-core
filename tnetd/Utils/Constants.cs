@@ -1,12 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using TNetD.Address;
-using TNetD.Json.REST;
 using TNetD.Ledgers;
 using TNetD.Transactions;
 
@@ -26,22 +21,8 @@ namespace TNetD
         public static readonly int Connections_PerNode_Max = 20;
         public static readonly int Connections_PerNode_Min = 5;
 
-        /// <summary>
-        /// This value is the minimum percentage of positive packets needed for a transaction.
-        /// </summary>
-        public static readonly int Consensus_MinLimit = 90;
-
-        /// <summary>
-        /// This is the percentage at which the node begins to vote for a packet.
-        /// </summary>
-        public static readonly int Consensus_BeginForwarding = 50;
-
         public static readonly int PacketLimitPerSecond = 10;
         public static readonly int DataLimitPerSecond = 512 * 1024; // Bytes per second.
-
-        //public static List<Node> GlobalNodeList = new List<Node>();
-
-        /// ////////////////////////
 
         /// <summary>
         ///  Minimum 10 trest balance.
@@ -93,12 +74,6 @@ namespace TNetD
         public static readonly int CONS_FINAL_VOTING_THRESHOLD_PERC = 80;
 
         /// <summary>
-        /// ////////////////////////////////////////////////
-        /// </summary>
-
-        public static readonly int SYNC_LEAF_COUNT_THRESHOLD = 200;
-
-        /// <summary>
         /// Number of Tre's per Genesis Account. Currently equivalent to 100,000 USD (1 T = 1 US Cent).
         /// </summary>
         public static readonly long FIN_TRE_PER_GENESIS_ACCOUNT = 1000000000000000;
@@ -115,14 +90,14 @@ namespace TNetD
 
         public static bool ApplicationRunning = true;
 
-        public static int PREFS_APP_TCP_BUFFER_SIZE = 4096;// 512 * 1024;
+        public static int PREFS_APP_TCP_BUFFER_SIZE = 4096; // 512 * 1024;
 
         public static long PREFS_MAX_RPC_POST_CONTENT_LENGTH = 50 * 1024; // 50 KiB 
 
         public static byte TransportVersion = 1;
         public static byte ProtocolVersion = 1;
 
-        public static int Difficulty = 8; // 17;
+        public static int Difficulty = 15;
 
         // ////////////////////// Counters ////////////////
 
@@ -130,7 +105,6 @@ namespace TNetD
         public static int GlobalReceivedBytes = 0;
         public static int GlobalSentPackets = 0;
         public static int GlobalSentBytes = 0;
-
 
         public static long SERVER_GLOBAL_PACKETS = 0;
         public static long SERVER_GLOBAL_DATA_PACKETS = 0;

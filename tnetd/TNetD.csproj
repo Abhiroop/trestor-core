@@ -141,6 +141,7 @@
     <Compile Include="Network\Networking\NodeRating.cs" />
     <Compile Include="Nodes\HeartbeatMessage.cs" />
     <Compile Include="Nodes\Logging.cs" />
+    <Compile Include="Nodes\NodeDetailHandler.cs" />
     <Compile Include="Nodes\NodeLatency.cs" />
     <Compile Include="Consensus\SyncMessage.cs" />
     <Compile Include="Consensus\TransactionValidator.cs" />

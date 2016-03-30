@@ -65,7 +65,7 @@ namespace TNetD.Network.Networking
         /// <summary>
         /// Incoiming Connections Keyed on Identifier.
         /// </summary>
-        public Dictionary<Hash, IncomingClient> ThreadList = new Dictionary<Hash, IncomingClient>();
+        public Dictionary<Hash, IncomingClient> clientList = new Dictionary<Hash, IncomingClient>();
 
         /// <summary>
         /// Check whether the given PK is already connected.
@@ -202,48 +202,47 @@ namespace TNetD.Network.Networking
         {
             // Remove Threads
             // Remove bad connections
-            
+
             try
             {
-                List<Hash> threadsForRemoval = new List<Hash>();
-                foreach (KeyValuePair<Hash, IncomingClient> kvp in ThreadList)
+                List<Hash> removalKeys = new List<Hash>();
+                foreach (KeyValuePair<Hash, IncomingClient> kvp in clientList)
                 {
                     if (kvp.Value.Ended == true)
                     {
-                        threadsForRemoval.Add(kvp.Key);
+                        removalKeys.Add(kvp.Key);
                     }
                 }
 
-                foreach (Hash h in threadsForRemoval)
+                foreach (Hash h in removalKeys)
                 {
-                    ThreadList.Remove(h);
-                    DisplayUtils.Display("Removed Thread: " + HexUtil.ToString(h.Hex), DisplayType.Warning);
+                    clientList.Remove(h);
+                    DisplayUtils.Display("Removed Client: " + HexUtil.ToString(h.Hex), DisplayType.Warning);
                 }
 
-                threadsForRemoval.Clear();
+                removalKeys.Clear();
                 foreach (KeyValuePair<Hash, IncomingClient> kvp in IncomingConnections)
                 {
                     if (kvp.Value.Ended == true)
                     {
-                        threadsForRemoval.Add(kvp.Key);
+                        removalKeys.Add(kvp.Key);
                     }
                 }
 
-                foreach (Hash h in threadsForRemoval)
+                foreach (Hash h in removalKeys)
                 {
                     IncomingConnections.Remove(h);
                     DisplayUtils.Display("Removed Connection: " + HexUtil.ToString(h.Hex), DisplayType.Warning);
                 }
-
             }
 
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 DisplayUtils.Display("TimerCallback()", ex);
             }
         }
 
-        private async void ClientHandler(object oTcpClient)
+        private async Task ClientHandler(object oTcpClient)
         {
             IncomingClient iClient = (IncomingClient)oTcpClient;
             TcpClient tcpClient = iClient.client;
@@ -597,9 +596,9 @@ namespace TNetD.Network.Networking
                     Hash identifier = new Hash(Utils.GenerateUniqueGUID_Bytes(8));
                     inClient.Identifier = identifier;
 
-                    ThreadList.Add(identifier, inClient);
+                    clientList.Add(identifier, inClient);
 
-                    Task.Run(() => { ClientHandler(inClient); });
+                    Task.Run(async () => { await ClientHandler(inClient); });
                 }
                 catch (Exception ex)
                 {

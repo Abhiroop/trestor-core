@@ -44,15 +44,19 @@ namespace TNetD.Nodes
         public string Path_BannedNamesDB;
         public string Path_CloseHistoryDB;
 
-        public NetworkConfig NetworkConfig = new NetworkConfig();
+        /// <summary>
+        /// Saves the node datails as a JSON file.
+        /// This is loaded when the app starts.
+        /// </summary>
+        public string Path_NodeDetails;
 
+        public NetworkConfig NetworkConfig = new NetworkConfig();
+        public Dictionary<Hash, NodeSocketData> TrustedNodes;
+        
         byte[] masterNodeRandom;
         byte[] masterPrivateKeyExpanded;
 
-        private string File_TrustedNodes = "TrustedNodes.ini";
-        private string File_NodeDetails = "NodeDetails.json";
-
-        public Dictionary<Hash, NodeSocketData> TrustedNodes;
+        string Path_TrustedNodes;
 
         INIFile iniFile = default(INIFile);
 
@@ -66,8 +70,8 @@ namespace TNetD.Nodes
 
             TrustedNodes = new Dictionary<Hash, NodeSocketData>();
 
-            File_TrustedNodes = WorkDirectory + "\\TrustedNodes.ini";
-            File_NodeDetails = WorkDirectory + "\\NodeDetails.json";
+            Path_TrustedNodes = WorkDirectory + "\\TrustedNodes.ini";
+            Path_NodeDetails = WorkDirectory + "\\NodeDetails.json";
 
             LoadTrustedNodes();
 
@@ -154,9 +158,9 @@ namespace TNetD.Nodes
 
         void LoadTrustedNodes()
         {
-            if (File.Exists(File_TrustedNodes))
+            if (File.Exists(Path_TrustedNodes))
             {
-                StreamReader sr = new StreamReader(File_TrustedNodes);
+                StreamReader sr = new StreamReader(Path_TrustedNodes);
 
                 TrustedNodes.Clear();
 
@@ -469,7 +473,7 @@ namespace TNetD.Nodes
             info.Organisation = Organisation;
             info.Platform = Platform;
             info.PublicKey = PublicKey.Hex;
-            info.Version = "0.2 alpha-release (development)";
+            info.Version = "0.2 beta-release (dev)";
 
             return info;
         }

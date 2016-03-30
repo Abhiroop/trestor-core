@@ -60,7 +60,7 @@ namespace TNetD.Nodes
 
         // TODO: MAKE PRIVATE (public only for testing)
         public PeerDiscovery peerDiscovery = default(PeerDiscovery);
-        
+
         /// <summary>
         /// Handles all received network packets and dispatches them to various sub-systems.
         /// </summary>
@@ -72,7 +72,9 @@ namespace TNetD.Nodes
         TransactionHandler transactionHandler = default(TransactionHandler);
         TimeSync timeSync = default(TimeSync);
         LedgerSync ledgerSync = default(LedgerSync);
-        
+
+        NodeDetailHandler nodeDetailHandler = default(NodeDetailHandler);
+
         #endregion
 
         #region ConstructorsAndTimers
@@ -120,6 +122,9 @@ namespace TNetD.Nodes
             rpcHandlers = new RpcHandlers(nodeConfig, nodeState);
             networkPacketSwitch = new NetworkPacketSwitch(nodeConfig, nodeState);
             transactionHandler = new TransactionHandler(nodeConfig, nodeState);
+
+            nodeDetailHandler = new NodeDetailHandler(nodeConfig, nodeState);
+
             timeSync = new TimeSync(nodeState, nodeConfig, networkPacketSwitch);
             ledgerSync = new LedgerSync(nodeState, nodeConfig, networkPacketSwitch);
             peerDiscovery = new PeerDiscovery(nodeState, nodeConfig, networkPacketSwitch);
@@ -129,30 +134,28 @@ namespace TNetD.Nodes
 
             networkPacketSwitch.HeartbeatEvent += NetworkPacketSwitch_HeartbeatEvent;
 
-            if (Common.NODE_OPERATION_TYPE == NodeOperationType.Distributed)
+            if (Common.NODE_OPERATION_TYPE == NodeOperationType.Centralized)
             {
-                
-            }            
+                TimerConsensus = new System.Timers.Timer();
+                TimerConsensus.Elapsed += TimerConsensus_Elapsed;
+                TimerConsensus.Enabled = true;
+                TimerConsensus.Interval = nodeConfig.UpdateFrequencyConsensusMS;
+            }
 
-            TimerConsensus = new System.Timers.Timer();
-            TimerConsensus.Elapsed += TimerConsensus_Elapsed;
-            TimerConsensus.Enabled = true;
-            TimerConsensus.Interval = nodeConfig.UpdateFrequencyConsensusMS;            
-            
             TimerSecond = new System.Timers.Timer();
             TimerSecond.Elapsed += TimerSecond_Elapsed;
             TimerSecond.Enabled = true;
-            TimerSecond.Interval = 100;            
+            TimerSecond.Interval = 1000;
 
             TimerFast = new System.Timers.Timer();
             TimerFast.Elapsed += TimerFast_Elapsed;
             TimerFast.Enabled = true;
-            TimerFast.Interval = 100;            
+            TimerFast.Interval = 100;
 
             TimerMinute = new System.Timers.Timer();
             TimerMinute.Elapsed += TimerMinute_Elapsed;
             TimerMinute.Enabled = true;
-            TimerMinute.Interval = 30000;           
+            TimerMinute.Interval = 30000;
 
             TimerTimeSync = new System.Timers.Timer();
             TimerTimeSync.Elapsed += TimerTimeSync_Elapsed;
@@ -161,7 +164,6 @@ namespace TNetD.Nodes
 
             //peerDiscovery.Start(30 * 1000);
             StartNode();
-
         }
 
         public void StartNode()
@@ -172,11 +174,20 @@ namespace TNetD.Nodes
             TimerMinute.Start();
             TimerTimeSync.Start();
 
+            var detailHandlerTask = nodeDetailHandler.Load();            
+
             DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
         }
 
+        /// <summary>
+        /// Currently this does not entirely stop/destroy everything.
+        /// The network handlers are closed, so the application can exit properly.
+        /// Should be called at the time of application exit.
+        /// </summary>
         public void StopNode()
         {
+            var detailHandlerTask = nodeDetailHandler.Save();
+
             TimerConsensus.Stop();
             TimerSecond.Stop();
             TimerFast.Stop();
@@ -191,28 +202,14 @@ namespace TNetD.Nodes
 
         public bool VotingEnabled
         {
-            get
-            {
-                return voting.Enabled;
-            }
-
-            set
-            {
-                voting.Enabled = value;
-            }
+            get { return voting.Enabled; }
+            set { voting.Enabled = value; }
         }
 
         public bool LedgerSyncEnabled
         {
-            get
-            {
-                return ledgerSync.Enabled;
-            }
-
-            set
-            {
-                ledgerSync.Enabled = value;
-            }
+            get { return ledgerSync.Enabled; }
+            set { ledgerSync.Enabled = value; }
         }
 
         void TimerTimeSync_Elapsed(object sender, ElapsedEventArgs e)
@@ -220,7 +217,7 @@ namespace TNetD.Nodes
             if (Common.NODE_OPERATION_TYPE == NodeOperationType.Distributed)
             {
                 nodeState.updateTimeDifference(timeSync.SyncTime().Result);
-                sendHeartbeatRequests(); // For Testing
+                var heartbeatTask = sendHeartbeatRequests(); // For Testing
             }
         }
 
@@ -255,6 +252,8 @@ namespace TNetD.Nodes
                     nodeState.TransactionStateManager.ProcessAndClear();
 
                     nodeState.NodeLatency.Prune();
+
+                    var detailHandlerTask = nodeDetailHandler.Save();
                 }
                 catch (Exception ex)
                 {
@@ -317,8 +316,7 @@ namespace TNetD.Nodes
 
         #endregion
 
-        
-        
+
         #region TRANSACTION PROCESSING
 
         /// <summary>
@@ -332,13 +330,10 @@ namespace TNetD.Nodes
             {
                 TimerEventProcessed = false;
 
-                // // // // // // // // //
                 if (Common.NODE_OPERATION_TYPE == NodeOperationType.Centralized)
                 {
                     transactionHandler.ProcessPendingTransactions();
                 }
-
-                // // // // // // // // //
             }
             else
             {
