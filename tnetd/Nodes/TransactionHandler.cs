@@ -28,7 +28,7 @@ namespace TNetD.Nodes
                 {
                     if ((nodeState.IncomingTransactionMap.IncomingTransactions.Count > 0) &&
                         (Common.NODE_OPERATION_TYPE == NodeOperationType.Centralized))
-                    {        
+                    {
                         var currentTransactions = new List<TransactionContent>();
 
                         lock (nodeState.IncomingTransactionMap.transactionLock)
@@ -48,7 +48,10 @@ namespace TNetD.Nodes
 
                         var transactionHandlingData = transactionValidator.ValidateTransactions(currentTransactions);
 
-                        transactionValidator.ApplyTransactions(transactionHandlingData);
+                        if (transactionHandlingData.AcceptedTransactions.Any())
+                        {
+                            transactionValidator.ApplyTransactions(transactionHandlingData);
+                        }
                     }
 
                 }

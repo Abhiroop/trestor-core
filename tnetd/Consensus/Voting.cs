@@ -107,9 +107,7 @@ namespace TNetD.Consensus
                 Init();
             }
         }
-
         
-
         readonly FailureHandlerFactory<Hash, ConsensusStates, VotingStates> failureHandlerFactory;
 
         public ConsensusParams Params;
@@ -131,7 +129,7 @@ namespace TNetD.Consensus
         /// <summary>
         /// ID and content of current transactions
         /// </summary>
-        ConcurrentDictionary<Hash, TransactionContent> CurrentTransactions;
+        ConcurrentDictionary<Hash, TransactionContent> currentTransactions;
         Ballot ballot, finalBallot;
         TransactionChecker transactionChecker;
         TransactionValidator transactionValidator;
@@ -161,21 +159,27 @@ namespace TNetD.Consensus
             this.nodeConfig = nodeConfig;
             this.nodeState = nodeState;
             this.networkPacketSwitch = networkPacketSwitch;
-            this.CurrentTransactions = new ConcurrentDictionary<Hash, TransactionContent>();
-            this.propagationMap = new ConcurrentDictionary<Hash, HashSet<Hash>>();
-            this.syncMap = new ConcurrentDictionary<Hash, SyncState>();
-            this.voteMap = new VoteMap(nodeConfig, nodeState);
-            this.synchronizedVoters = new HashSet<Hash>();
-            this.timeStep = new TimeStep(nodeState);
-            this.timeStep.Step += VotingEvent;
-            this.packetLogger = new Tests.PacketLogger(nodeConfig, nodeState);
-            this.failureHandlerFactory = new FailureHandlerFactory<Hash, ConsensusStates, VotingStates>();
-            this.Params = new ConsensusParams();
+
+            currentTransactions = new ConcurrentDictionary<Hash, TransactionContent>();
+            propagationMap = new ConcurrentDictionary<Hash, HashSet<Hash>>();
+            syncMap = new ConcurrentDictionary<Hash, SyncState>();
+            voteMap = new VoteMap(nodeConfig, nodeState);
+            synchronizedVoters = new HashSet<Hash>();
+            timeStep = new TimeStep(nodeState);
+            
+            packetLogger = new Tests.PacketLogger(nodeConfig, nodeState);
+            failureHandlerFactory = new FailureHandlerFactory<Hash, ConsensusStates, VotingStates>();
+            Params = new ConsensusParams();
 
             finalBallot = new Ballot();
             ballot = new Ballot();
 
-            networkPacketSwitch.ConsensusEvent += networkPacketSwitch_ConsensusEvent;
+            if (Common.NODE_OPERATION_TYPE == NodeOperationType.Distributed)
+            {
+                timeStep.Step += VotingEvent;
+                networkPacketSwitch.ConsensusEvent += networkPacketSwitch_ConsensusEvent;
+                Print("Class 'Voting' created.");
+            }
 
             transactionChecker = new TransactionChecker(nodeState);
             transactionValidator = new TransactionValidator(nodeConfig, nodeState);
@@ -184,9 +188,7 @@ namespace TNetD.Consensus
 
             voteMessageCounter = new VoteMessageCounter();
             
-            DebuggingMessages = true;
-
-            Print("Class \"Voting\" created.");
+            DebuggingMessages = true;           
         }
 
         private void Init()
@@ -474,7 +476,7 @@ namespace TNetD.Consensus
 
         void CreateBallot()
         {
-            ballot = transactionChecker.CreateBallot(CurrentTransactions, Params.LCS);
+            ballot = transactionChecker.CreateBallot(currentTransactions, Params.LCS);
             ballot.UpdateSignature(nodeConfig.SignDataWithPrivateKey(ballot.GetSignatureData()));
         }
 
@@ -657,7 +659,6 @@ namespace TNetD.Consensus
             Params.VotingState = VotingStates.STNone;
 
             voteMessageCounter.ResetConfirmations();
-
         }
 
         bool NotEnoughVoters = false;
@@ -730,7 +731,7 @@ namespace TNetD.Consensus
 
         void ApplyToLedger(Ballot applyBallot)
         {
-            var transactions = CurrentTransactions.Where(d => applyBallot.Contains(d.Key)).Select(d => d.Value);
+            var transactions = currentTransactions.Where(d => applyBallot.Contains(d.Key)).Select(d => d.Value);
 
             TransactionHandlingData THD = transactionValidator.ValidateTransactions(transactions);
 
@@ -751,10 +752,10 @@ namespace TNetD.Consensus
             // Remove Txns from current set !
             foreach (var tx in ballot)
             {
-                if (CurrentTransactions.ContainsKey(tx))
+                if (currentTransactions.ContainsKey(tx))
                 {
                     TransactionContent tc;
-                    CurrentTransactions.TryRemove(tx, out tc);
+                    currentTransactions.TryRemove(tx, out tc);
                 }
             }
 

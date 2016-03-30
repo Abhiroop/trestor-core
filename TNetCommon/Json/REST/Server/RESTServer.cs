@@ -6,7 +6,6 @@ using System.Net;
 using System.Reflection;
 using System.Threading;
 using TNetD;
-//using TNetD.Nodes;
 
 namespace Grapevine.Server
 {
@@ -279,7 +278,7 @@ namespace Grapevine.Server
         {
             get
             {
-                return String.Format("{0}://{1}:{2}/", this.Protocol, this.Host, this.Port);
+                return string.Format("{0}://{1}:{2}/", this.Protocol, this.Host, this.Port);
             }
         }
 
@@ -386,7 +385,7 @@ namespace Grapevine.Server
                     this.IsListening = true;
                     this._listener.Prefixes.Add(this.BaseUrl);
 
-                    if(Common.NETWORK_TYPE == TNetD.Address.NetworkType.MainNet)
+                    if(Common.NETWORK_ENABLE_ALL_RPC_PREFIXES)
                     {
                         this._listener.Prefixes.Add(this.BaseUrlHttp);
                         this._listener.Prefixes.Add(this.BaseUrlHttps);

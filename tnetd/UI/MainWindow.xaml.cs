@@ -47,9 +47,7 @@ namespace TNetD
         MessageViewModel viewModel = new MessageViewModel();
 
         List<Node> nodes = new List<Node>();
-
-        List<Thread> runningNodes = new List<Thread>();
-
+        
         public MainWindow()
         {
             DataContext = viewModel;
@@ -62,43 +60,30 @@ namespace TNetD
 
             lv_TX.ItemsSource = _tranxData;
 
-            Title += " | " + Common.NETWORK_TYPE.ToString();
-
+            Title += " | " + Common.NETWORK_TYPE + " | " + Common.NODE_OPERATION_TYPE;
         }
 
-        private void START_NODES()
+        private void StartNodes()
         {
-            Thread backgroundLoad;
-            backgroundLoad = new Thread(LoadNodes);
-            backgroundLoad.Start();
-
-            runningNodes.Add(backgroundLoad);
+            Task.Run(async () => {
+                await AddNodeAsync(0);
+            }).ConfigureAwait(false);             
         }
 
-        /*void tmr_UI_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            try
-            {
-                this.Dispatcher.Invoke(new Action(() =>
-                {
-                   // textBlock_StatusLabel.Text = "" + ledgerEvent.ToString() + " - " + Message;
-                    //textBlock_StatusLog.Inlines.Add(new Run(Text + "\n") { Foreground = new SolidColorBrush(color) });
-                }));
-            }
-            catch { }
-        }*/
-
-        void AddNode(int idx)
+        async Task AddNodeAsync(int idx)
         {
             Node nd = new Node(idx);
             nd.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
             nd.NodeStatusEvent += nd_NodeStatusEvent;
-            nd.BeginBackgroundLoad();
+            await nd.BeginBackgroundLoad();
 
             nodes.Add(nd);
 
-            nd.VotingEnabled = true;
-            nd.LedgerSyncEnabled = true;
+            if (Common.NODE_OPERATION_TYPE == NodeOperationType.Distributed)
+            {
+                nd.VotingEnabled = true;
+                nd.LedgerSyncEnabled = true;
+            }
         }
 
         void nd_NodeStatusEvent(string Status, int NodeID)
@@ -107,7 +92,7 @@ namespace TNetD
             {
                 try
                 {
-                    this.Dispatcher.Invoke(new Action(() =>
+                    Dispatcher.Invoke(new Action(() =>
                     {
                         textBlock_Status.Text = Status;
                     }));
@@ -120,22 +105,15 @@ namespace TNetD
         {
             try
             {
-                this.Dispatcher.Invoke(new Action(() =>
+                Dispatcher.Invoke(new Action(() =>
                 {
                     textBlock_StatusLabel.Text = "" + ledgerEvent.ToString() + " - " + Message;
                     //textBlock_StatusLog.Inlines.Add(new Run(Text + "\n") { Foreground = new SolidColorBrush(color) });
                 }));
             }
             catch { }
-            //throw new NotImplementedException();
         }
-
-        void LoadNodes()
-        {
-            AddNode(0);
-            //AddNode(1);
-        }
-
+        
         void DisplayUtils_DisplayText(DisplayMessageType displayMessage)
         {
             if (displayMessage.DisplayType >= Constants.DebugLevel)
@@ -245,59 +223,26 @@ namespace TNetD
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            STOP_NODES();
+            StopNodes();
             Constants.ApplicationRunning = false;
         }
 
-        private void STOP_NODES()
+        private void StopNodes()
         {
             foreach (Node nd in nodes)
             {
                 nd.StopNode();
             }
-
-            foreach (Thread thr in runningNodes)
-            {
-                if (thr.IsAlive)
-                    thr.Abort();
-            }
         }
-
-        /// ///////
-
+        
         private void menuItem_Server_Start_Click(object sender, RoutedEventArgs e)
         {
-            START_NODES();
-
-            /*SingleTransactionFactory stf = new SingleTransactionFactory(nodes[0].PublicKey, nodes[1].PublicKey, Constants.random.Next(100, 1000), Constants.random.Next(10, 150000));
-
-            byte[] tranxData = stf.GetTransactionData();
-            byte[] signature = nodes[0].nodeConfig.SignDataWithPrivateKey(tranxData);
-
-            TransactionContent transactionContent;
-
-            TransactionProcessingResult TransOk = stf.Create(new Hash(signature), out transactionContent);
-
-            if (TransOk == TransactionProcessingResult.Accepted)
-            {
-                DisplayUtils.Display("Transaction Valid: ");
-
-                DBResponse dBResponse = nodes[0].TransactionStore.AddUpdate(transactionContent);
-
-                DisplayUtils.Display("dBResponse: " + dBResponse);
-
-                _tranxData.Add(transactionContent);
-            }*/
+            StartNodes();
         }
 
         private void menuItem_Server_Stop_Click(object sender, RoutedEventArgs e)
         {
-            /*NodeConfig nc = new NodeConfig(0);
-            NodeConfig nc1 = new NodeConfig(1);
-
-            IPersistentTransactionStore transactionStore = new SQLiteTransactionStore(nc);*/
-
-            STOP_NODES();
+            StopNodes();
         }
 
         private void lv_TX_MouseUp(object sender, MouseButtonEventArgs e)
@@ -388,7 +333,6 @@ namespace TNetD
                 sbn.AddUpdateBatch(BN);
                 sr.Close();
                 MessageBox.Show("DONE.");
-
             }
         }
 

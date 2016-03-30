@@ -60,8 +60,7 @@ namespace TNetD.Nodes
 
         // TODO: MAKE PRIVATE (public only for testing)
         public PeerDiscovery peerDiscovery = default(PeerDiscovery);
-
-
+        
         /// <summary>
         /// Handles all received network packets and dispatches them to various sub-systems.
         /// </summary>
@@ -73,8 +72,7 @@ namespace TNetD.Nodes
         TransactionHandler transactionHandler = default(TransactionHandler);
         TimeSync timeSync = default(TimeSync);
         LedgerSync ledgerSync = default(LedgerSync);
-
-
+        
         #endregion
 
         #region ConstructorsAndTimers
@@ -133,48 +131,63 @@ namespace TNetD.Nodes
 
             if (Common.NODE_OPERATION_TYPE == NodeOperationType.Distributed)
             {
-                // voting.Enabled = true;
-            }
-
-            //AI = new AccountInfo(PublicKey, Money);
+                
+            }            
 
             TimerConsensus = new System.Timers.Timer();
             TimerConsensus.Elapsed += TimerConsensus_Elapsed;
             TimerConsensus.Enabled = true;
-            TimerConsensus.Interval = nodeConfig.UpdateFrequencyConsensusMS;
-            TimerConsensus.Start();
-
-            // ////////////////////
-
+            TimerConsensus.Interval = nodeConfig.UpdateFrequencyConsensusMS;            
+            
             TimerSecond = new System.Timers.Timer();
             TimerSecond.Elapsed += TimerSecond_Elapsed;
             TimerSecond.Enabled = true;
-            TimerSecond.Interval = 100;
-            TimerSecond.Start();
+            TimerSecond.Interval = 100;            
 
             TimerFast = new System.Timers.Timer();
             TimerFast.Elapsed += TimerFast_Elapsed;
             TimerFast.Enabled = true;
-            TimerFast.Interval = 100;
-            TimerFast.Start();
+            TimerFast.Interval = 100;            
 
             TimerMinute = new System.Timers.Timer();
             TimerMinute.Elapsed += TimerMinute_Elapsed;
             TimerMinute.Enabled = true;
-            TimerMinute.Interval = 30000;
-            TimerMinute.Start();
+            TimerMinute.Interval = 30000;           
 
             TimerTimeSync = new System.Timers.Timer();
             TimerTimeSync.Elapsed += TimerTimeSync_Elapsed;
             TimerTimeSync.Enabled = true;
             TimerTimeSync.Interval = 1 * 30 * 1000;
-            TimerTimeSync.Start();
 
             //peerDiscovery.Start(30 * 1000);
+            StartNode();
+
+        }
+
+        public void StartNode()
+        {
+            TimerConsensus.Start();
+            TimerSecond.Start();
+            TimerFast.Start();
+            TimerMinute.Start();
+            TimerTimeSync.Start();
 
             DisplayUtils.Display("Started Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
         }
-        
+
+        public void StopNode()
+        {
+            TimerConsensus.Stop();
+            TimerSecond.Stop();
+            TimerFast.Stop();
+            TimerMinute.Stop();
+            TimerTimeSync.Stop();
+
+            networkPacketSwitch.Stop();
+            rpcHandlers.StopServer();
+
+            DisplayUtils.Display("Stopped Node " + nodeConfig.NodeID, DisplayType.ImportantInfo);
+        }
 
         public bool VotingEnabled
         {
@@ -204,8 +217,11 @@ namespace TNetD.Nodes
 
         void TimerTimeSync_Elapsed(object sender, ElapsedEventArgs e)
         {
-            nodeState.updateTimeDifference(timeSync.SyncTime().Result);
-            sendHeartbeatRequests(); // FOR TESTING
+            if (Common.NODE_OPERATION_TYPE == NodeOperationType.Distributed)
+            {
+                nodeState.updateTimeDifference(timeSync.SyncTime().Result);
+                sendHeartbeatRequests(); // For Testing
+            }
         }
 
         void TimerMinute_Elapsed(object sender, ElapsedEventArgs e)
@@ -255,7 +271,7 @@ namespace TNetD.Nodes
 
         void TimerSecond_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (NodeSecond != null) NodeSecond();
+            NodeSecond?.Invoke();
         }
 
         void TimerFast_Elapsed(object sender, ElapsedEventArgs e)
@@ -301,15 +317,8 @@ namespace TNetD.Nodes
 
         #endregion
 
-        public void StopNode()
-        {
-            Constants.ApplicationRunning = false;
-
-            networkPacketSwitch.Stop();
-            rpcHandlers.StopServer();
-        }
-
-
+        
+        
         #region TRANSACTION PROCESSING
 
         /// <summary>

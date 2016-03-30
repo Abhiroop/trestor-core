@@ -35,9 +35,9 @@ namespace TNetD.Consensus
                             foreach (KeyValuePair<Hash, TransactionContent> kvp in nodeState.IncomingTransactionMap.IncomingTransactions)
                             {
                                 //transactionContentStack.Enqueue(kvp.Value);
-                                if (!CurrentTransactions.ContainsKey(kvp.Key))
+                                if (!currentTransactions.ContainsKey(kvp.Key))
                                 {
-                                    CurrentTransactions.TryAdd(kvp.Key, kvp.Value);
+                                    currentTransactions.TryAdd(kvp.Key, kvp.Value);
                                 }
                                 //Interlocked.Increment(ref nodeState.NodeInfo.NodeDetails.TransactionsVerified);
                             }
@@ -101,8 +101,8 @@ namespace TNetD.Consensus
             FetchResponseMsg response = new FetchResponseMsg();
             foreach (Hash id in message.IDs)
             {
-                if (CurrentTransactions.ContainsKey(id))
-                    response.transactions.Add(id, CurrentTransactions[id]);
+                if (currentTransactions.ContainsKey(id))
+                    response.transactions.Add(id, currentTransactions[id]);
             }
 
             await networkPacketSwitch.SendAsync(packet.PublicKeySource, new NetworkPacket()
@@ -139,7 +139,7 @@ namespace TNetD.Consensus
                             List<Hash> badaccounts = new List<Hash>();
                             if (transactionChecker.Spendable(transaction.Value, new Dictionary<Hash, long>(), out badaccounts))
                             {
-                                CurrentTransactions.AddOrUpdate(transaction.Key, transaction.Value, (ok, ov) => ov);
+                                currentTransactions.AddOrUpdate(transaction.Key, transaction.Value, (ok, ov) => ov);
                             }
                             else
                             {
@@ -214,7 +214,7 @@ namespace TNetD.Consensus
             //add all transaction IDs from CurrentTransactions
             MergeResponseMsg message = new MergeResponseMsg();
             message.ConsensusState = Params.ConsensusState;
-            foreach (KeyValuePair<Hash, TransactionContent> transaction in CurrentTransactions)
+            foreach (KeyValuePair<Hash, TransactionContent> transaction in currentTransactions)
             {
                 message.AddTransaction(transaction.Key);
             }
@@ -248,7 +248,7 @@ namespace TNetD.Consensus
                 foreach (Hash transaction in message)
                 {
                     //check whether transaction for the given ID is already known
-                    if (!CurrentTransactions.ContainsKey(transaction))
+                    if (!currentTransactions.ContainsKey(transaction))
                     {
                         newTransactions.Add(transaction);
                     }

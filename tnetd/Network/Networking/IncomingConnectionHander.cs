@@ -202,7 +202,7 @@ namespace TNetD.Network.Networking
         {
             // Remove Threads
             // Remove bad connections
-
+            
             try
             {
                 List<Hash> threadsForRemoval = new List<Hash>();

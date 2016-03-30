@@ -74,8 +74,10 @@ namespace TNetD.Tests
                     var tx_opers = tv_dest.ValidateTransactions(transactions);
 
                     //lcd.CloseTime = tcs[0].Timestamp;
-
-                    tv_dest.ApplyTransactions(tx_opers, lcd.CloseTime);
+                    if (tx_opers.AcceptedTransactions.Any())
+                    {
+                        tv_dest.ApplyTransactions(tx_opers, lcd.CloseTime);
+                    }
 
                     LedgerCloseData l_lcd;
 

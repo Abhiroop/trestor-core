@@ -50,6 +50,7 @@ namespace TNetD.Nodes
         byte[] masterPrivateKeyExpanded;
 
         private string File_TrustedNodes = "TrustedNodes.ini";
+        private string File_NodeDetails = "NodeDetails.json";
 
         public Dictionary<Hash, NodeSocketData> TrustedNodes;
 
@@ -66,6 +67,7 @@ namespace TNetD.Nodes
             TrustedNodes = new Dictionary<Hash, NodeSocketData>();
 
             File_TrustedNodes = WorkDirectory + "\\TrustedNodes.ini";
+            File_NodeDetails = WorkDirectory + "\\NodeDetails.json";
 
             LoadTrustedNodes();
 

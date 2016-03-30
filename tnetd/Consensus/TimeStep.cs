@@ -43,7 +43,7 @@ namespace TNetD.Consensus
         /// <summary>
         /// Timesteps in MS
         /// </summary>
-        int[] resolutions = new int[] { 15,50, 100, 200, 300, 500, 800, 1000, 1500, 2000, 3000, 5000, 10000 };
+        int[] resolutions = new int[] { 15, 50, 100, 200, 300, 500, 800, 1000, 1500, 2000, 3000, 5000, 10000 };
 
         public double currentTimeElapsed = 0;
 
@@ -52,7 +52,7 @@ namespace TNetD.Consensus
         TimeSpan NextTimeStep { get; set; } = TimeSpan.FromMilliseconds(1000);
 
         DateTime LastTick;
-        DateTime NextTime;
+        //DateTime NextTime;
 
         /// <summary>
         /// Current resolution in Milliseconds
@@ -76,16 +76,10 @@ namespace TNetD.Consensus
 
             initialValue = nodeState.CurrentNetworkTime;
 
-            DateTime dt = nodeState.CurrentNetworkTime;
-
             minNextTickTime = nodeState.CurrentNetworkTime;
-
-            TimeSpan tsp;
 
             Observable.Interval(DEFAULT_TIMER_FASTSTEP)
                 .Subscribe(async x => await TimerVoting_FastElapsed(x));
-
-            //NextTime = nodeState.CurrentNetworkTime.Add(new TimeSpan())
         }
 
         #region Resolution
@@ -141,8 +135,6 @@ namespace TNetD.Consensus
 
                     LastTick = nodeState.CurrentNetworkTime;
 
-                    //LastTick.
-
                     await Step?.Invoke();
 
                     timerLockFree = true;
@@ -152,38 +144,42 @@ namespace TNetD.Consensus
 
         async Task TimerVoting_FastElapsed(object sender)
         {
-            // Creates a tick at every timer resolution match.
-
-            long resolutionTicks = CurrentResolution * TimeSpan.TicksPerMillisecond;
-
-            long closenessTicks = (long)(DEFAULT_TIMER_FASTSTEP.Ticks * 2);
-
-            DateTime timeNow = nodeState.CurrentNetworkTime;
-
-            long timeTicks = timeNow.Ticks;
-
-            if (((timeTicks % resolutionTicks) < closenessTicks))
+            // Voting only works in distributed mode.
+            if (Common.NODE_OPERATION_TYPE == NodeOperationType.Distributed)
             {
-                if ((minNextTickTime < timeNow))
-                {
-                    // Next event can be atleast halfway from now and the next expected resolution event
-                    minNextTickTime = timeNow.Add(TimeSpan.FromMilliseconds(CurrentResolution / 2));
+                // Creates a tick at every timer resolution match.
 
-                    // DisplayUtils.Display("+ " + timeNow.ToLongTimeString());
-                    
-                    if(EventEnabled)
-                        await Step?.Invoke();
-                    
-                    //await TimerInnerEvent();
+                long resolutionTicks = CurrentResolution * TimeSpan.TicksPerMillisecond;
+
+                long closenessTicks = (long)(DEFAULT_TIMER_FASTSTEP.Ticks * 2);
+
+                DateTime timeNow = nodeState.CurrentNetworkTime;
+
+                long timeTicks = timeNow.Ticks;
+
+                if (((timeTicks % resolutionTicks) < closenessTicks))
+                {
+                    if ((minNextTickTime < timeNow))
+                    {
+                        // Next event can be atleast halfway from now and the next expected resolution event
+                        minNextTickTime = timeNow.Add(TimeSpan.FromMilliseconds(CurrentResolution / 2));
+
+                        // DisplayUtils.Display("+ " + timeNow.ToLongTimeString());
+
+                        if (EventEnabled)
+                            await Step?.Invoke();
+
+                        // await TimerInnerEvent();
+                    }
+                    else
+                    {
+                        // DisplayUtils.Display("-");
+                    }
                 }
                 else
                 {
-                    // DisplayUtils.Display("-");
+                    // DisplayUtils.Display(".");
                 }
-            }
-            else
-            {
-                //  DisplayUtils.Display(".");
             }
         }
 

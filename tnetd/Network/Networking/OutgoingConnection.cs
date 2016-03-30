@@ -150,12 +150,8 @@ namespace TNetD.Network.Networking
                 tcpClient.SendTimeout = 30000;
 
                 tcpClient.Connect(nodeSocketData.IP, nodeSocketData.ListenPort);
-
-                /*Thread thr = new Thread(() => { ConnectAndProcess(tcpClient); });
-                thr.Start();*/
-
+                
                 Task.Run(() => ConnectAndProcess(tcpClient));
-
             }
             catch (Exception ex)
             {
