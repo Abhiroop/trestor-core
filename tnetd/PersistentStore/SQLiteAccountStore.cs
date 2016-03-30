@@ -40,7 +40,7 @@ namespace TNetD.PersistentStore
         {
             sqliteConnection = new SQLiteConnection("Data Source=" + (isMemoryDB ? ":memory:" : config.Path_AccountDB) + ";Version=3;");
             sqliteConnection.Open();
-
+            
             VerifyTables();
         }
 

@@ -8,15 +8,11 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using TNetD.Nodes;
-using TNetD.Types;
 
 namespace TNetD.Transactions
 {
-
     class IncomingTransactionMap
     {
         NodeState nodeState;
@@ -25,8 +21,10 @@ namespace TNetD.Transactions
 
         bool TimerEventProcessed = true;
 
-        // Makeshift :P
-        public Object transactionLock = new Object();
+        /// <summary>
+        /// Transaction Sync Lock Object
+        /// </summary>
+        public object transactionLock = new object();
 
         //[Transaction ID] -> [[Transaction Content] -> [vector of sender address]]
         ConcurrentDictionary<Hash, TransactionContentData> TransactionMap = new ConcurrentDictionary<Hash, TransactionContentData>();
@@ -60,23 +58,17 @@ namespace TNetD.Transactions
             Tmr.Interval = nodeConfig.UpdateFrequencyPacketProcessMS;
             Tmr.Start();
         }
-        
-
 
         void Tmr_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             if(TimerEventProcessed) // Lock to prevent multiple invocations 
             {
-                TimerEventProcessed = false;
-
-                // // // // // // // // //
+                TimerEventProcessed = false;                
 
                 try
                 {
-
                     lock (transactionLock)
                     {
-
                         // Add the propagations to the transactions list.
                         foreach (KeyValuePair<Hash, TransactionContent> kvp in IncomingPropagations)
                         {
@@ -100,14 +92,11 @@ namespace TNetD.Transactions
 
                     // TODO: Forward to connected peers.
                     // More processing.
-
                 }
                 catch
                 {
                     DisplayUtils.Display("Timer Event : Exception : IncomingTransactionMap", DisplayType.Warning);
-                }
-
-                // // // // // // // // //
+                }                
             }
             else
             {

@@ -94,43 +94,42 @@ namespace TNetD.Transactions
         }
 
         /// <summary>
-        /// Returns True if the Address is valid and AccountType and NetworkType is correct. 
+        /// Returns True if the Address is valid and AccountType, NetworkType is correct;
+        /// The value is aslo checked for a positive value. 
         /// </summary>
         /// <returns></returns>
         public bool ValidateEntity()
         {
             AddressData AD;
-            bool OK = AddressFactory.VerfiyAddress(out AD, address, publicKey, name);
-            return AD.ValidateAccountType() && OK;
+            bool Address_OK = AddressFactory.VerfiyAddress(out AD, address, publicKey, name);
+            bool Value_OK = (_value > 0);
+            return AD.ValidateAccountType() && Address_OK && Value_OK;
         }
 
         public byte[] Serialize()
         {
-            ProtocolDataType[] PDTs = new ProtocolDataType[4];
-            PDTs[0] = (ProtocolPackager.Pack(publicKey, 0));
-            PDTs[1] = (ProtocolPackager.Pack(_value, 1));
-            PDTs[2] = (ProtocolPackager.Pack(name, 2));
-            PDTs[3] = (ProtocolPackager.Pack(address, 3));
+            var PDTs = new List<ProtocolDataType>();
+
+            PDTs.Add(ProtocolPackager.Pack(publicKey, 0));
+            PDTs.Add(ProtocolPackager.Pack(_value, 1));
+            PDTs.Add(ProtocolPackager.Pack(name, 2));
+            PDTs.Add(ProtocolPackager.Pack(address, 3));
+
             return ProtocolPackager.PackRaw(PDTs);
         }
 
         public void Deserialize(JS_TransactionEntity entity)
         {
             publicKey = entity.PublicKey;
-            name = entity.Name;
-            address = entity.Address;
             _value = entity.Value;
+            name = entity.Name;
+            address = entity.Address;            
         }
 
         public void Deserialize(byte[] Data)
         {
-            List<ProtocolDataType> PDTs = ProtocolPackager.UnPackRaw(Data);
-            int cnt = 0;
-
-            while (cnt < (int)PDTs.Count)
+            foreach(var PDT in ProtocolPackager.UnPackRaw(Data))
             {
-                ProtocolDataType PDT = PDTs[cnt++];
-
                 switch (PDT.NameType)
                 {
                     case 0:
@@ -150,7 +149,6 @@ namespace TNetD.Transactions
                         break;
                 }
             }
-
         }
     }
 }

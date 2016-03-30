@@ -48,15 +48,15 @@ namespace TNetD.PersistentStore
             AccountStore.DeleteEverything();
         }
 
-        public void ExportToNodeSQLite(Node node)
+        public void ExportToNodeSQLite(Node destinationNode)
         {
             var source_AccountStore = (SQLiteConnection)AccountStore.GetConnection();
             var source_TransactionStore = (SQLiteConnection)TransactionStore.GetConnection();
             var source_CloseHistory = (SQLiteConnection)CloseHistory.GetConnection();
 
-            var dest_AccountStore = node.nodeState.Persistent.AccountStore.GetConnection();
-            var dest_TransactionStore = node.nodeState.Persistent.TransactionStore.GetConnection();
-            var dest_CloseHistory = node.nodeState.Persistent.CloseHistory.GetConnection();
+            var dest_AccountStore = destinationNode.nodeState.Persistent.AccountStore.GetConnection();
+            var dest_TransactionStore = destinationNode.nodeState.Persistent.TransactionStore.GetConnection();
+            var dest_CloseHistory = destinationNode.nodeState.Persistent.CloseHistory.GetConnection();
             
             source_AccountStore.BackupDatabase((SQLiteConnection)dest_AccountStore, "main", "main", -1, null, -1);
             source_TransactionStore.BackupDatabase((SQLiteConnection)dest_TransactionStore, "main", "main", -1, null, -1);

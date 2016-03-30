@@ -21,16 +21,23 @@ namespace TNetD.Tests
         Node inputNode = default(Node);
         Node destNode = default(Node);
         Node exportNode = default(Node);
+        Node tempNode = default(Node);
 
         public LedgerIntegrity(int inputNodeID, int destinationNodeID, int exportNodeID)
         {
-            inputNode = new Node(inputNodeID);
+            tempNode = new Node(inputNodeID);
+
+            inputNode = new Node(inputNodeID + 1, true);
+
+            tempNode.nodeState.Persistent.ExportToNodeSQLite(inputNode);
+
             destNode = new Node(destinationNodeID, true);
             exportNode = new Node(exportNodeID);
         }
 
         public void Dispose()
         {
+            tempNode.StopNode();
             inputNode.StopNode();
             destNode.StopNode();
             exportNode.StopNode();
@@ -68,7 +75,7 @@ namespace TNetD.Tests
 
                     //lcd.CloseTime = tcs[0].Timestamp;
 
-                    tv_dest.ApplyTransactions(tx_opers, lcd);
+                    tv_dest.ApplyTransactions(tx_opers, lcd.CloseTime);
 
                     LedgerCloseData l_lcd;
 
@@ -78,7 +85,7 @@ namespace TNetD.Tests
                     Hash curr_h = new Hash(lcd.LedgerHash);
 
                     DisplayUtils.Display("Ledger " + l_lcd.SequenceNumber + "/" + lcd.SequenceNumber + " Closed:" +
-                    dest_h, DisplayType.ImportantInfo);
+                                                dest_h, DisplayType.ImportantInfo);
 
                     /* if (dest_h == curr_h)
                      {

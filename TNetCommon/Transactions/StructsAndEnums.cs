@@ -94,9 +94,14 @@ namespace TNetD.Transactions
         InvalidExecutionData = 0x0C,
 
         /// <summary>
-        /// The Source entity is also present as one of the Destinations.
+        /// The Sourceentity is also present as one of the Destinations.
         /// </summary>
         SourceDestinationRepeat = 0x0D,
+
+        /// <summary>
+        /// The source or destination entity values overflows while evaluation.
+        /// </summary>
+        ValueOverflow = 0x0E,
 
         /// <summary>
         /// Processing Result: Source does not exist.
@@ -132,6 +137,12 @@ namespace TNetD.Transactions
         /// Processing Result: Not enough funds in account or double spending.
         /// </summary>
         PR_BadInsufficientFunds = 0x26,
+
+        /// <summary>
+        /// Processing Result: Transaction amount limits set by the server are violated. 
+        /// Use a lower value transaction source or total value.
+        /// </summary>
+        PR_BadTransactionAmountLimit = 0x27,
 
         /// <summary>
         /// Processing Result: OMG !!! Its all good !!!

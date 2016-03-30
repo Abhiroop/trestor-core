@@ -8,15 +8,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using TNetD.Json.JS_Structs;
 using TNetD.Protocol;
 
 namespace TNetD.Transactions
 {
-    
-
     /// <summary>
     /// A single transaction, contains all the sources and destinations.
     /// It is important that all the signees agree to all the transactions in the request.
@@ -161,7 +157,7 @@ namespace TNetD.Transactions
             transactionData.AddRange(executionData);
 
             // Adding Sources
-            for (int i = 0; i < (int)Sources.Count; i++)
+            for (int i = 0; i < Sources.Count; i++)
             {
                 TransactionEntity ts = Sources[i];
                 transactionData.AddRange(ts.PublicKey);
@@ -169,7 +165,7 @@ namespace TNetD.Transactions
             }
 
             // Adding Destinations
-            for (int i = 0; i < (int)Destinations.Count; i++)
+            for (int i = 0; i < Destinations.Count; i++)
             {
                 TransactionEntity td = Destinations[i];
                 transactionData.AddRange(td.PublicKey);
@@ -253,30 +249,41 @@ namespace TNetD.Transactions
             if (Sources.Count != Signatures.Count)
                 return TransactionProcessingResult.InsufficientSignatureCount;
 
-            if (transactionFee < Common.NETWORK_MIN_TRANSACTION_FEE)
+            if (transactionFee < Common.FIN_MIN_TRANSACTION_FEE)
             {
                 return TransactionProcessingResult.InsufficientFees;
             }
 
-            for (int i = 0; i < (int)Sources.Count; i++)
+            try
             {
-                if (Sources[i].Value < Common.NETWORK_TRANSACTION_SRCDEST_MIN_COUNT)
-                    return TransactionProcessingResult.NoProperSources;
+                checked
+                {
+                    for (int i = 0; i < Sources.Count; i++)
+                    {
+                        if (Sources[i].Value < Common.FIN_TRANSACTION_SRCDEST_MIN_VALUE)
+                            return TransactionProcessingResult.NoProperSources;
 
-                incoming += Sources[i].Value;
+                        incoming += Sources[i].Value;
+                    }
+
+                    for (int i = 0; i < Destinations.Count; i++)
+                    {
+                        if (Destinations[i].Value < Common.FIN_TRANSACTION_SRCDEST_MIN_VALUE)
+                            return TransactionProcessingResult.NoProperDestinations;
+
+                        outgoing += Destinations[i].Value;
+                    }
+
+                    outgoing += transactionFee;
+                }
+            }
+            catch (OverflowException)
+            {
+                // When 
+                return TransactionProcessingResult.ValueOverflow;
             }
 
-            for (int i = 0; i < (int)Destinations.Count; i++)
-            {
-                if (Destinations[i].Value < Common.NETWORK_TRANSACTION_SRCDEST_MIN_COUNT)
-                    return TransactionProcessingResult.NoProperDestinations;
-
-                outgoing += Destinations[i].Value;
-            }
-
-            outgoing += transactionFee;
-
-            if ((incoming == outgoing) &&
+            if ((incoming == outgoing) && (incoming > 0) &&
                 (Sources.Count > 0) &&
                 (Destinations.Count > 0))
             {
@@ -294,7 +301,7 @@ namespace TNetD.Transactions
         /// <returns></returns>
         public TransactionProcessingResult VerifySignature()
         {
-            TransactionProcessingResult tp_result = IntegrityCheck();
+            var tp_result = IntegrityCheck();
 
             if (tp_result != TransactionProcessingResult.Accepted)
             {
@@ -307,7 +314,7 @@ namespace TNetD.Transactions
 
             int PassedSignatures = 0;
 
-            for (int i = 0; i < (int)Sources.Count; i++)
+            for (int i = 0; i < Sources.Count; i++)
             {
                 TransactionEntity ts = Sources[i];
 
@@ -361,10 +368,8 @@ namespace TNetD.Transactions
 
         bool IsSource(Hash SourcePublicKey)
         {
-            for (int i = 0; i < (int)Sources.Count; i++)
+            foreach (var TE in Sources)
             {
-                TransactionEntity TE = Sources[i];
-
                 if (TE.PublicKey == SourcePublicKey.Hex)
                     return true;
             }
@@ -374,18 +379,14 @@ namespace TNetD.Transactions
 
         bool IsDestination(Hash DestinationPublicKey)
         {
-            for (int i = 0; i < (int)Destinations.Count; i++)
+            foreach (var TE in Destinations)
             {
-                TransactionEntity TE = Destinations[i];
-
                 if (TE.PublicKey == DestinationPublicKey.Hex)
                     return true;
             }
 
             return false;
         }
-
-        ///////////////////////////////////////////////////////////
 
         public byte[] Serialize()
         {
@@ -420,8 +421,6 @@ namespace TNetD.Transactions
 
             return ProtocolPackager.PackRaw(PDTs);
         }
-
-        /////////////////////////
 
         public bool Deserialize(JS_TransactionReply Data)
         {
@@ -528,14 +527,12 @@ namespace TNetD.Transactions
                             }
                         }
                         break;
-
                 }
             }
 
             // Update the internal Hash of the object.
             UpdateIntHash();
         }
-
     }
 }
 

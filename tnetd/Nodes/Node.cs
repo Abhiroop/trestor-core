@@ -286,9 +286,12 @@ namespace TNetD.Nodes
             {
                 long records = await nodeState.Ledger.InitializeLedger();
 
-                Interlocked.Add(ref nodeState.NodeInfo.NodeDetails.TotalAccounts, records);
+                nodeState.NodeInfo.NodeDetails.TotalAccounts = records;
 
-                await networkPacketSwitch.InitialConnectAsync();
+                if (Common.NODE_OPERATION_TYPE == NodeOperationType.Distributed)
+                {
+                    await networkPacketSwitch.InitialConnectAsync();
+                }
 
                 LedgerCloseData ledgerCloseData;
                 nodeState.Persistent.CloseHistory.GetLastRowData(out ledgerCloseData);
@@ -350,7 +353,6 @@ namespace TNetD.Nodes
 
             return Tres;
         }
-
 
         public async Task<long> CalculateTotalMoneyFromLedgerTreeAsync()
         {

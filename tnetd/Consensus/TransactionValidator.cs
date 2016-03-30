@@ -75,11 +75,17 @@ namespace TNetD.Consensus
                             bool badTX_AccountCreationValue = false;
                             bool badTX_AccountState = false;
                             bool badTX_TransactionFee = false;
+                            bool badTX_TransactionAmountLimit = false;
                             bool badTX_InsufficientFunds = false;
 
                             List<AccountInfo> temp_NewAccounts = new List<AccountInfo>();
 
                             // Check if account name in destination is valid.
+
+                            if (transactionContent.Value > Constants.FIN_MAX_TRE_PER_TX)
+                            {
+                                badTX_TransactionAmountLimit = true;
+                            }
 
                             foreach (TransactionEntity te in transactionContent.Destinations)
                             {
@@ -91,7 +97,8 @@ namespace TNetD.Consensus
                                 }
 
                                 AccountInfo ai;
-                                if (nodeState.Persistent.AccountStore.FetchAccount(out ai, new Hash(te.PublicKey)) == DBResponse.FetchSuccess)
+                                if (nodeState.Persistent.AccountStore.FetchAccount(out ai, new Hash(te.PublicKey))
+                                    == DBResponse.FetchSuccess)
                                 {
                                     // Account Exists
                                     if (ai.Name != te.Name)
@@ -118,6 +125,7 @@ namespace TNetD.Consensus
                                             // Thats too bad, transaction cannot happen, 
                                             // new wallet has invalid Name (name already used).
                                             badTX_AccountName = true;
+                                            break;
                                         }
                                         else
                                         {
@@ -145,20 +153,30 @@ namespace TNetD.Consensus
                                 {
                                     AccountInfo account = nodeState.Ledger[pkSource];
 
-                                    long PendingValueDifference = 0;
+                                    long removeValueForAccount = 0;
 
                                     // Check if the account exists in the pending transaction queue.
                                     if (pendingDifferenceData.ContainsKey(pkSource))
                                     {
-                                        TreeDiffData treeDiffData = pendingDifferenceData[pkSource];
-
-                                        // PendingValueDifference += treeDiffData.AddValue; // [Allows simultaneous TX]
-                                        PendingValueDifference -= treeDiffData.RemoveValue;
+                                        removeValueForAccount = pendingDifferenceData[pkSource].RemoveValue;
                                     }
 
                                     if (account.AccountState == AccountState.Normal)
                                     {
-                                        if ((account.Money + PendingValueDifference) >= (source.Value + Constants.FIN_MIN_BALANCE))
+                                        long sourceValue = source.Value;
+                                        long creditFromAccount = removeValueForAccount + Constants.FIN_MIN_BALANCE;
+                                        long availableBalance = account.Money - creditFromAccount;
+
+                                        if (source.Value > Constants.FIN_MAX_TRE_PER_TX_ENTITY)
+                                        {
+                                            badTX_TransactionAmountLimit = true;
+                                            break;
+                                        }
+
+                                        // Lots of checks :D
+                                        if ((sourceValue > 0) && (availableBalance > 0) &&
+                                            (account.Money >= creditFromAccount) &&
+                                            (creditFromAccount >= 0) && (availableBalance >= sourceValue))
                                         {
                                             // Has enough money.
                                         }
@@ -228,7 +246,7 @@ namespace TNetD.Consensus
                             // TEMPORARY SINGLE NODE STUFF // DIRECT DB WRITE.
                             // Make a list of updated accounts.
                             if (!badTX_SourceDoesNotExist && !badTX_AccountCreationValue && !badTX_AccountState && !badTX_InsufficientFunds
-                                && !badTX_AccountName && !badTX_AccountAddress & !badTX_TransactionFee)
+                                && !badTX_TransactionAmountLimit && !badTX_AccountName && !badTX_AccountAddress & !badTX_TransactionFee)
                             {
                                 newAccounts.AddRange(temp_NewAccounts);
 
@@ -237,7 +255,7 @@ namespace TNetD.Consensus
 
                                 foreach (TransactionEntity source in transactionContent.Sources)
                                 {
-                                    // As it is a source the known amount would be substracted from the value.
+                                    // As it is a source, the known amount would be substracted from the value.
                                     Hash PK = new Hash(source.PublicKey);
 
                                     if (pendingDifferenceData.ContainsKey(PK)) // Update Old
@@ -277,7 +295,7 @@ namespace TNetD.Consensus
                                 acceptedTransactions.Add(transactionContent.TransactionID, transactionContent);
 
                                 //DisplayUtils.Display("Transaction added to intermediate list : " +
-                                  //  HexUtil.ToString(transactionContent.TransactionID.Hex), DisplayType.Info);
+                                //  HexUtil.ToString(transactionContent.TransactionID.Hex), DisplayType.Info);
 
                                 nodeState.TransactionStateManager.Set(transactionContent.TransactionID, TransactionProcessingResult.PR_Validated);
                             }
@@ -289,6 +307,7 @@ namespace TNetD.Consensus
                                 if (badTX_AccountCreationValue) rs = TransactionProcessingResult.PR_BadAccountCreationValue;
                                 if (badTX_AccountState) rs = TransactionProcessingResult.PR_BadAccountState;
                                 if (badTX_InsufficientFunds) rs = TransactionProcessingResult.PR_BadInsufficientFunds;
+                                if (badTX_TransactionAmountLimit) rs = TransactionProcessingResult.PR_BadTransactionAmountLimit;
                                 if (badTX_AccountName) rs = TransactionProcessingResult.PR_BadAccountName;
                                 if (badTX_TransactionFee) rs = TransactionProcessingResult.PR_BadTransactionFee;
                                 if (badTX_AccountAddress) rs = TransactionProcessingResult.PR_BadAccountAddress;
@@ -301,6 +320,7 @@ namespace TNetD.Consensus
                                     (badTX_AccountCreationValue ? "\nbadTX_AccountCreationValue" : "") +
                                     (badTX_AccountState ? "\nbadTX_AccountState" : "") +
                                     (badTX_InsufficientFunds ? "\nbadTX_InsufficientFunds" : "") +
+                                    (badTX_TransactionAmountLimit ? "\nbadTX_TransactionAmountLimit" : "") +
                                     (badTX_AccountName ? "\nbadTX_AccountName" : "") +
                                     (badTX_TransactionFee ? "\nbadTX_TransactionFee" : "") +
                                     (badTX_AccountAddress ? "\nbadTX_AccountAddress" : "") + "\n" +
@@ -331,7 +351,7 @@ namespace TNetD.Consensus
             return thd;
         }
 
-        public void ApplyTransactions(TransactionHandlingData thd, LedgerCloseData ledgerCloseData = null)
+        public void ApplyTransactions(TransactionHandlingData thd, long? CloseTime = null)
         {
             Dictionary<Hash, TreeDiffData> pendingDifferenceData = thd.PendingDifferenceData;
             Dictionary<Hash, TransactionContent> acceptedTransactions = thd.AcceptedTransactions;
@@ -421,25 +441,10 @@ namespace TNetD.Consensus
 
                 List<AccountInfo> finalPersistentDBUpdateList = new List<AccountInfo>();
 
+                long closeTime = CloseTime ?? DateTime.UtcNow.ToFileTimeUtc();
+
                 // This essentially gets values from Ledger Tree and updates the Persistent-DB
 
-                long CloseTime = DateTime.UtcNow.ToFileTimeUtc();
-
-                // If the supplied ledger close data is null; use the one from persistent store.
-                // This would allow for LCD close tests, the actual value of ledgerCloseData in a live server 
-                // should be null.
-
-                if (ledgerCloseData == null)
-                {
-
-                }
-                else
-                {
-                    //DisplayUtils.Display("TEST MODE: NOT USING PERSISTENT LCD CloseTimes.", DisplayType.ImportantInfo);
-                    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    CloseTime = ledgerCloseData.CloseTime;
-                }
-                
                 foreach (KeyValuePair<Hash, TreeDiffData> kvp in pendingDifferenceData)
                 {
                     TreeDiffData diffData = kvp.Value;
@@ -452,8 +457,9 @@ namespace TNetD.Consensus
                     // DisplayUtils.Display("Balance: " + ledgerAccount.Money + ", Added:" + diffData.AddValue + ", Removed:" + diffData.RemoveValue, DisplayType.Info);
 
                     ledgerAccount.Money += diffData.AddValue;
-                    ledgerAccount.Money -= diffData.RemoveValue;
-                    ledgerAccount.LastTransactionTime = CloseTime;
+                    ledgerAccount.Money -= diffData.RemoveValue;                    
+
+                    ledgerAccount.LastTransactionTime = closeTime;
 
                     nodeState.Ledger[diffData.PublicKey] = ledgerAccount;
 
@@ -461,18 +467,18 @@ namespace TNetD.Consensus
                     // values in both locations.
 
                     finalPersistentDBUpdateList.Add(ledgerAccount);
-                }
+                }                
 
                 LedgerCloseData lcd;
 
                 bool ok = nodeState.Persistent.CloseHistory.GetLastRowData(out lcd);
 
-                lcd.CloseTime = CloseTime;
+                lcd.CloseTime = closeTime;
                 lcd.SequenceNumber++;
                 lcd.Transactions = acceptedTransactions.Count;
                 lcd.TotalTransactions += lcd.Transactions;
                 lcd.LedgerHash = nodeState.Ledger.RootHash.Hex;
-                
+
                 // Apply to persistent DB.
 
                 nodeState.Persistent.CloseHistory.AddUpdate(lcd);

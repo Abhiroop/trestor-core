@@ -35,11 +35,11 @@ namespace TNetD
 
         public static readonly int TRANSACTION_STALE_TIMER_MINUTES = 20; // Deviation of 1 minute. // Critical Fix
         
-        public static readonly int NETWORK_MIN_TRANSACTION_FEE = 0; //100000; // ~ 0.1 US Cent, approx, initial value.
+        public static readonly int FIN_MIN_TRANSACTION_FEE = 0; //100000; // ~ 0.1 US Cent, approx, initial value.
+        
+        public static readonly int FIN_TRANSACTION_SRCDEST_MIN_VALUE = 100; // Minimum transaction of 100 tre.
 
-        public static readonly int NETWORK_TRANSACTION_SRCDEST_MIN_COUNT = 1; // Atleast a singel source and destination
-
-        public static readonly int NETWORK_MIN_TRANSACTION_TOTAL_VALUE = 1; // Minimum transaction of 1 trest.
+        public static readonly int FIN_MIN_TRANSACTION_TOTAL_VALUE = 100; // Minimum transaction of 1 tre.
 
         // /////////////////////////////////////////////////////////////////////////////////////
 
@@ -53,7 +53,7 @@ namespace TNetD
         public static readonly long LSYNC_MAX_PENDING_QUEUE_LENGTH = 2048; 
         public static readonly long LSYNC_MAX_ORDERED_NODES = 64;
         public static readonly long LSYNC_MAX_ORDERED_LEAVES = 1024;
-        public static readonly long LSYNC_MAX_LEAVES_TO_FETCH = 64; // 4096 
+        public static readonly long LSYNC_MAX_LEAVES_TO_FETCH = 512; 
 
         /// <summary>
         /// This is for requests over the network
@@ -64,7 +64,7 @@ namespace TNetD
 
         public static readonly int UI_TextBox_Max_Length = 20000;
 
-        public static readonly NetworkType NETWORK_TYPE = Address.NetworkType.MainNet;
+        public static readonly NetworkType NETWORK_TYPE = NetworkType.MainNet;
         public static readonly NodeOperationType NODE_OPERATION_TYPE = NodeOperationType.Distributed;
 
         public static readonly string RPC_HOST = "localhost";// "localhost";

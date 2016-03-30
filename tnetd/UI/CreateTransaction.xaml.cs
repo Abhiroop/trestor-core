@@ -96,7 +96,7 @@ namespace TNetD.UI
             tb_SenderPrivate.Text = HexUtil.ToString(_rand_1);
             tb_DestPrivate.Text = HexUtil.ToString(_rand_2);
 
-            tb_Fee.Text = Common.NORMAL_RNG.Next(Common.NETWORK_MIN_TRANSACTION_FEE, Common.NETWORK_MIN_TRANSACTION_FEE * 2) + "";
+            tb_Fee.Text = Common.NORMAL_RNG.Next(Common.FIN_MIN_TRANSACTION_FEE, Common.FIN_MIN_TRANSACTION_FEE * 2) + "";
 
             tb_Value.Text = Common.NORMAL_RNG.Next(1000, 50000000) + "";
 

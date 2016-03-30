@@ -47,7 +47,18 @@ namespace TNetD
         ///  Minimum 10 trest balance.
         ///  [CRITICAL: FIX ME !!!]
         /// </summary>
-        public static readonly long FIN_MIN_BALANCE = 1000; //10000000;
+        public static readonly long FIN_MIN_BALANCE = 1000; // 10000000;
+
+        /// <summary>
+        /// Maximum amount of TRE's per transaction entity. 20,00,00,000 Trest
+        /// </summary>
+        public static readonly long FIN_MAX_TRE_PER_TX = 200000000000000;
+
+        /// <summary>
+        /// Maximum amount of TRE's per transaction entity. 5,00,00,000 Trest
+        /// </summary>
+        public static readonly long FIN_MAX_TRE_PER_TX_ENTITY = 50000000000000;
+
 
         public static readonly long DB_HISTORY_LIMIT = 1000;
         public static readonly long DB_HISTORY_TX_LIMIT = 100000; // TODO: SET TO GOOD LIMITS

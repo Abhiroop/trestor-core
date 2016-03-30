@@ -576,10 +576,7 @@ namespace TNetD.Nodes
 
             this.SendJsonResponse(context, msg.GetResponse());
         }
-
-
         
-
         private void HandleAccountRegister(HttpListenerContext context)
         {
             JS_Msg msg = new JS_Msg("Processing Initiated.", RPCStatus.Undefined);
