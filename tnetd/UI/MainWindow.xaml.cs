@@ -101,7 +101,7 @@ namespace TNetD
             }
         }
 
-        void LocalLedger_LedgerEvent(Ledgers.Ledger.LedgerEventType ledgerEvent, string Message)
+        void LocalLedger_LedgerEvent(Ledger.LedgerEventType ledgerEvent, string Message)
         {
             try
             {
@@ -120,7 +120,7 @@ namespace TNetD
             {
                 try
                 {
-                    this.Dispatcher.Invoke(new Action(() =>
+                    Dispatcher.Invoke(new Action(() =>
                     {
                         displayMessage.Text = displayMessage.Text.Trim();
                         viewModel.ProcessSkips();
@@ -129,91 +129,6 @@ namespace TNetD
                 }
                 catch { }
             }
-        }
-
-        private void menuItem_Simulation_Start_Click(object sender, RoutedEventArgs e)
-        {
-            List<Hash> accounts = new List<Hash>();
-            SortedDictionary<Hash, int> hh = new SortedDictionary<Hash, int>();
-
-            byte[] N_H = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
-
-            ListHashTree lht = new ListHashTree();
-
-            int ACCOUNTS = 1000;
-
-            long taka = 0;
-
-            DisplayUtils.Display("Adding ... ");
-
-            for (int i = 0; i < ACCOUNTS; i++)
-            {
-                N_H[0] = (byte)(i);
-
-                Common.SECURE_RNG.GetBytes(N_H);
-
-                accounts.Add(new Hash(N_H));
-
-                long _taks = Common.NORMAL_RNG.Next(0, 1000000000);
-
-                taka += _taks;
-
-                AccountInfo ai = new AccountInfo(new Hash(N_H), _taks);
-                lht.AddUpdate(ai);
-            }
-
-            //lht.TraverseNodes();
-
-            //long received_takas = 0;
-
-            // for (int i = 0; i < ACCOUNTS; i++)
-            // {
-            //     byte[] N_H = { (byte)(i * 3), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
-            //     Hash h = new Hash(N_H);
-            //     AccountInfo ai = (AccountInfo)lht[h];
-            //     //DisplayUtils.Display("Fetch: " + HexUtil.ToString(ai.GetID().Hex) + "   ---  Money: " + ai.Money);
-            //     received_takas += ai.Money;
-            // }
-
-            DisplayUtils.Display("Initial Money : " + taka);
-
-            DisplayUtils.Display("\nTraversing ... ");
-
-            long Tres = 0;
-
-            long LeafDataCount = 0;
-            long FoundNodes = 0;
-
-            lht.TraverseAllNodes(ref LeafDataCount, ref FoundNodes, (X) =>
-            {
-                foreach (AccountInfo AI in X)
-                {
-                    Tres += AI.Money;
-                }
-                return TreeResponseType.NothingDone;
-            });
-
-
-            DisplayUtils.Display("Traversed Money : " + Tres);
-            DisplayUtils.Display("Traversed Nodes : " + lht.TraversedNodes);
-            DisplayUtils.Display("Traversed Elements : " + lht.TraversedElements);
-
-            int cnt = 0;
-            foreach (Hash h in accounts)
-            {
-                //N_H[5] = (byte)(i * 3);
-
-                if (++cnt > accounts.Count / 2) break;
-
-                lht.DeleteNode(h);
-            }
-
-            DisplayUtils.Display("\nTraversing After Delete ... ");
-            // lht.TraverseNodes();
-
-            DisplayUtils.Display("Traversed Money : " + lht.TotalMoney);
-            DisplayUtils.Display("Traversed Nodes : " + lht.TraversedNodes);
-            DisplayUtils.Display("Traversed Elements : " + lht.TraversedElements);
         }
 
         private void menuItem_File_Exit_Click(object sender, RoutedEventArgs e)

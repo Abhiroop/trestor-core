@@ -140,7 +140,7 @@ namespace TNetD
         /// <summary>
         /// Minimum Level to be displayed.
         /// </summary>
-        public static readonly DisplayType DebugLevel = DisplayType.Info;
+        public static readonly DisplayType DebugLevel = DisplayType.Debug;
 
         /// <summary>
         /// Number of pending work proofs, before new entries are rejected.

@@ -3,21 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace TNetTest
 {
     class TimeTests
     {
-        
-
         public delegate void PrintHandler(string value);
         public event PrintHandler Print;
 
         public void Execute()
         {
-            string file1 = @"C:\Users\ashis_000\Source\Repos\tnetd\tnetd\bin\Debug\NODE_2\voteLog_2.log";
-            string file2 = @"C:\Users\ashis_000\Source\Repos\tnetd\tnetd\bin\Debug\NODE_2\resultLog_2.csv";
+            string file1 = @"NODE_2\voteLog_2.log";
+            string file2 = @"NODE_2\resultLog_2.csv";
+
             TimeTests parse = new TimeTests();
             List<string[]> fileParsed = parse.file(file1);
 
@@ -32,10 +30,10 @@ namespace TNetTest
                         {
 
                             timeMap[lines[2]] = Convert.ToInt64(lines[3]) - timeMap[lines[2]];
-                            
-                        }
-                        else {
 
+                        }
+                        else
+                        {
                             timeMap.Add(lines[2], Convert.ToInt64(lines[3]));
                         }
                     }
@@ -62,23 +60,17 @@ namespace TNetTest
             {
                 sb.Append(afterBucket.Item2 * i + ",");
             }
-
-
-
-
-
-
+            
             //logging
             FileStream logger = default(FileStream);
 
             TextWriter tr = default(TextWriter);
 
-            logger = new FileStream(file2,FileMode.Create);
+            logger = new FileStream(file2, FileMode.Create);
             tr = new StreamWriter(logger);
             tr.WriteLine(sb.ToString().TrimEnd());
             tr.WriteLine(k.TrimEnd());
             Print?.Invoke(afterBucket.Item2.ToString());
-
         }
 
         private List<string[]> file(string csvFile)
@@ -92,15 +84,12 @@ namespace TNetTest
                     string[] lineRead = line.Split(',');
 
                     total.Add(lineRead);
-
                 }
 
             }
             catch (Exception ex)
             {
-
-                Print?.Invoke( ex.Message +"\n"+ ex.StackTrace );
-
+                Print?.Invoke(ex.Message + "\n" + ex.StackTrace);
             }
             return total;
         }
@@ -126,11 +115,9 @@ namespace TNetTest
                 buckets[bucketIndex]++;
             }
 
-
             var bucketSizeF = ((float)max - (float)min) / (float)totalBuckets;
-            
 
-            Tuple<int[], float> result = new Tuple<int[], float>(buckets,bucketSizeF);
+            Tuple<int[], float> result = new Tuple<int[], float>(buckets, bucketSizeF);
             return result;
         }
     }

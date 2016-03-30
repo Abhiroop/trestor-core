@@ -10,7 +10,7 @@
         <local:HashToString x:Key="HashToString"/>
         <local:DateTimeToTimeString x:Key="DateTimeToTimeString"/>
         <local:DateTimeToDateString x:Key="DateTimeToDateString"/>
-        
+
         <Style x:Key="DarkRoomListViewStyle" TargetType="{x:Type ListView}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -105,7 +105,7 @@
         </Menu>
 
         <TabControl Grid.Row="1">
-            <TabItem Header="Log">
+            <TabItem Header="Status">
                 <Grid Name="grid_Main">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="620*"/>
@@ -113,11 +113,22 @@
                         <ColumnDefinition Width="380*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="38"/>
                         <RowDefinition Height="100*"/>
                         <RowDefinition Height="10"/>
                     </Grid.RowDefinitions>
-                    <Label>Log:</Label>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="60"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label VerticalAlignment="Center">Node ID</Label>
+                        <TextBox Name="textBox_NodeID" Grid.Column="1" Text="0" Width="60" Height="30" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                        <Button Grid.Column="2" Content="Load" HorizontalAlignment="Left" Width="100" Height="30" Click="menuItem_Load_Node_Data_Click"></Button>                    
+                    </Grid>
+                    
                     <Label Grid.Column="2">Status:</Label>
                     <ListBox Grid.Row="1" ItemsSource="{Binding LogMessages}"  Background="#FF1E1E1E" Foreground="#FF8ACD3A" >
                         <ListBox.ItemTemplate>
@@ -138,11 +149,13 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
+
+                    <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
+
                     <ScrollViewer Grid.Row="1" Grid.Column="2">
                         <TextBlock x:Name="textBlock_Status" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" TextWrapping="Wrap" RenderOptions.BitmapScalingMode="LowQuality"/>
                     </ScrollViewer>
 
-                    <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
 
                 </Grid>
             </TabItem>
@@ -170,22 +183,22 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="75"/>
-                                        <ColumnDefinition Width="140"/>                                       
-                                        <ColumnDefinition Width="*"/>                                                                               
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
                                         <RowDefinition />
-                                        <RowDefinition />                                   
+                                        <RowDefinition />
                                     </Grid.RowDefinitions>
-                                    
+
                                     <TextBlock Text="{Binding SequenceNumber}" 
                                                Foreground="CornflowerBlue" Grid.Column="0" />
-                                    
+
                                     <TextBlock Text="{Binding Time}" 
-                                               Foreground="Plum" Grid.Column="1" />                                    
-                                    
+                                               Foreground="Plum" Grid.Column="1" />
+
                                     <TextBlock Text="{Binding Transactions}" 
-                                               Foreground="Yellow" Grid.Column="2" />                                    
+                                               Foreground="Yellow" Grid.Column="2" />
 
                                     <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3"  
                                                 HorizontalAlignment="Left">
@@ -196,7 +209,7 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    
+
                     <GridSplitter  Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
 
                     <ListBox Name="listBox_TransactionData" Grid.Row="1" Grid.Column="2" ItemsSource="{Binding TransactionData}" 
@@ -205,11 +218,11 @@
                             <DataTemplate>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="150"/>                   
+                                        <ColumnDefinition Width="150"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="{Binding Time}" 
-                                               Foreground="Plum" Grid.Column="0" />                           
+                                               Foreground="Plum" Grid.Column="0" />
 
                                     <StackPanel Orientation="Vertical" Grid.Column="1" Width="100" HorizontalAlignment="Left">
                                         <TextBlock Text="{Binding Text}" FontFamily="Consolas" TextWrapping="Wrap"

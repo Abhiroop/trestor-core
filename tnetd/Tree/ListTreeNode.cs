@@ -15,7 +15,7 @@ namespace TNetD.Tree
     /// There can be 16 child nodes
     /// </summary>
     /// <typeparam name="LeafDataType"></typeparam>
-    class ListTreeNode
+    public class ListTreeNode
     {
         public Hash addressNibbles;
         protected long leafCount;

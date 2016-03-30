@@ -40,7 +40,7 @@ namespace TNetD.Nodes
 {
     public delegate void NodeStatusEventHandler(string Status, int NodeID);
 
-    internal class Node
+    internal class Node : IDisposable
     {
         #region Locals
 
@@ -128,7 +128,9 @@ namespace TNetD.Nodes
             timeSync = new TimeSync(nodeState, nodeConfig, networkPacketSwitch);
             ledgerSync = new LedgerSync(nodeState, nodeConfig, networkPacketSwitch);
             peerDiscovery = new PeerDiscovery(nodeState, nodeConfig, networkPacketSwitch);
-            peerDiscovery.AddKnownPeer(new PeerData(new NodeSocketData(nodeConfig.PublicKey, nodeConfig.ListenPortProtocol, "127.0.0.1", nodeConfig.Name), nodeState, nodeConfig));
+
+            peerDiscovery.AddKnownPeer(new PeerData(new NodeSocketData(nodeConfig.PublicKey, 
+                nodeConfig.ListenPortProtocol, "127.0.0.1", nodeConfig.Name), nodeState, nodeConfig));
 
             voting = new Voting(nodeConfig, nodeState, networkPacketSwitch);
 
@@ -477,6 +479,44 @@ namespace TNetD.Nodes
             }
 
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    StopNode();
+
+
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Node() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
 
     }
 }

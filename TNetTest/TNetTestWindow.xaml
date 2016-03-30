@@ -24,6 +24,13 @@
                 <MenuItem Name="menuItem_File_TestVarint" Header="Test Varint" Click="menuItem_File_TestVarint_Click" />
                 <MenuItem Name="menuItem_File_TestTree" Header="Test Tree" Click="menuItem_File_TestTree_Click" />
             </MenuItem>
+            <MenuItem Header="SIMULATION">
+                <MenuItem Name="menuItem_Simulation_Start" Header="Start" Click="menuItem_Simulation_Start_Click"/>
+                <MenuItem Name="menuItem_Simulation_Stop" Header="Stop"/>
+                <MenuItem Name="menuItem_Simulation_Restart" Header="Restart"/>
+                <Separator/>
+                <MenuItem Name="menuItem_Simulation_Resync" Header="Resync"/>
+            </MenuItem>
             <MenuItem Header="TRANSACTIONS">
                 <MenuItem Header="Intialize" Name="button_TransactionsInitialize" Click="button_TransactionsInitialize_Click" />
                 <MenuItem Header="Start" Name="button_TransactionsStart" Click="button_TransactionsStart_Click"/>

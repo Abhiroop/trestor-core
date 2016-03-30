@@ -138,6 +138,10 @@
       <Project>{66391146-98d7-4258-85f5-d8be99e632fd}</Project>
       <Name>TNetCommon</Name>
     </ProjectReference>
+    <ProjectReference Include="..\tnetd\TNetD.csproj">
+      <Project>{c432e226-42a1-499b-8034-da76ed578e2a}</Project>
+      <Name>TNetD</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TNetNative\TNetNative.vcxproj">
       <Project>{f9d34521-1ba7-4575-abb9-b9527848678c}</Project>
       <Name>TNetNative</Name>

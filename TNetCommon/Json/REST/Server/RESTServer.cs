@@ -59,6 +59,7 @@ namespace Grapevine.Server
 
             this._workers = new Thread[this.MaxThreads];
             this._listenerThread = new Thread(this.HandleRequests);
+            this._listenerThread.IsBackground = true;
         }
 
         public RESTServer(Config config) : this(host: config.Host, port: config.Port, protocol: config.Protocol, dirindex: config.DirIndex, webroot: config.WebRoot, maxthreads: config.MaxThreads) { }

@@ -564,23 +564,6 @@ namespace TNetD.Network.Networking
             catch { }
         }
 
-        public void StartListening()
-        {
-            lock (syncObject)
-            {
-                IsICHRunning = true;
-                if (listenThread == null || !listenThread.IsAlive)
-                {
-                    cts = new CancellationTokenSource();
-                    listenThread = new Thread(() => Listen(cts.Token))
-                    {
-                        IsBackground = true
-                    };
-                    listenThread.Start();
-                }
-            }
-        }
-
         private void Listen(CancellationToken token)
         {
             listener.Start();
@@ -607,6 +590,23 @@ namespace TNetD.Network.Networking
             }
         }
 
+        public void StartListening()
+        {
+            lock (syncObject)
+            {
+                IsICHRunning = true;
+                if (listenThread == null || !listenThread.IsAlive)
+                {
+                    cts = new CancellationTokenSource();
+                    listenThread = new Thread(() => Listen(cts.Token))
+                    {
+                        IsBackground = true
+                    };
+                    listenThread.Start();
+                }
+            }
+        }
+
         private void StopListener()
         {
             lock (syncObject)
@@ -614,7 +614,7 @@ namespace TNetD.Network.Networking
                 cts.Cancel();
                 listener.Stop();
             }
-        }
+        }        
 
         public void StopAndExit()
         {

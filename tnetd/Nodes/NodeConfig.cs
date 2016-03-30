@@ -1,14 +1,13 @@
 ﻿/*
- @Author: Arpan Jati
- @Date: Jan 2015
- */
+  @Author: Arpan Jati
+  @Date: Jan 2015
+*/
 
 using Chaos.NaCl;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using TNetD.Address;
 using TNetD.Json.JS_Structs;
 using TNetD.Network.Networking;
@@ -52,7 +51,7 @@ namespace TNetD.Nodes
 
         public NetworkConfig NetworkConfig = new NetworkConfig();
         public Dictionary<Hash, NodeSocketData> TrustedNodes;
-        
+
         byte[] masterNodeRandom;
         byte[] masterPrivateKeyExpanded;
 

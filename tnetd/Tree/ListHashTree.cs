@@ -41,7 +41,7 @@ namespace TNetD.Tree
     /// Insertion / Updation is non-recursive and constant time.
     /// The leaf nodes are sorted lists of elements.
     /// </summary>
-    class ListHashTree
+    public class ListHashTree
     {
         long _TraversedNodes = 0;
         long _TraversedElements = 0;

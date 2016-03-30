@@ -98,7 +98,7 @@ namespace TNetD.Network.Networking
                     }
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 DisplayUtils.Display("SecureNetwork.TimerCallback()", ex);
             }

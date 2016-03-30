@@ -5,14 +5,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Text;
-using System.Timers;
-using System.Threading.Tasks;
-using TNetD.Network;
 using TNetD.Network.Networking;
+using System.Threading.Tasks;
+using System.Timers;
+using System.Linq;
 using TNetD.Nodes;
-
 
 namespace TNetD.Network.PeerDiscovery
 {
@@ -27,7 +24,7 @@ namespace TNetD.Network.PeerDiscovery
         private NodeState nodeState;
         private NodeConfig nodeConfig;
         private NetworkPacketSwitch networkPacketSwitch;
-        private Random rng;
+
         private Timer timer;
 
         public PeerDiscovery(NodeState nodeState, NodeConfig nodeConfig, NetworkPacketSwitch networkPacketSwitch)
@@ -38,12 +35,8 @@ namespace TNetD.Network.PeerDiscovery
             requestRecipient = null;
             requestToken = null;
             KnownPeers = new ConcurrentDictionary<Hash, PeerData>();
-            networkPacketSwitch.PeerDiscoveryEvent += networkHandler_PeerDiscoveryEvent;
-
-            // maybe replace by better rng, but no crypo here anyway
-            rng = new Random();
+            networkPacketSwitch.PeerDiscoveryEvent += networkHandler_PeerDiscoveryEvent;            
         }
-
 
         public void AddKnownPeer(PeerData peer)
         {
@@ -58,14 +51,10 @@ namespace TNetD.Network.PeerDiscovery
             }
         }
 
-
-        private void Print(String message)
+        private void Print(string message)
         {
-            DisplayUtils.Display(" Node " + nodeConfig.NodeID + " | PrDscvry: " + message);
+            DisplayUtils.Display("Node " + nodeConfig.NodeID + " | PrDscvry: " + message);
         }
-
-
-
 
         public void Start(int interval)
         {
@@ -86,8 +75,10 @@ namespace TNetD.Network.PeerDiscovery
             int count = nodeState.ConnectedValidators.Count;
             if (count <= 0)
                 return;
-            int select = rng.Next(count);
-            Print("init: selecting " + select + " of " + count);
+
+            int select = Common.NORMAL_RNG.Next(count);
+
+            Print("Init: selecting " + select + " of " + count);
             Hash peer = nodeState.ConnectedValidators.ToArray()[select].Key;
             Hash token = TNetUtils.GenerateNewToken();
 

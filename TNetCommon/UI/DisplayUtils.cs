@@ -16,48 +16,50 @@ namespace TNetD
     public enum DisplayType
     {
         /// <summary>
-        /// [0] : General Messages
+        /// [0] : Debugging Messages { Verbose }
+        /// </summary>
+        Debug,
+
+        /// <summary>
+        /// [1] : General Messages
         /// </summary>
         Info,
 
         /// <summary>
-        /// [1] : Important Status Messages
+        /// [2] : Important Status Messages
         /// </summary>
         ImportantInfo,
 
         /// <summary>
-        /// [2] :
+        /// [3] :
         /// </summary>
         Warning,
 
         /// <summary>
-        ///  [3] : Exception Caught / Thrown. 
+        /// [4] : Exception Caught / Thrown. 
         /// </summary>        
         Exception,
 
         /// <summary>
-        /// [4] : Authentication Failure / Bad Signature
+        /// [5] : Authentication Failure / Bad Signature
         /// </summary>
         AuthFailure,
 
         /// <summary>
-        /// [5] : Invalid Transactions / Malformed Packets.
+        /// [6] : Invalid Transactions / Malformed Packets.
         /// </summary>
         BadData,
 
         /// <summary>
-        /// [5] : Should not happen for good code.
+        /// [7] : Should not happen for good code.
         /// </summary>
-        CodeAssertionFailed,
-
-        /// <summary>
-        /// [6] : Debugging Messages
-        /// </summary>
-        Debug
+        CodeAssertionFailed
+        
     };
 
     public static class DisplayUtils
-    {        public delegate void DisplayHandler(DisplayMessageType displayMessage);
+    {
+        public delegate void DisplayHandler(DisplayMessageType displayMessage);
         public static event DisplayHandler DisplayText;
 
         public static void Display(String Message, DisplayType type)
@@ -75,31 +77,35 @@ namespace TNetD
             switch (type)
             {
                 case DisplayType.Info:
-                    DisplayText(new DisplayMessageType( (WriteHeader ? " Info: " : "") + Message, Brushes.LawnGreen, type, DateTime.Now));
+                    DisplayText?.Invoke(new DisplayMessageType((WriteHeader ? " Info: " : "") + Message, Brushes.LawnGreen, type, DateTime.Now));
                     break;
 
                 case DisplayType.ImportantInfo:
-                    DisplayText(new DisplayMessageType((WriteHeader ? " Info: " : "") + Message, Brushes.CornflowerBlue, type, DateTime.Now));
+                    DisplayText?.Invoke(new DisplayMessageType((WriteHeader ? " Info: " : "") + Message, Brushes.CornflowerBlue, type, DateTime.Now));
                     break;
 
                 case DisplayType.Warning:
-                    DisplayText(new DisplayMessageType((WriteHeader ? " Warning: " : "") + Message, Brushes.Yellow, type, DateTime.Now));
+                    DisplayText?.Invoke(new DisplayMessageType((WriteHeader ? " Warning: " : "") + Message, Brushes.Yellow, type, DateTime.Now));
                     break;
 
                 case DisplayType.Exception:
-                    DisplayText(new DisplayMessageType((WriteHeader ? " Exception: " : "") + Message, Brushes.Orange, type, DateTime.Now));
+                    DisplayText?.Invoke(new DisplayMessageType((WriteHeader ? " Exception: " : "") + Message, Brushes.Orange, type, DateTime.Now));
                     break;
 
                 case DisplayType.AuthFailure:
-                    DisplayText(new DisplayMessageType((WriteHeader ? " AuthFailure: " : "") + Message, Brushes.Red, type, DateTime.Now));
+                    DisplayText?.Invoke(new DisplayMessageType((WriteHeader ? " AuthFailure: " : "") + Message, Brushes.Red, type, DateTime.Now));
                     break;
 
                 case DisplayType.BadData:
-                    DisplayText(new DisplayMessageType((WriteHeader ? " BadData: " : "") + Message, Brushes.Magenta, type, DateTime.Now));
+                    DisplayText?.Invoke(new DisplayMessageType((WriteHeader ? " BadData: " : "") + Message, Brushes.Magenta, type, DateTime.Now));
                     break;
 
                 case DisplayType.CodeAssertionFailed:
-                    DisplayText(new DisplayMessageType((WriteHeader ? " CodeAssertionFailed: " : "") + Message, Brushes.OrangeRed, type, DateTime.Now));
+                    DisplayText?.Invoke(new DisplayMessageType((WriteHeader ? " CodeAssertionFailed: " : "") + Message, Brushes.OrangeRed, type, DateTime.Now));
+                    break;
+
+                case DisplayType.Debug:
+                    DisplayText?.Invoke(new DisplayMessageType((WriteHeader ? " Debug: " : "") + Message, Brushes.LightPink, type, DateTime.Now));
                     break;
             }
         }

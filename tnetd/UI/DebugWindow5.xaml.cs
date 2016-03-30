@@ -47,8 +47,6 @@ namespace TNetD
         MessageViewModel viewModel = new MessageViewModel();
         TransactionViewModel transactionViewModel = new TransactionViewModel();
 
-        List<Node> nodes = new List<Node>();
-
         public DebugWindow5()
         {
             DataContext = viewModel;
@@ -125,17 +123,31 @@ namespace TNetD
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            foreach (Node nd in nodes)
-            {
-                nd.StopNode();
-            }
+            node?.StopNode();
         }
 
-        Node node = default(Node);
+        Node node = null;
 
         private async void menuItem_Load_Node_Data_Click(object sender, RoutedEventArgs e)
         {
-            node = new Node(101);
+            transactionViewModel.LedgerCloseData.Clear();
+            transactionViewModel.TransactionData.Clear();
+
+            string nodeString = textBox_NodeID.Text;
+
+            int node_id;
+
+            if (!int.TryParse(nodeString, out node_id))
+            {
+                node_id = 0;
+            }
+
+            node?.StopNode();
+
+            node = new Node(node_id);
+
+            textBlock_StatusLabel.Text = "Loaded: " + node.nodeConfig.ID() + " {" + node.nodeConfig.Name + "}";
+
             node.LocalLedger.LedgerEvent += LocalLedger_LedgerEvent;
             node.NodeStatusEvent += nd_NodeStatusEvent;
 
