@@ -130,7 +130,7 @@
                     </Grid>
                     
                     <Label Grid.Column="2">Status:</Label>
-                    <ListBox Grid.Row="1" ItemsSource="{Binding LogMessages}"  Background="#FF1E1E1E" Foreground="#FF8ACD3A" >
+                    <ListBox Grid.Row="1" ItemsSource="{Binding LogMessages}"  Background="#FF1E1E1E" Foreground="#FF62E515" >
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -153,34 +153,31 @@
                     <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
 
                     <ScrollViewer Grid.Row="1" Grid.Column="2">
-                        <TextBlock x:Name="textBlock_Status" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" TextWrapping="Wrap" RenderOptions.BitmapScalingMode="LowQuality"/>
+                        <TextBlock x:Name="textBlock_Status" Background="#FF1E1E1E" Foreground="#FF62E515" FontFamily="Consolas" TextWrapping="Wrap" RenderOptions.BitmapScalingMode="LowQuality"/>
                     </ScrollViewer>
-
-
                 </Grid>
             </TabItem>
 
             <TabItem Header="Transactions">
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="500*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="275"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="400*"/>
+                        <ColumnDefinition Width="560"/>                        
+                        <ColumnDefinition Width="275"/>                        
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30"/>
                         <RowDefinition Height="100*"/>
                         <RowDefinition Height="10"/>
                     </Grid.RowDefinitions>
-                    <Label>Log:</Label>
-                    <Label Grid.Column="2">Status:</Label>
+                    <Label>Ledger Close Sequence:</Label>
+                    <Label Grid.Column="1">Transactions:</Label>
+                    <Label Grid.Column="2">Transaction Details:</Label>
                     <ListBox Name="listBox_LCS" Grid.Row="1"  ItemsSource="{Binding LedgerCloseData}" Background="#FF1E1E1E"
-                             Foreground="#FF8ACD3A" SelectionChanged="listBox_LCS_SelectionChanged" >
+                             Foreground="#FF62E515" SelectionChanged="listBox_LCS_SelectionChanged" >
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid>
+                                <Grid Background="#1F0081c9">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="75"/>
                                         <ColumnDefinition Width="140"/>
@@ -209,10 +206,8 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-
-                    <GridSplitter  Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
-
-                    <ListBox Name="listBox_TransactionData" Grid.Row="1" Grid.Column="2" ItemsSource="{Binding TransactionData}" 
+                   
+                    <ListBox Name="listBox_TransactionData" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding TransactionData}" 
                              Background="#FF1E1E1E" Foreground="#FF8ACD3A" SelectionChanged="listBox_TransactionData_SelectionChanged">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -233,10 +228,68 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
 
-                    <GridSplitter Grid.Row="1" Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
+                    <ScrollViewer Grid.Row="1" Grid.Column="2">
+                        <TextBlock x:Name="textBlock_TransactionDetails" Background="#FF1E1E1E" Foreground="#FF62E515" FontFamily="Consolas" TextWrapping="Wrap" />
+                    </ScrollViewer>
 
-                    <ScrollViewer Grid.Row="1" Grid.Column="4">
-                        <TextBlock x:Name="textBlock_TransactionDetails" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" TextWrapping="Wrap" />
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Accounts">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="65*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="45*"/>                        
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="100*"/>
+                        <RowDefinition Height="10"/>
+                    </Grid.RowDefinitions>
+                    <Label>Accounts:</Label>
+                    <Label Grid.Column="2">Account Details:</Label>
+                    <ListBox Name="listBox_Accounts" Grid.Row="1"  ItemsSource="{Binding Accounts}" Background="#FF1E1E1E"
+                             Foreground="#FF62E515" SelectionChanged="listBox_Accounts_SelectionChanged" >
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Background="{Binding BackgroundColor}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="520"/>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Text="{Binding PublicKey}" FontFamily="Consolas"  FontWeight="ExtraLight"
+                                               Foreground="CornflowerBlue" Grid.Column="0" />
+
+                                    <TextBlock Text="{Binding Name}" 
+                                               Foreground="Plum" Grid.Column="1" FontWeight="Bold"/>
+
+                                    <TextBlock Text="{Binding Money}" 
+                                               Foreground="{Binding MoneyColor}" Grid.Column="2" />
+
+                                    <TextBlock Text="{Binding Address}" Grid.Row="1"  />
+
+                                    <TextBlock Text="{Binding Time}" 
+                                               Grid.Row="1"  Grid.Column="1"  />
+                                    
+                                    <TextBlock Text="{Binding AccountType}" Grid.Row="1"  Grid.Column="2"  />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <GridSplitter  Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
+
+                    <GridSplitter Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
+
+                    <ScrollViewer Grid.Row="1" Grid.Column="3">
+                        <TextBlock x:Name="textBlock_AccountDetails" Background="#FF1E1E1E" Foreground="#FF62E515" FontFamily="Consolas" TextWrapping="Wrap" />
                     </ScrollViewer>
 
                 </Grid>

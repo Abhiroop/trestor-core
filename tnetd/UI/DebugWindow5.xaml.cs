@@ -46,6 +46,7 @@ namespace TNetD
         object TimerLock = new object();
         MessageViewModel viewModel = new MessageViewModel();
         TransactionViewModel transactionViewModel = new TransactionViewModel();
+        AccountViewModel accountViewModel = new AccountViewModel();
 
         public DebugWindow5()
         {
@@ -57,6 +58,7 @@ namespace TNetD
 
             listBox_LCS.DataContext = transactionViewModel;
             listBox_TransactionData.DataContext = transactionViewModel;
+            listBox_Accounts.DataContext = accountViewModel;
 
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
 
@@ -133,6 +135,8 @@ namespace TNetD
             transactionViewModel.LedgerCloseData.Clear();
             transactionViewModel.TransactionData.Clear();
 
+            accountViewModel.Accounts.Clear();
+
             string nodeString = textBox_NodeID.Text;
 
             int node_id;
@@ -158,6 +162,16 @@ namespace TNetD
                             transactionViewModel.LedgerCloseData.Add(new DisplayLedgerCloseType(lcd));
                         }));
                     }, null);
+
+            await node.nodeState.Persistent.AccountStore.FetchAllAccountsAsync((AccountInfo accountInfo) =>
+                    {
+                        Dispatcher.Invoke(new Action(() =>
+                        {
+                            accountViewModel.Accounts.Add(new DisplayAccountInfoType(accountInfo));
+                        }));                       
+
+                        return TreeResponseType.NothingDone;
+                    });
         }
 
         private void LocalLedger_LedgerEvent(Ledger.LedgerEventType ledgerEvent, string Message)
@@ -212,8 +226,17 @@ namespace TNetD
             }
         }
 
+        private void listBox_Accounts_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            var ai = ((DisplayAccountInfoType)listBox_Accounts.SelectedItem).AccountInfo;
 
+            if (ai != null)
+            {
+                var d = new Json.JS_Structs.JS_AccountReply(ai);
 
+                textBlock_AccountDetails.Text = JsonConvert.SerializeObject(d, Common.JSON_SERIALIZER_SETTINGS);
+            }
+        }
     }
 }
 

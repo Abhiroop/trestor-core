@@ -296,10 +296,25 @@ namespace TNetD
             {
                 using (LedgerIntegrity le = new LedgerIntegrity(0, 100, 101))
                 {
-                    await le.ValidateLedger();                   
+                    le.LedgerIntegrityExent += Le_LedgerIntegrityExent;
+
+                    await le.ValidateLedger();
+
+                    await le.CompareAccounts();      
                 }
             }
+        }
 
+        private void Le_LedgerIntegrityExent(string Message)
+        {
+            try
+            {
+                Dispatcher.Invoke(new Action(() =>
+                {
+                    textBlock_StatusLabel.Text = "Ledger Integrity: " + Message;
+                }));
+            }
+            catch { }
         }
     }
 }

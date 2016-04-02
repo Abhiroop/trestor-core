@@ -56,7 +56,9 @@ namespace TNetD.Consensus
             {
                 try
                 {
-                    if (transactionContent.VerifySignature() == TransactionProcessingResult.Accepted)
+                    var txSigVerificationResult = transactionContent.VerifySignature();
+
+                    if (txSigVerificationResult == TransactionProcessingResult.Accepted)
                     {
                         TransactionContent transactionFromPersistentDB;
                         long sequenceNumber;
@@ -155,6 +157,12 @@ namespace TNetD.Consensus
 
                                     long removeValueForAccount = 0;
 
+                                    if (source.Value > Constants.FIN_MAX_TRE_PER_TX_ENTITY)
+                                    {
+                                        badTX_TransactionAmountLimit = true;
+                                        break;
+                                    }
+
                                     // Check if the account exists in the pending transaction queue.
                                     if (pendingDifferenceData.ContainsKey(pkSource))
                                     {
@@ -164,14 +172,8 @@ namespace TNetD.Consensus
                                     if (account.AccountState == AccountState.Normal)
                                     {
                                         long sourceValue = source.Value;
-                                        long creditFromAccount = removeValueForAccount + Constants.FIN_MIN_BALANCE;
-                                        long availableBalance = account.Money - creditFromAccount;
-
-                                        if (source.Value > Constants.FIN_MAX_TRE_PER_TX_ENTITY)
-                                        {
-                                            badTX_TransactionAmountLimit = true;
-                                            break;
-                                        }
+                                        long creditFromAccount = (removeValueForAccount + Constants.FIN_MIN_BALANCE);
+                                        long availableBalance = (account.Money - creditFromAccount);
 
                                         // Lots of checks :D
                                         if ((sourceValue > 0) && (availableBalance > 0) &&
@@ -331,15 +333,18 @@ namespace TNetD.Consensus
                             }
 
                             nodeState.TransactionStateManager.Set(transactionContent.TransactionID, TransactionStatusType.Processed);
-
                         }
+                    }
+                    else
+                    {
+                        // txSigVerificationResult => FAILED
+                        // TODO: Do LOG.
                     }
                 }
                 catch (Exception ex)
                 {
                     DisplayUtils.Display("Exception while processing transactions.", ex);
                 }
-
             }
 
             TransactionHandlingData thd = new TransactionHandlingData();
@@ -457,7 +462,7 @@ namespace TNetD.Consensus
                     // DisplayUtils.Display("Balance: " + ledgerAccount.Money + ", Added:" + diffData.AddValue + ", Removed:" + diffData.RemoveValue, DisplayType.Info);
 
                     ledgerAccount.Money += diffData.AddValue;
-                    ledgerAccount.Money -= diffData.RemoveValue;                    
+                    ledgerAccount.Money -= diffData.RemoveValue;
 
                     ledgerAccount.LastTransactionTime = closeTime;
 
@@ -467,7 +472,7 @@ namespace TNetD.Consensus
                     // values in both locations.
 
                     finalPersistentDBUpdateList.Add(ledgerAccount);
-                }                
+                }
 
                 LedgerCloseData lcd;
 
@@ -486,10 +491,7 @@ namespace TNetD.Consensus
                 nodeState.Persistent.TransactionStore.AddUpdateBatch(acceptedTransactions, lcd.SequenceNumber);
 
                 nodeState.NodeInfo.LastLedgerInfo = new JS_LedgerInfo(lcd);
-
             }
         }
-
-
     }
 }

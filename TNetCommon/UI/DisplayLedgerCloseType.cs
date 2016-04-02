@@ -14,8 +14,12 @@ namespace TNetD.UI
         string text = string.Empty;
         long transactions = 0;
         long totalTransactions = 0;
-        
-        Brush textColor = Brushes.Green;
+
+        static Brush lawnGreen_Brush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF62E515"));
+
+        //"#FF62E515"
+
+        Brush textColor = lawnGreen_Brush;
         DisplayType displayType = DisplayType.Info;
         DateTime time;
 
@@ -38,7 +42,7 @@ namespace TNetD.UI
         public DisplayLedgerCloseType()
         {
             text = string.Empty;
-            textColor = textColor = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF8ACD3A"));// #FF8ACD3A
+            textColor = lawnGreen_Brush;
             displayType = DisplayType.Info;
         }
 

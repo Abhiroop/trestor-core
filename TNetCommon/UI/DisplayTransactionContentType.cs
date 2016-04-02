@@ -12,8 +12,10 @@ namespace TNetD.UI
 {
     public class DisplayTransactionContentType : INotifyPropertyChanged
     {
+        static Brush lawnGreen_Brush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF62E515"));
+
         string text = string.Empty;
-        Brush textColor = Brushes.Green;
+        Brush textColor = lawnGreen_Brush;
         DisplayType displayType = DisplayType.Info;
         DateTime time;
         
@@ -38,7 +40,6 @@ namespace TNetD.UI
         public DisplayTransactionContentType()
         {
             text = string.Empty;
-            textColor = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF8ACD3A"));// #FF8ACD3A
             displayType = DisplayType.Info;
         }
 

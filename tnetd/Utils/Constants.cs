@@ -28,7 +28,7 @@ namespace TNetD
         ///  Minimum 10 trest balance.
         ///  [CRITICAL: FIX ME !!!]
         /// </summary>
-        public static readonly long FIN_MIN_BALANCE = 1000; // 10000000;
+        public static readonly long FIN_MIN_BALANCE = 50; // 10000000; [FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME]
 
         /// <summary>
         /// Maximum amount of TRE's per transaction entity. 20,00,00,000 Trest

@@ -132,7 +132,7 @@
                     </Grid.RowDefinitions>
                     <Label>Log:</Label>
                     <Label Grid.Column="2">Status:</Label>
-                    <ListBox Name="listBox_Log" Grid.Row="1" ItemsSource="{Binding LogMessages}"  Background="#FF1E1E1E" Foreground="#FF8ACD3A">
+                    <ListBox Name="listBox_Log" Grid.Row="1" ItemsSource="{Binding LogMessages}"  Background="#FF1E1E1E" Foreground="#FF62E515">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -152,7 +152,7 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                     <ScrollViewer Grid.Row="1" Grid.Column="2">
-                        <TextBlock x:Name="textBlock_Status" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" TextWrapping="Wrap" RenderOptions.BitmapScalingMode="LowQuality"/>
+                        <TextBlock x:Name="textBlock_Status" Background="#FF1E1E1E" Foreground="#FF62E515" FontFamily="Consolas" TextWrapping="Wrap" RenderOptions.BitmapScalingMode="LowQuality"/>
                     </ScrollViewer>
 
                     <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
@@ -175,10 +175,10 @@
                     <Label>Log:</Label>
                     <Label Grid.Column="2">Status:</Label>
                     <ScrollViewer Grid.Row="1">
-                        <TextBlock x:Name="textBlock_Log2" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
+                        <TextBlock x:Name="textBlock_Log2" Background="#FF1E1E1E" Foreground="#FF62E515" FontFamily="Consolas" />
                     </ScrollViewer>
                     <ScrollViewer Grid.Row="1" Grid.Column="2">
-                        <TextBlock x:Name="textBlock_Status2" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
+                        <TextBlock x:Name="textBlock_Status2" Background="#FF1E1E1E" Foreground="#FF62E515" FontFamily="Consolas" />
                     </ScrollViewer>
 
                     <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>
@@ -222,7 +222,7 @@
                         <Button Name="button_Graph_ResetLayout" Click="button_Graph_ResetLayout_Click" Content="Reset Layout" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Width="110" RenderTransformOrigin="0.707,-0.067" Height="30"/>
                     </Grid>
                     <ScrollViewer Grid.Row="1" Grid.Column="2">
-                        <TextBlock x:Name="textBlock_Status_Graph" Background="#FF1E1E1E" Foreground="#FF8ACD3A" FontFamily="Consolas" />
+                        <TextBlock x:Name="textBlock_Status_Graph" Background="#FF1E1E1E" Foreground="#FF62E515" FontFamily="Consolas" />
                     </ScrollViewer>
 
                     <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="5" ></GridSplitter>

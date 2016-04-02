@@ -36,10 +36,10 @@ namespace TNetD
         public static readonly int TRANSACTION_STALE_TIMER_MINUTES = 20; // Deviation of 1 minute. // Critical Fix
         
         public static readonly int FIN_MIN_TRANSACTION_FEE = 0; //100000; // ~ 0.1 US Cent, approx, initial value.
-        
-        public static readonly int FIN_TRANSACTION_SRCDEST_MIN_VALUE = 100; // Minimum transaction of 100 tre.
 
-        public static readonly int FIN_MIN_TRANSACTION_TOTAL_VALUE = 100; // Minimum transaction of 1 tre.
+        public static readonly int FIN_TRANSACTION_SRCDEST_MIN_VALUE = 1;//100; // Minimum transaction of 100 tre.
+
+        //public static readonly int FIN_MIN_TRANSACTION_TOTAL_VALUE = 1;//100; // Minimum transaction of 100 tre.
 
         // /////////////////////////////////////////////////////////////////////////////////////
 

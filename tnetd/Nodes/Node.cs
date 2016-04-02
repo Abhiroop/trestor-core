@@ -92,11 +92,11 @@ namespace TNetD.Nodes
             }
         }
 
-        System.Timers.Timer TimerConsensus;
-        System.Timers.Timer TimerFast;
-        System.Timers.Timer TimerSecond;
-        System.Timers.Timer TimerMinute;
-        System.Timers.Timer TimerTimeSync;
+        System.Timers.Timer timerConsensus;
+        System.Timers.Timer timerFast;
+        System.Timers.Timer timerSecond;
+        System.Timers.Timer timerMinute;
+        System.Timers.Timer timerTimeSync;
 
         /// <summary>
         /// Initializes a node. Node ID is 0 for most cases.
@@ -138,31 +138,31 @@ namespace TNetD.Nodes
 
             if (Common.NODE_OPERATION_TYPE == NodeOperationType.Centralized)
             {
-                TimerConsensus = new System.Timers.Timer();
-                TimerConsensus.Elapsed += TimerConsensus_Elapsed;
-                TimerConsensus.Enabled = true;
-                TimerConsensus.Interval = nodeConfig.UpdateFrequencyConsensusMS;
+                timerConsensus = new System.Timers.Timer();
+                timerConsensus.Elapsed += TimerConsensus_Elapsed;
+                timerConsensus.Enabled = true;
+                timerConsensus.Interval = nodeConfig.UpdateFrequencyConsensusMS;
             }
 
-            TimerSecond = new System.Timers.Timer();
-            TimerSecond.Elapsed += TimerSecond_Elapsed;
-            TimerSecond.Enabled = true;
-            TimerSecond.Interval = 1000;
+            timerSecond = new System.Timers.Timer();
+            timerSecond.Elapsed += TimerSecond_Elapsed;
+            timerSecond.Enabled = true;
+            timerSecond.Interval = 1000;
 
-            TimerFast = new System.Timers.Timer();
-            TimerFast.Elapsed += TimerFast_Elapsed;
-            TimerFast.Enabled = true;
-            TimerFast.Interval = 100;
+            timerFast = new System.Timers.Timer();
+            timerFast.Elapsed += TimerFast_Elapsed;
+            timerFast.Enabled = true;
+            timerFast.Interval = 100;
 
-            TimerMinute = new System.Timers.Timer();
-            TimerMinute.Elapsed += TimerMinute_Elapsed;
-            TimerMinute.Enabled = true;
-            TimerMinute.Interval = 30000;
+            timerMinute = new System.Timers.Timer();
+            timerMinute.Elapsed += TimerMinute_Elapsed;
+            timerMinute.Enabled = true;
+            timerMinute.Interval = 30000;
 
-            TimerTimeSync = new System.Timers.Timer();
-            TimerTimeSync.Elapsed += TimerTimeSync_Elapsed;
-            TimerTimeSync.Enabled = true;
-            TimerTimeSync.Interval = 1 * 30 * 1000;
+            timerTimeSync = new System.Timers.Timer();
+            timerTimeSync.Elapsed += TimerTimeSync_Elapsed;
+            timerTimeSync.Enabled = true;
+            timerTimeSync.Interval = 1 * 30 * 1000;
 
             //peerDiscovery.Start(30 * 1000);
             StartNode();
@@ -170,11 +170,11 @@ namespace TNetD.Nodes
 
         public void StartNode()
         {
-            TimerConsensus.Start();
-            TimerSecond.Start();
-            TimerFast.Start();
-            TimerMinute.Start();
-            TimerTimeSync.Start();
+            timerConsensus.Start();
+            timerSecond.Start();
+            timerFast.Start();
+            timerMinute.Start();
+            timerTimeSync.Start();
 
             var detailHandlerTask = nodeDetailHandler.Load();            
 
@@ -190,11 +190,11 @@ namespace TNetD.Nodes
         {
             var detailHandlerTask = nodeDetailHandler.Save();
 
-            TimerConsensus.Stop();
-            TimerSecond.Stop();
-            TimerFast.Stop();
-            TimerMinute.Stop();
-            TimerTimeSync.Stop();
+            timerConsensus.Stop();
+            timerSecond.Stop();
+            timerFast.Stop();
+            timerMinute.Stop();
+            timerTimeSync.Stop();
 
             networkPacketSwitch.Stop();
             rpcHandlers.StopServer();

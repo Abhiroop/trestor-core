@@ -54,6 +54,12 @@ namespace TNetD.Helpers
         ObservableCollection<DisplayLedgerCloseType> lcsData = new ObservableCollection<DisplayLedgerCloseType>();
         ObservableCollection<DisplayTransactionContentType> txData = new ObservableCollection<DisplayTransactionContentType>();
 
+        public void Clear()
+        {
+            lcsData.Clear();
+            txData.Clear();
+        }
+
         public ObservableCollection<DisplayLedgerCloseType> LedgerCloseData
         {
             get
@@ -67,6 +73,24 @@ namespace TNetD.Helpers
             get
             {
                 return txData;
+            }
+        }       
+    }
+
+    class AccountViewModel
+    {
+        ObservableCollection<DisplayAccountInfoType> accountData = new ObservableCollection<DisplayAccountInfoType>();
+
+        public void Clear()
+        {
+            accountData.Clear();           
+        }
+
+        public ObservableCollection<DisplayAccountInfoType> Accounts
+        {
+            get
+            {
+                return accountData;
             }
         }
     }
