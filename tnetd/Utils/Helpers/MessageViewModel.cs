@@ -80,10 +80,12 @@ namespace TNetD.Helpers
     class AccountViewModel
     {
         ObservableCollection<DisplayAccountInfoType> accountData = new ObservableCollection<DisplayAccountInfoType>();
+        ObservableCollection<DisplayTransactionContentType> transactionHistoryData = new ObservableCollection<DisplayTransactionContentType>();
 
         public void Clear()
         {
-            accountData.Clear();           
+            accountData.Clear();
+            transactionHistoryData.Clear();
         }
 
         public ObservableCollection<DisplayAccountInfoType> Accounts
@@ -91,6 +93,14 @@ namespace TNetD.Helpers
             get
             {
                 return accountData;
+            }
+        }
+
+        public ObservableCollection<DisplayTransactionContentType> TransactionHistory
+        {
+            get
+            {
+                return transactionHistoryData;
             }
         }
     }

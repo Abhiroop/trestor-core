@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using TNetD.Json.JS_Structs;
 using TNetD.Protocol;
 
@@ -366,26 +367,47 @@ namespace TNetD.Transactions
             intTransactionID = new Hash(output);
         }
 
-        bool IsSource(Hash SourcePublicKey)
+        public bool IsSource(Hash publicKey)
         {
             foreach (var TE in Sources)
             {
-                if (TE.PublicKey == SourcePublicKey.Hex)
+                if (new Hash(TE.PublicKey) == publicKey)
                     return true;
             }
 
             return false;
         }
 
-        bool IsDestination(Hash DestinationPublicKey)
+        public bool IsDestination(Hash publicKey)
         {
             foreach (var TE in Destinations)
             {
-                if (TE.PublicKey == DestinationPublicKey.Hex)
+                if (new Hash(TE.PublicKey) == publicKey)
                     return true;
             }
 
             return false;
+        }
+
+        string GetNameStringFromEntities(List<TransactionEntity> list)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < list.Count; i++)
+            {
+                sb.Append("" + list[i].Name);
+                if (i + 1 < list.Count) sb.Append(" + ");
+            }
+            return sb.ToString();
+        }
+
+        public string GetSourcesString()
+        {
+            return GetNameStringFromEntities(Sources);
+        }
+
+        public string GetDestinationsString()
+        {
+            return GetNameStringFromEntities(Destinations);
         }
 
         public byte[] Serialize()

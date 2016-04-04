@@ -12,13 +12,22 @@ namespace TNetD.UI
 {
     public class DisplayTransactionContentType : INotifyPropertyChanged
     {
+        static Brush greenBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#1F00c87c"));
+        static Brush pinkBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#1Fbf384f"));
+
+        static Brush greenTextBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF00c87c"));
+        static Brush pinkTextBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FFbf384f"));
+
+        static Brush yellowBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#2FFFD700"));
         static Brush lawnGreen_Brush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF62E515"));
 
         string text = string.Empty;
         Brush textColor = lawnGreen_Brush;
         DisplayType displayType = DisplayType.Info;
         DateTime time;
-        
+
+        public bool IsSource = false;
+
         public TransactionContent TransactionContent = default(TransactionContent);
 
         public long sequenceNumber = 0;
@@ -47,11 +56,8 @@ namespace TNetD.UI
         {
             TransactionContent = tc;
 
-            text = tc.TransactionID.ToString().Substring(0, 8) + "\r\n" + (tc.Value/1000000.0).ToString("0.00000");
-            //this.transactions = lcd.Transactions;
-            //this.totalTransactions = lcd.TotalTransactions;
-            // this.textColor = textColor;
-            // this.displayType = displayType;
+            text = tc.GetSourcesString() + " => " + tc.GetDestinationsString();
+            
             time = tc.DateTime;
         }
 
@@ -93,15 +99,44 @@ namespace TNetD.UI
         {
             get
             {
-                return textColor;
-            }
-
-            set
-            {
-                if (value != textColor)
+                if (IsSource)
                 {
-                    textColor = value;
-                    NotifyPropertyChanged();
+                    return pinkTextBrush;
+                }
+                else
+                {
+                    return greenTextBrush;
+                }
+            }
+        }
+
+        public string Money
+        {
+            get
+            {
+                return MoneyTools.GetMoneyDisplayString(TransactionContent.Value);
+            }
+        }
+
+        public Brush MoneyColor
+        {
+            get
+            {
+                return MoneyTools.GetMoneyDisplayColor(TransactionContent.Value);
+            }
+        }
+
+        public Brush BackgroundColor
+        {
+            get
+            {
+                if (IsSource)
+                {
+                    return pinkBrush;
+                }
+                else
+                {
+                    return greenBrush;
                 }
             }
         }

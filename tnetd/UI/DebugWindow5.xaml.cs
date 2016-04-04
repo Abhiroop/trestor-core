@@ -27,6 +27,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TNetD.Address;
 using TNetD.Helpers;
+using TNetD.Json.JS_Structs;
 using TNetD.Ledgers;
 using TNetD.Network.Networking;
 using TNetD.Nodes;
@@ -59,6 +60,7 @@ namespace TNetD
             listBox_LCS.DataContext = transactionViewModel;
             listBox_TransactionData.DataContext = transactionViewModel;
             listBox_Accounts.DataContext = accountViewModel;
+            listBox_AccountHistory.DataContext = accountViewModel;
 
             DisplayUtils.DisplayText += DisplayUtils_DisplayText;
 
@@ -168,7 +170,7 @@ namespace TNetD
                         Dispatcher.Invoke(new Action(() =>
                         {
                             accountViewModel.Accounts.Add(new DisplayAccountInfoType(accountInfo));
-                        }));                       
+                        }));
 
                         return TreeResponseType.NothingDone;
                     });
@@ -220,7 +222,7 @@ namespace TNetD
 
             if (tc != null)
             {
-                var d = new Json.JS_Structs.JS_TransactionReply(tc);
+                var d = new JS_TransactionReply(tc);
 
                 textBlock_TransactionDetails.Text = JsonConvert.SerializeObject(tc, Common.JSON_SERIALIZER_SETTINGS);
             }
@@ -228,14 +230,56 @@ namespace TNetD
 
         private void listBox_Accounts_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            var ai = ((DisplayAccountInfoType)listBox_Accounts.SelectedItem).AccountInfo;
+            accountsSelectionChanged();
+        }
+
+        private void accountsSelectionChanged()
+        {
+            var ai = ((DisplayAccountInfoType)listBox_Accounts.SelectedItem)?.AccountInfo;
 
             if (ai != null)
             {
-                var d = new Json.JS_Structs.JS_AccountReply(ai);
+                accountViewModel.TransactionHistory.Clear();
 
-                textBlock_AccountDetails.Text = JsonConvert.SerializeObject(d, Common.JSON_SERIALIZER_SETTINGS);
+                textBlock_AccountDetails.Text = JsonConvert.SerializeObject(new JS_AccountReply(ai), Common.JSON_SERIALIZER_SETTINGS);
+
+                List<TransactionContent> history;
+
+                if (node.nodeState.Persistent.TransactionStore.FetchTransactionHistory(out history, ai.PublicKey, 0, 0) ==
+                    DBResponse.FetchSuccess)
+                {
+                    foreach (var tc in history)
+                    {
+                        var dtct = new DisplayTransactionContentType(tc);
+
+                        dtct.IsSource = tc.IsSource(ai.PublicKey);
+
+                        accountViewModel.TransactionHistory.Add(dtct);
+                    }
+                }
+
+                label_AccountDetails.Content = "Account History: " + history.Count;
             }
+        }        
+
+        private void listBox_AccountHistory_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            var tc = ((DisplayTransactionContentType)listBox_AccountHistory.SelectedItem)?.TransactionContent;
+
+            if (tc != null)
+            {
+                textBlock_AccountDetails.Text = JsonConvert.SerializeObject(tc, Common.JSON_SERIALIZER_SETTINGS);
+            }
+        }
+
+        private void listBox_AccountHistory_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+
+        }
+
+        private void listBox_Accounts_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            accountsSelectionChanged();
         }
     }
 }

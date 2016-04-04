@@ -208,10 +208,10 @@ namespace TNetD.PersistentStore
         /// <param name="publicKey">Public Key of Account</param>
         /// <param name="TimeStamp">The time after which tranactions are needed</param>
         /// <param name="Limit">Max result count, 0 means all (Bounded by system limit.)</param>
-        /// <returns></returns>
+        /// <returns>FetchSuccess implies that some history is returned.</returns>
         public DBResponse FetchTransactionHistory(out List<TransactionContent> transactions, Hash publicKey, long timeStamp, int Limit)
         {
-            DBResponse response = DBResponse.Exception;
+            DBResponse response = DBResponse.NoRowsReturned;
 
             string LIMIT_CLAUSE = "";
 
@@ -252,6 +252,8 @@ namespace TNetD.PersistentStore
 
                 }
             }
+
+            if (transactions.Count > 0) response = DBResponse.FetchSuccess;
 
             return response;
         }

@@ -17,10 +17,8 @@ namespace TNetD.UI
         static Brush blueBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#1F0081c9"));
         static Brush greenBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#1F00c87c"));
         static Brush pinkBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#1Fbf384f"));
-
-        static Brush lawnGreen_Brush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FF62E515"));
-        static Brush yellow_Brush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#FFFFD700"));
-
+        static Brush yellowBrush = (SolidColorBrush)(new BrushConverter().ConvertFrom("#2FFFD700"));
+        
         public AccountInfo AccountInfo = default(AccountInfo);
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -40,7 +38,7 @@ namespace TNetD.UI
         {
 
         }
-
+        
         public DisplayAccountInfoType(AccountInfo accountInfo) : this()
         {
             this.AccountInfo = accountInfo;
@@ -55,14 +53,7 @@ namespace TNetD.UI
         {
             get
             {
-                if (AccountInfo.Money >= 1000000)
-                {
-                    return string.Format(CultureInfo.InvariantCulture, "{0:N0}", ((AccountInfo.Money / 1000000))) + " Trest";
-                }
-                else
-                {
-                    return string.Format(CultureInfo.InvariantCulture, "{0:N0}", ((AccountInfo.Money))) + " Tre";
-                }
+                return MoneyTools.GetMoneyDisplayString (AccountInfo.Money);
             }
         }
 
@@ -70,14 +61,7 @@ namespace TNetD.UI
         {
             get
             {
-                if (AccountInfo.Money >= 1000000)
-                {
-                    return lawnGreen_Brush;
-                }
-                else
-                {
-                    return yellow_Brush;
-                }
+                return MoneyTools.GetMoneyDisplayColor(AccountInfo.Money);
             }
         }
 
@@ -120,6 +104,12 @@ namespace TNetD.UI
         {
             get
             {
+                if(AccountInfo.Money >= 10000000000 && !(AccountInfo.AccountType == TNetD.Address.AccountType.MainGenesis ||
+                    AccountInfo.AccountType == TNetD.Address.AccountType.TestGenesis) )
+                {
+                    return yellowBrush;
+                }
+
                 if (AccountInfo.AccountType == TNetD.Address.AccountType.MainGenesis ||
                     AccountInfo.AccountType == TNetD.Address.AccountType.TestGenesis)
                 {
