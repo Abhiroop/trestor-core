@@ -1,5 +1,6 @@
 TNETD
 ======
+This is a fork of the trestor-core protocol originally authored by Arpan Jati, Stephan Verbucheln, Aritra Dhar and myself. I plan to fix the ongoing issues and make it entirely distributed.
 
 Trestor Net Daemon
 
