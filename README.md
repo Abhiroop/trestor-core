@@ -10,5 +10,5 @@ Currently it also has a network simulator which can simulate the consensus proce
 
 These files are currently undocumented. Want to be a part of the mission? Fork the project to start contributing.
 
-For any help, contact app[at]trestor.org
+For any help, contact [me](https://abhiroop.github.io/about/)
 
